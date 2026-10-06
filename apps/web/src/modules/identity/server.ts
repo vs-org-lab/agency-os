@@ -9,7 +9,11 @@ import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platf
 import { serverEnv } from '@/platform/env';
 import { clientIpAddress, isSecureRequest, requestOrigin } from '@/platform/request';
 import { createSupabaseServerClient } from '@/platform/supabase-server';
+import { createSupabaseAdminPort } from './admin';
 import type { IdentityDeps, UserKind } from './auth-port';
+import { isPwnedPassword } from './hibp';
+import { acceptInvitation, type InvitationDeps } from './invitations';
+import type { SetPasswordDeps } from './set-password';
 
 export async function lookupUserKindByEmail(email: string): Promise<UserKind | null> {
   const rows = await withSystemContext((tx) =>
@@ -72,4 +76,35 @@ export async function createIdentityDeps(locale: Locale): Promise<IdentityDeps> 
     startActivity,
     magicLinkRedirectUrl: `${origin}${callbackPath(locale)}`,
   };
+}
+
+export async function createInvitationDeps(locale: Locale): Promise<InvitationDeps> {
+  const env = serverEnv();
+  const contexts = { withUserContext, withSystemContext };
+  const origin = requestOrigin(await headers());
+  const prefix = locale === 'pt-PT' ? '' : `/${locale}`;
+
+  return {
+    contexts,
+    admin: createSupabaseAdminPort(
+      { url: env.NEXT_PUBLIC_SUPABASE_URL, secretKey: env.SUPABASE_SECRET_KEY },
+      contexts,
+    ),
+    invitationRedirectUrl: `${origin}${prefix}/accept-invitation`,
+  };
+}
+
+export async function createSetPasswordDeps(): Promise<SetPasswordDeps> {
+  const supabase = await createSupabaseServerClient();
+  return {
+    updatePassword: async (password) => ({
+      ok: !(await supabase.auth.updateUser({ password })).error,
+    }),
+    isPwned: (password) => isPwnedPassword(password),
+    audit: auditForClaims,
+  };
+}
+
+export function acceptInvitationForUser(claims: VerifiedClaims): Promise<{ activated: number }> {
+  return acceptInvitation(claims, { contexts: { withUserContext, withSystemContext } });
 }

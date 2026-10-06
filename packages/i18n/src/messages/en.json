@@ -41,8 +41,9 @@
     },
     "invitation": {
       "title": "Accept invitation",
-      "description": "You have been invited to {organization}.",
-      "accept": "Accept invitation"
+      "description": "Confirm to activate your access.",
+      "accept": "Accept invitation",
+      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation."
     },
     "setPassword": {
       "title": "Set password",

@@ -41,8 +41,9 @@
     },
     "invitation": {
       "title": "Aceitar convite",
-      "description": "Foi convidado para o {organization}.",
-      "accept": "Aceitar convite"
+      "description": "Confirme para ativar o seu acesso.",
+      "accept": "Aceitar convite",
+      "invalid": "O convite expirou ou já foi usado. Peça um novo convite a quem o enviou."
     },
     "setPassword": {
       "title": "Definir palavra-passe",

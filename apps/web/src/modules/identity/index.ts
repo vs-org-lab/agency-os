@@ -15,11 +15,31 @@ export {
 } from './password-policy';
 export { REAUTHENTICATION_WINDOW_MS, requireRecentMfa, type RecentMfaResult } from './reauth';
 export {
+  acceptInvitationForUser,
   auditForClaims,
   callbackPath,
   clearActivity,
   createIdentityDeps,
+  createInvitationDeps,
+  createSetPasswordDeps,
   lookupUserKindByEmail,
   startActivity,
 } from './server';
 export { signInWithPassword, type SignInResult } from './sign-in';
+export { createSupabaseAdminPort } from './admin';
+export {
+  acceptInvitation,
+  bootstrapFounder,
+  inviteClientUser,
+  inviteTeamMember,
+  lookupUserIdByEmail,
+  organizationSlug,
+  type AdminPort,
+  type BootstrapResult,
+  type ClientInvitationInput,
+  type InvitationDeps,
+  type InvitationResult,
+  type Session,
+  type TeamInvitationInput,
+} from './invitations';
+export { setPassword, type SetPasswordDeps, type SetPasswordResult } from './set-password';

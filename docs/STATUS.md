@@ -8,7 +8,7 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 | Item | Referência | Estado |
 | --- | --- | --- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md) | Spec em revisão |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Plano aprovado; execução nativa; próxima: Tarefa 1 |
 
 ## Feito
 
@@ -19,6 +19,10 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Contas criadas: Supabase (dev e staging em eu-west-1), Vercel, Sentry (EU), Inngest | [ADR 0001](decisions/0001-managed-services.md), [ADR 0002](decisions/0002-region-ireland.md) |
 | 2026-10-06 | Stack e serviços geridos decididos | [ADR 0001](decisions/0001-managed-services.md) a [ADR 0005](decisions/0005-drizzle-generates-supabase-migrations.md) |
 | 2026-10-06 | Design da fundação aprovado em conversa (4 secções) | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md) |
+| 2026-10-06 | Spec da fundação aprovado pelo fundador | PR #1 |
+| 2026-10-06 | Ativos da marca utilizáveis copiados para `assets/brand` (símbolo, wordmark vetorizado claro e escuro, paleta). `wordmark_black.svg` e `Asset 7.svg` excluídos: usam a fonte "Refinity Personal Use Only" | `assets/brand/` |
+| 2026-10-06 | Documentação de produto copiada para `docs/product/`, passa a ser a fonte versionada | `docs/product/` |
+| 2026-10-06 | Plano da fundação aprovado; execução nativa | PR #2 |
 
 ## Adiado
 
@@ -49,5 +53,6 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 
 | Questão | Dono |
 | --- | --- |
-| Ativos da marca (logótipo, ícones para o PWA) | Fundador |
-| Documentação de produto (`Documents/Tecnical`) dentro ou fora do repositório | Fundador |
+| O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se | Fundador |
+| Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`) | Fundador |
+| "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso | Fundador |

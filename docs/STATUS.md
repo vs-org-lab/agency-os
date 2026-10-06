@@ -43,6 +43,26 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Task 17: Sentry sem dados pessoais, logging estruturado | `feat/platform-foundation` |
 | 2026-10-06 | Task 18: CI no PR (tipos, lint, unitários, RLS, build, auditoria, segredos, Semgrep, título), Dependabot; verificado que um teste a falhar bloqueia | PR #3 |
 
+## Critérios de aceitação da fundação
+
+Evidência de cada critério da secção 12 do [spec](superpowers/specs/2026-10-06-platform-foundation-design.md).
+
+| #   | Critério                                                                                          | Evidência                                                                                                                                                | Estado                                       |
+| --- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 1   | Instalação, build, testes e lint numa cópia limpa                                                 | CI em runner limpo (PR #3): tipos, lint, 26 ficheiros de testes unitários, build                                                                         | Cumprido                                     |
+| 2   | Nenhum cliente acede a dados de outro cliente                                                     | `packages/db/test/rls/isolation.test.ts` em CI, para cada tabela com dados de cliente                                                                    | Cumprido                                     |
+| 3   | Interno sem MFA não lê tabelas internas                                                           | `packages/db/test/rls/access.test.ts` (`founder without mfa sees no internal rows`)                                                                      | Cumprido                                     |
+| 4   | Auditoria não pode ser alterada nem apagada                                                       | `packages/db/test/audit-append-only.test.ts` (UPDATE, DELETE e TRUNCATE)                                                                                 | Cumprido                                     |
+| 5   | Fundador com palavra-passe e TOTP; convidado define palavra-passe e TOTP; cliente por link mágico | `apps/web/e2e/authentication.spec.ts`                                                                                                                    | Cumprido (dev); staging após o merge         |
+| 6   | Ação crítica pede novo código após 15 minutos                                                     | Testes unitários de `requireRecentMfa`; ainda não existe nenhuma ação crítica na interface                                                               | Cumprido ao nível da lógica                  |
+| 7   | Sessão interna termina após 8 horas sem atividade                                                 | Testes unitários do cookie de atividade e do limite; aplicado no proxy                                                                                   | Cumprido ao nível da lógica                  |
+| 8   | Ecrã de sessões lista e termina sessões                                                           | E2E `revoking a session signs that browser out`                                                                                                          | Cumprido                                     |
+| 9   | pt-PT e en, claro e escuro, 360 e 1440 px, sem falhas graves no axe                               | `apps/web/e2e/preferences.spec.ts` e `accessibility.spec.ts`                                                                                             | Cumprido                                     |
+| 10  | Evento revertido não é despachado; confirmado é despachado uma vez                                | `apps/web/src/modules/events/outbox.db.test.ts`                                                                                                          | Cumprido                                     |
+| 11  | PR com teste a falhar, segredo ou vulnerabilidade não fica verde                                  | Teste a falhar verificado (run 37514799591); TruffleHog e `pnpm audit` ativos. O bloqueio do merge depende da proteção de `main`/`develop` (GitHub Team) | Parcial até ao GitHub Team                   |
+| 12  | Merge em `develop` aplica migrações e faz deploy em staging                                       | Workflow `deploy-staging.yml`                                                                                                                            | Pendente: verificar no merge do PR #3        |
+| 13  | Erro em staging chega ao Sentry em menos de 5 minutos                                             | Sentry configurado (DSN EU, túnel `/monitoring`)                                                                                                         | Pendente: verificar após o deploy de staging |
+
 ## Adiado
 
 | Item                                                     | Motivo                                           | Volta quando                           |

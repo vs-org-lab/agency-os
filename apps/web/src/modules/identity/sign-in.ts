@@ -26,6 +26,7 @@ export async function signInWithPassword(
     return { error: 'invalid_credentials' };
   }
 
+  await deps.activateInvitations(claims);
   await deps.audit(claims, 'auth.sign_in');
   if (claims.user_kind === 'internal') await deps.startActivity(claims.session_id);
 

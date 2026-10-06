@@ -17,6 +17,7 @@ export type IdentityDeps = {
   auth: AuthPort;
   lookupUserKind: (email: string) => Promise<UserKind | null>;
   audit: (claims: VerifiedClaims, action: AuditAction) => Promise<void>;
+  activateInvitations: (claims: VerifiedClaims) => Promise<void>;
   startActivity: (sessionId: string) => Promise<void>;
   magicLinkRedirectUrl: string;
 };

@@ -17,6 +17,7 @@ export { REAUTHENTICATION_WINDOW_MS, requireRecentMfa, type RecentMfaResult } fr
 export {
   acceptInvitationForUser,
   auditForClaims,
+  canManageAccount,
   callbackPath,
   clearActivity,
   createChangePasswordDeps,
@@ -46,3 +47,4 @@ export {
 } from './invitations';
 export { setPassword, type SetPasswordDeps, type SetPasswordResult } from './set-password';
 export { changePassword, listSessions, revokeSession, type ActiveSession } from './sessions';
+export { accountActionAllowed } from './account-assurance';

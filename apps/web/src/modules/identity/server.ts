@@ -9,6 +9,7 @@ import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platf
 import { serverEnv } from '@/platform/env';
 import { clientIpAddress, isSecureRequest, requestOrigin } from '@/platform/request';
 import { createSupabaseServerClient } from '@/platform/supabase-server';
+import { accountActionAllowed } from './account-assurance';
 import { createSupabaseAdminPort } from './admin';
 import type { IdentityDeps, UserKind } from './auth-port';
 import { isPwnedPassword } from './hibp';
@@ -73,6 +74,9 @@ export async function createIdentityDeps(locale: Locale): Promise<IdentityDeps> 
     auth: supabase.auth,
     lookupUserKind: lookupUserKindByEmail,
     audit: auditForClaims,
+    activateInvitations: async (claims) => {
+      await acceptInvitationForUser(claims);
+    },
     startActivity,
     magicLinkRedirectUrl: `${origin}${callbackPath(locale)}`,
   };
@@ -125,4 +129,11 @@ export async function createChangePasswordDeps(): Promise<
       await clearActivity();
     },
   };
+}
+
+export async function canManageAccount(claims: VerifiedClaims): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.mfa.listFactors();
+  const hasVerifiedFactor = (data?.all ?? []).some((factor) => factor.status === 'verified');
+  return accountActionAllowed(claims, { hasVerifiedFactor });
 }

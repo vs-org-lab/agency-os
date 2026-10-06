@@ -94,6 +94,7 @@ function fakeDeps(options: FakeOptions = {}) {
           : null,
     ),
     audit: vi.fn(async () => undefined),
+    activateInvitations: vi.fn(async () => undefined),
     startActivity: vi.fn(async () => undefined),
     magicLinkRedirectUrl: 'https://app.example/callback',
   };
@@ -148,6 +149,17 @@ describe('signInWithPassword', () => {
       next: 'done',
     });
     expect(deps.startActivity).not.toHaveBeenCalled();
+  });
+
+  it('activates pending invitations before auditing the sign-in', async () => {
+    const { deps } = fakeDeps({ verifiedFactors: 1 });
+
+    await signInWithPassword({ email: 'team@agency.example', password: 'pw' }, deps);
+
+    expect(deps.activateInvitations).toHaveBeenCalledWith(expect.objectContaining({ sub: USER }));
+    const activation = vi.mocked(deps.activateInvitations).mock.invocationCallOrder[0] ?? 0;
+    const audit = vi.mocked(deps.audit).mock.invocationCallOrder[0] ?? 0;
+    expect(activation).toBeLessThan(audit);
   });
 
   it('normalises the email before signing in', async () => {

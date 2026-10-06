@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
-import { auditForClaims, readClaims, startActivity } from '@/modules/identity';
+import {
+  acceptInvitationForUser,
+  auditForClaims,
+  readClaims,
+  startActivity,
+} from '@/modules/identity';
 import { createSupabaseServerClient } from '@/platform/supabase-server';
 import { safeNextPath } from '../mfa/safe-next-path';
 
@@ -28,6 +33,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(failure);
   }
 
+  await acceptInvitationForUser(claims);
   await auditForClaims(claims, 'auth.sign_in');
   if (claims.user_kind === 'internal') await startActivity(claims.session_id);
 

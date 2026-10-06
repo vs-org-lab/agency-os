@@ -105,4 +105,36 @@ describe('access scope', () => {
       expect(Object.fromEntries(ctx.clientRoles)).toEqual({ [world.clients.b]: ['operational'] });
     });
   });
+
+  it('returns null when the only client or the organization is archived', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { withUserContext } = createDbContexts(testDatabase(sql));
+      await sql`update public.clients set archived_at = now() where id = ${world.clients.a}`;
+      const client = claimsFor(world.users.decisionMakerA, { aal: 'aal1' });
+      expect(await withUserContext(client, (tx) => resolveActor(tx, client))).toBeNull();
+
+      await sql`reset role`;
+      await sql`update public.organizations set archived_at = now() where id = ${world.organizationId}`;
+      const founder = claimsFor(world.users.founder);
+      expect(await withUserContext(founder, (tx) => resolveActor(tx, founder))).toBeNull();
+    });
+  });
+
+  it('access context ignores archived clients', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await sql`update public.clients set archived_at = now() where id = ${world.clients.a}`;
+      const { withUserContext } = createDbContexts(testDatabase(sql));
+      const claims = claimsFor(world.users.manager);
+
+      const ctx = await withUserContext(claims, async (tx) => {
+        const actor = await resolveActor(tx, claims);
+        if (!actor) throw new Error('Actor not resolved');
+        return loadAccessContext(tx, actor);
+      });
+
+      expect([...ctx.assignedClientIds]).toEqual([]);
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
 import type { AccessContext, Actor, ClientRole, InternalRole } from './types';
@@ -35,6 +35,7 @@ export async function resolveActor(
         eq(organizationMemberships.userId, claims.sub),
         eq(organizationMemberships.status, 'active'),
         isNull(organizationMemberships.archivedAt),
+        sql`app.is_active_organization(${organizationMemberships.organizationId})`,
       ),
     )
     .orderBy(asc(organizationMemberships.createdAt));
@@ -59,6 +60,7 @@ export async function resolveActor(
         eq(clientMemberships.userId, claims.sub),
         eq(clientMemberships.status, 'active'),
         isNull(clientMemberships.archivedAt),
+        sql`app.is_active_client(${clientMemberships.clientId})`,
       ),
     )
     .orderBy(asc(clientMemberships.createdAt))
@@ -82,6 +84,7 @@ export async function loadAccessContext(tx: DbTransaction, actor: Actor): Promis
         eq(clientStaffAssignments.userId, actor.userId),
         eq(clientStaffAssignments.organizationId, actor.organizationId),
         isNull(clientStaffAssignments.archivedAt),
+        sql`app.is_active_client(${clientStaffAssignments.clientId})`,
       ),
     );
 
@@ -94,6 +97,7 @@ export async function loadAccessContext(tx: DbTransaction, actor: Actor): Promis
         eq(clientMemberships.organizationId, actor.organizationId),
         eq(clientMemberships.status, 'active'),
         isNull(clientMemberships.archivedAt),
+        sql`app.is_active_client(${clientMemberships.clientId})`,
       ),
     );
 

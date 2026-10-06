@@ -274,3 +274,47 @@ describe('client membership management', () => {
     });
   });
 });
+
+describe('archived organizations and clients', () => {
+  it('archived organization loses access for staff and client users', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await sql`update public.organizations set archived_at = now() where id = ${world.organizationId}`;
+
+      for (const userId of [world.users.founder, world.users.manager, world.users.decisionMakerA]) {
+        await sql`savepoint probe`;
+        await asUser(sql, userId);
+        expect(await visibleClientIds(sql), userId).toEqual([]);
+        const memberships = await sql`select id from public.client_memberships`;
+        expect(memberships, userId).toHaveLength(0);
+        await sql`rollback to savepoint probe`;
+        await asSystem(sql);
+      }
+    });
+  });
+
+  it('archived client blocks membership listing and invitations for its users', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const colleague = await createAuthUser(sql, { fullName: 'Colleague', kind: 'client' });
+      await sql`update public.clients set archived_at = now() where id = ${world.clients.a}`;
+
+      await sql`savepoint probe`;
+      await asUser(sql, world.users.decisionMakerA);
+      expect(await sql`select id from public.client_memberships`).toHaveLength(0);
+      await expect(
+        sql`
+          insert into public.client_memberships (organization_id, client_id, user_id, role, status)
+          values (${world.organizationId}, ${world.clients.a}, ${colleague}, 'operational', 'invited')
+        `,
+      ).rejects.toThrow(/row-level security/);
+      await sql`rollback to savepoint probe`;
+      await asSystem(sql);
+
+      await asUser(sql, world.users.manager);
+      expect(
+        await sql`select id from public.client_memberships where client_id = ${world.clients.a}`,
+      ).toHaveLength(0);
+    });
+  });
+});

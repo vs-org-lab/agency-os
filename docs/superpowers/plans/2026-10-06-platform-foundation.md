@@ -83,7 +83,7 @@ apps/brand-hub/
 - Teste: `packages/ui/test/tokens.test.ts`
 
 **Interfaces:**
-- Produz: `@agency-os/ui` com os componentes acima; `ThemeProvider` (next-themes, `attribute="class"`, `defaultTheme="system"`); `BrandSymbol({ className, title }: { className?: string; title?: string })` que desenha `References/Brand/logouu.svg` com `fill="currentColor"`.
+- Produz: `@agency-os/ui` com os componentes acima; `ThemeProvider` (next-themes, `attribute="class"`, `defaultTheme="system"`); `BrandSymbol({ className, title }: { className?: string; title?: string })` que desenha `assets/brand/symbol.svg` com `fill="currentColor"`.
 
 - [ ] **Passo 1:** escrever `tokens.test.ts`, que lê `tokens.css` e verifica:
   - `defines every token from design system 05 in light and dark`, para cada token: `canvas`, `surface`, `surface-muted`, `border`, `border-strong`, `text`, `text-secondary`, `text-tertiary`, `primary`, `primary-foreground`, `accent`, `link`, `gold`, `neutral`, `info`, `success`, `warning`, `danger` e os respetivos `-bg`.

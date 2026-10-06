@@ -7,7 +7,7 @@ Repository: https://github.com/vs-org-lab/agency-os
 - Read `docs/STATUS.md` at the start of every session before any other work.
 - Update it on every completed task, scope change or deferral. Deferred items record the reason and the trigger to revisit.
 - Specs live in `docs/superpowers/specs/`, implementation plans in `docs/superpowers/plans/`, architecture decisions in `docs/decisions/`.
-- Product documentation (requirements, business rules, security, design system) lives in `Documents/Tecnical/`. On conflict, follow the precedence table in `00 Visão geral.md`; `08 Segurança` prevails on anything security-related.
+- Product documentation (requirements, business rules, security, design system) lives in `docs/product/`. On conflict, follow the precedence table in `00 Visão geral.md`; `08 Segurança` prevails on anything security-related.
 
 ## Language
 

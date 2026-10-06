@@ -4,7 +4,7 @@
 | --- | --- |
 | Data | 2026-10-06 |
 | Estado | Em revisão |
-| Documentação de produto | `Documents/Tecnical/00`–`09` (separadores 01, 05, 06, 08 e 09) |
+| Documentação de produto | `docs/product/00`–`09` (separadores 01, 05, 06, 08 e 09) |
 | Decisões relacionadas | [ADR 0001](../../decisions/0001-managed-services.md) a [ADR 0005](../../decisions/0005-drizzle-generates-supabase-migrations.md) |
 
 ## 1. Objetivo

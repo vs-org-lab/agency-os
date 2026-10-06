@@ -8,7 +8,7 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 | Item | Referência | Estado |
 | --- | --- | --- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Spec aprovado; plano em revisão (21 tarefas) |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Plano aprovado; execução nativa; próxima: Tarefa 1 |
 
 ## Feito
 
@@ -20,7 +20,9 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Stack e serviços geridos decididos | [ADR 0001](decisions/0001-managed-services.md) a [ADR 0005](decisions/0005-drizzle-generates-supabase-migrations.md) |
 | 2026-10-06 | Design da fundação aprovado em conversa (4 secções) | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md) |
 | 2026-10-06 | Spec da fundação aprovado pelo fundador | PR #1 |
-| 2026-10-06 | Ativos da marca recebidos em `References/Brand` (paleta, símbolo, wordmark, estratégia) | Ver questões em aberto |
+| 2026-10-06 | Ativos da marca utilizáveis copiados para `assets/brand` (símbolo, wordmark vetorizado claro e escuro, paleta). `wordmark_black.svg` e `Asset 7.svg` excluídos: usam a fonte "Refinity Personal Use Only" | `assets/brand/` |
+| 2026-10-06 | Documentação de produto copiada para `docs/product/`, passa a ser a fonte versionada | `docs/product/` |
+| 2026-10-06 | Plano da fundação aprovado; execução nativa | PR #2 |
 
 ## Adiado
 
@@ -52,7 +54,5 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 | Questão | Dono |
 | --- | --- |
 | O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se | Fundador |
-| `wordmark_black.svg` usa texto com a fonte "Refinity Personal Use Only": licença só pessoal e não desenha sem a fonte instalada. Precisa de versão vetorizada e licença comercial antes de ser usado. A fundação usa só o símbolo (`logouu.svg`) | Fundador |
 | Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`) | Fundador |
 | "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso | Fundador |
-| Documentação de produto (`Documents/Tecnical`) dentro ou fora do repositório | Fundador |

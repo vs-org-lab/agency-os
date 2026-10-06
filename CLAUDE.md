@@ -2,6 +2,18 @@
 
 Repository: https://github.com/vs-org-lab/agency-os
 
+## Project tracking (mandatory)
+
+- Read `docs/STATUS.md` at the start of every session before any other work.
+- Update it on every completed task, scope change or deferral. Deferred items record the reason and the trigger to revisit.
+- Specs live in `docs/superpowers/specs/`, implementation plans in `docs/superpowers/plans/`, architecture decisions in `docs/decisions/`.
+- Product documentation (requirements, business rules, security, design system) lives in `Documents/Tecnical/`. On conflict, follow the precedence table in `00 Visão geral.md`; `08 Segurança` prevails on anything security-related.
+
+## Language
+
+- Code, identifiers, commit messages and code comments: English.
+- Project documentation (specs, plans, decisions, status): Portuguese (Portugal), matching the product documentation.
+
 ## Development workflow (mandatory)
 
 The `superpowers` plugin governs every development task. Before writing code, invoke the applicable superpowers skills:

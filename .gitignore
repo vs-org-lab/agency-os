@@ -26,3 +26,6 @@ Thumbs.db
 .turbo/
 *.tsbuildinfo
 next-env.d.ts
+
+# Vercel CLI link metadata
+.vercel/

@@ -40,7 +40,9 @@ export function LocaleSwitcher({
             onClick={() => startTransition(() => router.replace(pathname, { locale }))}
             className={cn(
               'rounded-sm px-2 py-0.5 text-caption font-medium transition-colors duration-(--duration-fast)',
-              checked ? 'bg-surface text-text shadow-xs' : 'text-text-secondary hover:text-text',
+              checked
+                ? 'bg-surface text-text shadow-xs ring-1 ring-border-strong'
+                : 'text-text-secondary hover:text-text',
             )}
           >
             {SHORT_LABEL[locale]}

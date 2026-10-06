@@ -60,7 +60,9 @@ export function ThemeToggle({
             onClick={() => setTheme(value)}
             className={cn(
               'flex size-7 items-center justify-center rounded-sm text-text-secondary transition-colors duration-(--duration-fast)',
-              checked ? 'bg-surface text-text shadow-xs' : 'hover:text-text',
+              checked
+                ? 'bg-surface text-text shadow-xs ring-1 ring-border-strong'
+                : 'hover:text-text',
             )}
           >
             <Icon className="size-4" aria-hidden />

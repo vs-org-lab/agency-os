@@ -1,4 +1,4 @@
-import { scrubEvent } from './sentry-scrub';
+import { scrubBreadcrumb, scrubEvent, scrubTransaction } from './sentry-scrub';
 
 export function sentryOptions() {
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
@@ -9,5 +9,7 @@ export function sentryOptions() {
     tracesSampleRate: 0.1,
     sendDefaultPii: false,
     beforeSend: scrubEvent,
+    beforeSendTransaction: scrubTransaction,
+    beforeBreadcrumb: scrubBreadcrumb,
   };
 }

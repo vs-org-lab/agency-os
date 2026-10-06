@@ -65,16 +65,25 @@ Evidência de cada critério da secção 12 do [spec](superpowers/specs/2026-10-
 
 ## Adiado
 
-| Item                                                     | Motivo                                           | Volta quando                           |
-| -------------------------------------------------------- | ------------------------------------------------ | -------------------------------------- |
-| Ecrãs e entidades de negócio                             | Fora do âmbito da fundação                       | Vaga 1                                 |
-| Cofre de credenciais (SEC-20 a SEC-23)                   | Nenhum módulo da fundação guarda credenciais     | Primeiro módulo que guarde credenciais |
-| Stripe, faturação certificada, assinatura, Figma, Google | Integrações de negócio                           | M04 e M05 (Vaga 1)                     |
-| Servidor MCP e OAuth do agente                           | Módulo M18                                       | Vaga 4                                 |
-| Atribuição de freelancers por projeto                    | Projetos só existem com o M07                    | M20 (Vaga 2)                           |
-| Service worker e offline                                 | Risco de guardar dados de cliente no dispositivo | Avaliação na Vaga 2                    |
-| Passkeys                                                 | O TOTP cumpre o SEC-01                           | Depois do lançamento                   |
-| Docker no ambiente local                                 | Preferência por fluxo só na cloud                | Não previsto                           |
+| Item                                                                                                                        | Motivo                                                                          | Volta quando                                                   |
+| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Ecrãs e entidades de negócio                                                                                                | Fora do âmbito da fundação                                                      | Vaga 1                                                         |
+| Cofre de credenciais (SEC-20 a SEC-23)                                                                                      | Nenhum módulo da fundação guarda credenciais                                    | Primeiro módulo que guarde credenciais                         |
+| Stripe, faturação certificada, assinatura, Figma, Google                                                                    | Integrações de negócio                                                          | M04 e M05 (Vaga 1)                                             |
+| Servidor MCP e OAuth do agente                                                                                              | Módulo M18                                                                      | Vaga 4                                                         |
+| Atribuição de freelancers por projeto                                                                                       | Projetos só existem com o M07                                                   | M20 (Vaga 2)                                                   |
+| Service worker e offline                                                                                                    | Risco de guardar dados de cliente no dispositivo                                | Avaliação na Vaga 2                                            |
+| Passkeys                                                                                                                    | O TOTP cumpre o SEC-01                                                          | Depois do lançamento                                           |
+| Despacho imediato do outbox após cada commit (`requestFlush`)                                                               | Hoje os eventos esperam até 5 min pelo cron; ainda não existe nenhum consumidor | Primeiro consumidor de eventos                                 |
+| Idioma do perfil e da organização aplicado automaticamente                                                                  | Hoje usa o URL, o cookie e o browser                                            | Ecrã de perfil                                                 |
+| Ler as próprias pertenças só com MFA; gestor sem ativação direta de pertenças                                               | Endurecimento de RLS de baixo impacto                                           | Próxima revisão de RLS                                         |
+| Validação do segredo de atividade no proxy; idioma no redirecionamento por inatividade; inatividade em `/api`               | Pormenores do proxy                                                             | Próxima alteração ao proxy ou primeira rota `/api` autenticada |
+| Inscrição TOTP por ação em vez de no carregamento da página                                                                 | Hoje recarregar a página recria o fator                                         | Ajuste de UX de MFA                                            |
+| Segredos dos workflows via variáveis de ambiente; actions e imagem Semgrep fixadas; traces do Playwright sem palavras-passe | Endurecimento da CI                                                             | Antes do lançamento                                            |
+| `ALTER DEFAULT PRIVILEGES` para tabelas futuras e teste de privilégios                                                      | Hoje cada tabela nova tem de revogar privilégios na sua migração                | Próxima migração com tabela nova                               |
+| Teste de ponta a ponta do convite pelo módulo real e pelo adaptador de administração                                        | Ainda não existe ecrã de gestão de equipa                                       | M20 (Vaga 2)                                                   |
+| `bootstrap:founder` sem valor por defeito para `--redirect-url`; validação do IP antes de gravar em `inet`                  | Robustez                                                                        | Antes do lançamento                                            |
+| Docker no ambiente local                                                                                                    | Preferência por fluxo só na cloud                                               | Não previsto                                                   |
 
 ## Critérios de lançamento
 

@@ -62,3 +62,6 @@ minimumReleaseAgeExclude:
 allowBuilds:
   unrs-resolver: true
   esbuild: true
+  '@parcel/watcher': false
+  '@swc/core': false
+  protobufjs: false

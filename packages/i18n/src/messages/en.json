@@ -77,7 +77,18 @@
       "pt-PT": "Português",
       "en": "English"
     },
-    "close": "Close"
+    "close": "Close",
+    "settings": "Settings",
+    "clients": "Clients",
+    "noClients": "There are no clients yet.",
+    "account": "Account",
+    "studioNav": {
+      "home": "Home"
+    },
+    "room": {
+      "dashboard": "Dashboard"
+    },
+    "breadcrumb": "Breadcrumb"
   },
   "states": {
     "empty": {
@@ -122,5 +133,23 @@
     "generic": "An unexpected error occurred.",
     "rateLimited": "Too many attempts. Please wait a moment and try again.",
     "validation": "Check the highlighted fields."
+  },
+  "studio": {
+    "home": {
+      "title": "The studio is ready",
+      "description": "Work modules appear here as they are enabled."
+    }
+  },
+  "room": {
+    "home": {
+      "title": "This room is empty",
+      "description": "The process, documents and library of this room appear here."
+    }
+  },
+  "portal": {
+    "home": {
+      "title": "Welcome",
+      "description": "Your project progress appears here."
+    }
   }
 }

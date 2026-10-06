@@ -9,7 +9,8 @@
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./theme": "./src/theme/theme-provider.tsx",
-    "./brand": "./src/brand/symbol.tsx"
+    "./brand": "./src/brand/symbol.tsx",
+    "./theme-toggle": "./src/theme/theme-toggle.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"

@@ -1,9 +1,11 @@
 import path from 'node:path';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 const webSource = path.resolve(import.meta.dirname, 'apps/web/src');
 
 export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
       '@': webSource,
@@ -16,7 +18,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['packages/*/test/**/*.test.ts', 'apps/*/src/**/*.test.{ts,tsx}'],
+          include: ['packages/*/test/**/*.test.{ts,tsx}', 'apps/*/src/**/*.test.{ts,tsx}'],
           exclude: ['packages/db/**', '**/node_modules/**', '**/*.db.test.ts'],
         },
       },

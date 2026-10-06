@@ -77,7 +77,18 @@
       "pt-PT": "Português",
       "en": "English"
     },
-    "close": "Fechar"
+    "close": "Fechar",
+    "settings": "Definições",
+    "clients": "Clientes",
+    "noClients": "Ainda não há clientes.",
+    "account": "Conta",
+    "studioNav": {
+      "home": "Início"
+    },
+    "room": {
+      "dashboard": "Dashboard"
+    },
+    "breadcrumb": "Caminho"
   },
   "states": {
     "empty": {
@@ -122,5 +133,23 @@
     "generic": "Ocorreu um erro inesperado.",
     "rateLimited": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
     "validation": "Verifique os campos assinalados."
+  },
+  "studio": {
+    "home": {
+      "title": "O estúdio está pronto",
+      "description": "Os módulos de trabalho aparecem aqui à medida que forem ativados."
+    }
+  },
+  "room": {
+    "home": {
+      "title": "Sala sem conteúdo",
+      "description": "O processo, os documentos e a biblioteca desta sala aparecem aqui."
+    }
+  },
+  "portal": {
+    "home": {
+      "title": "Bem-vindo",
+      "description": "O acompanhamento do seu projeto aparece aqui."
+    }
   }
 }

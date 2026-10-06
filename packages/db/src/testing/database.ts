@@ -5,6 +5,9 @@ import * as schema from '../schema';
 import { getTestSql } from './db';
 
 export function testDatabase(sql: TransactionSql): Database {
-  const client = Object.assign(sql, { options: getTestSql().options }) as unknown as Sql;
+  const client = Object.assign(sql, {
+    options: getTestSql().options,
+    begin: <T>(fn: (savepoint: TransactionSql) => Promise<T>) => sql.savepoint(fn),
+  }) as unknown as Sql;
   return drizzle({ client, schema });
 }

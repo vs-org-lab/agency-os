@@ -48,6 +48,20 @@ describe('shared configuration', () => {
     expect(publicEntry).not.toContain('no-restricted-imports');
   });
 
+  it('eslint rejects importing withSystemContext from app directory', async () => {
+    const fromApp = await lint(
+      "import { withSystemContext } from '@/platform/db';\nexport { withSystemContext };\n",
+      'apps/web/src/app/[locale]/page.ts',
+    );
+    const fromModule = await lint(
+      "import { withSystemContext } from '@/platform/db';\nexport { withSystemContext };\n",
+      'apps/web/src/modules/events/dispatch.ts',
+    );
+
+    expect(fromApp).toContain('no-restricted-imports');
+    expect(fromModule).not.toContain('no-restricted-imports');
+  });
+
   it('eslint forbids literal text in application components', async () => {
     const rules = await lint(
       'export function Greeting() {\n  return <p>Hello</p>;\n}\n',

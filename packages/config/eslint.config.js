@@ -14,6 +14,17 @@ const moduleBoundary = {
   ],
 };
 
+const systemContextRestriction = {
+  ...moduleBoundary,
+  paths: [
+    {
+      name: '@/platform/db',
+      importNames: ['withSystemContext'],
+      message: 'System context bypasses row level security and is not available to route code.',
+    },
+  ],
+};
+
 export default tseslint.config(
   {
     ignores: [
@@ -69,6 +80,12 @@ export default tseslint.config(
     ignores: ['**/*.test.tsx'],
     rules: {
       'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
+    },
+  },
+  {
+    files: ['apps/web/src/app/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', systemContextRestriction],
     },
   },
   prettier,

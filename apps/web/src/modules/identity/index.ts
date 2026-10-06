@@ -48,3 +48,4 @@ export {
 export { setPassword, type SetPasswordDeps, type SetPasswordResult } from './set-password';
 export { changePassword, listSessions, revokeSession, type ActiveSession } from './sessions';
 export { accountActionAllowed } from './account-assurance';
+export { createInviteLinkPort, type InviteLinkGenerator } from './invite-link';

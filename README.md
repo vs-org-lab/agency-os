@@ -32,10 +32,10 @@ pnpm test:db                      # database and RLS tests against the dev proje
 pnpm dev                          # http://localhost:3000
 ```
 
-Create the first founder account (sends an invitation email):
+Create the first founder account. `--deliver email` sends the Supabase invitation email; `--deliver link` prints a single-use invitation link instead (use it while the project relies on Supabase's default SMTP, which only delivers to organization members):
 
 ```bash
-pnpm --filter web bootstrap:founder --email <email> --name "<full name>" --organization "<organization>"
+pnpm --filter web bootstrap:founder --email <email> --name "<full name>" --organization "<organization>" \n  --redirect-url https://<app-host>/accept-invitation --deliver link
 ```
 
 ## Commands

@@ -109,7 +109,14 @@
     "lastActive": "Last active",
     "revoke": "End session",
     "revoked": "Session ended.",
-    "empty": "There are no other active sessions."
+    "empty": "There are no other active sessions.",
+    "unknownDevice": "Unknown device",
+    "started": "Started",
+    "changePasswordTitle": "Change password",
+    "changePasswordDescription": "Changing your password ends every session, including this one.",
+    "changePasswordSubmit": "Change and end sessions",
+    "revokeFailed": "The session could not be ended. Refresh the page and try again.",
+    "lastActiveDetail": "Last active: {time}"
   },
   "errors": {
     "generic": "An unexpected error occurred.",

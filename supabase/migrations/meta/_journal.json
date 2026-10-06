@@ -36,6 +36,13 @@
       "when": 1791310136931,
       "tag": "20261006180856_access_token_hook",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791311354805,
+      "tag": "20261006182914_session_functions",
+      "breakpoints": true
     }
   ]
 }

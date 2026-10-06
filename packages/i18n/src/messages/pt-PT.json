@@ -109,7 +109,14 @@
     "lastActive": "Última atividade",
     "revoke": "Terminar sessão",
     "revoked": "Sessão terminada.",
-    "empty": "Não há outras sessões ativas."
+    "empty": "Não há outras sessões ativas.",
+    "unknownDevice": "Dispositivo desconhecido",
+    "started": "Iniciada",
+    "changePasswordTitle": "Alterar palavra-passe",
+    "changePasswordDescription": "Ao alterar a palavra-passe, todas as sessões terminam, incluindo esta.",
+    "changePasswordSubmit": "Alterar e terminar sessões",
+    "revokeFailed": "Não foi possível terminar a sessão. Atualize a página e tente novamente.",
+    "lastActiveDetail": "Última atividade: {time}"
   },
   "errors": {
     "generic": "Ocorreu um erro inesperado.",

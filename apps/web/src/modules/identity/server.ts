@@ -108,3 +108,21 @@ export async function createSetPasswordDeps(): Promise<SetPasswordDeps> {
 export function acceptInvitationForUser(claims: VerifiedClaims): Promise<{ activated: number }> {
   return acceptInvitation(claims, { contexts: { withUserContext, withSystemContext } });
 }
+
+export function sessionDeps(): { contexts: { withUserContext: typeof withUserContext } } {
+  return { contexts: { withUserContext } };
+}
+
+export async function createChangePasswordDeps(): Promise<
+  SetPasswordDeps & { signOutEverywhere: () => Promise<void> }
+> {
+  const supabase = await createSupabaseServerClient();
+  const base = await createSetPasswordDeps();
+  return {
+    ...base,
+    signOutEverywhere: async () => {
+      await supabase.auth.signOut({ scope: 'global' });
+      await clearActivity();
+    },
+  };
+}

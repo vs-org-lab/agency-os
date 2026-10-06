@@ -19,10 +19,12 @@ export {
   auditForClaims,
   callbackPath,
   clearActivity,
+  createChangePasswordDeps,
   createIdentityDeps,
   createInvitationDeps,
   createSetPasswordDeps,
   lookupUserKindByEmail,
+  sessionDeps,
   startActivity,
 } from './server';
 export { signInWithPassword, type SignInResult } from './sign-in';
@@ -43,3 +45,4 @@ export {
   type TeamInvitationInput,
 } from './invitations';
 export { setPassword, type SetPasswordDeps, type SetPasswordResult } from './set-password';
+export { changePassword, listSessions, revokeSession, type ActiveSession } from './sessions';

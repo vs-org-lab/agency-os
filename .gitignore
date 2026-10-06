@@ -23,3 +23,6 @@ Thumbs.db
 
 # Plan execution workspaces
 /.superpowers/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts

@@ -1,5 +1,6 @@
 import 'server-only';
-import { verifiedClaimsSchema, type VerifiedClaims } from './db';
+import { verifiedClaimsSchema, withSystemContext, type VerifiedClaims } from './db';
+import { isSessionActive } from './session-state';
 import { createSupabaseServerClient } from './supabase-server';
 
 export async function getVerifiedClaims(): Promise<VerifiedClaims | null> {
@@ -8,5 +9,8 @@ export async function getVerifiedClaims(): Promise<VerifiedClaims | null> {
   if (error || !data) return null;
 
   const parsed = verifiedClaimsSchema.safeParse(data.claims);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) return null;
+  if (!(await isSessionActive(parsed.data, { withSystemContext }))) return null;
+
+  return parsed.data;
 }

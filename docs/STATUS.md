@@ -6,9 +6,9 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 ## Em curso
 
-| Item                                   | Referência                                                                                                                       | Estado                                                                                   |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Em execução no branch `feat/platform-foundation`: Tasks 1–9 concluídas; próxima: Task 10 |
+| Item                                   | Referência                                                                                                                       | Estado                                                                                                                               |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Em execução no branch `feat/platform-foundation` (PR #3, rascunho): Tasks 1–18 concluídas; Task 19 à espera de credenciais de deploy |
 
 ## Feito
 
@@ -33,6 +33,15 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Task 7: contextos de base de dados de utilizador e de sistema, cliente Supabase no servidor com cookies httpOnly | `feat/platform-foundation` |
 | 2026-10-06 | Task 8: outbox de eventos com despacho único e concorrente para o Inngest | `feat/platform-foundation` |
 | 2026-10-06 | Task 9: matriz de acesso do separador 08 em código, com 80 testes célula a célula | `feat/platform-foundation` |
+| 2026-10-06 | Task 10: cabeçalhos de segurança com CSP por nonce, expiração por 8 h de inatividade, claim `user_kind` no token | `feat/platform-foundation` |
+| 2026-10-06 | Task 11: política de palavra-passe (12 caracteres) e verificação Have I Been Pwned | `feat/platform-foundation` |
+| 2026-10-06 | Task 12: entrada com palavra-passe, link mágico, MFA TOTP, reautenticação | `feat/platform-foundation` |
+| 2026-10-06 | Task 13: convites, aceitação, definição de palavra-passe, script do fundador | `feat/platform-foundation` |
+| 2026-10-06 | Task 14: sessões ativas e alteração de palavra-passe | `feat/platform-foundation` |
+| 2026-10-06 | Task 15: moldura da aplicação (estúdio, sala, portal), estados, 404 traduzido | `feat/platform-foundation` |
+| 2026-10-06 | Task 16: manifesto PWA, ícones, esqueleto estático do Brand Hub | `feat/platform-foundation` |
+| 2026-10-06 | Task 17: Sentry sem dados pessoais, logging estruturado | `feat/platform-foundation` |
+| 2026-10-06 | Task 18: CI no PR (tipos, lint, unitários, RLS, build, auditoria, segredos, Semgrep, título), Dependabot; verificado que um teste a falhar bloqueia | PR #3 |
 
 ## Adiado
 
@@ -54,6 +63,7 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 - [ ] Projeto Supabase de produção em eu-west-1, plano Pro
 - [ ] Plano Vercel Pro
 - [ ] Domínio, Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth
+- [ ] Ativar os templates de email em `supabase/templates` (convite e link mágico com `token_hash`)
 - [ ] Pipeline de `main` ativo, com aprovação do fundador
 - [ ] GitHub Team e proteção de `main`
 - [ ] Monitor de disponibilidade

@@ -89,6 +89,8 @@ jobs:
       - name: Deploy
         id: deploy
         timeout-minutes: 10
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
             --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.STAGING_NEXT_PUBLIC_SUPABASE_URL }}" \
@@ -99,7 +101,11 @@ jobs:
             --env SESSION_ACTIVITY_SECRET="${{ secrets.STAGING_SESSION_ACTIVITY_SECRET }}" \
             --env INNGEST_EVENT_KEY="${{ secrets.STAGING_INNGEST_EVENT_KEY }}" \
             --env INNGEST_SIGNING_KEY="${{ secrets.STAGING_INNGEST_SIGNING_KEY }}")
-          vercel alias set "$url" "${{ vars.STAGING_DOMAIN }}" --token=${{ secrets.VERCEL_TOKEN }}
+          host="${url#https://}"
+          curl --fail-with-body -sS -o /dev/null -X POST \
+            "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
+            -d "{\"alias\":\"${{ vars.STAGING_DOMAIN }}\"}"
           echo "url=https://${{ vars.STAGING_DOMAIN }}" >> "$GITHUB_OUTPUT"
 
   e2e:

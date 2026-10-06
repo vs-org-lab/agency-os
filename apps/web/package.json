@@ -18,6 +18,8 @@
     "@supabase/supabase-js": "2.117.2",
     "drizzle-orm": "0.45.3",
     "inngest": "4.21.1",
+    "input-otp": "1.5.0",
+    "lucide-react": "1.52.0",
     "next": "16.3.8",
     "next-intl": "4.14.9",
     "postgres": "3.4.9",

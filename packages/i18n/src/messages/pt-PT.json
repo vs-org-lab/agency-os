@@ -10,7 +10,12 @@
       "password": "Palavra-passe",
       "submit": "Entrar",
       "magicLinkPrompt": "É cliente? Receba um link por email.",
-      "invalidCredentials": "Email ou palavra-passe incorretos."
+      "invalidCredentials": "Email ou palavra-passe incorretos.",
+      "showPassword": "Mostrar palavra-passe",
+      "hidePassword": "Ocultar palavra-passe",
+      "inactive": "A sessão terminou após 8 horas sem atividade. Entre novamente.",
+      "emailInvalid": "Introduza um email válido, por exemplo nome@empresa.pt.",
+      "passwordRequired": "Introduza a palavra-passe."
     },
     "magicLink": {
       "title": "Entrar com link",
@@ -29,7 +34,10 @@
       "code": "Código",
       "submit": "Verificar",
       "invalidCode": "Código inválido. Tente novamente.",
-      "reauthenticationRequired": "Por segurança, confirme o código antes de continuar."
+      "reauthenticationRequired": "Por segurança, confirme o código antes de continuar.",
+      "qrAlt": "Código QR para a aplicação de autenticação",
+      "codeHint": "O código muda a cada 30 segundos.",
+      "codeInvalidFormat": "O código tem 6 dígitos."
     },
     "invitation": {
       "title": "Aceitar convite",
@@ -45,7 +53,11 @@
       "pwned": "Esta palavra-passe apareceu numa fuga de dados conhecida. Escolha outra.",
       "checkUnavailable": "Não foi possível verificar a palavra-passe. Tente novamente."
     },
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "callback": {
+      "error": "O link expirou ou já foi usado. Peça um novo link."
+    },
+    "signOutDone": "Sessão terminada."
   },
   "shell": {
     "studio": "Estúdio",

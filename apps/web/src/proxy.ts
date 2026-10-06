@@ -10,6 +10,7 @@ import {
   signActivity,
   verifyActivity,
 } from './platform/activity-cookie';
+import { isSecureRequest } from './platform/request';
 import { buildSecurityHeaders, generateNonce } from './platform/security-headers';
 
 const intlMiddleware = createIntlMiddleware(routing);
@@ -26,7 +27,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';
   const activitySecret = process.env.SESSION_ACTIVITY_SECRET ?? '';
-  const secure = request.nextUrl.protocol === 'https:';
+  const secure = isSecureRequest(request.headers, request.nextUrl.protocol);
   const securityHeaders = buildSecurityHeaders(nonce, {
     isDevelopment: process.env.NODE_ENV === 'development',
     connectSources: supabaseUrl ? [supabaseUrl] : [],

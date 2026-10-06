@@ -10,7 +10,12 @@
       "password": "Password",
       "submit": "Sign in",
       "magicLinkPrompt": "Are you a client? Get a link by email.",
-      "invalidCredentials": "Incorrect email or password."
+      "invalidCredentials": "Incorrect email or password.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "inactive": "Your session ended after 8 hours without activity. Please sign in again.",
+      "emailInvalid": "Enter a valid email, for example name@company.com.",
+      "passwordRequired": "Enter your password."
     },
     "magicLink": {
       "title": "Sign in with a link",
@@ -29,7 +34,10 @@
       "code": "Code",
       "submit": "Verify",
       "invalidCode": "Invalid code. Please try again.",
-      "reauthenticationRequired": "For your security, confirm the code before continuing."
+      "reauthenticationRequired": "For your security, confirm the code before continuing.",
+      "qrAlt": "QR code for your authenticator app",
+      "codeHint": "The code changes every 30 seconds.",
+      "codeInvalidFormat": "The code has 6 digits."
     },
     "invitation": {
       "title": "Accept invitation",
@@ -45,7 +53,11 @@
       "pwned": "This password appeared in a known data breach. Choose another one.",
       "checkUnavailable": "We could not check the password. Please try again."
     },
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "callback": {
+      "error": "The link has expired or was already used. Request a new link."
+    },
+    "signOutDone": "Signed out."
   },
   "shell": {
     "studio": "Studio",

@@ -29,3 +29,8 @@ next-env.d.ts
 
 # Vercel CLI link metadata
 .vercel/
+
+# End-to-end test artefacts
+apps/web/e2e/.auth/
+apps/web/playwright-report/
+apps/web/test-results/

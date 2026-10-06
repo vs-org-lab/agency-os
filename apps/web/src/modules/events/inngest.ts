@@ -1,4 +1,6 @@
+import * as Sentry from '@sentry/nextjs';
 import { Inngest } from 'inngest';
+import { logger } from '@/platform/logger';
 import { withSystemContext } from '@/platform/db';
 import { createOutboxDispatcher, type DispatchResult, type OutboxFailure } from './dispatch';
 
@@ -7,7 +9,12 @@ export const inngest = new Inngest({ id: 'agency-os' });
 export const OUTBOX_FLUSH_EVENT = 'outbox/flush';
 
 function reportOutboxFailure(failure: OutboxFailure): void {
-  console.error(JSON.stringify({ level: 'error', message: 'outbox.event_failed', ...failure }));
+  logger.error('outbox.event_failed', failure);
+  Sentry.captureMessage('outbox.event_failed', {
+    level: 'error',
+    tags: { eventType: failure.type },
+    extra: { eventId: failure.id, attempts: failure.attempts, error: failure.error },
+  });
 }
 
 export function dispatchPending(): Promise<DispatchResult> {
@@ -35,12 +42,6 @@ export async function requestFlush(): Promise<void> {
   try {
     await inngest.send({ name: OUTBOX_FLUSH_EVENT, data: {} });
   } catch (error) {
-    console.error(
-      JSON.stringify({
-        level: 'warn',
-        message: 'outbox.flush_request_failed',
-        error: error instanceof Error ? error.message : String(error),
-      }),
-    );
+    logger.warn('outbox.flush_request_failed', { error });
   }
 }

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs/config';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 loadEnvConfig(
@@ -19,4 +20,13 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['postgres'],
 };
 
-export default withNextIntl(nextConfig);
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: process.env.SENTRY_ORG ?? 'aurion-j4',
+  project: process.env.SENTRY_PROJECT ?? 'javascript-nextjs',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  tunnelRoute: '/monitoring',
+  widenClientFileUpload: true,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  telemetry: false,
+});

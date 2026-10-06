@@ -58,8 +58,11 @@ jobs:
       - run: pnpm add --global vercel@62.4.0
       - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Remove git metadata
+        run: rm -rf .git
       - name: Deploy
         id: deploy
+        timeout-minutes: 10
         run: |
           url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
             --env DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}" \

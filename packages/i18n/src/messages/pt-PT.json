@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "Agency OS"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Entrar",
+      "description": "Entre com o seu email e palavra-passe.",
+      "email": "Email",
+      "password": "Palavra-passe",
+      "submit": "Entrar",
+      "magicLinkPrompt": "É cliente? Receba um link por email.",
+      "invalidCredentials": "Email ou palavra-passe incorretos."
+    },
+    "magicLink": {
+      "title": "Entrar com link",
+      "description": "Enviamos um link de acesso para o seu email.",
+      "email": "Email",
+      "submit": "Enviar link",
+      "sent": "Se o email existir, enviámos um link de acesso.",
+      "backToSignIn": "Entrar com palavra-passe"
+    },
+    "mfa": {
+      "enrollTitle": "Ativar verificação em dois passos",
+      "enrollDescription": "Leia o código QR com a sua aplicação de autenticação e introduza o código de seis dígitos.",
+      "secretLabel": "Chave para introdução manual",
+      "verifyTitle": "Verificação em dois passos",
+      "verifyDescription": "Introduza o código de seis dígitos da sua aplicação de autenticação.",
+      "code": "Código",
+      "submit": "Verificar",
+      "invalidCode": "Código inválido. Tente novamente.",
+      "reauthenticationRequired": "Por segurança, confirme o código antes de continuar."
+    },
+    "invitation": {
+      "title": "Aceitar convite",
+      "description": "Foi convidado para o {organization}.",
+      "accept": "Aceitar convite"
+    },
+    "setPassword": {
+      "title": "Definir palavra-passe",
+      "description": "Use pelo menos 12 caracteres.",
+      "password": "Nova palavra-passe",
+      "submit": "Guardar palavra-passe",
+      "tooShort": "A palavra-passe tem de ter pelo menos 12 caracteres.",
+      "pwned": "Esta palavra-passe apareceu numa fuga de dados conhecida. Escolha outra.",
+      "checkUnavailable": "Não foi possível verificar a palavra-passe. Tente novamente."
+    },
+    "signOut": "Sair"
+  },
+  "shell": {
+    "studio": "Estúdio",
+    "allClients": "Todos os clientes",
+    "toggleSidebar": "Mostrar ou ocultar menu",
+    "navigation": "Navegação",
+    "navigationDescription": "Menu principal da aplicação.",
+    "theme": {
+      "label": "Tema",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "locale": {
+      "label": "Idioma",
+      "pt-PT": "Português",
+      "en": "English"
+    },
+    "close": "Fechar"
+  },
+  "states": {
+    "empty": {
+      "title": "Ainda não há nada aqui",
+      "description": "Quando houver conteúdo, aparece neste espaço."
+    },
+    "loading": {
+      "title": "A carregar"
+    },
+    "error": {
+      "title": "Algo correu mal",
+      "description": "Tente novamente dentro de momentos.",
+      "retry": "Tentar novamente"
+    },
+    "blocked": {
+      "title": "Bloqueado",
+      "description": "Este passo está à espera de uma ação anterior."
+    },
+    "notFound": {
+      "title": "Página não encontrada",
+      "description": "A página não existe ou não tem acesso a ela.",
+      "home": "Voltar ao início"
+    }
+  },
+  "sessions": {
+    "title": "Sessões ativas",
+    "description": "Dispositivos com sessão iniciada na sua conta.",
+    "current": "Esta sessão",
+    "lastActive": "Última atividade",
+    "revoke": "Terminar sessão",
+    "revoked": "Sessão terminada.",
+    "empty": "Não há outras sessões ativas."
+  },
+  "errors": {
+    "generic": "Ocorreu um erro inesperado.",
+    "rateLimited": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
+    "validation": "Verifique os campos assinalados."
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "Agency OS"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "description": "Sign in with your email and password.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "magicLinkPrompt": "Are you a client? Get a link by email.",
+      "invalidCredentials": "Incorrect email or password."
+    },
+    "magicLink": {
+      "title": "Sign in with a link",
+      "description": "We will send a sign-in link to your email.",
+      "email": "Email",
+      "submit": "Send link",
+      "sent": "If the email exists, we have sent a sign-in link.",
+      "backToSignIn": "Sign in with password"
+    },
+    "mfa": {
+      "enrollTitle": "Turn on two-step verification",
+      "enrollDescription": "Scan the QR code with your authenticator app and enter the six-digit code.",
+      "secretLabel": "Key for manual entry",
+      "verifyTitle": "Two-step verification",
+      "verifyDescription": "Enter the six-digit code from your authenticator app.",
+      "code": "Code",
+      "submit": "Verify",
+      "invalidCode": "Invalid code. Please try again.",
+      "reauthenticationRequired": "For your security, confirm the code before continuing."
+    },
+    "invitation": {
+      "title": "Accept invitation",
+      "description": "You have been invited to {organization}.",
+      "accept": "Accept invitation"
+    },
+    "setPassword": {
+      "title": "Set password",
+      "description": "Use at least 12 characters.",
+      "password": "New password",
+      "submit": "Save password",
+      "tooShort": "The password must have at least 12 characters.",
+      "pwned": "This password appeared in a known data breach. Choose another one.",
+      "checkUnavailable": "We could not check the password. Please try again."
+    },
+    "signOut": "Sign out"
+  },
+  "shell": {
+    "studio": "Studio",
+    "allClients": "All clients",
+    "toggleSidebar": "Show or hide menu",
+    "navigation": "Navigation",
+    "navigationDescription": "Main application menu.",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "locale": {
+      "label": "Language",
+      "pt-PT": "Português",
+      "en": "English"
+    },
+    "close": "Close"
+  },
+  "states": {
+    "empty": {
+      "title": "Nothing here yet",
+      "description": "Content will appear here when there is some."
+    },
+    "loading": {
+      "title": "Loading"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "Please try again in a moment.",
+      "retry": "Try again"
+    },
+    "blocked": {
+      "title": "Blocked",
+      "description": "This step is waiting for an earlier action."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page does not exist or you do not have access to it.",
+      "home": "Back to home"
+    }
+  },
+  "sessions": {
+    "title": "Active sessions",
+    "description": "Devices signed in to your account.",
+    "current": "This session",
+    "lastActive": "Last active",
+    "revoke": "End session",
+    "revoked": "Session ended.",
+    "empty": "There are no other active sessions."
+  },
+  "errors": {
+    "generic": "An unexpected error occurred.",
+    "rateLimited": "Too many attempts. Please wait a moment and try again.",
+    "validation": "Check the highlighted fields."
+  }
+}

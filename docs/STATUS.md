@@ -6,9 +6,9 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 ## Em curso
 
-| Item                                   | Referência                                                                                                                       | Estado                                             |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Plano aprovado; execução nativa; próxima: Tarefa 1 |
+| Item                                   | Referência                                                                                                                       | Estado                                                                                                                   |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Em execução no branch `feat/platform-foundation`: Tasks 1–3 concluídas; Task 4 à espera da password da base de dados dev |
 
 ## Feito
 
@@ -23,6 +23,10 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Ativos da marca utilizáveis copiados para `assets/brand` (símbolo, wordmark vetorizado claro e escuro, paleta). `wordmark_black.svg` e `Asset 7.svg` excluídos: usam a fonte "Refinity Personal Use Only" | `assets/brand/`                                                                                                      |
 | 2026-10-06 | Documentação de produto copiada para `docs/product/`, passa a ser a fonte versionada                                                                                                                      | `docs/product/`                                                                                                      |
 | 2026-10-06 | Plano da fundação aprovado; execução nativa                                                                                                                                                               | PR #2                                                                                                                |
+
+| 2026-10-06 | Task 1: monorepo pnpm + Turborepo, TypeScript 6, ESLint 9, Prettier, Vitest | `feat/platform-foundation` |
+| 2026-10-06 | Task 2: aplicação Next.js 16, tokens do separador 05 (testados, contraste AA), tema claro/escuro, componentes shadcn, símbolo da marca | `feat/platform-foundation` |
+| 2026-10-06 | Task 3: pt-PT e en com next-intl, resolução de idioma, formatação de moeda, catálogos de mensagens | `feat/platform-foundation` |
 
 ## Adiado
 

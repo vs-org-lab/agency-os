@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "bootstrap:founder": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/bootstrap-founder.ts"
+    "bootstrap:founder": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/bootstrap-founder.ts",
+    "icons:generate": "tsx scripts/generate-icons.ts"
   },
   "dependencies": {
     "@agency-os/db": "workspace:*",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@agency-os/config": "workspace:*",
+    "@resvg/resvg-js": "2.6.2",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^22.19.0",
     "@types/react": "19.3.0",

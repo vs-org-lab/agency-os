@@ -1,0 +1,17 @@
+{
+  "extends": "@agency-os/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    "*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

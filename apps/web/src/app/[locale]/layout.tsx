@@ -27,7 +27,10 @@ export async function generateMetadata({
 }: Omit<LayoutProps, 'children'>): Promise<Metadata> {
   const locale = requireLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'app' });
-  return { title: t('name') };
+  return {
+    title: t('name'),
+    icons: { icon: '/icons/icon.svg', apple: '/icons/apple-touch-icon.png' },
+  };
 }
 
 export default async function LocaleLayout({ children, params }: LayoutProps) {

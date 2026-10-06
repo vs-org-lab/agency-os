@@ -15,6 +15,7 @@ export default defineConfig({
           name: 'db',
           include: ['packages/db/test/**/*.test.ts', 'apps/*/src/**/*.db.test.ts'],
           fileParallelism: false,
+          setupFiles: ['packages/db/src/testing/load-env.ts'],
           testTimeout: 30_000,
         },
       },

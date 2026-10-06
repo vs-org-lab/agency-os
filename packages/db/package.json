@@ -1,0 +1,27 @@
+{
+  "name": "@agency-os/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./testing": "./src/testing/index.ts"
+  },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "generate:custom": "drizzle-kit generate --custom",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.3",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@agency-os/config": "workspace:*",
+    "@types/node": "^22.19.0",
+    "dotenv": "18.0.5",
+    "drizzle-kit": "0.31.11",
+    "typescript": "6.0.3"
+  }
+}

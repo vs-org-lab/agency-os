@@ -6,9 +6,9 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 ## Em curso
 
-| Item                                   | Referência                                                                                                                       | Estado                                                                                                                   |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Em execução no branch `feat/platform-foundation`: Tasks 1–3 concluídas; Task 4 à espera da password da base de dados dev |
+| Item                                   | Referência                                                                                                                       | Estado                                                                                   |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Em execução no branch `feat/platform-foundation`: Tasks 1–9 concluídas; próxima: Task 10 |
 
 ## Feito
 
@@ -27,6 +27,12 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-06 | Task 1: monorepo pnpm + Turborepo, TypeScript 6, ESLint 9, Prettier, Vitest | `feat/platform-foundation` |
 | 2026-10-06 | Task 2: aplicação Next.js 16, tokens do separador 05 (testados, contraste AA), tema claro/escuro, componentes shadcn, símbolo da marca | `feat/platform-foundation` |
 | 2026-10-06 | Task 3: pt-PT e en com next-intl, resolução de idioma, formatação de moeda, catálogos de mensagens | `feat/platform-foundation` |
+| 2026-10-06 | Task 4: esquema da fundação (8 tabelas, RLS ativo desde a criação), chaves estrangeiras compostas entre cliente e organização, infraestrutura de testes | `feat/platform-foundation` |
+| 2026-10-06 | Task 5: políticas RLS e funções de acesso; privilégios revogados e concedidos por coluna (as predefinições do Supabase davam TRUNCATE a `anon` e `authenticated`) | `feat/platform-foundation` |
+| 2026-10-06 | Task 6: registo de auditoria só de escrita (UPDATE, DELETE e TRUNCATE bloqueados para todos os papéis) | `feat/platform-foundation` |
+| 2026-10-06 | Task 7: contextos de base de dados de utilizador e de sistema, cliente Supabase no servidor com cookies httpOnly | `feat/platform-foundation` |
+| 2026-10-06 | Task 8: outbox de eventos com despacho único e concorrente para o Inngest | `feat/platform-foundation` |
+| 2026-10-06 | Task 9: matriz de acesso do separador 08 em código, com 80 testes célula a célula | `feat/platform-foundation` |
 
 ## Adiado
 
@@ -55,8 +61,9 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 
 ## Questões em aberto
 
-| Questão                                                                                                                                                   | Dono     |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se                               | Fundador |
-| Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`) | Fundador |
-| "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso                                         | Fundador |
+| Questão                                                                                                                                                                                                                                            | Dono     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se                                                                                                                        | Fundador |
+| Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`)                                                                                          | Fundador |
+| O spec (secção 6) previa que o gestor atribuído pudesse convidar utilizadores do cliente, mas a matriz do separador 08 dá "—" ao gestor em utilizadores. A aplicação segue o 08 (só o fundador e o decisor convidam). Confirmar a regra pretendida | Fundador |
+| "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso                                                                                                                                  | Fundador |

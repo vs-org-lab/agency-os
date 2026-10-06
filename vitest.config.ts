@@ -5,7 +5,10 @@ const webSource = path.resolve(import.meta.dirname, 'apps/web/src');
 
 export default defineConfig({
   resolve: {
-    alias: { '@': webSource },
+    alias: {
+      '@': webSource,
+      'server-only': path.resolve(import.meta.dirname, 'apps/web/test/server-only.ts'),
+    },
   },
   test: {
     projects: [

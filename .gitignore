@@ -1,0 +1,22 @@
+# Local working material (not part of the codebase)
+/References/
+/Software/
+/Documents/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Tooling
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
+*.log

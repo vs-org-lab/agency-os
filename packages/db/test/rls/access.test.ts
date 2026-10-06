@@ -192,6 +192,29 @@ describe('client membership management', () => {
     });
   });
 
+  it('assigned manager cannot invite client users or change their memberships', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const colleague = await createAuthUser(sql, { fullName: 'Colleague', kind: 'client' });
+      await asUser(sql, world.users.manager);
+
+      await sql`savepoint probe`;
+      await expect(
+        sql`
+          insert into public.client_memberships (organization_id, client_id, user_id, role, status)
+          values (${world.organizationId}, ${world.clients.a}, ${colleague}, 'operational', 'invited')
+        `,
+      ).rejects.toThrow(/row-level security/);
+      await sql`rollback to savepoint probe`;
+
+      const updated = await sql`
+        update public.client_memberships set status = 'revoked'
+        where client_id = ${world.clients.a} and user_id = ${world.users.operationalA}
+      `;
+      expect(updated.count).toBe(0);
+    });
+  });
+
   it('operational cannot insert client memberships', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

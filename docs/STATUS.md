@@ -100,9 +100,8 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 
 ## Questões em aberto
 
-| Questão                                                                                                                                                                                                                                            | Dono     |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se                                                                                                                        | Fundador |
-| Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`)                                                                                          | Fundador |
-| O spec (secção 6) previa que o gestor atribuído pudesse convidar utilizadores do cliente, mas a matriz do separador 08 dá "—" ao gestor em utilizadores. A aplicação segue o 08 (só o fundador e o decisor convidam). Confirmar a regra pretendida | Fundador |
-| "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso                                                                                                                                  | Fundador |
+| Questão                                                                                                                                                   | Dono     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| O nome da agência pode mudar. O código não usa o nome: vem de `app.name` e de `portal_branding`. Logótipo e cores mantêm-se                               | Fundador |
+| Na paleta, "Aurion INK" tem o código `#0f2a42`, igual ao Orbit Navy, mas a cor visível é quase preta. A interface segue o separador 05 (`text` `#0B1117`) | Fundador |
+| "Core Cream" (`#fdf2de`) não existe nos tokens do separador 05; fica fora da interface até ser definido o seu uso                                         | Fundador |

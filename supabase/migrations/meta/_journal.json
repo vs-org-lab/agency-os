@@ -8,6 +8,13 @@
       "when": 1791307862424,
       "tag": "20261006173102_foundation_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791308310588,
+      "tag": "20261006173830_access_policies",
+      "breakpoints": true
     }
   ]
 }

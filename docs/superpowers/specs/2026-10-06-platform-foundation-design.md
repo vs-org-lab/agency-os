@@ -1,11 +1,11 @@
 # Sub-projeto 0 — Fundação da plataforma
 
-| Campo | Valor |
-| --- | --- |
-| Data | 2026-10-06 |
-| Estado | Em revisão |
-| Documentação de produto | `docs/product/00`–`09` (separadores 01, 05, 06, 08 e 09) |
-| Decisões relacionadas | [ADR 0001](../../decisions/0001-managed-services.md) a [ADR 0005](../../decisions/0005-drizzle-generates-supabase-migrations.md) |
+| Campo                   | Valor                                                                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Data                    | 2026-10-06                                                                                                                       |
+| Estado                  | Em revisão                                                                                                                       |
+| Documentação de produto | `docs/product/00`–`09` (separadores 01, 05, 06, 08 e 09)                                                                         |
+| Decisões relacionadas   | [ADR 0001](../../decisions/0001-managed-services.md) a [ADR 0005](../../decisions/0005-drizzle-generates-supabase-migrations.md) |
 
 ## 1. Objetivo
 
@@ -30,18 +30,18 @@ A fundação não entrega nenhum ecrã de negócio. Está concluída quando um u
 
 ### Excluído (registado em `docs/STATUS.md`)
 
-| Item | Entra com |
-| --- | --- |
-| Qualquer ecrã ou entidade de negócio (candidaturas, CRM, documentos, faturação, etc.) | Vaga 1 e seguintes |
-| Cofre de credenciais (SEC-20 a SEC-23) | Primeiro módulo que guarde credenciais |
-| Stripe, software de faturação, assinatura eletrónica, Figma, Google | Módulos M04 e M05 |
-| Servidor MCP e OAuth do agente | M18 (Vaga 4) |
-| Atribuição de freelancers por projeto | M20 (Vaga 2); a fundação atribui ao nível do cliente |
-| Ambiente de produção (projeto Supabase, deploy de `main`) | Critério de lançamento (secção 13) |
-| Email transacional próprio (Resend) e domínio | Critério de lançamento |
-| Service worker e funcionamento offline | Avaliação na Vaga 2, com o portal; sem cache de dados de cliente |
-| Monitor de disponibilidade | Critério de lançamento |
-| Passkeys | Avaliação depois do lançamento; o TOTP cumpre o SEC-01 |
+| Item                                                                                  | Entra com                                                        |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Qualquer ecrã ou entidade de negócio (candidaturas, CRM, documentos, faturação, etc.) | Vaga 1 e seguintes                                               |
+| Cofre de credenciais (SEC-20 a SEC-23)                                                | Primeiro módulo que guarde credenciais                           |
+| Stripe, software de faturação, assinatura eletrónica, Figma, Google                   | Módulos M04 e M05                                                |
+| Servidor MCP e OAuth do agente                                                        | M18 (Vaga 4)                                                     |
+| Atribuição de freelancers por projeto                                                 | M20 (Vaga 2); a fundação atribui ao nível do cliente             |
+| Ambiente de produção (projeto Supabase, deploy de `main`)                             | Critério de lançamento (secção 13)                               |
+| Email transacional próprio (Resend) e domínio                                         | Critério de lançamento                                           |
+| Service worker e funcionamento offline                                                | Avaliação na Vaga 2, com o portal; sem cache de dados de cliente |
+| Monitor de disponibilidade                                                            | Critério de lançamento                                           |
+| Passkeys                                                                              | Avaliação depois do lançamento; o TOTP cumpre o SEC-01           |
 
 ## 3. Arquitetura
 
@@ -88,16 +88,16 @@ docs/
 
 Todas as tabelas usam identificadores UUID v4 (SEC-12), `created_at` e `updated_at`. As entidades não são apagadas: `archived_at` marca o arquivo. Todas as tabelas com dados de uma organização têm `organization_id`; as que pertencem a um cliente têm também `client_id`.
 
-| Tabela | Campos principais | Notas |
-| --- | --- | --- |
-| `organizations` | `name`, `slug`, `default_locale` (`pt-PT`, `en`), `default_currency` (`EUR`, `GBP`, `USD`), `portal_branding` (jsonb) | Existe desde já, preparando o M22 |
-| `profiles` | `id` (= `auth.users.id`), `full_name`, `locale`, `kind` (`internal`, `client`) | Um por utilizador autenticado |
-| `organization_memberships` | `organization_id`, `user_id`, `role` (`founder`, `project_manager`, `freelancer`, `finance`), `status` (`invited`, `active`, `revoked`) | Pertença da equipa |
-| `clients` | `organization_id`, `name`, `tax_id`, `sector`, `size`, `logo_path`, `portal_domain` | Só os campos da fundação; o M02 acrescenta o resto |
-| `client_memberships` | `organization_id`, `client_id`, `user_id`, `role` (`decision_maker`, `operational`, `client_finance`), `status` | Pertença de utilizadores do cliente |
-| `client_staff_assignments` | `organization_id`, `client_id`, `user_id` | Define o âmbito "próprio" do gestor e do freelancer |
-| `audit_log` | `organization_id`, `actor_user_id`, `actor_kind` (`user`, `agent`, `system`), `action`, `resource_type`, `resource_id`, `client_id`, `metadata` (jsonb), `ip_address`, `user_agent`, `occurred_at` | Só inserção |
-| `domain_events` | `organization_id`, `client_id`, `type`, `payload` (jsonb), `status` (`pending`, `dispatched`, `failed`), `attempts`, `last_error`, `dispatched_at` | Outbox |
+| Tabela                     | Campos principais                                                                                                                                                                                  | Notas                                               |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `organizations`            | `name`, `slug`, `default_locale` (`pt-PT`, `en`), `default_currency` (`EUR`, `GBP`, `USD`), `portal_branding` (jsonb)                                                                              | Existe desde já, preparando o M22                   |
+| `profiles`                 | `id` (= `auth.users.id`), `full_name`, `locale`, `kind` (`internal`, `client`)                                                                                                                     | Um por utilizador autenticado                       |
+| `organization_memberships` | `organization_id`, `user_id`, `role` (`founder`, `project_manager`, `freelancer`, `finance`), `status` (`invited`, `active`, `revoked`)                                                            | Pertença da equipa                                  |
+| `clients`                  | `organization_id`, `name`, `tax_id`, `sector`, `size`, `logo_path`, `portal_domain`                                                                                                                | Só os campos da fundação; o M02 acrescenta o resto  |
+| `client_memberships`       | `organization_id`, `client_id`, `user_id`, `role` (`decision_maker`, `operational`, `client_finance`), `status`                                                                                    | Pertença de utilizadores do cliente                 |
+| `client_staff_assignments` | `organization_id`, `client_id`, `user_id`                                                                                                                                                          | Define o âmbito "próprio" do gestor e do freelancer |
+| `audit_log`                | `organization_id`, `actor_user_id`, `actor_kind` (`user`, `agent`, `system`), `action`, `resource_type`, `resource_id`, `client_id`, `metadata` (jsonb), `ip_address`, `user_agent`, `occurred_at` | Só inserção                                         |
+| `domain_events`            | `organization_id`, `client_id`, `type`, `payload` (jsonb), `status` (`pending`, `dispatched`, `failed`), `attempts`, `last_error`, `dispatched_at`                                                 | Outbox                                              |
 
 ## 5. Autorização
 
@@ -115,40 +115,40 @@ Todas as tabelas usam identificadores UUID v4 (SEC-12), `created_at` e `updated_
 
 Funções SQL no esquema `app`, `security definer`, `stable`, com `search_path` vazio:
 
-| Função | Devolve verdadeiro quando |
-| --- | --- |
-| `app.is_mfa_verified()` | A sessão atual tem `aal2` |
-| `app.has_org_role(org, roles[])` | O utilizador tem pertença ativa na organização com um dos papéis indicados e, sendo interno, a sessão tem MFA |
-| `app.is_org_member(org)` | O utilizador tem qualquer pertença ativa interna na organização (com MFA) |
-| `app.has_client_access(client)` | Fundador ou financeiro da organização; interno atribuído ao cliente; ou utilizador do cliente com pertença ativa |
+| Função                           | Devolve verdadeiro quando                                                                                        |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `app.is_mfa_verified()`          | A sessão atual tem `aal2`                                                                                        |
+| `app.has_org_role(org, roles[])` | O utilizador tem pertença ativa na organização com um dos papéis indicados e, sendo interno, a sessão tem MFA    |
+| `app.is_org_member(org)`         | O utilizador tem qualquer pertença ativa interna na organização (com MFA)                                        |
+| `app.has_client_access(client)`  | Fundador ou financeiro da organização; interno atribuído ao cliente; ou utilizador do cliente com pertença ativa |
 
 Políticas da fundação:
 
-| Tabela | Ler | Escrever |
-| --- | --- | --- |
-| `organizations` | Membros internos e utilizadores de clientes dessa organização | Fundador |
-| `profiles` | O próprio e quem partilha organização ou cliente | O próprio (nome, idioma) |
-| `organization_memberships` | O próprio; o fundador vê todas | Fundador |
-| `clients` | `has_client_access` | Criar: fundador e gestor. Alterar: fundador e gestor atribuído |
-| `client_memberships` | Fundador, internos atribuídos e utilizadores do mesmo cliente | Fundador, gestor atribuído e decisor do próprio cliente (convidar colegas) |
-| `client_staff_assignments` | Fundador e o próprio | Fundador |
-| `audit_log` | Fundador | Nenhuma escrita direta; só através de `app.record_audit()` |
-| `domain_events` | Nenhum utilizador | Nenhum utilizador; só o contexto de sistema |
+| Tabela                     | Ler                                                           | Escrever                                                                   |
+| -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `organizations`            | Membros internos e utilizadores de clientes dessa organização | Fundador                                                                   |
+| `profiles`                 | O próprio e quem partilha organização ou cliente              | O próprio (nome, idioma)                                                   |
+| `organization_memberships` | O próprio; o fundador vê todas                                | Fundador                                                                   |
+| `clients`                  | `has_client_access`                                           | Criar: fundador e gestor. Alterar: fundador e gestor atribuído             |
+| `client_memberships`       | Fundador, internos atribuídos e utilizadores do mesmo cliente | Fundador, gestor atribuído e decisor do próprio cliente (convidar colegas) |
+| `client_staff_assignments` | Fundador e o próprio                                          | Fundador                                                                   |
+| `audit_log`                | Fundador                                                      | Nenhuma escrita direta; só através de `app.record_audit()`                 |
+| `domain_events`            | Nenhum utilizador                                             | Nenhum utilizador; só o contexto de sistema                                |
 
 O registo de auditoria é só de escrita por três mecanismos: `UPDATE` e `DELETE` revogados a todos os papéis, um gatilho que rejeita qualquer alteração ou remoção, e inserção apenas através de função.
 
 ## 6. Autenticação e sessões
 
-| Requisito | Implementação |
-| --- | --- |
-| SEC-01 Equipa | Email e palavra-passe. Palavra-passe com 12 caracteres no mínimo, verificada contra a API Have I Been Pwned por k-anonimato (só os 5 primeiros caracteres do hash SHA-1 saem do sistema). MFA TOTP obrigatório: sem fator inscrito, o utilizador é levado para a inscrição antes de qualquer outro ecrã. |
-| SEC-02 Clientes | Link mágico por email. MFA TOTP opcional. Um pedido de link mágico para um email interno não envia nada; a resposta é igual para qualquer email ("se o email existir, enviámos um link"), para não revelar contas. |
-| Sem registo público | Os registos públicos estão desligados no Supabase Auth. O fundador inicial é criado por um script (`pnpm --filter web bootstrap:founder`). Os restantes utilizadores entram por convite. |
-| SEC-03 Inatividade | Cookie `httpOnly` assinado com a hora da última atividade, atualizado no middleware no máximo uma vez por minuto. Mais de 8 horas sem atividade numa sessão interna termina a sessão. |
-| SEC-03 Reautenticação | `requireRecentMfa(15 minutos)` lê a hora da última verificação TOTP nas claims `amr` do token. Se for mais antiga, a ação devolve "verificação necessária" e a interface pede um novo código. |
-| SEC-04 Limites | Limites nativos do Supabase Auth para login, links mágicos e verificações MFA. |
-| SEC-05 Sessões | `app.list_my_sessions()` e `app.revoke_my_session(id)` sobre `auth.sessions`, restritas ao próprio utilizador. Mudar a palavra-passe termina todas as sessões. |
-| SEC-51 Cookies | Cookies de sessão `httpOnly`, `Secure`, `SameSite=Lax`. A autenticação corre só no servidor; o browser nunca tem acesso ao token. |
+| Requisito             | Implementação                                                                                                                                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEC-01 Equipa         | Email e palavra-passe. Palavra-passe com 12 caracteres no mínimo, verificada contra a API Have I Been Pwned por k-anonimato (só os 5 primeiros caracteres do hash SHA-1 saem do sistema). MFA TOTP obrigatório: sem fator inscrito, o utilizador é levado para a inscrição antes de qualquer outro ecrã. |
+| SEC-02 Clientes       | Link mágico por email. MFA TOTP opcional. Um pedido de link mágico para um email interno não envia nada; a resposta é igual para qualquer email ("se o email existir, enviámos um link"), para não revelar contas.                                                                                       |
+| Sem registo público   | Os registos públicos estão desligados no Supabase Auth. O fundador inicial é criado por um script (`pnpm --filter web bootstrap:founder`). Os restantes utilizadores entram por convite.                                                                                                                 |
+| SEC-03 Inatividade    | Cookie `httpOnly` assinado com a hora da última atividade, atualizado no middleware no máximo uma vez por minuto. Mais de 8 horas sem atividade numa sessão interna termina a sessão.                                                                                                                    |
+| SEC-03 Reautenticação | `requireRecentMfa(15 minutos)` lê a hora da última verificação TOTP nas claims `amr` do token. Se for mais antiga, a ação devolve "verificação necessária" e a interface pede um novo código.                                                                                                            |
+| SEC-04 Limites        | Limites nativos do Supabase Auth para login, links mágicos e verificações MFA.                                                                                                                                                                                                                           |
+| SEC-05 Sessões        | `app.list_my_sessions()` e `app.revoke_my_session(id)` sobre `auth.sessions`, restritas ao próprio utilizador. Mudar a palavra-passe termina todas as sessões.                                                                                                                                           |
+| SEC-51 Cookies        | Cookies de sessão `httpOnly`, `Secure`, `SameSite=Lax`. A autenticação corre só no servidor; o browser nunca tem acesso ao token.                                                                                                                                                                        |
 
 Ecrãs: entrar, pedir link mágico, verificar MFA, inscrever MFA, aceitar convite, definir palavra-passe, sessões ativas.
 
@@ -185,11 +185,11 @@ Convites: o fundador convida membros da equipa; o fundador, o gestor atribuído 
 
 ### Ambientes
 
-| Ambiente | Supabase | Vercel | Origem |
-| --- | --- | --- | --- |
-| Desenvolvimento | `Agency-OS-Dev` (eu-west-1) | Previews de PR | Branches `feature/*`, `fix/*`, `chore/*`, `docs/*` |
-| Staging | `Agency-OS-Staging` (eu-west-1) | Deploy de staging (`dub1`) | Merge em `develop` |
-| Produção | A criar no lançamento | Produção (`dub1`) | Merge em `main`; desligado até ao lançamento |
+| Ambiente        | Supabase                        | Vercel                     | Origem                                             |
+| --------------- | ------------------------------- | -------------------------- | -------------------------------------------------- |
+| Desenvolvimento | `Agency-OS-Dev` (eu-west-1)     | Previews de PR             | Branches `feature/*`, `fix/*`, `chore/*`, `docs/*` |
+| Staging         | `Agency-OS-Staging` (eu-west-1) | Deploy de staging (`dub1`) | Merge em `develop`                                 |
+| Produção        | A criar no lançamento           | Produção (`dub1`)          | Merge em `main`; desligado até ao lançamento       |
 
 ### Pipeline de pull request
 
@@ -218,14 +218,14 @@ Concorrência por branch, com cancelamento da execução anterior.
 
 ## 11. Testes
 
-| Tipo | Ferramenta | Onde corre | O que cobre |
-| --- | --- | --- | --- |
-| Unitários | Vitest | Local e CI | Matriz de acesso, `authorize`, política de palavra-passe, cliente HIBP (simulado), inatividade, reautenticação, formatação por idioma |
-| Base de dados | Vitest + postgres.js | CI (Supabase no runner); local contra o projeto dev, cada teste numa transação revertida | Cada política RLS, acesso cruzado entre dois clientes para cada tabela, auditoria só de escrita, funções de sessão |
-| Cobertura de políticas | Vitest | CI | Falha se uma tabela com `organization_id` ou `client_id` não tiver RLS ativo e pelo menos uma política |
-| Integração | Vitest | CI | Outbox: emissão na transação, despacho idempotente, falha e repetição (Inngest simulado) |
-| Ponta a ponta | Playwright | Staging | Entrada da equipa com palavra-passe e TOTP, entrada de cliente por link mágico, convite, sessões, troca de tema e idioma |
-| Acessibilidade | axe (Playwright) | Staging | Todos os ecrãs da fundação; falhas graves bloqueiam |
+| Tipo                   | Ferramenta           | Onde corre                                                                               | O que cobre                                                                                                                           |
+| ---------------------- | -------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Unitários              | Vitest               | Local e CI                                                                               | Matriz de acesso, `authorize`, política de palavra-passe, cliente HIBP (simulado), inatividade, reautenticação, formatação por idioma |
+| Base de dados          | Vitest + postgres.js | CI (Supabase no runner); local contra o projeto dev, cada teste numa transação revertida | Cada política RLS, acesso cruzado entre dois clientes para cada tabela, auditoria só de escrita, funções de sessão                    |
+| Cobertura de políticas | Vitest               | CI                                                                                       | Falha se uma tabela com `organization_id` ou `client_id` não tiver RLS ativo e pelo menos uma política                                |
+| Integração             | Vitest               | CI                                                                                       | Outbox: emissão na transação, despacho idempotente, falha e repetição (Inngest simulado)                                              |
+| Ponta a ponta          | Playwright           | Staging                                                                                  | Entrada da equipa com palavra-passe e TOTP, entrada de cliente por link mágico, convite, sessões, troca de tema e idioma              |
+| Acessibilidade         | axe (Playwright)     | Staging                                                                                  | Todos os ecrãs da fundação; falhas graves bloqueiam                                                                                   |
 
 O desenvolvimento segue TDD: cada comportamento começa por um teste que falha.
 
@@ -249,21 +249,21 @@ O desenvolvimento segue TDD: cada comportamento começa por um teste que falha.
 
 Antes de o primeiro dado real de cliente entrar no sistema:
 
-| Item | Motivo |
-| --- | --- |
-| Criar o projeto Supabase de produção em eu-west-1, no plano Pro | Backups diários e RPO de 24 horas (RNF-04); verificação nativa de palavras-passe expostas |
-| Plano Vercel Pro | Termos de uso comercial |
-| Domínio, Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth | Entrega fiável de links mágicos e convites |
-| Ativar o pipeline de `main` com aprovação do fundador | Separador 09, passo 6 |
-| GitHub Team e proteção de `main` | Quando houver mais pessoas com acesso ao repositório |
-| Monitor de disponibilidade | RNF-02 e RNF-11 |
-| Rever os DPA de Supabase, Vercel, Inngest e Sentry | SEC-71 |
+| Item                                                                 | Motivo                                                                                    |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Criar o projeto Supabase de produção em eu-west-1, no plano Pro      | Backups diários e RPO de 24 horas (RNF-04); verificação nativa de palavras-passe expostas |
+| Plano Vercel Pro                                                     | Termos de uso comercial                                                                   |
+| Domínio, Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth | Entrega fiável de links mágicos e convites                                                |
+| Ativar o pipeline de `main` com aprovação do fundador                | Separador 09, passo 6                                                                     |
+| GitHub Team e proteção de `main`                                     | Quando houver mais pessoas com acesso ao repositório                                      |
+| Monitor de disponibilidade                                           | RNF-02 e RNF-11                                                                           |
+| Rever os DPA de Supabase, Vercel, Inngest e Sentry                   | SEC-71                                                                                    |
 
 ## 14. Riscos
 
-| Risco | Mitigação |
-| --- | --- |
-| O plano Free do Supabase pausa projetos após 7 dias sem uso | Reativação manual; o pipeline de `develop` mantém o staging ativo enquanto houver desenvolvimento |
-| Limite de 2 000 minutos/mês de GitHub Actions | Cache, cancelamento de execuções antigas, testes de ponta a ponta só em `develop` |
+| Risco                                                                     | Mitigação                                                                                              |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| O plano Free do Supabase pausa projetos após 7 dias sem uso               | Reativação manual; o pipeline de `develop` mantém o staging ativo enquanto houver desenvolvimento      |
+| Limite de 2 000 minutos/mês de GitHub Actions                             | Cache, cancelamento de execuções antigas, testes de ponta a ponta só em `develop`                      |
 | O email interno do Supabase só envia para membros da organização Supabase | Testes de ponta a ponta obtêm links através da API de administração; utilizadores de teste são membros |
-| Mudança do comportamento das claims `amr` ou `aal` no Supabase | Testes unitários e de ponta a ponta sobre a reautenticação detetam a regressão |
+| Mudança do comportamento das claims `amr` ou `aal` no Supabase            | Testes unitários e de ponta a ponta sobre a reautenticação detetam a regressão                         |

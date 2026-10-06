@@ -1,0 +1,104 @@
+name: Deploy preview
+
+on:
+  pull_request:
+    branches: [develop]
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    name: Vercel preview
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.PREVIEW_NEXT_PUBLIC_SENTRY_DSN }}
+      NEXT_PUBLIC_VERCEL_ENV: preview
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add --global vercel@62.4.0
+      - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Remove git metadata
+        run: rm -rf .git
+      - name: Deploy
+        id: deploy
+        timeout-minutes: 10
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
+            --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}" \
+            --env NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" \
+            --env NEXT_PUBLIC_SENTRY_DSN="${{ secrets.PREVIEW_NEXT_PUBLIC_SENTRY_DSN }}" \
+            --env DATABASE_URL="${{ secrets.PREVIEW_DATABASE_URL }}" \
+            --env SUPABASE_SECRET_KEY="${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}" \
+            --env SESSION_ACTIVITY_SECRET="${{ secrets.PREVIEW_SESSION_ACTIVITY_SECRET }}" \
+            --env INNGEST_EVENT_KEY="${{ secrets.PREVIEW_INNGEST_EVENT_KEY }}" \
+            --env INNGEST_SIGNING_KEY="${{ secrets.PREVIEW_INNGEST_SIGNING_KEY }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Comment preview URL
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const marker = '<!-- preview-url -->';
+            const body = `${marker}\nPreview: ${{ steps.deploy.outputs.url }}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            }
+
+  e2e:
+    name: End-to-end and accessibility
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: true
+      E2E_BASE_URL: ${{ needs.deploy.outputs.url }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}
+      DATABASE_DIRECT_URL: ${{ secrets.PREVIEW_DATABASE_DIRECT_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm --filter web e2e:seed
+      - run: pnpm --filter web e2e
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7

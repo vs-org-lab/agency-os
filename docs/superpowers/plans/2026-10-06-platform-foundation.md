@@ -26,11 +26,11 @@
 
 ## Foco de revisão
 
-1. **Utilizador com pertença `revoked` ou entidade com `archived_at`:** deve perder o acesso imediatamente. Testes na Tarefa 5 (`revoked membership loses access`, `archived client is invisible`).
-2. **Token com `aal1` de um utilizador interno que também é utilizador de cliente:** não lê tabelas internas, mas mantém o acesso à sala. Teste na Tarefa 5 (`dual-role user without mfa keeps client access only`).
-3. **Pedido de link mágico com email em maiúsculas ou com espaços:** é normalizado antes da verificação de tipo interno, para que um email interno nunca receba link. Teste na Tarefa 12 (`normalises email before internal check`).
-4. **API Have I Been Pwned indisponível ou lenta:** a definição de palavra-passe não pode ficar bloqueada nem aceitar em silêncio. Timeout de 3 segundos e recusa com mensagem "tente novamente". Teste na Tarefa 11 (`rejects with retryable error when hibp times out`).
-5. **Relógio do cookie de atividade adulterado ou no futuro:** a assinatura falha ou a data é inválida, logo a sessão termina. Teste na Tarefa 10 (`rejects tampered or future activity cookie`).
+1. **Utilizador com pertença `revoked` ou entidade com `archived_at`:** deve perder o acesso imediatamente. Testes na Task 5 (`revoked membership loses access`, `archived client is invisible`).
+2. **Token com `aal1` de um utilizador interno que também é utilizador de cliente:** não lê tabelas internas, mas mantém o acesso à sala. Teste na Task 5 (`dual-role user without mfa keeps client access only`).
+3. **Pedido de link mágico com email em maiúsculas ou com espaços:** é normalizado antes da verificação de tipo interno, para que um email interno nunca receba link. Teste na Task 12 (`normalises email before internal check`).
+4. **API Have I Been Pwned indisponível ou lenta:** a definição de palavra-passe não pode ficar bloqueada nem aceitar em silêncio. Timeout de 3 segundos e recusa com mensagem "tente novamente". Teste na Task 11 (`rejects with retryable error when hibp times out`).
+5. **Relógio do cookie de atividade adulterado ou no futuro:** a assinatura falha ou a data é inválida, logo a sessão termina. Teste na Task 10 (`rejects tampered or future activity cookie`).
 
 ---
 
@@ -59,13 +59,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 1: Monorepo e configuração partilhada
+### Task 1: Monorepo e configuração partilhada
 
 **Ficheiros:**
+
 - Criar: `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `.nvmrc` (`22`), `.gitattributes` (`* text=auto eol=lf`), `packages/config/{package.json,tsconfig.base.json,eslint.config.js,prettier.config.js}`, `vitest.workspace.ts`
 - Teste: `packages/config/test/config.test.ts`
 
 **Interfaces:**
+
 - Produz: scripts raiz `build`, `dev`, `lint`, `typecheck`, `format`, `format:check`, `test`, `test:db`, executados pelo Turborepo; `@agency-os/config` exporta `eslint.config.js` (flat config) e `tsconfig.base.json`.
 
 - [ ] **Passo 1:** escrever `config.test.ts`: `tsconfig.base.json has strict and noUncheckedIndexedAccess`; `eslint config forbids explicit any` (executa o ESLint sobre uma string com `any` e espera um erro de `@typescript-eslint/no-explicit-any`); `eslint forbids deep imports between modules` (um import de `@/modules/identity/hibp` a partir de outro módulo dá erro de `no-restricted-imports`; `@/modules/identity` é permitido).
@@ -76,13 +78,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 2: Aplicação web, tokens e tema
+### Task 2: Aplicação web, tokens e tema
 
 **Ficheiros:**
+
 - Criar: `apps/web` (Next.js 16, App Router, `src/`, sem `create-next-app` de exemplo), `packages/ui/src/styles/tokens.css`, `packages/ui/src/styles/globals.css`, `packages/ui/components.json`, `packages/ui/src/components/{button,input,label,form,card,badge,dialog,dropdown-menu,sidebar,tooltip,sonner,skeleton,input-otp}.tsx` (via `shadcn add`), `packages/ui/src/theme/theme-provider.tsx`, `packages/ui/src/brand/symbol.tsx`
 - Teste: `packages/ui/test/tokens.test.ts`
 
 **Interfaces:**
+
 - Produz: `@agency-os/ui` com os componentes acima; `ThemeProvider` (next-themes, `attribute="class"`, `defaultTheme="system"`); `BrandSymbol({ className, title }: { className?: string; title?: string })` que desenha `assets/brand/symbol.svg` com `fill="currentColor"`.
 
 - [ ] **Passo 1:** escrever `tokens.test.ts`, que lê `tokens.css` e verifica:
@@ -99,13 +103,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 3: Idiomas
+### Task 3: Idiomas
 
 **Ficheiros:**
+
 - Criar: `packages/i18n/src/{locale.ts,format.ts,messages/pt-PT.json,messages/en.json}`, `apps/web/src/i18n/{routing.ts,request.ts}`
 - Teste: `packages/i18n/test/{locale.test.ts,messages.test.ts,format.test.ts}`
 
 **Interfaces:**
+
 - Produz:
   - `type Locale = 'pt-PT' | 'en'`; `const defaultLocale: Locale = 'pt-PT'`.
   - `resolveLocale(input: { profile?: string | null; organization?: string | null; acceptLanguage?: string | null }): Locale`.
@@ -126,14 +132,16 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 4: Esquema da base de dados e infraestrutura de testes
+### Task 4: Esquema da base de dados e infraestrutura de testes
 
 **Ficheiros:**
+
 - Criar: `supabase/config.toml` (`supabase init`; `[auth] enable_signup = false`; `[auth.mfa.totp] enroll_enabled = true, verify_enabled = true`), `packages/db/src/schema/{enums.ts,organizations.ts,profiles.ts,memberships.ts,clients.ts,audit.ts,events.ts,index.ts}`, `packages/db/drizzle.config.ts` (`out: '../../supabase/migrations'`), `packages/db/src/testing/{db.ts,fixtures.ts,as-user.ts}`
 - Gerar: `supabase/migrations/<timestamp>_foundation_schema.sql`
 - Teste: `packages/db/test/schema.test.ts`
 
 **Interfaces:**
+
 - Produz:
   - Tabelas e colunas da secção 4 do spec, em snake_case, com chaves estrangeiras e índices em `organization_id`, `client_id` e `user_id`.
   - Unicidade em `(organization_id, user_id)` nas pertenças e em `(client_id, user_id)` nas pertenças de cliente.
@@ -153,13 +161,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 5: Funções de acesso e políticas RLS
+### Task 5: Funções de acesso e políticas RLS
 
 **Ficheiros:**
+
 - Criar: migração personalizada `supabase/migrations/<timestamp>_access_policies.sql` (gerada com `drizzle-kit generate --custom`; contém o esquema `app`, as funções e as políticas)
 - Teste: `packages/db/test/rls/{organizations,profiles,memberships,clients,client-memberships,assignments,audit,events}.test.ts`, `packages/db/test/rls/coverage.test.ts`
 
 **Interfaces:**
+
 - Produz:
   - `app.is_mfa_verified() returns boolean`.
   - `app.has_org_role(org uuid, roles app.org_role[]) returns boolean`.
@@ -187,13 +197,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 6: Registo de auditoria só de escrita
+### Task 6: Registo de auditoria só de escrita
 
 **Ficheiros:**
+
 - Criar: migração `<timestamp>_audit_append_only.sql`, `apps/web/src/modules/audit/{record.ts,actions.ts,index.ts}`
 - Teste: `packages/db/test/audit-append-only.test.ts`, `apps/web/src/modules/audit/record.test.ts`
 
 **Interfaces:**
+
 - Produz:
   - `app.record_audit(p_organization uuid, p_action text, p_resource_type text, p_resource_id uuid, p_client uuid, p_metadata jsonb, p_ip inet, p_user_agent text, p_actor_kind app.actor_kind) returns uuid` (`security definer`; `actor_user_id` = `auth.uid()`; `actor_kind = 'system'` só quando não há `auth.uid()`).
   - `AUDIT_ACTIONS`, constante com `auth.sign_in`, `auth.sign_out`, `auth.mfa_failed`, `auth.mfa_enrolled`, `invitation.created`, `invitation.accepted`, `membership.changed`, `session.revoked`, `password.changed`.
@@ -212,14 +224,16 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 7: Contextos de base de dados e cliente Supabase no servidor
+### Task 7: Contextos de base de dados e cliente Supabase no servidor
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/platform/{db.ts,supabase-server.ts,session.ts}`
 - Modificar: `packages/config/eslint.config.js` (bloquear `withSystemContext` em `apps/web/src/app/**`)
 - Teste: `apps/web/src/platform/db.test.ts`
 
 **Interfaces:**
+
 - Produz:
   - `type VerifiedClaims = { sub: string; aal: 'aal1' | 'aal2'; session_id: string; amr: { method: string; timestamp: number }[]; role: 'authenticated' }`.
   - `withUserContext<T>(claims: VerifiedClaims, fn: (tx: DbTransaction) => Promise<T>): Promise<T>`.
@@ -239,14 +253,16 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 8: Outbox de eventos e Inngest
+### Task 8: Outbox de eventos e Inngest
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/modules/events/{emit.ts,dispatch.ts,inngest.ts,index.ts}`, `apps/web/src/app/api/inngest/route.ts`
 - Teste: `apps/web/src/modules/events/{emit.test.ts,dispatch.test.ts}` (base de dados real, Inngest simulado)
 
 **Interfaces:**
-- Consome: `withSystemContext` (Tarefa 7).
+
+- Consome: `withSystemContext` (Task 7).
 - Produz:
   - `DOMAIN_EVENTS`, constante com `identity.user.invited`.
   - `emit(tx, event: { type: DomainEventType; organizationId: string; clientId?: string; payload: unknown }): Promise<string>`.
@@ -267,13 +283,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 9: Matriz de acesso e `authorize`
+### Task 9: Matriz de acesso e `authorize`
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/modules/access/{matrix.ts,authorize.ts,scope.ts,index.ts}`
 - Teste: `apps/web/src/modules/access/{matrix.test.ts,authorize.test.ts}`
 
 **Interfaces:**
+
 - Produz:
   - `type Role = 'founder' | 'project_manager' | 'freelancer' | 'finance' | 'agent' | 'decision_maker' | 'operational' | 'client_finance'`.
   - `type Resource = 'pipeline' | 'rooms' | 'commercial_values' | 'invoices' | 'library' | 'brand_hub' | 'vault' | 'users' | 'audit_log'`.
@@ -284,7 +302,7 @@ apps/brand-hub/
   - `type AccessContext = { assignedClientIds: ReadonlySet<string>; memberClientIds: ReadonlySet<string> }`.
   - `authorize(actor: Actor, action: Action, resource: ResourceRef, ctx: AccessContext): { allowed: true } | { allowed: false; reason: 'forbidden' }`.
   - `loadAccessContext(tx: DbTransaction, actor: Actor): Promise<AccessContext>` em `scope.ts`.
-  - `getActor(): Promise<Actor | null>` em `scope.ts`: combina `getVerifiedClaims` (Tarefa 7) com as pertenças ativas do utilizador; `mfaVerifiedAt` vem da entrada `totp` de `amr`.
+  - `getActor(): Promise<Actor | null>` em `scope.ts`: combina `getVerifiedClaims` (Task 7) com as pertenças ativas do utilizador; `mfaVerifiedAt` vem da entrada `totp` de `amr`.
 
 - [ ] **Passo 1:** testes:
   - `matrix.test.ts` com um caso por célula da matriz do separador 08. Exemplos: `freelancer has no access to commercial_values`; `client_finance reads invoices of own room and can pay`; `agent can only draft on pipeline`; `project_manager writes rooms only for assigned clients`; `operational writes library only for own room`; `nobody but founder reads audit_log`.
@@ -296,13 +314,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 10: Proxy, cabeçalhos de segurança e inatividade
+### Task 10: Proxy, cabeçalhos de segurança e inatividade
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/proxy.ts`, `apps/web/src/platform/{security-headers.ts,activity-cookie.ts}`
 - Teste: `apps/web/src/platform/{security-headers.test.ts,activity-cookie.test.ts}`
 
 **Interfaces:**
+
 - Produz:
   - `buildSecurityHeaders(nonce: string): Headers`.
   - `signActivity(at: Date, secret: string): string`.
@@ -329,13 +349,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 11: Política de palavra-passe e Have I Been Pwned
+### Task 11: Política de palavra-passe e Have I Been Pwned
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/modules/identity/{password-policy.ts,hibp.ts}`
 - Teste: `apps/web/src/modules/identity/{password-policy.test.ts,hibp.test.ts}`
 
 **Interfaces:**
+
 - Produz:
   - `validatePassword(password: string, deps: { isPwned: (p: string) => Promise<boolean> }): Promise<{ ok: true } | { ok: false; reason: 'too_short' | 'pwned' | 'check_unavailable' }>`.
   - `isPwnedPassword(password: string, fetchImpl?: typeof fetch): Promise<boolean>`: pede `GET https://api.pwnedpasswords.com/range/{5 primeiros caracteres do SHA-1, em maiúsculas}` com o cabeçalho `Add-Padding: true` e timeout de 3000 ms.
@@ -352,13 +374,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 12: Entrada, link mágico, MFA e reautenticação
+### Task 12: Entrada, link mágico, MFA e reautenticação
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/modules/identity/{sign-in.ts,magic-link.ts,mfa.ts,reauth.ts}`, `apps/web/src/app/[locale]/(auth)/{sign-in,magic-link,mfa/enroll,mfa/verify}/page.tsx` e as respetivas `actions.ts`
 - Teste: `apps/web/src/modules/identity/{sign-in.test.ts,magic-link.test.ts,mfa.test.ts,reauth.test.ts}`
 
 **Interfaces:**
+
 - Consome: `createSupabaseServerClient`, `getVerifiedClaims`, `recordAudit`.
 - Produz:
   - `signInWithPassword(input: { email: string; password: string }): Promise<{ next: 'mfa_enroll' | 'mfa_verify' } | { error: 'invalid_credentials' }>`.
@@ -383,13 +407,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 13: Convites e fundador inicial
+### Task 13: Convites e fundador inicial
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/modules/identity/invitations.ts`, `apps/web/src/app/[locale]/(auth)/{accept-invitation,set-password}/page.tsx`, `apps/web/scripts/bootstrap-founder.ts`
 - Teste: `apps/web/src/modules/identity/invitations.test.ts`, `packages/db/test/invitations.test.ts`
 
 **Interfaces:**
+
 - Consome: `authorize`, `withUserContext`, `withSystemContext`, `emit`, `recordAudit`, `validatePassword`.
 - Produz:
   - `inviteTeamMember(actor, input: { email: string; role: 'project_manager' | 'freelancer' | 'finance'; fullName: string }): Promise<{ membershipId: string }>`.
@@ -412,13 +438,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 14: Sessões ativas
+### Task 14: Sessões ativas
 
 **Ficheiros:**
+
 - Criar: migração `<timestamp>_session_functions.sql`, `apps/web/src/modules/identity/sessions.ts`, `apps/web/src/app/[locale]/(studio)/settings/sessions/page.tsx` e `apps/web/src/app/[locale]/(portal)/settings/sessions/page.tsx` (partilham um componente)
 - Teste: `packages/db/test/sessions.test.ts`, `apps/web/src/modules/identity/sessions.test.ts`
 
 **Interfaces:**
+
 - Produz:
   - `app.list_my_sessions() returns table(id uuid, created_at timestamptz, updated_at timestamptz, user_agent text, ip inet, aal text, is_current boolean)`.
   - `app.revoke_my_session(p_session uuid) returns boolean`.
@@ -436,13 +464,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 15: Layout da aplicação, estados e encaminhamento
+### Task 15: Layout da aplicação, estados e encaminhamento
 
 **Ficheiros:**
+
 - Criar: `packages/ui/src/components/states/{empty-state,loading-state,error-state,blocked-state}.tsx`, `apps/web/src/app/[locale]/(studio)/{layout.tsx,page.tsx}`, `apps/web/src/app/[locale]/(portal)/{layout.tsx,page.tsx}`, `apps/web/src/app/[locale]/not-found.tsx`, `apps/web/src/components/shell/{app-sidebar,top-bar,theme-toggle,locale-switcher}.tsx`, `apps/web/src/modules/organizations/{queries.ts,index.ts}`
 - Teste: `apps/web/src/components/shell/*.test.tsx` (Testing Library), `apps/web/src/app/routing.test.ts`
 
 **Interfaces:**
+
 - Consome: `getActor`, `withUserContext`, `ThemeProvider`.
 - Produz:
   - `resolveHome(actor: Actor | null): '/sign-in' | '/studio' | '/portal'`.
@@ -463,13 +493,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 16: PWA e esqueleto do Brand Hub
+### Task 16: PWA e esqueleto do Brand Hub
 
 **Ficheiros:**
+
 - Criar: `apps/web/src/app/manifest.ts`, `apps/web/public/icons/{icon-192.png,icon-512.png,maskable-512.png}` (gerados a partir de `BrandSymbol` sobre `#0A0F15`), `apps/brand-hub` (Next.js com `output: 'export'`, página única com `EmptyState`)
 - Teste: `apps/web/src/app/manifest.test.ts`, `apps/brand-hub/test/export.test.ts`
 
 **Interfaces:**
+
 - Produz: o manifesto com `name` vindo de `app.name`, `display: 'standalone'`, `theme_color` e `background_color` dos tokens `canvas`.
 
 - [ ] **Passo 1:** testes:
@@ -482,13 +514,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 17: Observabilidade
+### Task 17: Observabilidade
 
 **Ficheiros:**
+
 - Criar: `apps/web/{instrumentation.ts,instrumentation-client.ts,sentry.server.config.ts,sentry.edge.config.ts}`, `apps/web/src/platform/{logger.ts,sentry-scrub.ts}`
 - Teste: `apps/web/src/platform/{logger.test.ts,sentry-scrub.test.ts}`
 
 **Interfaces:**
+
 - Produz:
   - `logger.info|warn|error(message: string, fields?: Record<string, unknown>)`: escreve uma linha JSON com `level`, `message`, `timestamp` e `requestId`.
   - `scrubEvent(event: ErrorEvent): ErrorEvent`.
@@ -503,13 +537,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 18: Pipeline de pull request
+### Task 18: Pipeline de pull request
 
 **Ficheiros:**
+
 - Criar: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `.semgrep.yml` (regras `p/typescript`, `p/nextjs`, `p/secrets`)
 - Teste: um PR de verificação com um teste a falhar propositadamente, depois revertido
 
 **Interfaces:**
+
 - Produz:
   - Jobs `quality` (typecheck, lint, format:check, unit), `database` (`supabase start`, `supabase db reset`, `pnpm test:db`), `build`, `security` (Semgrep, TruffleHog `--only-verified`, `pnpm audit --audit-level high`) e `pr-title` (`amannn/action-semantic-pull-request`).
   - Configuração `concurrency: { group: ci-${{ github.ref }}, cancel-in-progress: true }`.
@@ -521,13 +557,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 19: Deploy de preview e de staging
+### Task 19: Deploy de preview e de staging
 
 **Ficheiros:**
+
 - Criar: `.github/workflows/deploy-preview.yml`, `.github/workflows/deploy-staging.yml`, `apps/web/vercel.json` (`regions: ["dub1"]`)
 - Configuração externa (com o fundador): GitHub Environments `preview` e `staging` com os segredos da lista de restrições globais e `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`; projeto Vercel criado com `vercel link`; integração Inngest e Vercel ativa.
 
 **Interfaces:**
+
 - Produz:
   - Em PR: `vercel pull`, `vercel build` e `vercel deploy --prebuilt`, com o URL comentado no PR.
   - Em push para `develop`: `supabase link --project-ref yjbdsaygzrgxsclfyegp`, `supabase db push`, depois o deploy de staging, depois `sentry-cli sourcemaps upload`, depois a Tarefa 20.
@@ -539,13 +577,15 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 20: Testes de ponta a ponta e acessibilidade
+### Task 20: Testes de ponta a ponta e acessibilidade
 
 **Ficheiros:**
+
 - Criar: `apps/web/playwright.config.ts`, `apps/web/e2e/{founder-sign-in,invitation,client-magic-link,sessions,theme-and-locale,accessibility}.spec.ts`, `apps/web/scripts/seed-e2e.ts`
 - Modificar: `.github/workflows/deploy-staging.yml` (job `e2e` depois do deploy)
 
 **Interfaces:**
+
 - Consome: `bootstrap:founder`, a API de administração (`auth.admin.generateLink`) para obter links mágicos e de convite sem caixa de correio, e `otplib` para gerar códigos TOTP a partir do segredo do utilizador de teste.
 - Produz: `seed-e2e.ts`, idempotente, que cria a organização de teste, um cliente e os utilizadores de teste em staging.
 
@@ -561,9 +601,10 @@ apps/brand-hub/
 
 ---
 
-### Tarefa 21: Documentação de desenvolvimento e fecho
+### Task 21: Documentação de desenvolvimento e fecho
 
 **Ficheiros:**
+
 - Modificar: `README.md` (pré-requisitos, `.env.local`, comandos, ligação ao projeto dev, fluxo de branches), `.env.example`, `docs/STATUS.md`
 
 - [ ] **Passo 1:** numa cópia limpa do repositório, seguir apenas o README até `pnpm dev` funcionar contra o projeto dev.

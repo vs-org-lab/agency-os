@@ -7,6 +7,7 @@
 node_modules/
 dist/
 build/
+out/
 .next/
 coverage/
 
@@ -20,3 +21,17 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+
+# Plan execution workspaces
+/.superpowers/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel CLI link metadata
+.vercel/
+
+# End-to-end test artefacts
+apps/web/e2e/.auth/
+apps/web/playwright-report/
+apps/web/test-results/

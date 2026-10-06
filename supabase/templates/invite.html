@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-PT">
+  <body
+    style="
+      margin: 0;
+      padding: 32px 16px;
+      background: #fbfbfb;
+      font-family: Inter, Arial, sans-serif;
+      color: #0b1117;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      style="
+        max-width: 480px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #e7e8eb;
+        border-radius: 12px;
+      "
+    >
+      <tr>
+        <td style="padding: 32px">
+          <h1 style="margin: 0 0 8px; font-size: 20px; line-height: 28px; font-weight: 600">
+            Foi convidado
+          </h1>
+          <p style="margin: 0 0 24px; font-size: 14px; line-height: 22px; color: #5b6672">
+            Clique no botão para aceitar o convite e ativar o seu acesso.
+          </p>
+          <a
+            href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=invite"
+            style="
+              display: inline-block;
+              background: #0b1117;
+              color: #ffffff;
+              text-decoration: none;
+              font-size: 13px;
+              font-weight: 500;
+              padding: 10px 16px;
+              border-radius: 8px;
+            "
+          >
+            Aceitar convite
+          </a>
+          <hr style="margin: 32px 0 24px; border: none; border-top: 1px solid #e7e8eb" />
+          <p lang="en" style="margin: 0; font-size: 12px; line-height: 16px; color: #6b7480">
+            You have been invited. Open the link above to accept the invitation and activate your
+            access.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

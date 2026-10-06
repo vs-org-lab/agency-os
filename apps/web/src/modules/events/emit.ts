@@ -1,0 +1,36 @@
+import { sql } from 'drizzle-orm';
+import type { DbExecutor } from '@agency-os/db';
+
+export const DOMAIN_EVENTS = ['identity.user.invited'] as const;
+
+export type DomainEventType = (typeof DOMAIN_EVENTS)[number];
+
+export type DomainEventInput = {
+  type: DomainEventType;
+  organizationId: string;
+  clientId?: string | null;
+  payload: unknown;
+};
+
+function isDomainEventType(value: string): value is DomainEventType {
+  return (DOMAIN_EVENTS as readonly string[]).includes(value);
+}
+
+export async function emit(tx: DbExecutor, event: DomainEventInput): Promise<string> {
+  if (!isDomainEventType(event.type)) {
+    throw new Error(`Unknown domain event: ${String(event.type)}`);
+  }
+
+  const rows = await tx.execute<{ id: string }>(sql`
+    select app.emit_event(
+      ${event.organizationId}::uuid,
+      ${event.clientId ?? null}::uuid,
+      ${event.type},
+      ${JSON.stringify(event.payload ?? {})}::jsonb
+    ) as id
+  `);
+
+  const id = rows[0]?.id;
+  if (!id) throw new Error('Domain event was not recorded');
+  return id;
+}

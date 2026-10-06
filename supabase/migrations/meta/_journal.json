@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791307862424,
+      "tag": "20261006173102_foundation_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791308310588,
+      "tag": "20261006173830_access_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791308801473,
+      "tag": "20261006174641_audit_append_only",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791309504761,
+      "tag": "20261006175824_domain_event_emitter",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791310136931,
+      "tag": "20261006180856_access_token_hook",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791311354805,
+      "tag": "20261006182914_session_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791323829188,
+      "tag": "20261006215709_archive_access_checks",
+      "breakpoints": true
+    }
+  ]
+}

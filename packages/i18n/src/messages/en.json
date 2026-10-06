@@ -1,0 +1,155 @@
+{
+  "app": {
+    "name": "Agency OS"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "description": "Sign in with your email and password.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "magicLinkPrompt": "Are you a client? Get a link by email.",
+      "invalidCredentials": "Incorrect email or password.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "inactive": "Your session ended after 8 hours without activity. Please sign in again.",
+      "emailInvalid": "Enter a valid email, for example name@company.com.",
+      "passwordRequired": "Enter your password."
+    },
+    "magicLink": {
+      "title": "Sign in with a link",
+      "description": "We will send a sign-in link to your email.",
+      "email": "Email",
+      "submit": "Send link",
+      "sent": "If the email exists, we have sent a sign-in link.",
+      "backToSignIn": "Sign in with password"
+    },
+    "mfa": {
+      "enrollTitle": "Turn on two-step verification",
+      "enrollDescription": "Scan the QR code with your authenticator app and enter the six-digit code.",
+      "secretLabel": "Key for manual entry",
+      "verifyTitle": "Two-step verification",
+      "verifyDescription": "Enter the six-digit code from your authenticator app.",
+      "code": "Code",
+      "submit": "Verify",
+      "invalidCode": "Invalid code. Please try again.",
+      "reauthenticationRequired": "For your security, confirm the code before continuing.",
+      "qrAlt": "QR code for your authenticator app",
+      "codeHint": "The code changes every 30 seconds.",
+      "codeInvalidFormat": "The code has 6 digits."
+    },
+    "invitation": {
+      "title": "Accept invitation",
+      "description": "Confirm to activate your access.",
+      "accept": "Accept invitation",
+      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation."
+    },
+    "setPassword": {
+      "title": "Set password",
+      "description": "Use at least 12 characters.",
+      "password": "New password",
+      "submit": "Save password",
+      "tooShort": "The password must have at least 12 characters.",
+      "pwned": "This password appeared in a known data breach. Choose another one.",
+      "checkUnavailable": "We could not check the password. Please try again."
+    },
+    "signOut": "Sign out",
+    "callback": {
+      "error": "The link has expired or was already used. Request a new link."
+    },
+    "signOutDone": "Signed out."
+  },
+  "shell": {
+    "studio": "Studio",
+    "allClients": "All clients",
+    "toggleSidebar": "Show or hide menu",
+    "navigation": "Navigation",
+    "navigationDescription": "Main application menu.",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "locale": {
+      "label": "Language",
+      "pt-PT": "Português",
+      "en": "English"
+    },
+    "close": "Close",
+    "settings": "Settings",
+    "clients": "Clients",
+    "noClients": "There are no clients yet.",
+    "account": "Account",
+    "studioNav": {
+      "home": "Home"
+    },
+    "room": {
+      "dashboard": "Dashboard"
+    },
+    "breadcrumb": "Breadcrumb"
+  },
+  "states": {
+    "empty": {
+      "title": "Nothing here yet",
+      "description": "Content will appear here when there is some."
+    },
+    "loading": {
+      "title": "Loading"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "Please try again in a moment.",
+      "retry": "Try again"
+    },
+    "blocked": {
+      "title": "Blocked",
+      "description": "This step is waiting for an earlier action."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page does not exist or you do not have access to it.",
+      "home": "Back to home"
+    }
+  },
+  "sessions": {
+    "title": "Active sessions",
+    "description": "Devices signed in to your account.",
+    "current": "This session",
+    "lastActive": "Last active",
+    "revoke": "End session",
+    "revoked": "Session ended.",
+    "empty": "There are no other active sessions.",
+    "unknownDevice": "Unknown device",
+    "started": "Started",
+    "changePasswordTitle": "Change password",
+    "changePasswordDescription": "Changing your password ends every session, including this one.",
+    "changePasswordSubmit": "Change and end sessions",
+    "revokeFailed": "The session could not be ended. Refresh the page and try again.",
+    "lastActiveDetail": "Last active: {time}"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred.",
+    "rateLimited": "Too many attempts. Please wait a moment and try again.",
+    "validation": "Check the highlighted fields."
+  },
+  "studio": {
+    "home": {
+      "title": "The studio is ready",
+      "description": "Work modules appear here as they are enabled."
+    }
+  },
+  "room": {
+    "home": {
+      "title": "This room is empty",
+      "description": "The process, documents and library of this room appear here."
+    }
+  },
+  "portal": {
+    "home": {
+      "title": "Welcome",
+      "description": "Your project progress appears here."
+    }
+  }
+}

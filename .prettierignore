@@ -1,0 +1,14 @@
+node_modules
+pnpm-lock.yaml
+.next
+.turbo
+dist
+out
+coverage
+.superpowers
+supabase/migrations
+assets
+docs/product
+References
+Software
+Documents

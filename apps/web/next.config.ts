@@ -3,7 +3,12 @@ import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-loadEnvConfig(path.resolve(import.meta.dirname, '../..'));
+loadEnvConfig(
+  path.resolve(import.meta.dirname, '../..'),
+  process.env.NODE_ENV !== 'production',
+  { info: () => undefined, error: console.error },
+  true,
+);
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 

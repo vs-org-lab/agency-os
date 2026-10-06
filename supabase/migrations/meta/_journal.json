@@ -29,6 +29,13 @@
       "when": 1791309504761,
       "tag": "20261006175824_domain_event_emitter",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791310136931,
+      "tag": "20261006180856_access_token_hook",
+      "breakpoints": true
     }
   ]
 }

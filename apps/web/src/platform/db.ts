@@ -11,6 +11,7 @@ export const verifiedClaimsSchema = z.object({
   aal: z.enum(['aal1', 'aal2']),
   session_id: z.uuid(),
   amr: z.array(z.object({ method: z.string(), timestamp: z.number() })),
+  user_kind: z.enum(['internal', 'client']).nullable().optional(),
 });
 
 export type VerifiedClaims = z.infer<typeof verifiedClaimsSchema>;

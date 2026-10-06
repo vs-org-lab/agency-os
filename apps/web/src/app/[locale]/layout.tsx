@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { Fraunces, Inter, Space_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ThemeProvider } from '@agency-os/ui/theme';
 import { requireLocale } from '@/i18n/require-locale';
-import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -22,10 +22,6 @@ type LayoutProps = {
   params: Promise<{ locale: string }>;
 };
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
-
 export async function generateMetadata({
   params,
 }: Omit<LayoutProps, 'children'>): Promise<Metadata> {
@@ -37,6 +33,7 @@ export async function generateMetadata({
 export default async function LocaleLayout({ children, params }: LayoutProps) {
   const locale = requireLocale((await params).locale);
   setRequestLocale(locale);
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <html
@@ -46,7 +43,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     >
       <body>
         <NextIntlClientProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider nonce={nonce}>{children}</ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

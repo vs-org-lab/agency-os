@@ -124,16 +124,16 @@ Funções SQL no esquema `app`, `security definer`, `stable`, com `search_path` 
 
 Políticas da fundação:
 
-| Tabela                     | Ler                                                           | Escrever                                                                   |
-| -------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `organizations`            | Membros internos e utilizadores de clientes dessa organização | Fundador                                                                   |
-| `profiles`                 | O próprio e quem partilha organização ou cliente              | O próprio (nome, idioma)                                                   |
-| `organization_memberships` | O próprio; o fundador vê todas                                | Fundador                                                                   |
-| `clients`                  | `has_client_access`                                           | Criar: fundador e gestor. Alterar: fundador e gestor atribuído             |
-| `client_memberships`       | Fundador, internos atribuídos e utilizadores do mesmo cliente | Fundador, gestor atribuído e decisor do próprio cliente (convidar colegas) |
-| `client_staff_assignments` | Fundador e o próprio                                          | Fundador                                                                   |
-| `audit_log`                | Fundador                                                      | Nenhuma escrita direta; só através de `app.record_audit()`                 |
-| `domain_events`            | Nenhum utilizador                                             | Nenhum utilizador; só o contexto de sistema                                |
+| Tabela                     | Ler                                                           | Escrever                                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `organizations`            | Membros internos e utilizadores de clientes dessa organização | Fundador                                                                                                                                          |
+| `profiles`                 | O próprio e quem partilha organização ou cliente              | O próprio (nome, idioma)                                                                                                                          |
+| `organization_memberships` | O próprio; o fundador vê todas                                | Fundador                                                                                                                                          |
+| `clients`                  | `has_client_access`                                           | Criar: fundador e gestor. Alterar: fundador e gestor atribuído                                                                                    |
+| `client_memberships`       | Fundador, internos atribuídos e utilizadores do mesmo cliente | Criar: fundador e decisor do próprio cliente (convidar colegas). Alterar: fundador ([ADR 0006](../../decisions/0006-client-invitation-rights.md)) |
+| `client_staff_assignments` | Fundador e o próprio                                          | Fundador                                                                                                                                          |
+| `audit_log`                | Fundador                                                      | Nenhuma escrita direta; só através de `app.record_audit()`                                                                                        |
+| `domain_events`            | Nenhum utilizador                                             | Nenhum utilizador; só o contexto de sistema                                                                                                       |
 
 O registo de auditoria é só de escrita por três mecanismos: `UPDATE` e `DELETE` revogados a todos os papéis, um gatilho que rejeita qualquer alteração ou remoção, e inserção apenas através de função.
 
@@ -152,7 +152,7 @@ O registo de auditoria é só de escrita por três mecanismos: `UPDATE` e `DELET
 
 Ecrãs: entrar, pedir link mágico, verificar MFA, inscrever MFA, aceitar convite, definir palavra-passe, sessões ativas.
 
-Convites: o fundador convida membros da equipa; o fundador, o gestor atribuído e o decisor convidam utilizadores do cliente. Um convite cria a pertença com estado `invited` e passa a `active` na primeira entrada.
+Convites: o fundador convida membros da equipa; o fundador e o decisor convidam utilizadores do cliente ([ADR 0006](../../decisions/0006-client-invitation-rights.md)). Um convite cria a pertença com estado `invited` e passa a `active` na primeira entrada.
 
 ## 7. Auditoria e eventos
 

@@ -1,0 +1,74 @@
+name: Deploy staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Apply migrations to staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.120.0
+      - name: Push migrations
+        run: supabase db push --db-url "${{ secrets.STAGING_DATABASE_DIRECT_URL }}" --yes
+      - name: Push auth configuration
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          AUTH_SITE_URL: https://${{ vars.STAGING_DOMAIN }}
+          AUTH_REDIRECT_URLS: https://${{ vars.STAGING_DOMAIN }}/**
+        run: supabase config push --project-ref "${{ vars.STAGING_SUPABASE_PROJECT_REF }}" --yes
+
+  deploy:
+    name: Vercel staging
+    needs: migrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.STAGING_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.STAGING_NEXT_PUBLIC_SENTRY_DSN }}
+      NEXT_PUBLIC_VERCEL_ENV: staging
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      CI: true
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add --global vercel@62.4.0
+      - working-directory: apps/web
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - working-directory: apps/web
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy
+        id: deploy
+        working-directory: apps/web
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
+            --env DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}" \
+            --env SUPABASE_SECRET_KEY="${{ secrets.STAGING_SUPABASE_SECRET_KEY }}" \
+            --env SESSION_ACTIVITY_SECRET="${{ secrets.STAGING_SESSION_ACTIVITY_SECRET }}" \
+            --env INNGEST_EVENT_KEY="${{ secrets.STAGING_INNGEST_EVENT_KEY }}" \
+            --env INNGEST_SIGNING_KEY="${{ secrets.STAGING_INNGEST_SIGNING_KEY }}")
+          vercel alias set "$url" "${{ vars.STAGING_DOMAIN }}" --token=${{ secrets.VERCEL_TOKEN }}
+          echo "url=https://${{ vars.STAGING_DOMAIN }}" >> "$GITHUB_OUTPUT"

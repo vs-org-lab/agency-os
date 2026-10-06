@@ -194,3 +194,11 @@ Spec: docs/superpowers/specs/2026-10-06-platform-foundation-design.md
 - Final: minor (deferred): bootstrap-founder defaults --redirect-url to localhost.
 - Final: minor (deferred): x-forwarded-for trusted and cast to inet; malformed header outside Vercel fails sign-in.
 - Final: minor (deferred): Vercel/Sentry/Supabase admin adapter not covered end-to-end (finding 8).
+
+## After merge
+
+- Staging: first run (37544468185) applied migrations and config but `vercel alias set` failed with "User not found" (team token); alias now assigned through the Vercel REST API (PR #4).
+- Ruling: client invitations restricted to founder and decision maker in RLS and spec (ADR 0006); reviewer minor "PM can activate memberships" resolved by the same change.
+- Feature: `bootstrap:founder --deliver link` prints a single-use invitation link; founder for "Aurion Creative" created on dev.
+- Verified: staging run 37545807184 — isolation gate 78/78, migrations, deploy, e2e 16/16 against staging.
+- Verified: client error on staging accepted by the Sentry tunnel (HTTP 200); dashboard confirmation pending with the founder (auth token lacks read scope).

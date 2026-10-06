@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { redirect } from '@/i18n/navigation';
 import {
+  canManageAccount,
   changePassword,
   clearActivity,
   createChangePasswordDeps,
@@ -23,6 +24,9 @@ export async function revokeSessionAction(
   const claims = await getVerifiedClaims();
   const locale = await getLocale();
   if (!claims) return redirect({ href: '/sign-in', locale });
+  if (!(await canManageAccount(claims))) {
+    return redirect({ href: '/mfa/verify?reason=reauthenticate', locale });
+  }
 
   const sessionId = z.uuid().safeParse(formData.get('sessionId'));
   if (!sessionId.success) return { error: 'revoke_failed' };
@@ -52,6 +56,9 @@ export async function changePasswordAction(
   const claims = await getVerifiedClaims();
   const locale = await getLocale();
   if (!claims) return redirect({ href: '/sign-in', locale });
+  if (!(await canManageAccount(claims))) {
+    return redirect({ href: '/mfa/verify?reason=reauthenticate', locale });
+  }
 
   const password = String(formData.get('password') ?? '').slice(0, 1024);
   const result = await changePassword(claims, { password }, await createChangePasswordDeps());

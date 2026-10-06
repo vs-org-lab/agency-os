@@ -2,7 +2,7 @@
 
 import { getLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
-import { createSetPasswordDeps, setPassword } from '@/modules/identity';
+import { canManageAccount, createSetPasswordDeps, setPassword } from '@/modules/identity';
 import { getVerifiedClaims } from '@/platform/session';
 
 export type SetPasswordState = {
@@ -15,6 +15,9 @@ export async function setPasswordAction(
 ): Promise<SetPasswordState> {
   const claims = await getVerifiedClaims();
   if (!claims) return { error: 'session_expired' };
+  if (!(await canManageAccount(claims))) {
+    return redirect({ href: '/mfa/verify?reason=reauthenticate', locale: await getLocale() });
+  }
 
   const password = String(formData.get('password') ?? '').slice(0, 1024);
   const result = await setPassword(claims, { password }, await createSetPasswordDeps());

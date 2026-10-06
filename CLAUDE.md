@@ -29,15 +29,15 @@ The `superpowers` plugin governs every development task. Before writing code, in
 
 Load these only when the task clearly matches. Do not load them speculatively.
 
-| Skill | Use when |
-| --- | --- |
+| Skill                                                                                                          | Use when                                                                        |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Taste Skill (`design-taste-frontend`, `high-end-visual-design`, `minimalist-ui`, `redesign-existing-projects`) | Defining the visual direction of a new interface or redesigning an existing one |
-| Impeccable (`impeccable`) | Auditing, polishing or hardening a built UI |
-| UI/UX Pro Max (`ui-ux-pro-max`) | Selecting palettes, typography, layout patterns and UX rules for a product type |
-| GSAP (`gsap-skills`) | Implementing animation, timelines or ScrollTrigger |
-| Hyperframes (`hyperframes`) | Producing rendered video from HTML |
-| Humanizer (`humanizer`) | Editing user-facing copy that reads as machine-generated |
-| Marketing skills (`marketing-skills`) | Copywriting, CRO, SEO, analytics and growth tasks |
+| Impeccable (`impeccable`)                                                                                      | Auditing, polishing or hardening a built UI                                     |
+| UI/UX Pro Max (`ui-ux-pro-max`)                                                                                | Selecting palettes, typography, layout patterns and UX rules for a product type |
+| GSAP (`gsap-skills`)                                                                                           | Implementing animation, timelines or ScrollTrigger                              |
+| Hyperframes (`hyperframes`)                                                                                    | Producing rendered video from HTML                                              |
+| Humanizer (`humanizer`)                                                                                        | Editing user-facing copy that reads as machine-generated                        |
+| Marketing skills (`marketing-skills`)                                                                          | Copywriting, CRO, SEO, analytics and growth tasks                               |
 
 Backend, infrastructure and CI/CD tasks use superpowers only.
 

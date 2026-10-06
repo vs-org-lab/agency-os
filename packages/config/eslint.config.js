@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import { importX } from 'eslint-plugin-import-x';
 import react from 'eslint-plugin-react';
 import globals from 'globals';
@@ -51,6 +52,14 @@ export default tseslint.config(
       globals: { ...globals.node, ...globals.browser },
     },
     plugins: { 'import-x': importX },
+    settings: {
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({
+          alwaysTryTypes: true,
+          project: ['apps/*/tsconfig.json', 'packages/*/tsconfig.json'],
+        }),
+      ],
+    },
     rules: {
       'import-x/no-cycle': 'error',
       'import-x/no-duplicates': 'error',

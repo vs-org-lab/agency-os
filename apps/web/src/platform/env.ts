@@ -24,6 +24,12 @@ export function publicEnv(): PublicEnv {
 }
 
 export function serverEnv(): ServerEnv {
-  cachedServerEnv ??= serverEnvSchema.parse(process.env);
+  cachedServerEnv ??= serverEnvSchema.parse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    DATABASE_URL: process.env.DATABASE_URL,
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    SESSION_ACTIVITY_SECRET: process.env.SESSION_ACTIVITY_SECRET,
+  });
   return cachedServerEnv;
 }

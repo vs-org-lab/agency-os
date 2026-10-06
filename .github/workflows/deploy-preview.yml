@@ -46,6 +46,9 @@ jobs:
         timeout-minutes: 10
         run: |
           url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
+            --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}" \
+            --env NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" \
+            --env NEXT_PUBLIC_SENTRY_DSN="${{ secrets.PREVIEW_NEXT_PUBLIC_SENTRY_DSN }}" \
             --env DATABASE_URL="${{ secrets.PREVIEW_DATABASE_URL }}" \
             --env SUPABASE_SECRET_KEY="${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}" \
             --env SESSION_ACTIVITY_SECRET="${{ secrets.PREVIEW_SESSION_ACTIVITY_SECRET }}" \

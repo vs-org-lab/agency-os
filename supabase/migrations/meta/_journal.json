@@ -15,6 +15,13 @@
       "when": 1791308310588,
       "tag": "20261006173830_access_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791308801473,
+      "tag": "20261006174641_audit_append_only",
+      "breakpoints": true
     }
   ]
 }

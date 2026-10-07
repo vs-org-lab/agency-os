@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   check,
   date,
   foreignKey,
@@ -76,6 +77,7 @@ export const dealStageChanges = pgTable(
     toCode: pipelineCodeEnum('to_code').notNull(),
     reason: text('reason'),
     actorUserId: uuid('actor_user_id'),
+    sequence: bigint('sequence', { mode: 'number' }).notNull().generatedAlwaysAsIdentity(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -89,7 +91,7 @@ export const dealStageChanges = pgTable(
       foreignColumns: [clients.id, clients.organizationId],
       name: 'deal_stage_changes_client_organization_fk',
     }).onDelete('restrict'),
-    index('deal_stage_changes_deal_created_idx').on(table.dealId, table.createdAt),
+    index('deal_stage_changes_deal_sequence_idx').on(table.dealId, table.sequence),
   ],
 ).enableRLS();
 

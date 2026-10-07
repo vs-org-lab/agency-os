@@ -61,7 +61,7 @@ async function previousOpenCode(tx: DbTransaction, dealId: string): Promise<Pipe
         notInArray(dealStageChanges.toCode, [...OFF_CYCLE_CODES]),
       ),
     )
-    .orderBy(desc(dealStageChanges.createdAt))
+    .orderBy(desc(dealStageChanges.sequence))
     .limit(1);
   return row?.code ?? null;
 }

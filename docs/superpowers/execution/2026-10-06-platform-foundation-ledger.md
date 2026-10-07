@@ -202,3 +202,6 @@ Spec: docs/superpowers/specs/2026-10-06-platform-foundation-design.md
 - Feature: `bootstrap:founder --deliver link` prints a single-use invitation link; founder for "Aurion Creative" created on dev.
 - Verified: staging run 37545807184 — isolation gate 78/78, migrations, deploy, e2e 16/16 against staging.
 - Verified: client error on staging accepted by the Sentry tunnel (HTTP 200); dashboard confirmation pending with the founder (auth token lacks read scope).
+- Feature: custom SMTP (Gmail app password) and token-hash invite and magic-link templates on dev and staging (PR #7); staging run 37562245347 green (isolation gate, migrations, deploy, e2e).
+- Verified: staging auth config read back through the Management API (SMTP host and port, sender, 30 emails per hour, redirect allow list limited to the staging domain, templates with `TokenHash`).
+- Verified: real email invitation on staging — test client "Cliente Teste" in "Aurion Creative", decision maker invited at an external Gmail address; email delivered, password set, client portal reached (2026-10-07).

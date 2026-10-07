@@ -64,6 +64,13 @@
       "when": 1791377100126,
       "tag": "20261007124500_commercial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791377725836,
+      "tag": "20261007125525_commercial_access",
+      "breakpoints": true
     }
   ]
 }

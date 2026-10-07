@@ -5,6 +5,7 @@ import {
   asSystem,
   asUser,
   closeTestSql,
+  createCommercialFixture,
   createFixtureWorld,
   withTestTransaction,
   type World,
@@ -25,9 +26,17 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'client_staff_assignments', clientColumn: 'client_id' },
   { table: 'audit_log', clientColumn: 'client_id' },
   { table: 'domain_events', clientColumn: 'client_id' },
+  { table: 'contacts', clientColumn: 'client_id' },
+  { table: 'applications', clientColumn: 'client_id' },
+  { table: 'deals', clientColumn: 'client_id' },
+  { table: 'deal_stage_changes', clientColumn: 'client_id' },
+  { table: 'calls', clientColumn: 'client_id' },
+  { table: 'follow_ups', clientColumn: 'client_id' },
+  { table: 'timeline_entries', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
+  await createCommercialFixture(sql, world);
   for (const clientId of [world.clients.a, world.clients.b]) {
     await sql`
       insert into public.audit_log (organization_id, actor_kind, action, resource_type, client_id)
@@ -98,7 +107,9 @@ describe('cross-client isolation', () => {
       await asUser(sql, world.users.clientFinanceB, { aal: 'aal1' });
 
       for (const target of clientScopedTables) {
+        await sql`savepoint probe`;
         expect(await countVisible(sql, target, world.clients.a), target.table).toBe(0);
+        await sql`rollback to savepoint probe`;
       }
     });
   });

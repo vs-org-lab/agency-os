@@ -6,6 +6,9 @@ export {
   addOrganizationMember,
   assignStaff,
   createAuthUser,
+  createCommercialFixture,
   createFixtureWorld,
+  type CommercialFixture,
+  type CommercialRecords,
   type World,
 } from './fixtures';

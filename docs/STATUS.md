@@ -6,10 +6,10 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 ## Em curso
 
-| Item                                   | Referência                                                                                                                       | Estado                                                         |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Concluído e integrado em `develop` (PR #3 a #7); staging ativo |
-| Vaga 1 — M01, M02, M03, M04, M05, M21  | Brainstorming iniciado em 2026-10-07                                                                                             | Em desenho                                                     |
+| Item                                   | Referência                                                                                                                                               | Estado                                                         |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md)                         | Concluído e integrado em `develop` (PR #3 a #7); staging ativo |
+| Vaga 1 — M01, M02, M03, M04, M05, M21  | Divisão aprovada: 1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → 1D Faturação; [Spec 1A](superpowers/specs/2026-10-07-commercial-design.md) | Spec 1A em revisão                                             |
 
 ## Feito
 

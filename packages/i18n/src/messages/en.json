@@ -275,6 +275,139 @@
       "clearFilters": "Clear filters",
       "moved": "Deal moved to {code}.",
       "drag": "Drag {name}"
+    },
+    "deal": {
+      "back": "Pipeline",
+      "move": "Move to…",
+      "tabs": {
+        "label": "Deal sections",
+        "summary": "Summary",
+        "application": "Application",
+        "calls": "Calls",
+        "timeline": "Timeline"
+      },
+      "tracking": {
+        "title": "Tracking",
+        "nextStep": "Next step",
+        "owner": "Owner",
+        "ownerNone": "No owner",
+        "ownerClient": "Client",
+        "dueOn": "Due date",
+        "value": "Estimated value",
+        "currency": "Currency",
+        "save": "Save",
+        "saved": "Tracking saved.",
+        "error": "The tracking could not be saved."
+      },
+      "summary": {
+        "company": "Company",
+        "website": "Website",
+        "sector": "Sector",
+        "revenue": "Revenue",
+        "source": "Source",
+        "lostReason": "Reason lost",
+        "sources": {
+          "application": "Application",
+          "acquisition": "Acquisition",
+          "referral": "Referral",
+          "client_request": "Client request"
+        }
+      },
+      "contacts": {
+        "title": "Contacts",
+        "empty": "No contacts yet.",
+        "add": "Add contact",
+        "edit": "Edit",
+        "fullName": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "jobTitle": "Job title",
+        "role": "Role",
+        "save": "Save contact",
+        "cancel": "Cancel",
+        "roles": {
+          "decision_maker": "Decision maker",
+          "operational": "Operational",
+          "client_finance": "Finance"
+        },
+        "errors": {
+          "duplicate_email": "A contact with this email already exists.",
+          "invalid_input": "Check the contact fields.",
+          "not_found": "The contact could not be saved."
+        }
+      },
+      "application": {
+        "empty": "This deal has no application.",
+        "submitted": "Received on {date}",
+        "score": "{score} points",
+        "path": "Path {path}",
+        "reviewed": "Queue B: decided for {path}",
+        "anonymized": "Application anonymized. Score, path and date remain.",
+        "costOfInaction": "What it costs not to solve this",
+        "question": "Question",
+        "answer": "Answer",
+        "points": "Points",
+        "knockout": "Knockout"
+      },
+      "calls": {
+        "empty": "No calls yet.",
+        "schedule": "Schedule call",
+        "scheduleHint": "For calls agreed by other means. The lead receives the confirmation by email.",
+        "start": "Date and time",
+        "duration": "Duration (minutes)",
+        "scheduled": "Scheduled",
+        "status": {
+          "scheduled": "Scheduled",
+          "cancelled": "Cancelled",
+          "completed": "Held",
+          "no_show": "No show"
+        },
+        "outcomes": {
+          "advance": "Advance",
+          "decline": "Decline",
+          "follow_up": "Follow up"
+        },
+        "meet": "Open Google Meet",
+        "record": "Record outcome",
+        "recordStatus": "Status",
+        "outcome": "Outcome",
+        "reason": "Reason",
+        "notes": "Notes",
+        "saveOutcome": "Save outcome",
+        "errors": {
+          "outcome_required": "Choose the call outcome.",
+          "reason_required": "Give the reason for declining.",
+          "invalid_input": "Check the fields.",
+          "not_found": "It could not be saved.",
+          "already_scheduled": "This deal already has a scheduled call."
+        }
+      },
+      "followUps": {
+        "title": "Follow-ups",
+        "empty": "No open follow-ups.",
+        "day": "Day {day}",
+        "due": "Due {date}",
+        "copy": "Copy message",
+        "copied": "Message copied",
+        "done": "Done",
+        "dismiss": "Dismiss"
+      },
+      "timeline": {
+        "empty": "No activity yet.",
+        "by": "by {name}",
+        "kinds": {
+          "application_submitted": "Application received",
+          "application_reviewed": "Queue B reviewed",
+          "stage_changed": "Code changed",
+          "call_booked": "Call booked",
+          "call_rescheduled": "Call rescheduled",
+          "call_cancelled": "Call cancelled",
+          "call_completed": "Call outcome recorded",
+          "follow_up_created": "Follow-up created",
+          "follow_up_completed": "Follow-up closed"
+        },
+        "stageChange": "{from} → {to}"
+      }
     }
   },
   "email": {

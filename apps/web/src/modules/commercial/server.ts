@@ -98,8 +98,14 @@ export type { BookingSource } from './booking/service';
 export { COMMERCIAL_FUNCTIONS } from './automations';
 
 export {
+  closeFollowUp,
   commercialSession,
+  loadDealDetail,
   loadPipelineCards,
   moveDeal,
+  recordOutcome,
+  saveContact,
+  scheduleCall,
+  updateTracking,
   type CommercialSession,
 } from './pipeline/studio';

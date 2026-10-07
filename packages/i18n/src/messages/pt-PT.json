@@ -275,6 +275,139 @@
       "clearFilters": "Limpar filtros",
       "moved": "Negócio movido para {code}.",
       "drag": "Arrastar {name}"
+    },
+    "deal": {
+      "back": "Pipeline",
+      "move": "Mover para…",
+      "tabs": {
+        "label": "Secções do negócio",
+        "summary": "Resumo",
+        "application": "Candidatura",
+        "calls": "Chamadas",
+        "timeline": "Linha temporal"
+      },
+      "tracking": {
+        "title": "Rastreio",
+        "nextStep": "Próximo passo",
+        "owner": "Responsável",
+        "ownerNone": "Sem responsável",
+        "ownerClient": "Cliente",
+        "dueOn": "Prazo",
+        "value": "Valor estimado",
+        "currency": "Moeda",
+        "save": "Guardar",
+        "saved": "Rastreio guardado.",
+        "error": "Não foi possível guardar o rastreio."
+      },
+      "summary": {
+        "company": "Empresa",
+        "website": "Website",
+        "sector": "Setor",
+        "revenue": "Faturação",
+        "source": "Origem",
+        "lostReason": "Motivo de perda",
+        "sources": {
+          "application": "Candidatura",
+          "acquisition": "Angariação",
+          "referral": "Indicação",
+          "client_request": "Pedido do cliente"
+        }
+      },
+      "contacts": {
+        "title": "Contactos",
+        "empty": "Ainda não há contactos.",
+        "add": "Adicionar contacto",
+        "edit": "Editar",
+        "fullName": "Nome",
+        "email": "Email",
+        "phone": "Telefone",
+        "jobTitle": "Função",
+        "role": "Papel",
+        "save": "Guardar contacto",
+        "cancel": "Cancelar",
+        "roles": {
+          "decision_maker": "Decisor",
+          "operational": "Operacional",
+          "client_finance": "Financeiro"
+        },
+        "errors": {
+          "duplicate_email": "Já existe um contacto com este email.",
+          "invalid_input": "Verifique os campos do contacto.",
+          "not_found": "Não foi possível guardar o contacto."
+        }
+      },
+      "application": {
+        "empty": "Este negócio não tem candidatura.",
+        "submitted": "Recebida em {date}",
+        "score": "{score} pontos",
+        "path": "Caminho {path}",
+        "reviewed": "Fila B: decidido para {path}",
+        "anonymized": "Candidatura anonimizada. Restam a pontuação, o caminho e a data.",
+        "costOfInaction": "O que lhe custa não resolver isto",
+        "question": "Pergunta",
+        "answer": "Resposta",
+        "points": "Pontos",
+        "knockout": "Eliminatório"
+      },
+      "calls": {
+        "empty": "Ainda não há chamadas.",
+        "schedule": "Marcar chamada",
+        "scheduleHint": "Para chamadas combinadas por outro meio. O lead recebe a confirmação por email.",
+        "start": "Data e hora",
+        "duration": "Duração (minutos)",
+        "scheduled": "Marcada",
+        "status": {
+          "scheduled": "Marcada",
+          "cancelled": "Cancelada",
+          "completed": "Feita",
+          "no_show": "Faltou"
+        },
+        "outcomes": {
+          "advance": "Avança",
+          "decline": "Recusa",
+          "follow_up": "Acompanhar"
+        },
+        "meet": "Abrir Google Meet",
+        "record": "Registar resultado",
+        "recordStatus": "Estado",
+        "outcome": "Resultado",
+        "reason": "Motivo",
+        "notes": "Notas",
+        "saveOutcome": "Guardar resultado",
+        "errors": {
+          "outcome_required": "Escolha o resultado da chamada.",
+          "reason_required": "Indique o motivo da recusa.",
+          "invalid_input": "Verifique os campos.",
+          "not_found": "Não foi possível guardar.",
+          "already_scheduled": "Este negócio já tem uma chamada marcada."
+        }
+      },
+      "followUps": {
+        "title": "Acompanhamentos",
+        "empty": "Sem acompanhamentos em aberto.",
+        "day": "Dia {day}",
+        "due": "Para {date}",
+        "copy": "Copiar mensagem",
+        "copied": "Mensagem copiada",
+        "done": "Feito",
+        "dismiss": "Dispensar"
+      },
+      "timeline": {
+        "empty": "Ainda não há atividade.",
+        "by": "por {name}",
+        "kinds": {
+          "application_submitted": "Candidatura recebida",
+          "application_reviewed": "Fila B revista",
+          "stage_changed": "Código alterado",
+          "call_booked": "Chamada marcada",
+          "call_rescheduled": "Chamada remarcada",
+          "call_cancelled": "Chamada cancelada",
+          "call_completed": "Resultado da chamada registado",
+          "follow_up_created": "Acompanhamento criado",
+          "follow_up_completed": "Acompanhamento fechado"
+        },
+        "stageChange": "{from} → {to}"
+      }
     }
   },
   "email": {

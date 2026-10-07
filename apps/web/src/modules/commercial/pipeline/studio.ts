@@ -1,10 +1,20 @@
 import 'server-only';
+import type { Locale } from '@agency-os/i18n';
 import { resolveActor, type Actor } from '@/modules/access';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { canSeePipeline } from '../access';
+import { recordCallOutcome, scheduleCallManually } from '../calls';
+import { hostCalendar } from '../calendar/integration';
+import { completeFollowUp, upsertContact, type ContactInput } from '../contacts';
+import { getDealDetail, type DealDetail } from '../deal-detail';
 import { listPipelineDeals, type PipelineCard, type PipelineFilters } from '../queries';
 import type { PipelineCode } from './codes';
-import { changeDealStage, type StageChangeResult } from './service';
+import {
+  changeDealStage,
+  updateDealTracking,
+  type DealTrackingInput,
+  type StageChangeResult,
+} from './service';
 
 export type CommercialSession = { claims: VerifiedClaims; actor: Actor };
 
@@ -30,4 +40,49 @@ export function moveDeal(
   return changeDealStage(session.claims, input, {
     contexts: { withUserContext, withSystemContext },
   });
+}
+
+export function loadDealDetail(
+  session: CommercialSession,
+  dealId: string,
+  locale: Locale,
+): Promise<DealDetail | null> {
+  return withUserContext(session.claims, (tx) => getDealDetail(tx, dealId, locale));
+}
+
+const userContexts = { withUserContext, withSystemContext };
+
+export function updateTracking(session: CommercialSession, input: DealTrackingInput) {
+  return updateDealTracking(session.claims, input, { contexts: userContexts });
+}
+
+export function recordOutcome(
+  session: CommercialSession,
+  input: Parameters<typeof recordCallOutcome>[1],
+) {
+  return recordCallOutcome(session.claims, input, {
+    contexts: userContexts,
+    calendar: hostCalendar,
+  });
+}
+
+export function scheduleCall(
+  session: CommercialSession,
+  input: Parameters<typeof scheduleCallManually>[1],
+) {
+  return scheduleCallManually(session.claims, input, {
+    contexts: userContexts,
+    calendar: hostCalendar,
+  });
+}
+
+export function saveContact(session: CommercialSession, input: ContactInput) {
+  return upsertContact(session.claims, input, { contexts: userContexts });
+}
+
+export function closeFollowUp(
+  session: CommercialSession,
+  input: { followUpId: string; status: 'done' | 'dismissed' },
+) {
+  return completeFollowUp(session.claims, input, { contexts: userContexts });
 }

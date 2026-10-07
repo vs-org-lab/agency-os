@@ -677,6 +677,104 @@
         "disconnected": "Google Calendar desligado.",
         "error": "Não foi possível concluir a ligação ao Google Calendar. Tente de novo."
       }
+    },
+    "nav": {
+      "label": "Definições",
+      "sessions": "Sessões",
+      "integrations": "Integrações",
+      "application": "Candidatura",
+      "booking": "Agenda",
+      "templates": "Modelos"
+    },
+    "application": {
+      "title": "Candidatura",
+      "description": "Perguntas, pontos, eliminatórios e limites dos caminhos. Publicar cria uma versão nova; as candidaturas guardam a versão com que foram pontuadas.",
+      "currentVersion": "Versão ativa: {version}",
+      "thresholds": {
+        "title": "Limites dos caminhos",
+        "a": "Pontuação mínima para o caminho A",
+        "b": "Pontuação mínima para o caminho B"
+      },
+      "question": {
+        "labelPt": "Pergunta (português)",
+        "labelEn": "Pergunta (inglês)",
+        "required": "Obrigatória",
+        "remove": "Remover pergunta",
+        "kind": {
+          "contact": "Nome e email",
+          "company": "Empresa e website",
+          "single_choice": "Escolha única",
+          "long_text": "Texto livre"
+        },
+        "showIf": "Só aparece quando a resposta anterior o exige."
+      },
+      "option": {
+        "labelPt": "Opção (português)",
+        "labelEn": "Opção (inglês)",
+        "points": "Pontos",
+        "knockout": "Eliminatório",
+        "remove": "Remover opção",
+        "add": "Adicionar opção"
+      },
+      "addChoice": "Adicionar pergunta de escolha",
+      "addText": "Adicionar pergunta de texto",
+      "maxScore": "Pontuação máxima: {score}",
+      "preview": {
+        "title": "Pré-visualização da pontuação",
+        "description": "Escolha respostas para ver a pontuação e o caminho.",
+        "result": "{score} pontos · caminho {path}"
+      },
+      "publish": "Publicar nova versão",
+      "published": "Versão {version} publicada.",
+      "invalid": "A configuração tem erros: {issues}"
+    },
+    "booking": {
+      "title": "Agenda",
+      "description": "Horário em que os leads do caminho A podem marcar a chamada de descoberta.",
+      "timeZone": "Fuso horário",
+      "days": {
+        "mon": "Segunda",
+        "tue": "Terça",
+        "wed": "Quarta",
+        "thu": "Quinta",
+        "fri": "Sexta",
+        "sat": "Sábado",
+        "sun": "Domingo"
+      },
+      "start": "Início",
+      "end": "Fim",
+      "closed": "Fechado",
+      "duration": "Duração da chamada (minutos)",
+      "buffer": "Intervalo entre chamadas (minutos)",
+      "notice": "Antecedência mínima (horas)",
+      "horizon": "Horizonte de marcação (dias)",
+      "selfDiagnosis": "URL do autodiagnóstico (caminho C)",
+      "anonymize": "Anonimizar candidaturas C ao fim de (meses)",
+      "save": "Guardar",
+      "saved": "Agenda guardada.",
+      "invalid": "Verifique os horários e os valores."
+    },
+    "templates": {
+      "title": "Modelos de mensagem",
+      "description": "Mensagens sugeridas nos acompanhamentos e na angariação. Use '{firstName}', '{companyName}' e '{callDate}'.",
+      "kinds": {
+        "follow_up": "Acompanhamento",
+        "acquisition": "Angariação",
+        "email": "Email"
+      },
+      "new": "Novo modelo",
+      "edit": "Editar",
+      "kind": "Tipo",
+      "name": "Nome",
+      "sector": "Setor",
+      "day": "Dia",
+      "locale": "Idioma",
+      "subject": "Assunto",
+      "body": "Mensagem",
+      "save": "Guardar modelo",
+      "saved": "Modelo guardado.",
+      "invalid": "Verifique os campos do modelo.",
+      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
     }
   }
 }

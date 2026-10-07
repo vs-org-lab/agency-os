@@ -10,6 +10,17 @@ import { hostCalendar } from '../calendar/integration';
 import { completeFollowUp, upsertContact, type ContactInput } from '../contacts';
 import { getDealDetail, type DealDetail } from '../deal-detail';
 import { listTodayItems, type TodayItem } from '../today';
+import {
+  getCommercialSettings,
+  listMessageTemplates,
+  publishApplicationForm,
+  saveMessageTemplate,
+  updateBookingSettings,
+  type BookingSettingsInput,
+  type TemplateInput,
+} from '../settings/service';
+import { getActiveForm } from '../applications/forms';
+import type { ApplicationFormDefinition } from '../applications/form-definition';
 import { listApplications, type ApplicationRow } from '../applications/list';
 import { reviewQueueB } from '../applications/review';
 import {
@@ -139,4 +150,27 @@ export function loadToday(session: CommercialSession, now: Date): Promise<TodayI
       .where(eq(schema.commercialSettings.organizationId, session.actor.organizationId));
     return listTodayItems(tx, { now, timeZone: settings?.timeZone ?? 'Europe/Lisbon' });
   });
+}
+
+export function loadSettingsData(session: CommercialSession) {
+  return withUserContext(session.claims, async (tx) => ({
+    settings: await getCommercialSettings(tx, session.actor.organizationId),
+    templates: await listMessageTemplates(tx),
+  }));
+}
+
+export function loadActiveForm(session: CommercialSession) {
+  return withUserContext(session.claims, (tx) => getActiveForm(tx, session.actor.organizationId));
+}
+
+export function saveBookingSettings(session: CommercialSession, input: BookingSettingsInput) {
+  return updateBookingSettings(session.claims, input, { contexts: userContexts });
+}
+
+export function publishForm(session: CommercialSession, definition: ApplicationFormDefinition) {
+  return publishApplicationForm(session.claims, definition, { contexts: userContexts });
+}
+
+export function saveTemplate(session: CommercialSession, input: TemplateInput) {
+  return saveMessageTemplate(session.claims, input, { contexts: userContexts });
 }

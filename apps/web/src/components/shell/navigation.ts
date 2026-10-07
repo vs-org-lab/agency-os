@@ -41,7 +41,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
           { href: '/', labelKey: 'shell.studioNav.home', icon: 'home' },
           ...(input.permissions.pipeline ? COMMERCIAL_ITEMS : []),
         ],
-        footer: [{ href: '/settings/sessions', labelKey: 'shell.settings', icon: 'settings' }],
+        footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
       };
     case 'room':
       return {
@@ -53,7 +53,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             icon: 'dashboard',
           },
         ],
-        footer: [{ href: '/settings/sessions', labelKey: 'shell.settings', icon: 'settings' }],
+        footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
       };
     case 'portal':
       return {

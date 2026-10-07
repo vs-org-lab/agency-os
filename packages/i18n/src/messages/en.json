@@ -677,6 +677,104 @@
         "disconnected": "Google Calendar disconnected.",
         "error": "The Google Calendar connection could not be completed. Try again."
       }
+    },
+    "nav": {
+      "label": "Settings",
+      "sessions": "Sessions",
+      "integrations": "Integrations",
+      "application": "Application",
+      "booking": "Booking",
+      "templates": "Templates"
+    },
+    "application": {
+      "title": "Application",
+      "description": "Questions, points, knockouts and path thresholds. Publishing creates a new version; applications keep the version they were scored with.",
+      "currentVersion": "Active version: {version}",
+      "thresholds": {
+        "title": "Path thresholds",
+        "a": "Minimum score for path A",
+        "b": "Minimum score for path B"
+      },
+      "question": {
+        "labelPt": "Question (Portuguese)",
+        "labelEn": "Question (English)",
+        "required": "Required",
+        "remove": "Remove question",
+        "kind": {
+          "contact": "Name and email",
+          "company": "Company and website",
+          "single_choice": "Single choice",
+          "long_text": "Free text"
+        },
+        "showIf": "Shown only when the previous answer requires it."
+      },
+      "option": {
+        "labelPt": "Option (Portuguese)",
+        "labelEn": "Option (English)",
+        "points": "Points",
+        "knockout": "Knockout",
+        "remove": "Remove option",
+        "add": "Add option"
+      },
+      "addChoice": "Add a choice question",
+      "addText": "Add a text question",
+      "maxScore": "Maximum score: {score}",
+      "preview": {
+        "title": "Score preview",
+        "description": "Choose answers to see the score and the path.",
+        "result": "{score} points · path {path}"
+      },
+      "publish": "Publish new version",
+      "published": "Version {version} published.",
+      "invalid": "The configuration has errors: {issues}"
+    },
+    "booking": {
+      "title": "Booking",
+      "description": "Hours when path A leads can book the discovery call.",
+      "timeZone": "Time zone",
+      "days": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      },
+      "start": "Start",
+      "end": "End",
+      "closed": "Closed",
+      "duration": "Call duration (minutes)",
+      "buffer": "Buffer between calls (minutes)",
+      "notice": "Minimum notice (hours)",
+      "horizon": "Booking horizon (days)",
+      "selfDiagnosis": "Self-assessment URL (path C)",
+      "anonymize": "Anonymize path C applications after (months)",
+      "save": "Save",
+      "saved": "Booking saved.",
+      "invalid": "Check the hours and the values."
+    },
+    "templates": {
+      "title": "Message templates",
+      "description": "Suggested messages for follow-ups and acquisition. Use '{firstName}', '{companyName}' and '{callDate}'.",
+      "kinds": {
+        "follow_up": "Follow-up",
+        "acquisition": "Acquisition",
+        "email": "Email"
+      },
+      "new": "New template",
+      "edit": "Edit",
+      "kind": "Type",
+      "name": "Name",
+      "sector": "Sector",
+      "day": "Day",
+      "locale": "Language",
+      "subject": "Subject",
+      "body": "Message",
+      "save": "Save template",
+      "saved": "Template saved.",
+      "invalid": "Check the template fields.",
+      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
     }
   }
 }

@@ -17,7 +17,7 @@ describe('buildNavigation', () => {
 
     expect(navigation.back).toBeNull();
     expect(navigation.items.map((item) => item.href)).toEqual(['/']);
-    expect(navigation.footer.map((item) => item.href)).toEqual(['/settings/sessions']);
+    expect(navigation.footer.map((item) => item.href)).toEqual(['/settings']);
   });
 
   it('studio shows commercial items only with pipeline permission', () => {

@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Última atualização: 2026-10-06
+Última atualização: 2026-10-07
 
 Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que foi deliberadamente adiado. É lido no início de cada sessão de trabalho e atualizado em cada tarefa concluída ou decisão de âmbito.
 
@@ -8,7 +8,8 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 
 | Item                                   | Referência                                                                                                                       | Estado                                                         |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Concluído e integrado em `develop` (PR #3 e #4); staging ativo |
+| Sub-projeto 0 — Fundação da plataforma | [Spec](superpowers/specs/2026-10-06-platform-foundation-design.md), [Plano](superpowers/plans/2026-10-06-platform-foundation.md) | Concluído e integrado em `develop` (PR #3 a #7); staging ativo |
+| Vaga 1 — M01, M02, M03, M04, M05, M21  | Brainstorming iniciado em 2026-10-07                                                                                             | Em desenho                                                     |
 
 ## Feito
 
@@ -47,6 +48,7 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-07 | Conta de fundador criada no staging com convite por email | `bootstrap:founder --deliver email` |
 | 2026-10-07 | Email por SMTP próprio (Gmail, sem domínio nem custo) no dev e no staging; templates de convite e link mágico com `token_hash` ativos | `supabase/config.toml` |
 | 2026-10-07 | Convites de utilizadores do cliente restritos ao fundador e ao decisor | [ADR 0006](decisions/0006-client-invitation-rights.md) |
+| 2026-10-07 | Convite real por email verificado em staging: cliente de teste "Cliente Teste", decisor convidado num endereço Gmail externo, palavra-passe definida e portal do cliente aberto | PR #7, run 37562245347 |
 
 ## Critérios de aceitação da fundação
 

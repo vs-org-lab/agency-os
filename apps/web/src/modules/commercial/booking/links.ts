@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { signToken } from '@/platform/signed-token';
 
 export const BOOKING_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
@@ -16,9 +16,12 @@ export function hashManageToken(token: string): string {
   return createHash('sha256').update(token).digest('base64url');
 }
 
-export function newManageToken(): { token: string; hash: string } {
-  const token = randomBytes(32).toString('base64url');
-  return { token, hash: hashManageToken(token) };
+/**
+ * Derived rather than random so every email about the same call carries the same working
+ * link. A cancelled call stops being manageable, and a new booking gets a new call id.
+ */
+export function manageToken(callId: string, secret: string): string {
+  return createHmac('sha256', secret).update(`manage:${callId}`).digest('base64url');
 }
 
 export function bookingUrl(baseUrl: string, token: string): string {

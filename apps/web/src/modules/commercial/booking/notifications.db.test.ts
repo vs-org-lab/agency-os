@@ -81,7 +81,7 @@ function depsFor(sql: TransactionSql, email: EmailPort): NotificationDeps {
 }
 
 describe('notifications', () => {
-  it('confirmation rotates the manage token', async () => {
+  it('confirmation and reminder carry the same working manage link', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const { callId } = await bookedCall(sql, world);
@@ -89,7 +89,7 @@ describe('notifications', () => {
       const deps = depsFor(sql, email);
 
       await sendCallConfirmation(callId, deps);
-      await sendCallConfirmation(callId, deps);
+      await sendCallReminder(callId, STARTS_AT, deps);
 
       expect(email.sent).toHaveLength(2);
       expect(email.sent[0]).toMatchObject({
@@ -100,7 +100,8 @@ describe('notifications', () => {
       const tokens = email.sent.map(
         (message) => /apply\/booking\/([A-Za-z0-9_-]+)/.exec(message.text)?.[1] ?? '',
       );
-      expect(tokens[0]).not.toBe(tokens[1]);
+      expect(tokens[0]).not.toBe('');
+      expect(tokens[1]).toBe(tokens[0]);
       await sql`reset role`;
       const [call] = await sql<{ hash: string }[]>`
         select manage_token_hash as hash from public.calls where id = ${callId}

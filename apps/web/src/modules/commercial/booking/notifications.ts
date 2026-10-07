@@ -13,8 +13,9 @@ import {
   BOOKING_LINK_TTL_MS,
   bookingLinkToken,
   bookingUrl,
+  hashManageToken,
+  manageToken,
   manageUrl,
-  newManageToken,
 } from './links';
 import { resolveTimeZone } from './slots';
 
@@ -232,30 +233,27 @@ function startsAtLabel(startsAt: Date, locale: Locale, timeZone: string): string
 async function leadCallMessage(
   callId: string,
   deps: NotificationDeps,
-  rotateToken: boolean,
 ): Promise<{
   call: CallContext;
   lead: LeadContext | null;
   sender: Sender;
-  manageToken: string | null;
+  manageToken: string;
 } | null> {
   return deps.contexts.withSystemContext(async (tx) => {
     const call = await callContext(tx, callId);
     if (!call) return null;
-    let manageToken: string | null = null;
-    if (rotateToken) {
-      const generated = newManageToken();
+    const token = manageToken(callId, deps.linkSecret);
+    if (call.status === 'scheduled') {
       await tx
         .update(calls)
-        .set({ manageTokenHash: generated.hash })
+        .set({ manageTokenHash: hashManageToken(token) })
         .where(and(eq(calls.id, callId), eq(calls.status, 'scheduled')));
-      manageToken = generated.token;
     }
     return {
       call,
       lead: await leadForDeal(tx, call.dealId),
       sender: await senderFor(tx, call.organizationId),
-      manageToken,
+      manageToken: token,
     };
   });
 }
@@ -264,10 +262,10 @@ export async function sendCallConfirmation(
   callId: string,
   deps: NotificationDeps,
 ): Promise<boolean> {
-  const context = await leadCallMessage(callId, deps, true);
+  const context = await leadCallMessage(callId, deps);
   const to = context?.call.contactEmail;
   if (!context || context.call.status !== 'scheduled' || !to) return false;
-  const { call, lead, sender, manageToken } = context;
+  const { call, lead, sender, manageToken: token } = context;
   const locale = lead?.locale ?? sender.defaultLocale;
   const timeZone = resolveTimeZone(call.leadTimeZone, 'Europe/Lisbon');
 
@@ -282,7 +280,7 @@ export async function sendCallConfirmation(
       agencyName: sender.agencyName,
       startsAtLabel: startsAtLabel(call.startsAt, locale, timeZone),
       meetUrl: call.meetUrl,
-      manageUrl: manageUrl(deps.appBaseUrl, manageToken ?? ''),
+      manageUrl: manageUrl(deps.appBaseUrl, token),
     },
   });
   return true;
@@ -293,19 +291,17 @@ export async function sendCallReminder(
   expectedStartsAt: Date,
   deps: NotificationDeps,
 ): Promise<'sent' | 'skipped'> {
-  const context = await leadCallMessage(callId, deps, false);
+  const context = await leadCallMessage(callId, deps);
+  const to = context?.call.contactEmail;
   if (
     !context ||
+    !to ||
     context.call.status !== 'scheduled' ||
-    context.call.startsAt.getTime() !== expectedStartsAt.getTime() ||
-    !context.call.contactEmail
+    context.call.startsAt.getTime() !== expectedStartsAt.getTime()
   ) {
     return 'skipped';
   }
-  const rotated = await leadCallMessage(callId, deps, true);
-  const to = rotated?.call.contactEmail;
-  if (!rotated?.manageToken || !to) return 'skipped';
-  const { call, lead, sender, manageToken } = rotated;
+  const { call, lead, sender, manageToken: token } = context;
   const locale = lead?.locale ?? sender.defaultLocale;
 
   await send(deps, {
@@ -323,7 +319,7 @@ export async function sendCallReminder(
         resolveTimeZone(call.leadTimeZone, 'Europe/Lisbon'),
       ),
       meetUrl: call.meetUrl,
-      manageUrl: manageUrl(deps.appBaseUrl, manageToken),
+      manageUrl: manageUrl(deps.appBaseUrl, token),
     },
   });
   return 'sent';
@@ -333,7 +329,7 @@ export async function sendBookingCancelled(
   callId: string,
   deps: NotificationDeps,
 ): Promise<boolean> {
-  const context = await leadCallMessage(callId, deps, false);
+  const context = await leadCallMessage(callId, deps);
   const to = context?.call.contactEmail;
   if (!context || !to) return false;
   const { call, lead, sender } = context;

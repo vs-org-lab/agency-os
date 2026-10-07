@@ -141,6 +141,21 @@
     "home": {
       "title": "The studio is ready",
       "description": "Work modules appear here as they are enabled."
+    },
+    "today": {
+      "title": "Today",
+      "description": "What needs you, in order of urgency.",
+      "empty": {
+        "title": "Nothing pending today",
+        "description": "Follow-ups, queue B and today's calls appear here."
+      },
+      "kinds": {
+        "follow_up": "Day {day} follow-up",
+        "queue_b": "Application in queue B",
+        "call": "Call at {time}"
+      },
+      "overdue": "Overdue",
+      "open": "Open"
     }
   },
   "room": {

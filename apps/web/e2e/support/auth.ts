@@ -30,5 +30,5 @@ export async function signInWithPassword(
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page).toHaveURL(/\/mfa\/verify/);
   await submitTotp(page, credentials.totpSecret);
-  await expect(page.getByRole('heading', { name: 'O estúdio está pronto' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Hoje', exact: true })).toBeVisible();
 }

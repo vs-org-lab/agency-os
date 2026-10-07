@@ -1,4 +1,6 @@
 import 'server-only';
+import { eq } from 'drizzle-orm';
+import { schema } from '@agency-os/db';
 import type { Locale } from '@agency-os/i18n';
 import { resolveActor, type Actor } from '@/modules/access';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
@@ -7,6 +9,7 @@ import { recordCallOutcome, scheduleCallManually } from '../calls';
 import { hostCalendar } from '../calendar/integration';
 import { completeFollowUp, upsertContact, type ContactInput } from '../contacts';
 import { getDealDetail, type DealDetail } from '../deal-detail';
+import { listTodayItems, type TodayItem } from '../today';
 import { listApplications, type ApplicationRow } from '../applications/list';
 import { reviewQueueB } from '../applications/review';
 import {
@@ -126,4 +129,14 @@ export function convertTarget(
   input: Parameters<typeof convertAcquisitionTarget>[1],
 ) {
   return convertAcquisitionTarget(session.claims, input, { contexts: userContexts });
+}
+
+export function loadToday(session: CommercialSession, now: Date): Promise<TodayItem[]> {
+  return withUserContext(session.claims, async (tx) => {
+    const [settings] = await tx
+      .select({ timeZone: schema.commercialSettings.timeZone })
+      .from(schema.commercialSettings)
+      .where(eq(schema.commercialSettings.organizationId, session.actor.organizationId));
+    return listTodayItems(tx, { now, timeZone: settings?.timeZone ?? 'Europe/Lisbon' });
+  });
 }

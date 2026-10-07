@@ -105,6 +105,7 @@ export {
   loadApplications,
   loadDealDetail,
   loadPipelineCards,
+  loadToday,
   moveDeal,
   recordOutcome,
   reviewApplication,

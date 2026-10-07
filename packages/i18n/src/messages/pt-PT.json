@@ -141,6 +141,21 @@
     "home": {
       "title": "O estúdio está pronto",
       "description": "Os módulos de trabalho aparecem aqui à medida que forem ativados."
+    },
+    "today": {
+      "title": "Hoje",
+      "description": "O que precisa de si, por ordem de urgência.",
+      "empty": {
+        "title": "Nada pendente para hoje",
+        "description": "Os acompanhamentos, a Fila B e as chamadas do dia aparecem aqui."
+      },
+      "kinds": {
+        "follow_up": "Acompanhamento do dia {day}",
+        "queue_b": "Candidatura na Fila B",
+        "call": "Chamada às {time}"
+      },
+      "overdue": "Atrasado",
+      "open": "Abrir"
     }
   },
   "room": {

@@ -36,7 +36,7 @@ test('invited manager sets password, enrols totp and reaches studio', async ({ p
 
   const secret = (await page.locator('code').innerText()).trim();
   await submitTotp(page, secret);
-  await expect(page.getByRole('heading', { name: 'O estúdio está pronto' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Hoje', exact: true })).toBeVisible();
 });
 
 test('client signs in with magic link and reaches portal', async ({ page }) => {

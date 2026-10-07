@@ -190,10 +190,21 @@ export const onCallCancelled = inngest.createFunction(
     onFailure: failureHandler('commercial-call-cancelled'),
   },
   async ({ event, step }) => {
-    const data = event.data as EventData<{ callId: string }>;
-    await step.run('send-cancellation', () =>
-      sendBookingCancelled(data.payload.callId, notificationDeps()),
-    );
+    const data = event.data as EventData<{
+      callId: string;
+      notifyLead?: boolean;
+      externalEventId?: string | null;
+    }>;
+    const { callId, notifyLead, externalEventId } = data.payload;
+    if (externalEventId) {
+      await step.run('delete-calendar-event', async () => {
+        const host = await hostCalendar(data.organizationId);
+        await host?.port.deleteEvent(externalEventId);
+      });
+    }
+    if (notifyLead !== false) {
+      await step.run('send-cancellation', () => sendBookingCancelled(callId, notificationDeps()));
+    }
   },
 );
 

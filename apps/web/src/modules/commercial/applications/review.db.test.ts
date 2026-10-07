@@ -60,6 +60,29 @@ async function dealCode(sql: TransactionSql, dealId: string) {
 }
 
 describe('queue b review', () => {
+  it('rejection is not recorded when the deal can no longer move', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { applicationId, dealId } = await queueB(sql, world);
+      await sql`update public.deals set pipeline_code = 'X.3' where id = ${dealId}`;
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const result = await reviewQueueB(
+        claimsFor(world.users.founder),
+        { applicationId, decision: 'c' },
+        { contexts, flush: async () => {} },
+      );
+
+      expect(result).toEqual({ ok: false, rule: 'stage_refused' });
+      await sql`reset role`;
+      const [application] = await sql<{ decision: string | null }[]>`
+        select review_decision::text as decision from public.applications where id = ${applicationId}
+      `;
+      expect(application?.decision).toBeNull();
+      expect(await dealCode(sql, dealId)).toBe('X.3');
+    });
+  });
+
   it('approve to a emits the reviewed event and keeps the deal at 0.2', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

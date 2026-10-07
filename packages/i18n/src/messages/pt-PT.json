@@ -459,7 +459,8 @@
         "approved": "Candidatura aprovada para A. O link de marcação segue por email.",
         "rejected": "Candidatura enviada para C.",
         "already_reviewed": "Esta candidatura já foi decidida.",
-        "not_found": "Não foi possível decidir esta candidatura."
+        "not_found": "Não foi possível decidir esta candidatura.",
+        "stage_refused": "Este negócio já está fechado e não pode ser movido para C."
       },
       "empty": {
         "title": "Ainda não há candidaturas",

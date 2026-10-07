@@ -10,7 +10,15 @@ import { addTimelineEntry } from '../timeline';
 
 const { applications } = schema;
 
-export type ReviewResult = { ok: true } | { ok: false; rule: 'not_found' | 'already_reviewed' };
+export type ReviewResult =
+  { ok: true } | { ok: false; rule: 'not_found' | 'already_reviewed' | 'stage_refused' };
+
+class StageRefusedError extends Error {
+  constructor() {
+    super('Queue B rejection was refused by the pipeline');
+    this.name = 'StageRefusedError';
+  }
+}
 
 export async function reviewQueueB(
   claims: VerifiedClaims,
@@ -47,12 +55,13 @@ export async function reviewQueueB(
       if (updated.length === 0) return { ok: false, rule: 'already_reviewed' };
 
       if (input.decision === 'c') {
-        await applyStageChange(tx, {
+        const change = await applyStageChange(tx, {
           dealId: application.dealId,
           to: 'X.4',
           reason: 'path_c',
           actor: { userId: actor.userId, isFounder: actor.roles.includes('founder') },
         });
+        if (!change.ok) throw new StageRefusedError();
       }
       await addTimelineEntry(tx, {
         organizationId: application.organizationId,
@@ -85,7 +94,10 @@ export async function reviewQueueB(
       return { ok: true };
     },
     { ok: false, rule: 'not_found' },
-  );
+  ).catch((error: unknown): ReviewResult => {
+    if (error instanceof StageRefusedError) return { ok: false, rule: 'stage_refused' };
+    throw error;
+  });
 
   if (result.ok) await (deps.flush ?? requestFlush)();
   return result;

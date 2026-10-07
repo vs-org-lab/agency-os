@@ -6,7 +6,7 @@ import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { addTimelineEntry } from '../timeline';
-import { OFF_CYCLE_CODES, type PipelineCode } from './codes';
+import { FINAL_CODES, OFF_CYCLE_CODES, type PipelineCode } from './codes';
 import {
   evaluateTransition,
   type PendingModule,
@@ -79,6 +79,54 @@ async function callFacts(tx: DbTransaction, dealId: string) {
   };
 }
 
+/**
+ * A closed deal keeps no live call: the call is cancelled in the same transaction and the
+ * cancellation event removes the calendar event without sending the lead a rebooking email.
+ */
+async function cancelScheduledCalls(
+  tx: DbTransaction,
+  deal: { id: string; organizationId: string; clientId: string },
+  actor: StageActor,
+): Promise<void> {
+  const cancelled = await tx
+    .update(calls)
+    .set({ status: 'cancelled' })
+    .where(and(eq(calls.dealId, deal.id), eq(calls.status, 'scheduled')))
+    .returning({ id: calls.id, startsAt: calls.startsAt, externalEventId: calls.externalEventId });
+
+  for (const call of cancelled) {
+    await addTimelineEntry(tx, {
+      organizationId: deal.organizationId,
+      clientId: deal.clientId,
+      dealId: deal.id,
+      kind: 'call_cancelled',
+      summary: { startsAt: call.startsAt.toISOString(), cancelledBy: 'deal_closed' },
+      itemType: 'call',
+      itemId: call.id,
+      actorUserId: actorUserId(actor),
+    });
+    await recordAudit(tx, {
+      organizationId: deal.organizationId,
+      action: 'call.cancelled',
+      resourceType: 'call',
+      resourceId: call.id,
+      clientId: deal.clientId,
+      metadata: { reason: 'deal_closed' },
+    });
+    await emit(tx, {
+      type: 'commercial.call.cancelled',
+      organizationId: deal.organizationId,
+      clientId: deal.clientId,
+      payload: {
+        callId: call.id,
+        dealId: deal.id,
+        notifyLead: false,
+        externalEventId: call.externalEventId,
+      },
+    });
+  }
+}
+
 export async function applyStageChange(
   tx: DbTransaction,
   input: StageChangeInput,
@@ -119,6 +167,7 @@ export async function applyStageChange(
     })
     .where(eq(deals.id, deal.id));
   await tx.execute(sql`select set_config('app.stage_change_reason', '', true)`);
+  if (FINAL_CODES.includes(input.to)) await cancelScheduledCalls(tx, deal, input.actor);
 
   const summary = { from: deal.pipelineCode, to: input.to, reason };
   await addTimelineEntry(tx, {

@@ -459,7 +459,8 @@
         "approved": "Application approved for A. The booking link is sent by email.",
         "rejected": "Application sent to C.",
         "already_reviewed": "This application has already been decided.",
-        "not_found": "This application could not be decided."
+        "not_found": "This application could not be decided.",
+        "stage_refused": "This deal is already closed and cannot be moved to C."
       },
       "empty": {
         "title": "No applications yet",

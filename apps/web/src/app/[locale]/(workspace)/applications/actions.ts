@@ -7,7 +7,7 @@ import { getVerifiedClaims } from '@/platform/session';
 export type ReviewActionState =
   | { status: 'idle' }
   | { status: 'approved' | 'rejected' }
-  | { status: 'error'; code: 'already_reviewed' | 'not_found' };
+  | { status: 'error'; code: 'already_reviewed' | 'not_found' | 'stage_refused' };
 
 export async function reviewApplicationAction(
   applicationId: string,

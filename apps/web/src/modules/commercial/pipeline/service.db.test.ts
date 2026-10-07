@@ -46,6 +46,38 @@ async function countRows(sql: TransactionSql, table: string, dealId: string): Pr
 }
 
 describe('pipeline stage service', () => {
+  it('closing a deal cancels its scheduled call without notifying the lead', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+      const contexts = createDbContexts(testDatabase(sql));
+      await sql`update public.calls set external_event_id = 'event-1' where id = ${fixture.a.callId}`;
+
+      const result = await changeDealStage(
+        claimsFor(world.users.founder),
+        { dealId: fixture.a.dealId, to: 'X.4', reason: 'Not a fit after the first contact' },
+        { contexts, flush: noFlush },
+      );
+
+      expect(result).toEqual({ ok: true, from: '0.3', to: 'X.4' });
+      await sql`reset role`;
+      const [call] = await sql<{ status: string }[]>`
+        select status::text from public.calls where id = ${fixture.a.callId}
+      `;
+      expect(call?.status).toBe('cancelled');
+      const [event] = await sql<{ payload: Record<string, unknown> }[]>`
+        select payload from public.domain_events
+        where organization_id = ${world.organizationId} and type = 'commercial.call.cancelled'
+      `;
+      expect(event?.payload).toMatchObject({
+        callId: fixture.a.callId,
+        dealId: fixture.a.dealId,
+        notifyLead: false,
+        externalEventId: 'event-1',
+      });
+    });
+  });
+
   it('applies an allowed transition and records history, timeline, audit and event', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
@@ -117,6 +149,32 @@ describe('pipeline stage service', () => {
       expect(
         await changeDealStage(claims, { dealId: fixture.a.dealId, to: '0.3', reason: null }, deps),
       ).toEqual({ ok: true, from: 'X.1', to: '0.3' });
+    });
+  });
+
+  it('reopens to the latest code when history rows share a timestamp', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contexts = createDbContexts(testDatabase(sql));
+      const deps = { contexts, flush: noFlush };
+      const claims = claimsFor(world.users.founder);
+      const [deal] = await sql<{ id: string }[]>`
+        insert into public.deals (organization_id, client_id, title, pipeline_code, source)
+        values (${world.organizationId}, ${world.clients.a}, 'Empresa Exemplo', '0.1', 'application')
+        returning id
+      `;
+      const dealId = deal?.id ?? '';
+      await contexts.withSystemContext((tx) =>
+        applyStageChange(tx, { dealId, to: '0.2', reason: null, actor: 'system' }),
+      );
+
+      await changeDealStage(claims, { dealId, to: 'X.1', reason: null }, deps);
+
+      expect(await changeDealStage(claims, { dealId, to: '0.2', reason: null }, deps)).toEqual({
+        ok: true,
+        from: 'X.1',
+        to: '0.2',
+      });
     });
   });
 

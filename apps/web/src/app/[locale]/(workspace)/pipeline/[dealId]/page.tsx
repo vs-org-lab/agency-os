@@ -208,7 +208,7 @@ export default async function DealPage({ params }: PageProps) {
                   ) : (
                     <>
                       {application.costOfInaction ? (
-                        <blockquote className="rounded-md border-l-2 border-gold bg-surface-muted px-4 py-3">
+                        <blockquote className="rounded-md bg-surface-muted px-4 py-3">
                           <p className="text-caption text-text-tertiary">
                             {t('deal.application.costOfInaction')}
                           </p>

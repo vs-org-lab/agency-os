@@ -83,7 +83,10 @@
     "noClients": "Ainda não há clientes.",
     "account": "Conta",
     "studioNav": {
-      "home": "Início"
+      "home": "Início",
+      "pipeline": "Pipeline",
+      "applications": "Candidaturas",
+      "acquisition": "Angariação"
     },
     "room": {
       "dashboard": "Dashboard"
@@ -214,7 +217,64 @@
         "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
         "module_pending": "Disponível quando o módulo {module} existir.",
         "not_found": "Este negócio não existe ou não tem acesso a ele."
-      }
+      },
+      "codeOption": "{code} · {name}"
+    },
+    "board": {
+      "title": "Pipeline",
+      "description": "Cada negócio num único código, com o próximo passo, o responsável e o prazo.",
+      "views": {
+        "label": "Vista",
+        "board": "Quadro",
+        "list": "Lista"
+      },
+      "stageCount": "{count, plural, =0 {Sem negócios} one {# negócio} other {# negócios}}",
+      "emptyColumn": "Sem negócios",
+      "moveTo": "Mover {name} para…",
+      "moveDialog": {
+        "title": "Mover negócio",
+        "description": "O pipeline confirma a regra de cada mudança antes de a aplicar.",
+        "target": "Mover para",
+        "reason": "Motivo",
+        "reasonHint": "Obrigatório para encerrar como perdido ou para recuar um código.",
+        "submit": "Mover",
+        "cancel": "Cancelar"
+      },
+      "card": {
+        "value": "Valor estimado",
+        "noNextStep": "Sem próximo passo",
+        "due": "Prazo {date}",
+        "overdue": "Prazo ultrapassado",
+        "client": "Cliente",
+        "noOwner": "Sem responsável"
+      },
+      "list": {
+        "client": "Empresa",
+        "code": "Código",
+        "nextStep": "Próximo passo",
+        "owner": "Responsável",
+        "due": "Prazo",
+        "value": "Valor"
+      },
+      "filters": {
+        "label": "Filtros",
+        "allStages": "Todas as etapas",
+        "overdue": "Só prazos ultrapassados",
+        "mine": "Só os meus",
+        "search": "Pesquisar empresa ou negócio",
+        "apply": "Aplicar"
+      },
+      "empty": {
+        "title": "Ainda não há negócios",
+        "description": "As candidaturas e a angariação criam negócios automaticamente."
+      },
+      "noResults": {
+        "title": "Nenhum negócio com estes filtros",
+        "description": "Ajuste ou limpe os filtros para ver mais negócios."
+      },
+      "clearFilters": "Limpar filtros",
+      "moved": "Negócio movido para {code}.",
+      "drag": "Arrastar {name}"
     }
   },
   "email": {

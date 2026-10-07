@@ -96,3 +96,10 @@ export {
 } from './booking/public';
 export type { BookingSource } from './booking/service';
 export { COMMERCIAL_FUNCTIONS } from './automations';
+
+export {
+  commercialSession,
+  loadPipelineCards,
+  moveDeal,
+  type CommercialSession,
+} from './pipeline/studio';

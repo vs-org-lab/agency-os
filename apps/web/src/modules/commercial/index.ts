@@ -45,3 +45,5 @@ export {
   type TransitionRefusal,
 } from './pipeline/transitions';
 export { isPersonalEmail } from './protection/personal-email';
+export { canSeePipeline, canWritePipeline, isFounderActor } from './access';
+export type { PipelineCard, PipelineFilters } from './queries';

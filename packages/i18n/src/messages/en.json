@@ -83,7 +83,10 @@
     "noClients": "There are no clients yet.",
     "account": "Account",
     "studioNav": {
-      "home": "Home"
+      "home": "Home",
+      "pipeline": "Pipeline",
+      "applications": "Applications",
+      "acquisition": "Acquisition"
     },
     "room": {
       "dashboard": "Dashboard"
@@ -214,7 +217,64 @@
         "call_outcome_required": "Record the call outcome before moving to 0.4.",
         "module_pending": "Available once the {module} module exists.",
         "not_found": "This deal does not exist or you do not have access to it."
-      }
+      },
+      "codeOption": "{code} · {name}"
+    },
+    "board": {
+      "title": "Pipeline",
+      "description": "Every deal at a single code, with the next step, the owner and the due date.",
+      "views": {
+        "label": "View",
+        "board": "Board",
+        "list": "List"
+      },
+      "stageCount": "{count, plural, =0 {No deals} one {# deal} other {# deals}}",
+      "emptyColumn": "No deals",
+      "moveTo": "Move {name} to…",
+      "moveDialog": {
+        "title": "Move deal",
+        "description": "The pipeline checks the rule of every change before applying it.",
+        "target": "Move to",
+        "reason": "Reason",
+        "reasonHint": "Required to close as lost or to move a code back.",
+        "submit": "Move",
+        "cancel": "Cancel"
+      },
+      "card": {
+        "value": "Estimated value",
+        "noNextStep": "No next step",
+        "due": "Due {date}",
+        "overdue": "Overdue",
+        "client": "Client",
+        "noOwner": "No owner"
+      },
+      "list": {
+        "client": "Company",
+        "code": "Code",
+        "nextStep": "Next step",
+        "owner": "Owner",
+        "due": "Due",
+        "value": "Value"
+      },
+      "filters": {
+        "label": "Filters",
+        "allStages": "All stages",
+        "overdue": "Overdue only",
+        "mine": "Mine only",
+        "search": "Search company or deal",
+        "apply": "Apply"
+      },
+      "empty": {
+        "title": "No deals yet",
+        "description": "Applications and acquisition create deals automatically."
+      },
+      "noResults": {
+        "title": "No deals match these filters",
+        "description": "Adjust or clear the filters to see more deals."
+      },
+      "clearFilters": "Clear filters",
+      "moved": "Deal moved to {code}.",
+      "drag": "Drag {name}"
     }
   },
   "email": {

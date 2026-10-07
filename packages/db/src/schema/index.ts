@@ -9,3 +9,4 @@ export * from './contacts';
 export * from './deals';
 export * from './applications';
 export * from './commercial';
+export * from './seen-markers';

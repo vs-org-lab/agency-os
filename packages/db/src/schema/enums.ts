@@ -136,6 +136,8 @@ export const timelineKindEnum = appSchema.enum('timeline_kind', [
   'follow_up_completed',
 ]);
 
+export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
+
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
   'application_ip',
   'application_email',
@@ -153,6 +155,7 @@ export type CallStatus = (typeof callStatusEnum.enumValues)[number];
 export type CallSyncStatus = (typeof callSyncStatusEnum.enumValues)[number];
 export type CallOutcome = (typeof callOutcomeEnum.enumValues)[number];
 export type FollowUpStatus = (typeof followUpStatusEnum.enumValues)[number];
+export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];
 export type CalendarConnectionStatus = (typeof calendarConnectionStatusEnum.enumValues)[number];

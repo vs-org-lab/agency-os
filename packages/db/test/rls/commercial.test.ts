@@ -193,6 +193,35 @@ describe('commercial access', () => {
     });
   });
 
+  it('seen markers are readable and writable only by their owner', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+
+      await asUser(sql, world.users.founder);
+      await sql`
+        insert into public.seen_markers (organization_id, user_id, area, seen_at)
+        values (${world.organizationId}, ${world.users.founder}, 'applications', now())
+      `;
+      expect(await sql`select id from public.seen_markers`).toHaveLength(1);
+      await asSystem(sql);
+
+      await asUser(sql, world.users.manager);
+      expect(await sql`select id from public.seen_markers`).toHaveLength(0);
+      const updated = await sql`
+        update public.seen_markers set seen_at = now() where user_id = ${world.users.founder}
+      `;
+      expect(updated.count).toBe(0);
+      await sql`savepoint probe`;
+      await expect(
+        sql`
+          insert into public.seen_markers (organization_id, user_id, area, seen_at)
+          values (${world.organizationId}, ${world.users.founder}, 'applications', now())
+        `,
+      ).rejects.toThrow(/row-level security/);
+      await sql`rollback to savepoint probe`;
+    });
+  });
+
   it('throttle and captured emails are invisible to every user', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

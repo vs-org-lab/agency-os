@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { signInWithPassword } from './support/auth';
 import {
   bookingLinkFor,
@@ -14,7 +14,7 @@ import { readCredentials } from './support/credentials';
 
 const credentials = readCredentials();
 
-async function bookFirstSlot(page: import('@playwright/test').Page): Promise<void> {
+async function bookFirstSlot(page: Page): Promise<void> {
   await page
     .getByRole('group', { name: 'Horários disponíveis' })
     .getByRole('button')

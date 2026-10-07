@@ -323,6 +323,35 @@
         "title": "Obrigado.",
         "body": "Recebemos a sua candidatura e entramos em contacto se fizer sentido avançar."
       }
+    },
+    "booking": {
+      "title": "Escolha o horário",
+      "timeZone": "Fuso horário",
+      "duration": "Chamada de {minutes} minutos por vídeo.",
+      "days": "Dias disponíveis",
+      "times": "Horários disponíveis",
+      "noSlots": "Não há horários livres nos próximos dias. Respondemos por email em 24 horas úteis.",
+      "confirmTitle": "Confirmar a chamada",
+      "confirm": "Confirmar marcação",
+      "change": "Escolher outro horário",
+      "booked": {
+        "title": "A chamada está marcada",
+        "body": "{when}. Enviámos a confirmação e o link para gerir a marcação por email."
+      },
+      "meet": "Link da chamada",
+      "slotTaken": "Este horário acabou de ser ocupado. Escolha outro.",
+      "unavailable": "De momento não é possível marcar online. Respondemos em 24 horas úteis.",
+      "closed": "Este link de marcação já não está ativo.",
+      "throttled": "Demasiadas tentativas. Aguarde um pouco e tente de novo.",
+      "tooLate": "Já não é possível alterar esta marcação online. Responda ao email de confirmação.",
+      "error": "Não foi possível concluir a marcação. Tente de novo.",
+      "manage": {
+        "title": "A sua marcação",
+        "current": "Marcada para {when}.",
+        "reschedule": "Mudar de horário",
+        "cancel": "Cancelar chamada",
+        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário."
+      }
     }
   },
   "settings": {

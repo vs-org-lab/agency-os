@@ -323,6 +323,35 @@
         "title": "Thank you.",
         "body": "We received your application and will get in touch if it makes sense to move forward."
       }
+    },
+    "booking": {
+      "title": "Choose a time",
+      "timeZone": "Time zone",
+      "duration": "{minutes}-minute video call.",
+      "days": "Available days",
+      "times": "Available times",
+      "noSlots": "There are no free times in the coming days. We will reply by email within 24 business hours.",
+      "confirmTitle": "Confirm the call",
+      "confirm": "Confirm booking",
+      "change": "Choose another time",
+      "booked": {
+        "title": "Your call is booked",
+        "body": "{when}. We sent the confirmation and the link to manage the booking by email."
+      },
+      "meet": "Call link",
+      "slotTaken": "This time was just taken. Choose another one.",
+      "unavailable": "Online booking is not available right now. We reply within 24 business hours.",
+      "closed": "This booking link is no longer active.",
+      "throttled": "Too many attempts. Wait a moment and try again.",
+      "tooLate": "This booking can no longer be changed online. Reply to the confirmation email.",
+      "error": "The booking could not be completed. Try again.",
+      "manage": {
+        "title": "Your booking",
+        "current": "Booked for {when}.",
+        "reschedule": "Change the time",
+        "cancel": "Cancel the call",
+        "cancelled": "The call was cancelled. You can choose another time if you want."
+      }
     }
   },
   "settings": {

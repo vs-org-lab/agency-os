@@ -85,3 +85,13 @@ export {
   type IntegrationsView,
   type StartConnectionResult,
 } from './calendar/integration';
+
+export {
+  publicBook,
+  publicBookingView,
+  publicCancel,
+  publicReschedule,
+  publicSlotList,
+  type PublicBookingView,
+} from './booking/public';
+export type { BookingSource } from './booking/service';

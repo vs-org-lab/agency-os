@@ -38,6 +38,10 @@ const commercialEnvSchema = z.object({
   PUBLIC_LINK_SECRET: z.string().min(32),
   PUBLIC_ORGANIZATION_SLUG: z.string().min(1),
   APP_BASE_URL: z.url(),
+  APPLY_IP_LIMIT_PER_HOUR: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.coerce.number().int().positive().default(5),
+  ),
 });
 
 export type CommercialEnv = z.infer<typeof commercialEnvSchema>;
@@ -48,7 +52,10 @@ export function commercialEnv(): CommercialEnv {
   cachedCommercialEnv ??= commercialEnvSchema.parse({
     PUBLIC_LINK_SECRET: process.env.PUBLIC_LINK_SECRET,
     PUBLIC_ORGANIZATION_SLUG: process.env.PUBLIC_ORGANIZATION_SLUG,
-    APP_BASE_URL: process.env.APP_BASE_URL,
+    APP_BASE_URL:
+      process.env.APP_BASE_URL ??
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
+    APPLY_IP_LIMIT_PER_HOUR: process.env.APPLY_IP_LIMIT_PER_HOUR,
   });
   return cachedCommercialEnv;
 }

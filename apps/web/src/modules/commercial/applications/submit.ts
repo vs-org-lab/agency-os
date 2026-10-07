@@ -46,6 +46,7 @@ export type SubmitDeps = {
   organizationSlug: string;
   linkSecret: string;
   now: () => Date;
+  ipLimitPerHour?: number;
   flush?: () => Promise<void>;
 };
 
@@ -207,6 +208,7 @@ export async function submitApplication(
         kind: 'application_ip',
         key: input.ipAddress,
         ...THROTTLE_LIMITS.applicationIp,
+        limit: deps.ipLimitPerHour ?? THROTTLE_LIMITS.applicationIp.limit,
       }));
     const emailAllowed = await consumeThrottle(tx, {
       ...throttleBase,

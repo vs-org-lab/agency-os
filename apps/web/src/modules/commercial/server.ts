@@ -43,6 +43,7 @@ export function submitPublicApplication(input: SubmitApplicationInput): Promise<
     organizationSlug: env.PUBLIC_ORGANIZATION_SLUG,
     linkSecret: env.PUBLIC_LINK_SECRET,
     now: () => new Date(),
+    ipLimitPerHour: env.APPLY_IP_LIMIT_PER_HOUR,
   });
 }
 

@@ -135,10 +135,10 @@ function Column({
         <h3 className="truncate text-label text-text">
           <span className="font-mono text-text-secondary">{code}</span> {name}
         </h3>
-        <span className="text-caption text-text-tertiary tabular-nums">{cards.length}</span>
+        <span className="text-caption text-text-secondary tabular-nums">{cards.length}</span>
       </header>
       {cards.length === 0 ? (
-        <p className="px-1 py-4 text-caption text-text-tertiary">{t('board.emptyColumn')}</p>
+        <p className="px-1 py-4 text-caption text-text-secondary">{t('board.emptyColumn')}</p>
       ) : (
         cards.map((card) => <DealCard key={card.dealId} card={card} onMove={onMove} />)
       )}

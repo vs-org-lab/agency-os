@@ -223,6 +223,18 @@ describe('submitApplication', () => {
     });
   });
 
+  it('applies the configured hourly limit per ip address', async () => {
+    await withTestTransaction(async (sql) => {
+      const { deps } = await setup(sql);
+      const limited = { ...deps, ipLimitPerHour: 1 };
+
+      const first = await submitApplication(submission({ email: 'um@empresa.pt' }), limited);
+      const second = await submitApplication(submission({ email: 'dois@empresa.pt' }), limited);
+
+      expect([first.status, second.status]).toEqual(['accepted', 'throttled']);
+    });
+  });
+
   it('fourth application from the same email in a day is throttled', async () => {
     await withTestTransaction(async (sql) => {
       const { deps } = await setup(sql);

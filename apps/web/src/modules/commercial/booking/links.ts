@@ -22,7 +22,9 @@ export function newManageToken(): { token: string; hash: string } {
 }
 
 export function bookingUrl(baseUrl: string, token: string): string {
-  return new URL(`/apply/book/${token}`, baseUrl).toString();
+  const url = new URL('/apply/book', baseUrl);
+  url.searchParams.set('token', token);
+  return url.toString();
 }
 
 export function manageUrl(baseUrl: string, token: string): string {

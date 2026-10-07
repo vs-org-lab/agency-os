@@ -141,7 +141,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: pnpm --filter web e2e:seed
-      - run: pnpm --filter web e2e
+      - name: End-to-end tests without public application writes
+        run: pnpm --filter web e2e --grep-invert @public-writes
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

@@ -216,5 +216,68 @@
         "not_found": "This deal does not exist or you do not have access to it."
       }
     }
+  },
+  "email": {
+    "footer": "Automatic message from the project management system. Reply to this email if you need help.",
+    "lead": {
+      "booking_link": {
+        "subject": "Your call with {agencyName}",
+        "heading": "Choose a time for the call",
+        "body": "Hello {firstName}, thank you for applying.\n\nThe call lasts 45 minutes and helps us understand your context before any proposal. Choose the time that suits you best. The link is valid until {expiresOn}.",
+        "action": "Choose a time"
+      },
+      "booking_confirmed": {
+        "subject": "Call booked: {startsAtLabel}",
+        "heading": "Your call is booked",
+        "body": "Hello {firstName}, your call with {agencyName} is booked for {startsAtLabel}.\n\nIf you need to change the time or cancel, use the button below up to 2 hours before.",
+        "meetLine": "Call link: {meetUrl}",
+        "action": "Manage booking"
+      },
+      "call_reminder": {
+        "subject": "Reminder: call with {agencyName}",
+        "heading": "Your call is coming up",
+        "body": "Hello {firstName}, this is a reminder of your call with {agencyName} on {startsAtLabel}.",
+        "meetLine": "Call link: {meetUrl}",
+        "action": "Manage booking"
+      },
+      "booking_cancelled": {
+        "subject": "Call cancelled",
+        "heading": "Your call was cancelled",
+        "body": "Hello {firstName}, your call with {agencyName} was cancelled.\n\nIf you want to book another time, use the button below.",
+        "action": "Choose a new time"
+      }
+    },
+    "founder": {
+      "application_received": {
+        "subject": "Path {path} application: {companyName}",
+        "heading": "New application on path {path}",
+        "body": "{contactName} from {companyName} applied with {score} points.\n\nCost of not solving it: {costOfInaction}",
+        "action": "Open deal"
+      },
+      "queue_b_pending": {
+        "subject": "Queue B to review: {companyName}",
+        "heading": "An application has waited 24 hours for a decision",
+        "body": "The application from {companyName} is still in queue B. Approve it for A or send it to C.",
+        "action": "Review queue B"
+      },
+      "call_outcome_missing": {
+        "subject": "Outcome to record: {companyName}",
+        "heading": "Record the call outcome",
+        "body": "The call with {companyName} ended 2 hours ago and has no recorded outcome.",
+        "action": "Record outcome"
+      },
+      "integration_unavailable": {
+        "subject": "{integration} disconnected",
+        "heading": "The {integration} connection is not active",
+        "body": "Path A leads cannot book calls until the connection is active again.",
+        "action": "Open integrations"
+      },
+      "automation_failed": {
+        "subject": "Automation failed: {automation}",
+        "heading": "An automation failed",
+        "body": "The {automation} automation failed after 5 attempts, at {occurredAt}. The error is in Sentry.",
+        "action": "Open the studio"
+      }
+    }
   }
 }

@@ -216,5 +216,68 @@
         "not_found": "Este negócio não existe ou não tem acesso a ele."
       }
     }
+  },
+  "email": {
+    "footer": "Mensagem automática do sistema de gestão de projetos. Responda a este email se precisar de ajuda.",
+    "lead": {
+      "booking_link": {
+        "subject": "A sua chamada com a {agencyName}",
+        "heading": "Escolha o horário da chamada",
+        "body": "Olá {firstName}, obrigado pela candidatura.\n\nA chamada dura 45 minutos e serve para percebermos o seu contexto antes de qualquer proposta. Escolha o horário que lhe der mais jeito. O link é válido até {expiresOn}.",
+        "action": "Escolher horário"
+      },
+      "booking_confirmed": {
+        "subject": "Chamada marcada: {startsAtLabel}",
+        "heading": "A chamada está marcada",
+        "body": "Olá {firstName}, a sua chamada com a {agencyName} fica marcada para {startsAtLabel}.\n\nSe precisar de mudar a hora ou cancelar, use o botão abaixo até 2 horas antes.",
+        "meetLine": "Link da chamada: {meetUrl}",
+        "action": "Gerir marcação"
+      },
+      "call_reminder": {
+        "subject": "Lembrete: chamada com a {agencyName}",
+        "heading": "A chamada é em breve",
+        "body": "Olá {firstName}, lembramos a chamada com a {agencyName} marcada para {startsAtLabel}.",
+        "meetLine": "Link da chamada: {meetUrl}",
+        "action": "Gerir marcação"
+      },
+      "booking_cancelled": {
+        "subject": "Chamada cancelada",
+        "heading": "A chamada foi cancelada",
+        "body": "Olá {firstName}, a sua chamada com a {agencyName} foi cancelada.\n\nSe quiser marcar outra hora, use o botão abaixo.",
+        "action": "Escolher novo horário"
+      }
+    },
+    "founder": {
+      "application_received": {
+        "subject": "Candidatura {path}: {companyName}",
+        "heading": "Nova candidatura no caminho {path}",
+        "body": "{contactName}, da {companyName}, candidatou-se com {score} pontos.\n\nO que lhe custa não resolver: {costOfInaction}",
+        "action": "Abrir negócio"
+      },
+      "queue_b_pending": {
+        "subject": "Fila B por rever: {companyName}",
+        "heading": "Uma candidatura espera decisão há 24 horas",
+        "body": "A candidatura da {companyName} continua na Fila B. Aprove para A ou envie para C.",
+        "action": "Rever Fila B"
+      },
+      "call_outcome_missing": {
+        "subject": "Resultado por registar: {companyName}",
+        "heading": "Registe o resultado da chamada",
+        "body": "A chamada com a {companyName} terminou há 2 horas e ainda não tem resultado registado.",
+        "action": "Registar resultado"
+      },
+      "integration_unavailable": {
+        "subject": "{integration} desligado",
+        "heading": "A ligação ao {integration} não está ativa",
+        "body": "Os leads do caminho A não conseguem marcar chamadas até a ligação voltar a estar ativa.",
+        "action": "Abrir integrações"
+      },
+      "automation_failed": {
+        "subject": "Automação com falha: {automation}",
+        "heading": "Uma automação falhou",
+        "body": "A automação {automation} falhou depois de 5 tentativas, em {occurredAt}. O erro está no Sentry.",
+        "action": "Abrir o estúdio"
+      }
+    }
   }
 }

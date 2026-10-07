@@ -151,5 +151,70 @@
       "title": "Welcome",
       "description": "Your project progress appears here."
     }
+  },
+  "commercial": {
+    "pipeline": {
+      "codes": {
+        "p0_1": "Application received",
+        "p0_2": "Application qualified",
+        "p0_3": "Discovery scheduled",
+        "p0_4": "Discovery held",
+        "p1_1": "Core contracted",
+        "p1_2": "Information gathering",
+        "p1_3": "Analysis and architecture",
+        "p1_4": "Roadmap prepared",
+        "p1_5": "Presentation session",
+        "p1_6": "Core delivered",
+        "p2_1": "Orbit contracted",
+        "p2_2": "Kickoff held",
+        "p2_3": "Creative and technical discovery",
+        "p2_4": "Architecture approved",
+        "p2_5": "Production in progress",
+        "p2_6": "Internal QA",
+        "p2_7": "Presentation and feedback",
+        "p2_8": "Final adjustments",
+        "p2_9": "Launch",
+        "p2_10": "Orbit completed",
+        "p3_1": "Gravity contracted",
+        "p3_2": "Tracking setup",
+        "p3_3": "Campaigns configured",
+        "p3_4": "Learning and optimisation",
+        "p3_5": "Initial report",
+        "p3_6": "Gravity ongoing",
+        "p4_1": "Constellation active",
+        "p4_2": "Monthly cycle",
+        "p4_3": "QBR",
+        "p4_4": "Renewal and expansion",
+        "pX_1": "Paused",
+        "pX_2": "Blocked",
+        "pX_3": "Closed, completed",
+        "pX_4": "Closed, lost"
+      },
+      "stages": {
+        "pre_sale": "Pre-sale",
+        "core": "Core",
+        "orbit": "Orbit",
+        "gravity": "Gravity",
+        "constellation": "Constellation",
+        "off_cycle": "Off cycle"
+      },
+      "modules": {
+        "diagnosis": "Diagnosis",
+        "documents": "Documents and contracts",
+        "billing": "Billing",
+        "retainers": "Retainers"
+      },
+      "rules": {
+        "same_code": "The deal is already at this code.",
+        "not_allowed": "The pipeline moves one code at a time, in the defined order.",
+        "final_state": "A closed deal does not change code.",
+        "reason_required": "Give the reason for this change.",
+        "founder_only": "Only the founder can move a deal back.",
+        "call_required": "Schedule the call in the Calls tab before moving to 0.3.",
+        "call_outcome_required": "Record the call outcome before moving to 0.4.",
+        "module_pending": "Available once the {module} module exists.",
+        "not_found": "This deal does not exist or you do not have access to it."
+      }
+    }
   }
 }

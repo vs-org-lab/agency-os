@@ -151,5 +151,70 @@
       "title": "Bem-vindo",
       "description": "O acompanhamento do seu projeto aparece aqui."
     }
+  },
+  "commercial": {
+    "pipeline": {
+      "codes": {
+        "p0_1": "Candidatura recebida",
+        "p0_2": "Candidatura qualificada",
+        "p0_3": "Descoberta agendada",
+        "p0_4": "Descoberta realizada",
+        "p1_1": "Core contratado",
+        "p1_2": "Recolha de informação",
+        "p1_3": "Análise e arquitetura",
+        "p1_4": "Roadmap preparado",
+        "p1_5": "Sessão de apresentação",
+        "p1_6": "Core entregue",
+        "p2_1": "Orbit contratado",
+        "p2_2": "Kickoff realizado",
+        "p2_3": "Descoberta criativa e técnica",
+        "p2_4": "Arquitetura aprovada",
+        "p2_5": "Produção em curso",
+        "p2_6": "QA interno",
+        "p2_7": "Apresentação e feedback",
+        "p2_8": "Ajustes finais",
+        "p2_9": "Lançamento",
+        "p2_10": "Orbit concluído",
+        "p3_1": "Gravity contratado",
+        "p3_2": "Setup de tracking",
+        "p3_3": "Campanhas configuradas",
+        "p3_4": "Aprendizagem e otimização",
+        "p3_5": "Relatório inicial",
+        "p3_6": "Gravity em regime contínuo",
+        "p4_1": "Constellation ativo",
+        "p4_2": "Ciclo mensal",
+        "p4_3": "QBR",
+        "p4_4": "Renovação e expansão",
+        "pX_1": "Em pausa",
+        "pX_2": "Bloqueado",
+        "pX_3": "Encerrado, concluído",
+        "pX_4": "Encerrado, perdido"
+      },
+      "stages": {
+        "pre_sale": "Pré-venda",
+        "core": "Core",
+        "orbit": "Orbit",
+        "gravity": "Gravity",
+        "constellation": "Constellation",
+        "off_cycle": "Fora de ciclo"
+      },
+      "modules": {
+        "diagnosis": "Diagnóstico",
+        "documents": "Documentos e contratos",
+        "billing": "Faturação",
+        "retainers": "Retainers"
+      },
+      "rules": {
+        "same_code": "O negócio já está neste código.",
+        "not_allowed": "O pipeline avança um código de cada vez, pela ordem definida.",
+        "final_state": "Um negócio encerrado não muda de código.",
+        "reason_required": "Indique o motivo desta mudança.",
+        "founder_only": "Só o fundador pode recuar um negócio.",
+        "call_required": "Marque a chamada no separador Chamadas antes de passar a 0.3.",
+        "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
+        "module_pending": "Disponível quando o módulo {module} existir.",
+        "not_found": "Este negócio não existe ou não tem acesso a ele."
+      }
+    }
   }
 }

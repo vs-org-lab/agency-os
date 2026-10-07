@@ -285,6 +285,7 @@ export async function getHostCalendar(
   const port = createGoogleCalendarPort({
     calendarId: connection.calendarId,
     accessToken,
+    invalidateAccessToken: () => accessTokenCache.delete(connection.id),
     fetch: deps.fetch,
   });
   return { port: guardRevocation(port, onRevoked), hostUserId: host.hostUserId };

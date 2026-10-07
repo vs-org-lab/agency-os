@@ -18,15 +18,15 @@ import {
   sendCallReminder,
   type NotificationDeps,
 } from './booking/notifications';
-import { syncCallEvent } from './booking/service';
+import { runCallBookedFlow } from './booking/call-flow';
+import { syncPendingCall } from './booking/service';
 import { hostCalendar } from './calendar/integration';
 import { createDueFollowUps } from './follow-ups/sweep';
 import { nextAllowedSendTime } from '@/modules/email';
 
-const { applications, calls } = schema;
+const { applications } = schema;
 
 const RETRIES = 5;
-const HOUR_MS = 60 * 60 * 1000;
 
 type EventData<P> = { organizationId: string; clientId: string | null; payload: P };
 
@@ -73,10 +73,6 @@ function failureHandler(functionId: string) {
     const original = event.data.event?.data as { organizationId?: string } | undefined;
     await reportFailure(functionId, original?.organizationId, error);
   };
-}
-
-function future(date: Date): boolean {
-  return date.getTime() > Date.now();
 }
 
 export const onApplicationSubmitted = inngest.createFunction(
@@ -129,8 +125,10 @@ export const onApplicationReviewed = inngest.createFunction(
       );
       return (row?.source as { timeZone?: string } | undefined)?.timeZone ?? 'Europe/Lisbon';
     });
-    const sendAt = nextAllowedSendTime(new Date(), timeZone);
-    if (future(sendAt)) await step.sleepUntil('respect-quiet-hours', sendAt);
+    const sendAt = await step.run('quiet-hours-send-time', () =>
+      nextAllowedSendTime(new Date(), timeZone).toISOString(),
+    );
+    await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
     await step.run('send-booking-link', () =>
       sendBookingLinkEmail(data.payload.dealId, notificationDeps()),
     );
@@ -157,44 +155,30 @@ export const onCallBooked = inngest.createFunction(
   },
   async ({ event, step }) => {
     const data = event.data as EventData<{ callId: string; startsAt: string }>;
-    const { callId } = data.payload;
-    const startsAt = new Date(data.payload.startsAt);
-
-    const endsAt = await step.run('sync-calendar-event', async () => {
-      const [call] = await withSystemContext((tx) =>
-        tx
-          .select({ syncStatus: calls.syncStatus, endsAt: calls.endsAt })
-          .from(calls)
-          .where(eq(calls.id, callId)),
-      );
-      if (!call) return null;
-      if (call.syncStatus !== 'synced') {
-        const host = await hostCalendar(data.organizationId);
-        if (host) await syncCallEvent(callId, host.port, { withSystemContext });
-      }
-      return call.endsAt.toISOString();
-    });
-    if (!endsAt) return { skipped: true };
-
-    await step.run('send-confirmation', () => sendCallConfirmation(callId, notificationDeps()));
-
-    const dayBefore = new Date(startsAt.getTime() - 24 * HOUR_MS);
-    if (future(dayBefore)) {
-      await step.sleepUntil('wait-day-before', dayBefore);
-      await step.run('remind-day-before', () =>
-        sendCallReminder(callId, startsAt, notificationDeps()),
-      );
-    }
-    const hourBefore = new Date(startsAt.getTime() - HOUR_MS);
-    if (future(hourBefore)) {
-      await step.sleepUntil('wait-hour-before', hourBefore);
-      await step.run('remind-hour-before', () =>
-        sendCallReminder(callId, startsAt, notificationDeps()),
-      );
-    }
-    await step.sleepUntil('wait-for-outcome', new Date(new Date(endsAt).getTime() + 2 * HOUR_MS));
-    await step.run('check-outcome', () => callOutcomeMissing(callId, notificationDeps()));
-    return { skipped: false };
+    const deps = notificationDeps();
+    return runCallBookedFlow(
+      { callId: data.payload.callId, startsAt: new Date(data.payload.startsAt) },
+      {
+        run: (id, operation) => step.run(id, operation) as never,
+        sleepUntil: async (id, at) => {
+          await step.sleepUntil(id, at);
+        },
+      },
+      {
+        now: () => new Date(),
+        syncCall: async (callId) => {
+          const result = await syncPendingCall(callId, {
+            contexts: { withSystemContext },
+            calendar: hostCalendar,
+          });
+          if (result?.sync === 'failed') logger.warn('commercial.call_sync_failed', { callId });
+          return result?.endsAt ?? null;
+        },
+        sendConfirmation: (callId) => sendCallConfirmation(callId, deps),
+        sendReminder: (callId, startsAt) => sendCallReminder(callId, startsAt, deps),
+        checkOutcome: (callId) => callOutcomeMissing(callId, deps),
+      },
+    );
   },
 );
 

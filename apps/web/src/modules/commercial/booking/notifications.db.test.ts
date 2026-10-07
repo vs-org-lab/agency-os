@@ -163,7 +163,7 @@ describe('notifications', () => {
       await sendBookingLinkEmail(dealId, depsFor(sql, email));
 
       expect(email.sent[0]).toMatchObject({ to: 'ana@empresa.pt', template: 'lead.booking_link' });
-      expect(email.sent[0]?.text).toContain('https://os.example.com/apply/book/');
+      expect(email.sent[0]?.text).toContain('https://os.example.com/apply/book?token=');
       expect(email.sent[0]?.subject).toContain('Your call');
     });
   });
@@ -175,7 +175,7 @@ describe('notifications', () => {
       const port: CalendarPort = {
         freeBusy: async () => [],
         createEvent: async () => ({ eventId: 'event-9', meetUrl: 'https://meet.google.com/xyz' }),
-        updateEvent: async () => undefined,
+        updateEvent: async () => 'updated',
         deleteEvent: async () => undefined,
       };
 

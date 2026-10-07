@@ -6,13 +6,15 @@ export type CalendarEventInput = {
   end: Date;
   summary: string;
   description: string;
-  attendee: { email: string; name: string };
+  attendee: { email: string; name: string } | null;
 };
+
+export type CalendarUpdateResult = 'updated' | 'missing';
 
 export type CalendarPort = {
   freeBusy(range: Interval): Promise<Interval[]>;
   createEvent(input: CalendarEventInput): Promise<{ eventId: string; meetUrl: string | null }>;
-  updateEvent(eventId: string, input: CalendarEventInput): Promise<void>;
+  updateEvent(eventId: string, input: CalendarEventInput): Promise<CalendarUpdateResult>;
   deleteEvent(eventId: string): Promise<void>;
 };
 

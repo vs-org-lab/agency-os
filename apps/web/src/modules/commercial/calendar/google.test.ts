@@ -99,11 +99,83 @@ describe('createGoogleCalendarPort', () => {
     });
   });
 
-  it('maps 401 to revoked and 503 to provider_error', async () => {
-    const revoked = createGoogleCalendarPort({
+  it('omits attendees when the contact has no email', async () => {
+    const { calls, fetchImpl } = fakeFetch([{ status: 200, body: { id: 'event-1' } }]);
+    const port = createGoogleCalendarPort({
       calendarId: 'primary',
       accessToken: async () => 'token',
-      fetch: fakeFetch([{ status: 401, body: {} }]).fetchImpl,
+      fetch: fetchImpl,
+    });
+
+    await port.createEvent({ ...EVENT, attendee: null });
+
+    expect(calls[0]?.body).not.toHaveProperty('attendees');
+  });
+
+  it('retries once with a fresh access token after a 401', async () => {
+    const { calls, fetchImpl } = fakeFetch([
+      { status: 401, body: {} },
+      { status: 200, body: { id: 'event-1' } },
+    ]);
+    const tokens = ['stale-token', 'fresh-token'];
+    let invalidations = 0;
+    const port = createGoogleCalendarPort({
+      calendarId: 'primary',
+      accessToken: async () => tokens.shift() ?? 'unexpected',
+      invalidateAccessToken: () => {
+        invalidations += 1;
+      },
+      fetch: fetchImpl,
+    });
+
+    await expect(port.createEvent(EVENT)).resolves.toMatchObject({ eventId: 'event-1' });
+    expect(invalidations).toBe(1);
+    expect(calls.map((call) => call.authorization)).toEqual([
+      'Bearer stale-token',
+      'Bearer fresh-token',
+    ]);
+  });
+
+  it('maps a persistent 401 and rate limits to provider_error', async () => {
+    const unauthorized = createGoogleCalendarPort({
+      calendarId: 'primary',
+      accessToken: async () => 'token',
+      fetch: fakeFetch([
+        { status: 401, body: {} },
+        { status: 401, body: {} },
+      ]).fetchImpl,
+    });
+    const rateLimited = createGoogleCalendarPort({
+      calendarId: 'primary',
+      accessToken: async () => 'token',
+      fetch: fakeFetch([
+        {
+          status: 403,
+          body: {
+            error: { code: 403, errors: [{ domain: 'usageLimits', reason: 'rateLimitExceeded' }] },
+          },
+        },
+      ]).fetchImpl,
+    });
+
+    await expect(unauthorized.createEvent(EVENT)).rejects.toMatchObject({
+      reason: 'provider_error',
+    });
+    await expect(rateLimited.createEvent(EVENT)).rejects.toMatchObject({
+      reason: 'provider_error',
+    });
+  });
+
+  it('maps a permission 403 to revoked and 503 to provider_error', async () => {
+    const forbidden = createGoogleCalendarPort({
+      calendarId: 'primary',
+      accessToken: async () => 'token',
+      fetch: fakeFetch([
+        {
+          status: 403,
+          body: { error: { code: 403, errors: [{ domain: 'global', reason: 'forbidden' }] } },
+        },
+      ]).fetchImpl,
     });
     const failing = createGoogleCalendarPort({
       calendarId: 'primary',
@@ -111,7 +183,7 @@ describe('createGoogleCalendarPort', () => {
       fetch: fakeFetch([{ status: 503, body: {} }]).fetchImpl,
     });
 
-    await expect(revoked.createEvent(EVENT)).rejects.toMatchObject({ reason: 'revoked' });
+    await expect(forbidden.createEvent(EVENT)).rejects.toMatchObject({ reason: 'revoked' });
     await expect(failing.createEvent(EVENT)).rejects.toBeInstanceOf(CalendarUnavailableError);
     await expect(
       createGoogleCalendarPort({
@@ -120,6 +192,16 @@ describe('createGoogleCalendarPort', () => {
         fetch: fakeFetch([{ status: 503, body: {} }]).fetchImpl,
       }).createEvent(EVENT),
     ).rejects.toMatchObject({ reason: 'provider_error' });
+  });
+
+  it('reports an update of a deleted event as missing', async () => {
+    const port = createGoogleCalendarPort({
+      calendarId: 'primary',
+      accessToken: async () => 'token',
+      fetch: fakeFetch([{ status: 404 }]).fetchImpl,
+    });
+
+    await expect(port.updateEvent('event-1', EVENT)).resolves.toBe('missing');
   });
 
   it('treats a missing event as already deleted', async () => {

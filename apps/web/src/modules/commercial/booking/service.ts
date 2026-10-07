@@ -287,7 +287,9 @@ async function eventInput(
     end: row.endsAt,
     summary: `${row.organizationName} · ${row.companyName}`,
     description,
-    attendee: { email: row.contactEmail ?? '', name: row.contactName ?? row.companyName },
+    attendee: row.contactEmail
+      ? { email: row.contactEmail, name: row.contactName ?? row.companyName }
+      : null,
     externalEventId: row.externalEventId,
   };
 }
@@ -299,14 +301,16 @@ export async function syncCallEvent(
 ): Promise<{ meetUrl: string | null }> {
   const input = await contexts.withSystemContext((tx) => eventInput(tx, callId));
   if (input.externalEventId) {
-    await port.updateEvent(input.externalEventId, input);
-    await contexts.withSystemContext((tx) =>
-      tx.update(calls).set({ syncStatus: 'synced' }).where(eq(calls.id, callId)),
-    );
-    const [call] = await contexts.withSystemContext((tx) =>
-      tx.select({ meetUrl: calls.meetUrl }).from(calls).where(eq(calls.id, callId)),
-    );
-    return { meetUrl: call?.meetUrl ?? null };
+    const updated = await port.updateEvent(input.externalEventId, input);
+    if (updated === 'updated') {
+      await contexts.withSystemContext((tx) =>
+        tx.update(calls).set({ syncStatus: 'synced' }).where(eq(calls.id, callId)),
+      );
+      const [call] = await contexts.withSystemContext((tx) =>
+        tx.select({ meetUrl: calls.meetUrl }).from(calls).where(eq(calls.id, callId)),
+      );
+      return { meetUrl: call?.meetUrl ?? null };
+    }
   }
 
   const created = await port.createEvent(input);
@@ -317,6 +321,48 @@ export async function syncCallEvent(
       .where(eq(calls.id, callId)),
   );
   return { meetUrl: created.meetUrl };
+}
+
+export type PendingSyncResult = { endsAt: string; sync: 'synced' | 'skipped' | 'failed' };
+
+/**
+ * Brings a call's calendar event up to date without ever blocking the lead's messages: a
+ * failure is recorded on the call instead of thrown, and calls hosted by someone other than
+ * the connected calendar's owner stay out of that calendar.
+ */
+export async function syncPendingCall(
+  callId: string,
+  deps: Pick<BookingDeps, 'contexts' | 'calendar'>,
+): Promise<PendingSyncResult | null> {
+  const [call] = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .select({
+        organizationId: calls.organizationId,
+        hostUserId: calls.hostUserId,
+        status: calls.status,
+        syncStatus: calls.syncStatus,
+        endsAt: calls.endsAt,
+      })
+      .from(calls)
+      .where(eq(calls.id, callId)),
+  );
+  if (!call) return null;
+  const endsAt = call.endsAt.toISOString();
+  if (call.syncStatus === 'synced' || call.status !== 'scheduled') {
+    return { endsAt, sync: 'skipped' };
+  }
+
+  const host = await deps.calendar(call.organizationId);
+  if (!host || host.hostUserId !== call.hostUserId) return { endsAt, sync: 'skipped' };
+  try {
+    await syncCallEvent(callId, host.port, deps.contexts);
+    return { endsAt, sync: 'synced' };
+  } catch {
+    await deps.contexts.withSystemContext((tx) =>
+      tx.update(calls).set({ syncStatus: 'failed' }).where(eq(calls.id, callId)),
+    );
+    return { endsAt, sync: 'failed' };
+  }
 }
 
 async function trySync(

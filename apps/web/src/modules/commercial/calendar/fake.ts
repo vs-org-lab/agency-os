@@ -9,7 +9,7 @@ export function createFakeCalendarPort(): CalendarPort {
       return { eventId: `fake-${input.requestId}`, meetUrl: null };
     },
     async updateEvent() {
-      return;
+      return 'updated';
     },
     async deleteEvent() {
       return;

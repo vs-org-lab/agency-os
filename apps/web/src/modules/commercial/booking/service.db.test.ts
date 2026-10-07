@@ -21,6 +21,7 @@ import {
   listSlots,
   rescheduleCall,
   resolveBookingAccess,
+  syncPendingCall,
   type BookingDeps,
 } from './service';
 
@@ -34,7 +35,9 @@ const FIRST_SLOT = new Date('2026-10-13T09:00:00Z');
 
 type FakeCalendar = CalendarPort & { created: CalendarEventInput[]; deleted: string[] };
 
-function fakeCalendar(options: { failCreate?: boolean } = {}): FakeCalendar {
+function fakeCalendar(
+  options: { failCreate?: boolean; missingOnUpdate?: boolean } = {},
+): FakeCalendar {
   const created: CalendarEventInput[] = [];
   const deleted: string[] = [];
   return {
@@ -52,7 +55,7 @@ function fakeCalendar(options: { failCreate?: boolean } = {}): FakeCalendar {
       };
     },
     async updateEvent() {
-      return;
+      return options.missingOnUpdate ? 'missing' : 'updated';
     },
     async deleteEvent(eventId) {
       deleted.push(eventId);
@@ -326,6 +329,91 @@ describe('booking service', () => {
         select starts_at as starts from public.calls where id = ${booked.callId}
       `;
       expect(new Date(call?.starts ?? 0).toISOString()).toBe(later.toISOString());
+    });
+  });
+
+  async function pendingCall(
+    sql: TransactionSql,
+    world: World,
+    options: { hostUserId?: string; withoutEmail?: boolean; externalEventId?: string } = {},
+  ) {
+    const { dealId, contactId } = await prospectDeal(sql, world, world.clients.a, '0.3');
+    if (options.withoutEmail) {
+      await sql`update public.contacts set email = null where id = ${contactId}`;
+    }
+    const [call] = await sql<{ id: string }[]>`
+      insert into public.calls (organization_id, client_id, deal_id, contact_id, host_user_id,
+                                starts_at, ends_at, external_event_id)
+      values (${world.organizationId}, ${world.clients.a}, ${dealId}, ${contactId},
+              ${options.hostUserId ?? world.users.founder}, ${FIRST_SLOT.toISOString()},
+              ${new Date(FIRST_SLOT.getTime() + 45 * 60_000).toISOString()},
+              ${options.externalEventId ?? null})
+      returning id
+    `;
+    return call?.id ?? '';
+  }
+
+  async function syncState(sql: TransactionSql, callId: string) {
+    await sql`reset role`;
+    const [call] = await sql<{ sync: string; event: string | null }[]>`
+      select sync_status::text as sync, external_event_id as event
+      from public.calls where id = ${callId}
+    `;
+    return call;
+  }
+
+  it('pending sync leaves calls of another host out of the connected calendar', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const callId = await pendingCall(sql, world, { hostUserId: world.users.manager });
+      const calendar = fakeCalendar();
+
+      const result = await syncPendingCall(callId, depsFor(sql, world, calendar));
+
+      expect(result).toEqual({ endsAt: '2026-10-13T09:45:00.000Z', sync: 'skipped' });
+      expect(calendar.created).toHaveLength(0);
+      expect(await syncState(sql, callId)).toEqual({ sync: 'pending', event: null });
+    });
+  });
+
+  it('pending sync failure marks the call failed instead of throwing', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const callId = await pendingCall(sql, world);
+
+      const result = await syncPendingCall(
+        callId,
+        depsFor(sql, world, fakeCalendar({ failCreate: true })),
+      );
+
+      expect(result).toEqual({ endsAt: '2026-10-13T09:45:00.000Z', sync: 'failed' });
+      expect(await syncState(sql, callId)).toEqual({ sync: 'failed', event: null });
+    });
+  });
+
+  it('pending sync recreates an event deleted in the calendar', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const callId = await pendingCall(sql, world, { externalEventId: 'deleted-event' });
+      const calendar = fakeCalendar({ missingOnUpdate: true });
+
+      const result = await syncPendingCall(callId, depsFor(sql, world, calendar));
+
+      expect(result?.sync).toBe('synced');
+      expect(calendar.created).toHaveLength(1);
+      expect(await syncState(sql, callId)).toEqual({ sync: 'synced', event: 'event-1' });
+    });
+  });
+
+  it('pending sync invites nobody when the contact has no email', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const callId = await pendingCall(sql, world, { withoutEmail: true });
+      const calendar = fakeCalendar();
+
+      await syncPendingCall(callId, depsFor(sql, world, calendar));
+
+      expect(calendar.created[0]?.attendee).toBeNull();
     });
   });
 });

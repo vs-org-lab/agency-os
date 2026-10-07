@@ -4,10 +4,12 @@ import { CalendarUnavailableError, type CalendarEventInput, type CalendarPort } 
 export const GOOGLE_TIMEOUT_MS = 8000;
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
+const RATE_LIMIT_REASONS = new Set(['rateLimitExceeded', 'userRateLimitExceeded', 'quotaExceeded']);
 
 export type GoogleCalendarConfig = {
   calendarId: string;
   accessToken: () => Promise<string>;
+  invalidateAccessToken?: () => void;
   fetch?: typeof fetch;
   timeoutMs?: number;
 };
@@ -22,15 +24,28 @@ type EventResponse = {
   conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> };
 };
 
+type ErrorResponse = {
+  error?: { errors?: Array<{ domain?: string; reason?: string }> };
+};
+
 function eventBody(input: CalendarEventInput) {
   return {
     summary: input.summary,
     description: input.description,
     start: { dateTime: input.start.toISOString() },
     end: { dateTime: input.end.toISOString() },
-    attendees: [{ email: input.attendee.email, displayName: input.attendee.name }],
+    ...(input.attendee
+      ? { attendees: [{ email: input.attendee.email, displayName: input.attendee.name }] }
+      : {}),
     reminders: { useDefault: true },
   };
+}
+
+async function isRateLimited(response: Response): Promise<boolean> {
+  const payload = (await response.json().catch(() => ({}))) as ErrorResponse;
+  return (payload.error?.errors ?? []).some(
+    (entry) => entry.domain === 'usageLimits' || RATE_LIMIT_REASONS.has(entry.reason ?? ''),
+  );
 }
 
 export function createGoogleCalendarPort(config: GoogleCalendarConfig): CalendarPort {
@@ -38,15 +53,10 @@ export function createGoogleCalendarPort(config: GoogleCalendarConfig): Calendar
   const timeoutMs = config.timeoutMs ?? GOOGLE_TIMEOUT_MS;
   const calendarPath = `${API_BASE}/calendars/${encodeURIComponent(config.calendarId)}/events`;
 
-  async function request(
-    url: string,
-    init: { method: string; body?: unknown },
-    acceptedStatuses: number[] = [],
-  ): Promise<Response> {
+  async function send(url: string, init: { method: string; body?: unknown }): Promise<Response> {
     const token = await config.accessToken();
-    let response: Response;
     try {
-      response = await fetchImpl(url, {
+      return await fetchImpl(url, {
         method: init.method,
         headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
         body: init.body === undefined ? undefined : JSON.stringify(init.body),
@@ -58,8 +68,25 @@ export function createGoogleCalendarPort(config: GoogleCalendarConfig): Calendar
         error instanceof Error ? error.message : 'Calendar request failed',
       );
     }
+  }
+
+  /**
+   * A 401 usually means a cached access token expired early; the request is retried once with
+   * a fresh token. Only a refused refresh (invalid_grant) or a permission 403 means the
+   * founder revoked access, so rate limits and repeated 401s stay transient provider errors.
+   */
+  async function request(
+    url: string,
+    init: { method: string; body?: unknown },
+    acceptedStatuses: number[] = [],
+  ): Promise<Response> {
+    let response = await send(url, init);
+    if (response.status === 401) {
+      config.invalidateAccessToken?.();
+      response = await send(url, init);
+    }
     if (response.ok || acceptedStatuses.includes(response.status)) return response;
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 403 && !(await isRateLimited(response))) {
       throw new CalendarUnavailableError('revoked');
     }
     throw new CalendarUnavailableError(
@@ -108,10 +135,12 @@ export function createGoogleCalendarPort(config: GoogleCalendarConfig): Calendar
     },
 
     async updateEvent(eventId, input) {
-      await request(`${calendarPath}/${encodeURIComponent(eventId)}?sendUpdates=all`, {
-        method: 'PATCH',
-        body: eventBody(input),
-      });
+      const response = await request(
+        `${calendarPath}/${encodeURIComponent(eventId)}?sendUpdates=all`,
+        { method: 'PATCH', body: eventBody(input) },
+        [404, 410],
+      );
+      return response.ok ? 'updated' : 'missing';
     },
 
     async deleteEvent(eventId) {

@@ -100,6 +100,8 @@ export { COMMERCIAL_FUNCTIONS } from './automations';
 export {
   closeFollowUp,
   commercialSession,
+  convertTarget,
+  loadAcquisition,
   loadApplications,
   loadDealDetail,
   loadPipelineCards,
@@ -107,6 +109,7 @@ export {
   recordOutcome,
   reviewApplication,
   saveContact,
+  saveTarget,
   scheduleCall,
   updateTracking,
   type CommercialSession,

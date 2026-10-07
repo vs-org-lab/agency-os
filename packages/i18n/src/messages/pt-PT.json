@@ -454,6 +454,52 @@
         "title": "A Fila B está vazia",
         "description": "Não há candidaturas à espera de decisão."
       }
+    },
+    "acquisition": {
+      "title": "Angariação",
+      "description": "Empresas-alvo por setor, notas de abordagem e mensagens prontas a copiar.",
+      "add": "Nova empresa-alvo",
+      "edit": "Editar",
+      "form": {
+        "companyName": "Empresa",
+        "sector": "Setor",
+        "website": "Website",
+        "notes": "Notas de abordagem",
+        "status": "Estado",
+        "save": "Guardar",
+        "error": "Verifique os campos e tente de novo."
+      },
+      "statuses": {
+        "to_contact": "Por contactar",
+        "contacted": "Contactado",
+        "replied": "Respondeu",
+        "converted": "Convertido",
+        "discarded": "Descartado"
+      },
+      "convert": "Converter em negócio",
+      "convertDialog": {
+        "title": "Converter em negócio",
+        "description": "Cria o cliente como prospeto, o contacto e um negócio em 0.1.",
+        "fullName": "Nome do contacto",
+        "email": "Email do contacto",
+        "role": "Papel",
+        "submit": "Converter",
+        "cancel": "Cancelar",
+        "error": "Não foi possível converter esta empresa."
+      },
+      "converted": "Convertida em negócio",
+      "openDeal": "Abrir negócio",
+      "templates": {
+        "title": "Mensagens por setor",
+        "empty": "Ainda não há mensagens de angariação. Crie-as em Definições › Modelos.",
+        "allSectors": "Todos os setores",
+        "copy": "Copiar",
+        "copied": "Copiado"
+      },
+      "empty": {
+        "title": "Ainda não há empresas-alvo",
+        "description": "Acrescente as empresas que quer abordar, com as notas de cada uma."
+      }
     }
   },
   "email": {

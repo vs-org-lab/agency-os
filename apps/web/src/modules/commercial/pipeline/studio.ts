@@ -9,6 +9,13 @@ import { completeFollowUp, upsertContact, type ContactInput } from '../contacts'
 import { getDealDetail, type DealDetail } from '../deal-detail';
 import { listApplications, type ApplicationRow } from '../applications/list';
 import { reviewQueueB } from '../applications/review';
+import {
+  convertAcquisitionTarget,
+  listAcquisitionTargets,
+  listAcquisitionTemplates,
+  saveAcquisitionTarget,
+  type TargetInput,
+} from '../acquisition/service';
 import { listPipelineDeals, type PipelineCard, type PipelineFilters } from '../queries';
 import type { PipelineCode } from './codes';
 import {
@@ -101,4 +108,22 @@ export function reviewApplication(
   input: { applicationId: string; decision: 'a' | 'c' },
 ) {
   return reviewQueueB(session.claims, input, { contexts: userContexts });
+}
+
+export function loadAcquisition(session: CommercialSession) {
+  return withUserContext(session.claims, async (tx) => ({
+    targets: await listAcquisitionTargets(tx),
+    templates: await listAcquisitionTemplates(tx),
+  }));
+}
+
+export function saveTarget(session: CommercialSession, input: TargetInput) {
+  return saveAcquisitionTarget(session.claims, input, { contexts: userContexts });
+}
+
+export function convertTarget(
+  session: CommercialSession,
+  input: Parameters<typeof convertAcquisitionTarget>[1],
+) {
+  return convertAcquisitionTarget(session.claims, input, { contexts: userContexts });
 }

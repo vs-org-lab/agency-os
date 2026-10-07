@@ -454,6 +454,52 @@
         "title": "Queue B is empty",
         "description": "No applications are waiting for a decision."
       }
+    },
+    "acquisition": {
+      "title": "Acquisition",
+      "description": "Target companies by sector, approach notes and messages ready to copy.",
+      "add": "New target company",
+      "edit": "Edit",
+      "form": {
+        "companyName": "Company",
+        "sector": "Sector",
+        "website": "Website",
+        "notes": "Approach notes",
+        "status": "Status",
+        "save": "Save",
+        "error": "Check the fields and try again."
+      },
+      "statuses": {
+        "to_contact": "To contact",
+        "contacted": "Contacted",
+        "replied": "Replied",
+        "converted": "Converted",
+        "discarded": "Discarded"
+      },
+      "convert": "Convert into a deal",
+      "convertDialog": {
+        "title": "Convert into a deal",
+        "description": "Creates the client as a prospect, the contact and a deal at 0.1.",
+        "fullName": "Contact name",
+        "email": "Contact email",
+        "role": "Role",
+        "submit": "Convert",
+        "cancel": "Cancel",
+        "error": "This company could not be converted."
+      },
+      "converted": "Converted into a deal",
+      "openDeal": "Open deal",
+      "templates": {
+        "title": "Messages by sector",
+        "empty": "There are no acquisition messages yet. Create them in Settings › Templates.",
+        "allSectors": "All sectors",
+        "copy": "Copy",
+        "copied": "Copied"
+      },
+      "empty": {
+        "title": "No target companies yet",
+        "description": "Add the companies you want to approach, with notes for each one."
+      }
     }
   },
   "email": {

@@ -49,3 +49,4 @@ export { canSeePipeline, canWritePipeline, isFounderActor } from './access';
 export type { PipelineCard, PipelineFilters } from './queries';
 export type { DealAnswer, DealDetail } from './deal-detail';
 export type { ApplicationRow } from './applications/list';
+export type { AcquisitionTarget, AcquisitionTemplate } from './acquisition/service';

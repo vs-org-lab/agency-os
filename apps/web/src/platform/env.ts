@@ -33,3 +33,48 @@ export function serverEnv(): ServerEnv {
   });
   return cachedServerEnv;
 }
+
+const commercialEnvSchema = z.object({
+  PUBLIC_LINK_SECRET: z.string().min(32),
+  PUBLIC_ORGANIZATION_SLUG: z.string().min(1),
+  APP_BASE_URL: z.url(),
+});
+
+export type CommercialEnv = z.infer<typeof commercialEnvSchema>;
+
+let cachedCommercialEnv: CommercialEnv | undefined;
+
+export function commercialEnv(): CommercialEnv {
+  cachedCommercialEnv ??= commercialEnvSchema.parse({
+    PUBLIC_LINK_SECRET: process.env.PUBLIC_LINK_SECRET,
+    PUBLIC_ORGANIZATION_SLUG: process.env.PUBLIC_ORGANIZATION_SLUG,
+    APP_BASE_URL: process.env.APP_BASE_URL,
+  });
+  return cachedCommercialEnv;
+}
+
+const emailEnvSchema = z.discriminatedUnion('EMAIL_TRANSPORT', [
+  z.object({ EMAIL_TRANSPORT: z.literal('capture') }),
+  z.object({
+    EMAIL_TRANSPORT: z.literal('smtp'),
+    SMTP_HOST: z.string().min(1),
+    SMTP_PORT: z.coerce.number().int().positive(),
+    SMTP_USER: z.string().min(1),
+    SMTP_PASSWORD: z.string().min(1),
+  }),
+]);
+
+export type EmailEnv = z.infer<typeof emailEnvSchema>;
+
+let cachedEmailEnv: EmailEnv | undefined;
+
+export function emailEnv(): EmailEnv {
+  cachedEmailEnv ??= emailEnvSchema.parse({
+    EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+  });
+  return cachedEmailEnv;
+}

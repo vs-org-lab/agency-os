@@ -95,3 +95,4 @@ export {
   type PublicBookingView,
 } from './booking/public';
 export type { BookingSource } from './booking/service';
+export { COMMERCIAL_FUNCTIONS } from './automations';

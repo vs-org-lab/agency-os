@@ -237,7 +237,7 @@ export async function submitApplication(
         score: score.score,
         path: score.path,
         knockouts: score.knockouts,
-        source: source.success ? source.data : EMPTY_SOURCE,
+        source: { ...(source.success ? source.data : EMPTY_SOURCE), locale: input.locale },
         consentAt: now,
         consentTextVersion: input.consentTextVersion,
       })

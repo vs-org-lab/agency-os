@@ -21,6 +21,11 @@ jobs:
       DATABASE_DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
       AUTH_SITE_URL: http://localhost:3000
       AUTH_REDIRECT_URLS: http://localhost:3000/**
+      AUTH_PREVIEW_REDIRECT_URLS: http://localhost:3000/**
+      SMTP_HOST: localhost
+      SMTP_USER: ci@example.com
+      SMTP_PASSWORD: unused
+      SMTP_SENDER_NAME: Agency OS
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -55,6 +60,11 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           AUTH_SITE_URL: https://${{ vars.STAGING_DOMAIN }}
           AUTH_REDIRECT_URLS: https://${{ vars.STAGING_DOMAIN }}/**
+          AUTH_PREVIEW_REDIRECT_URLS: https://${{ vars.STAGING_DOMAIN }}/**
+          SMTP_HOST: smtp.gmail.com
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_SENDER_NAME: Agency OS
         run: supabase config push --project-ref "${{ vars.STAGING_SUPABASE_PROJECT_REF }}" --yes
 
   deploy:

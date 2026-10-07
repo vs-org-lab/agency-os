@@ -53,6 +53,28 @@ export function commercialEnv(): CommercialEnv {
   return cachedCommercialEnv;
 }
 
+const calendarEnvSchema = z.discriminatedUnion('CALENDAR_PROVIDER', [
+  z.object({ CALENDAR_PROVIDER: z.literal('fake') }),
+  z.object({
+    CALENDAR_PROVIDER: z.literal('google'),
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+  }),
+]);
+
+export type CalendarEnv = z.infer<typeof calendarEnvSchema>;
+
+let cachedCalendarEnv: CalendarEnv | undefined;
+
+export function calendarEnv(): CalendarEnv {
+  cachedCalendarEnv ??= calendarEnvSchema.parse({
+    CALENDAR_PROVIDER: process.env.CALENDAR_PROVIDER ?? 'fake',
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  });
+  return cachedCalendarEnv;
+}
+
 const emailEnvSchema = z.discriminatedUnion('EMAIL_TRANSPORT', [
   z.object({ EMAIL_TRANSPORT: z.literal('capture') }),
   z.object({

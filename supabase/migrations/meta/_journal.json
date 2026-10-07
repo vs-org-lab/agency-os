@@ -71,6 +71,13 @@
       "when": 1791377725836,
       "tag": "20261007125525_commercial_access",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791381419581,
+      "tag": "20261007135659_calendar_vault",
+      "breakpoints": true
     }
   ]
 }

@@ -324,5 +324,30 @@
         "body": "We received your application and will get in touch if it makes sense to move forward."
       }
     }
+  },
+  "settings": {
+    "integrations": {
+      "title": "Integrations",
+      "description": "External services connected to the studio.",
+      "google": {
+        "title": "Google Calendar",
+        "description": "Reads your availability and creates discovery calls with Google Meet."
+      },
+      "status": {
+        "none": "Not connected",
+        "active": "Connected as {email}",
+        "revoked": "Access revoked",
+        "error": "Connection error"
+      },
+      "connect": "Connect Google Calendar",
+      "reconnect": "Connect again",
+      "disconnect": "Disconnect",
+      "fakeProvider": "This environment uses a test calendar. The Google connection becomes available once the credentials are configured.",
+      "result": {
+        "connected": "Google Calendar connected.",
+        "disconnected": "Google Calendar disconnected.",
+        "error": "The Google Calendar connection could not be completed. Try again."
+      }
+    }
   }
 }

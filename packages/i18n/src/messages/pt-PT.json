@@ -324,5 +324,30 @@
         "body": "Recebemos a sua candidatura e entramos em contacto se fizer sentido avançar."
       }
     }
+  },
+  "settings": {
+    "integrations": {
+      "title": "Integrações",
+      "description": "Serviços externos ligados ao estúdio.",
+      "google": {
+        "title": "Google Calendar",
+        "description": "Lê a sua disponibilidade e cria as chamadas de descoberta com Google Meet."
+      },
+      "status": {
+        "none": "Por ligar",
+        "active": "Ligado como {email}",
+        "revoked": "Acesso revogado",
+        "error": "Erro na ligação"
+      },
+      "connect": "Ligar Google Calendar",
+      "reconnect": "Ligar de novo",
+      "disconnect": "Desligar",
+      "fakeProvider": "Este ambiente usa um calendário de teste. A ligação ao Google fica disponível quando as credenciais estiverem configuradas.",
+      "result": {
+        "connected": "Google Calendar ligado.",
+        "disconnected": "Google Calendar desligado.",
+        "error": "Não foi possível concluir a ligação ao Google Calendar. Tente de novo."
+      }
+    }
   }
 }

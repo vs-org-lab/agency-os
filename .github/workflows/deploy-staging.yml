@@ -110,7 +110,18 @@ jobs:
             --env SUPABASE_SECRET_KEY="${{ secrets.STAGING_SUPABASE_SECRET_KEY }}" \
             --env SESSION_ACTIVITY_SECRET="${{ secrets.STAGING_SESSION_ACTIVITY_SECRET }}" \
             --env INNGEST_EVENT_KEY="${{ secrets.STAGING_INNGEST_EVENT_KEY }}" \
-            --env INNGEST_SIGNING_KEY="${{ secrets.STAGING_INNGEST_SIGNING_KEY }}")
+            --env INNGEST_SIGNING_KEY="${{ secrets.STAGING_INNGEST_SIGNING_KEY }}" \
+            --env PUBLIC_LINK_SECRET="${{ secrets.STAGING_PUBLIC_LINK_SECRET }}" \
+            --env PUBLIC_ORGANIZATION_SLUG=aurion-creative \
+            --env APP_BASE_URL="https://${{ vars.STAGING_DOMAIN }}" \
+            --env EMAIL_TRANSPORT=smtp \
+            --env SMTP_HOST=smtp.gmail.com \
+            --env SMTP_PORT=465 \
+            --env SMTP_USER="${{ secrets.SMTP_USER }}" \
+            --env SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}" \
+            --env CALENDAR_PROVIDER="${{ secrets.STAGING_GOOGLE_CLIENT_ID != '' && 'google' || 'fake' }}" \
+            --env GOOGLE_CLIENT_ID="${{ secrets.STAGING_GOOGLE_CLIENT_ID }}" \
+            --env GOOGLE_CLIENT_SECRET="${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}")
           host="${url#https://}"
           curl --fail-with-body -sS -o /dev/null -X POST \
             "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \

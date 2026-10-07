@@ -1,7 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { commercialSession, reviewApplication } from '@/modules/commercial/server';
+import {
+  commercialSession,
+  loadUnseenApplicationsCount,
+  recordApplicationsSeen,
+  reviewApplication,
+} from '@/modules/commercial/server';
 import { getVerifiedClaims } from '@/platform/session';
 
 export type ReviewActionState =
@@ -20,4 +25,14 @@ export async function reviewApplicationAction(
   revalidatePath('/applications');
   revalidatePath('/pipeline');
   return { status: decision === 'a' ? 'approved' : 'rejected' };
+}
+
+export async function unseenApplicationsAction(): Promise<number> {
+  const session = await commercialSession(await getVerifiedClaims());
+  return session ? loadUnseenApplicationsCount(session) : 0;
+}
+
+export async function markApplicationsSeenAction(): Promise<void> {
+  const session = await commercialSession(await getVerifiedClaims());
+  if (session) await recordApplicationsSeen(session);
 }

@@ -24,6 +24,7 @@ export type {
   NextStepOwnerKind,
   OrgRole,
   PipelineCodeValue,
+  SeenArea,
   ThrottleKind,
   TimelineKind,
 } from './schema/enums';

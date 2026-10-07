@@ -14,8 +14,14 @@ import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { canWritePipeline } from '@/modules/commercial';
-import { commercialSession, loadApplications } from '@/modules/commercial/server';
+import {
+  commercialSession,
+  loadApplications,
+  loadApplicationsSeenAt,
+} from '@/modules/commercial/server';
 import { getVerifiedClaims } from '@/platform/session';
+import { markApplicationsSeenAction } from './actions';
+import { MarkApplicationsSeen } from './mark-seen';
 import { ReviewButtons } from './review-buttons';
 
 export const dynamic = 'force-dynamic';
@@ -35,14 +41,17 @@ export default async function ApplicationsPage({ params, searchParams }: PagePro
   const query = await searchParams;
   const tab = query.tab === 'queue_b' ? 'queue_b' : 'all';
   const search = query.q?.slice(0, 100);
-  const [rows, queue] = await Promise.all([
+  const [rows, queue, seenAt] = await Promise.all([
     loadApplications(session, { tab, search }),
     loadApplications(session, { tab: 'queue_b' }),
+    loadApplicationsSeenAt(session),
   ]);
+  const isNew = (createdAt: Date) => seenAt === null || createdAt > seenAt;
   const writable = canWritePipeline(session.actor);
 
   return (
     <div className="flex flex-col gap-6">
+      <MarkApplicationsSeen markSeen={markApplicationsSeenAction} />
       <header className="flex flex-col gap-1">
         <h1 className="text-title text-text">{t('title')}</h1>
         <p className="text-body text-text-secondary">{t('description')}</p>
@@ -113,9 +122,14 @@ export default async function ApplicationsPage({ params, searchParams }: PagePro
               {rows.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/pipeline/${row.dealId}`} className="text-text hover:underline">
-                      {row.companyName}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/pipeline/${row.dealId}`} className="text-text hover:underline">
+                        {row.companyName}
+                      </Link>
+                      {isNew(row.createdAt) ? (
+                        <Badge className="bg-info-bg text-info">{t('new')}</Badge>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell>{row.anonymized ? t('anonymized') : row.contactName}</TableCell>
                   <TableCell className="text-right tabular-nums">{row.score}</TableCell>

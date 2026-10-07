@@ -82,6 +82,7 @@
     "clients": "Clientes",
     "noClients": "Ainda não há clientes.",
     "account": "Conta",
+    "unseenLabel": "{label}, {count, plural, one {# nova} other {# novas}}",
     "studioNav": {
       "home": "Início",
       "pipeline": "Pipeline",
@@ -444,6 +445,7 @@
       },
       "direct": "Direto",
       "anonymized": "Anonimizada",
+      "new": "Nova",
       "decided": "Decidido: {path}",
       "approve": "Aprovar para A",
       "sendToC": "Enviar para C",

@@ -31,6 +31,17 @@ describe('buildNavigation', () => {
     ]);
   });
 
+  it('applications carry the unseen applications counter', () => {
+    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: true } });
+
+    expect(navigation.items.filter((item) => item.counter).map((item) => item.href)).toEqual([
+      '/applications',
+    ]);
+    expect(navigation.items.find((item) => item.href === '/applications')?.counter).toBe(
+      'unseenApplications',
+    );
+  });
+
   it('portal level links portal home and settings', () => {
     const navigation = buildNavigation({ level: 'portal' });
 

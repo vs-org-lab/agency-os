@@ -20,18 +20,28 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
 } from '@agency-os/ui/components/sidebar';
 import { ThemeToggle } from '@agency-os/ui/theme-toggle';
+import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitcher } from './locale-switcher';
-import type { NavigationIcon } from './navigation';
+import type { NavigationCounter, NavigationIcon } from './navigation';
+import { formatCounter, useLiveCounter } from './navigation-counter';
 import { signOutAction } from './sign-out-action';
 
-export type ResolvedNavigationItem = { href: string; label: string; icon: NavigationIcon };
+export type ResolvedNavigationItem = {
+  href: string;
+  label: string;
+  icon: NavigationIcon;
+  counter?: NavigationCounter;
+};
+
+export type CounterSource = { initial: number; refresh: () => Promise<number> };
 
 export type AppSidebarProps = {
   workspaceName: string;
@@ -41,6 +51,7 @@ export type AppSidebarProps = {
   footer: ResolvedNavigationItem[];
   clients?: { id: string; name: string }[];
   user: { name: string; email: string | null };
+  counters?: Partial<Record<NavigationCounter, CounterSource>>;
   labels: {
     mobileTitle: string;
     mobileDescription: string;
@@ -64,6 +75,51 @@ const ICONS = {
   target: Target,
 } as const;
 
+function NavigationItemLink({
+  item,
+  active,
+  source,
+}: {
+  item: ResolvedNavigationItem;
+  active: boolean;
+  source: CounterSource | undefined;
+}) {
+  const t = useTranslations('shell');
+  const count = useLiveCounter(source?.initial ?? 0, source?.refresh ?? noCount);
+  const display = source ? formatCounter(count) : null;
+  const Icon = ICONS[item.icon];
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+        <Link
+          href={item.href}
+          aria-current={active ? 'page' : undefined}
+          aria-label={display ? t('unseenLabel', { label: item.label, count }) : undefined}
+        >
+          <Icon aria-hidden />
+          <span>{item.label}</span>
+        </Link>
+      </SidebarMenuButton>
+      {display ? (
+        <>
+          <SidebarMenuBadge aria-hidden className="rounded-full bg-info-bg text-info">
+            {display}
+          </SidebarMenuBadge>
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-1 right-1 hidden size-2 rounded-full bg-info group-data-[collapsible=icon]:block"
+          />
+        </>
+      ) : null}
+    </SidebarMenuItem>
+  );
+}
+
+async function noCount(): Promise<number> {
+  return 0;
+}
+
 function initials(name: string): string {
   return name
     .split(/\s+/)
@@ -78,19 +134,14 @@ export function AppSidebar(props: AppSidebarProps) {
   const isActive = (href: string) =>
     href === '/' || href === '/portal' ? pathname === href : pathname.startsWith(href);
 
-  const renderItem = (item: ResolvedNavigationItem) => {
-    const Icon = ICONS[item.icon];
-    return (
-      <SidebarMenuItem key={item.href}>
-        <SidebarMenuButton asChild isActive={isActive(item.href)} tooltip={item.label}>
-          <Link href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
-            <Icon aria-hidden />
-            <span>{item.label}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    );
-  };
+  const renderItem = (item: ResolvedNavigationItem) => (
+    <NavigationItemLink
+      key={item.href}
+      item={item}
+      active={isActive(item.href)}
+      source={item.counter ? props.counters?.[item.counter] : undefined}
+    />
+  );
 
   return (
     <Sidebar

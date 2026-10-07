@@ -9,10 +9,13 @@ export type NavigationLabelKey =
   | 'shell.room.dashboard'
   | 'shell.allClients';
 
+export type NavigationCounter = 'unseenApplications';
+
 export type NavigationItem = {
   href: string;
   labelKey: NavigationLabelKey;
   icon: NavigationIcon;
+  counter?: NavigationCounter;
 };
 
 export type Navigation = {
@@ -28,7 +31,12 @@ export type NavigationLevel =
 
 const COMMERCIAL_ITEMS: NavigationItem[] = [
   { href: '/pipeline', labelKey: 'shell.studioNav.pipeline', icon: 'kanban' },
-  { href: '/applications', labelKey: 'shell.studioNav.applications', icon: 'inbox' },
+  {
+    href: '/applications',
+    labelKey: 'shell.studioNav.applications',
+    icon: 'inbox',
+    counter: 'unseenApplications',
+  },
   { href: '/acquisition', labelKey: 'shell.studioNav.acquisition', icon: 'target' },
 ];
 

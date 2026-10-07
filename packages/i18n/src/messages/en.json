@@ -82,6 +82,7 @@
     "clients": "Clients",
     "noClients": "There are no clients yet.",
     "account": "Account",
+    "unseenLabel": "{label}, {count} new",
     "studioNav": {
       "home": "Home",
       "pipeline": "Pipeline",
@@ -444,6 +445,7 @@
       },
       "direct": "Direct",
       "anonymized": "Anonymized",
+      "new": "New",
       "decided": "Decided: {path}",
       "approve": "Approve for A",
       "sendToC": "Send to C",

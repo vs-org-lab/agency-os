@@ -24,6 +24,11 @@ import type { ApplicationFormDefinition } from '../applications/form-definition'
 import { listApplications, type ApplicationRow } from '../applications/list';
 import { reviewQueueB } from '../applications/review';
 import {
+  applicationsSeenAt,
+  markApplicationsSeen,
+  unseenApplicationsCount,
+} from '../applications/unseen';
+import {
   convertAcquisitionTarget,
   listAcquisitionTargets,
   listAcquisitionTemplates,
@@ -115,6 +120,24 @@ export function loadApplications(
   input: { tab: 'all' | 'queue_b'; search?: string },
 ): Promise<ApplicationRow[]> {
   return withUserContext(session.claims, (tx) => listApplications(tx, input));
+}
+
+function viewerOf(session: CommercialSession) {
+  return { userId: session.actor.userId, organizationId: session.actor.organizationId };
+}
+
+export function loadUnseenApplicationsCount(session: CommercialSession): Promise<number> {
+  return withUserContext(session.claims, (tx) => unseenApplicationsCount(tx, viewerOf(session)));
+}
+
+export function loadApplicationsSeenAt(session: CommercialSession): Promise<Date | null> {
+  return withUserContext(session.claims, (tx) => applicationsSeenAt(tx, viewerOf(session)));
+}
+
+export function recordApplicationsSeen(session: CommercialSession): Promise<void> {
+  return withUserContext(session.claims, (tx) =>
+    markApplicationsSeen(tx, { ...viewerOf(session), now: new Date() }),
+  );
 }
 
 export function reviewApplication(

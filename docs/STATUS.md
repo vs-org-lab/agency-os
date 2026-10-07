@@ -45,6 +45,7 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-07 | Fundação integrada em `develop`; staging em https://agency-os-staging-vslab.vercel.app | PR #3, PR #4 |
 | 2026-10-07 | Conta de fundador criada no dev (Aurion Creative, Vladimir Silva) | `bootstrap:founder --deliver link` |
 | 2026-10-07 | Conta de fundador criada no staging com convite por email | `bootstrap:founder --deliver email` |
+| 2026-10-07 | Email por SMTP próprio (Gmail, sem domínio nem custo) no dev e no staging; templates de convite e link mágico com `token_hash` ativos | `supabase/config.toml` |
 | 2026-10-07 | Convites de utilizadores do cliente restritos ao fundador e ao decisor | [ADR 0006](decisions/0006-client-invitation-rights.md) |
 
 ## Critérios de aceitação da fundação
@@ -96,11 +97,16 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 - [ ] Projeto Supabase de produção em eu-west-1, plano Pro
 - [ ] Plano Vercel Pro
 - [ ] Domínio, Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth
-- [ ] Ativar os templates de email em `supabase/templates` (convite e link mágico com `token_hash`)
+- [ ] Trocar o SMTP de testes (Gmail) pelo email do domínio definitivo, com SPF, DKIM e DMARC
 - [ ] Pipeline de `main` ativo, com aprovação do fundador
 - [ ] GitHub Team e proteção de `main`
 - [ ] Monitor de disponibilidade
 - [ ] DPA revistos: Supabase, Vercel, Inngest, Sentry, Resend
+
+## Requisitos a garantir na Vaga 1
+
+- Modelos de contrato em Definições › Modelos, com geração automática do contrato a partir da proposta aceite no portal e envio para assinatura (RF-035, RF-036, RF-200, S-13).
+- Faturas emitidas pelo software certificado pela AT, com o PDF oficial e o modelo visual configurados nesse software; o OS gera com a marca apenas documentos não fiscais (pedidos de pagamento, pró-formas) (RF-041).
 
 ## Questões em aberto
 

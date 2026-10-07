@@ -9,18 +9,20 @@ import {
   listVisibleClients,
 } from '@/modules/organizations';
 import { withUserContext } from '@/platform/db';
-import { AppSidebar } from './app-sidebar';
-import { buildNavigation, type NavigationLevel } from './navigation';
+import { AppSidebar, type CounterSource } from './app-sidebar';
+import { buildNavigation, type NavigationCounter, type NavigationLevel } from './navigation';
 import type { AreaSession } from './session-guard';
 import { TopBar } from './top-bar';
 
 export async function AppShell({
   session,
   level,
+  counters,
   children,
 }: {
   session: AreaSession;
   level: NavigationLevel;
+  counters?: Partial<Record<NavigationCounter, CounterSource>>;
   children: ReactNode;
 }) {
   const t = await getTranslations();
@@ -60,6 +62,7 @@ export async function AppShell({
         items={resolve(navigation.items)}
         footer={resolve(navigation.footer)}
         clients={level.level === 'studio' ? data.clients : undefined}
+        counters={counters}
         user={{
           name: data.userName ?? session.claims.email ?? '',
           email: session.claims.email ?? null,

@@ -82,6 +82,33 @@ test.describe('commercial applications @public-writes', () => {
     await bookFirstSlot(page);
   });
 
+  test('a new application is counted in the navigation until the founder opens applications', async ({
+    page,
+    browser,
+  }) => {
+    const founder = await browser.newPage();
+    await signInWithPassword(founder, credentials.founder);
+    await founder.goto('/applications');
+    await expect(founder.getByRole('link', { name: 'Candidaturas', exact: true })).toBeVisible();
+
+    const lead = uniqueCompany('Empresa Nova');
+    await fillApplication(page, { ...lead, answers: PATH_A });
+    await submitApplication(page);
+    await expect(page.getByRole('heading', { name: 'Está dentro do perfil.' })).toBeVisible();
+
+    await founder.goto('/pipeline');
+    await expect(founder.getByRole('link', { name: 'Candidaturas, 1 nova' })).toBeVisible();
+
+    await founder.goto('/applications');
+    await expect(
+      founder
+        .getByRole('row', { name: new RegExp(lead.company) })
+        .getByText('Nova', { exact: true }),
+    ).toBeVisible();
+    await expect(founder.getByRole('link', { name: 'Candidaturas', exact: true })).toBeVisible();
+    await founder.close();
+  });
+
   test('honeypot submission shows the generic thank-you page', async ({ page }) => {
     const lead = uniqueCompany('Empresa Robô');
     await fillApplication(page, { ...lead, answers: PATH_A });

@@ -24,7 +24,7 @@ export type ApplicationSource = {
 
 export type SubmitApplicationInput = {
   answers: unknown;
-  source: ApplicationSource;
+  source: unknown;
   consentTextVersion: string;
   consentAccepted: boolean;
   honeypot: string;

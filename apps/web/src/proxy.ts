@@ -11,7 +11,11 @@ import {
   verifyActivity,
 } from './platform/activity-cookie';
 import { isSecureRequest } from './platform/request';
-import { buildSecurityHeaders, generateNonce } from './platform/security-headers';
+import {
+  buildSecurityHeaders,
+  embedOriginsForPath,
+  generateNonce,
+} from './platform/security-headers';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -31,6 +35,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
   const securityHeaders = buildSecurityHeaders(nonce, {
     isDevelopment: process.env.NODE_ENV === 'development',
     connectSources: supabaseUrl ? [supabaseUrl] : [],
+    frameAncestors: embedOriginsForPath(request.nextUrl.pathname, process.env.APPLY_EMBED_ORIGINS),
   });
 
   const requestHeaders = new Headers(request.headers);

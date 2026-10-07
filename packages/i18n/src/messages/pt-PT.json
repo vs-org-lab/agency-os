@@ -279,5 +279,50 @@
         "action": "Abrir o estúdio"
       }
     }
+  },
+  "publicApply": {
+    "title": "Candidatura",
+    "intro": "Demora cerca de 3 minutos. Aceitamos um número limitado de empresas por trimestre.",
+    "progress": "Pergunta {current} de {total}",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "submit": "Enviar candidatura",
+    "fields": {
+      "fullName": "Nome",
+      "email": "Email profissional",
+      "companyName": "Empresa",
+      "website": "Website",
+      "websitePlaceholder": "empresa.pt"
+    },
+    "personalEmail": "Este parece ser um email pessoal. Se tiver um email da empresa, prefira-o.",
+    "errors": {
+      "required": "Responda a esta pergunta para continuar.",
+      "email": "Indique um email válido.",
+      "consent": "Para enviar, aceite o tratamento dos dados.",
+      "throttled": "Recebemos várias candidaturas deste endereço. Tente de novo mais tarde.",
+      "invalid": "Algumas respostas não são válidas. Reveja-as e envie de novo.",
+      "generic": "Não foi possível enviar a candidatura. Tente de novo."
+    },
+    "consent": "Aceito que os dados desta candidatura sejam tratados para avaliar o pedido e entrar em contacto comigo, nos termos da política de privacidade.",
+    "fax": "Fax da empresa",
+    "thanks": {
+      "a": {
+        "title": "Está dentro do perfil.",
+        "body": "Escolha já o horário da chamada de 45 minutos. Também enviámos o link por email."
+      },
+      "b": {
+        "title": "Recebemos a sua candidatura.",
+        "body": "Respondemos em 24 horas úteis."
+      },
+      "c": {
+        "title": "Obrigado pela honestidade das respostas.",
+        "body": "Neste momento não somos a melhor resposta para o seu caso. Quando o momento for outro, pode voltar a candidatar-se.",
+        "selfDiagnosis": "Fazer o autodiagnóstico"
+      },
+      "generic": {
+        "title": "Obrigado.",
+        "body": "Recebemos a sua candidatura e entramos em contacto se fizer sentido avançar."
+      }
+    }
   }
 }

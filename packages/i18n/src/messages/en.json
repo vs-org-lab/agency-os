@@ -279,5 +279,50 @@
         "action": "Open the studio"
       }
     }
+  },
+  "publicApply": {
+    "title": "Application",
+    "intro": "It takes about 3 minutes. We accept a limited number of companies each quarter.",
+    "progress": "Question {current} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Send application",
+    "fields": {
+      "fullName": "Name",
+      "email": "Work email",
+      "companyName": "Company",
+      "website": "Website",
+      "websitePlaceholder": "company.com"
+    },
+    "personalEmail": "This looks like a personal email. If you have a company email, please use it.",
+    "errors": {
+      "required": "Answer this question to continue.",
+      "email": "Enter a valid email.",
+      "consent": "To send it, accept the processing of your data.",
+      "throttled": "We received several applications from this address. Try again later.",
+      "invalid": "Some answers are not valid. Review them and send again.",
+      "generic": "The application could not be sent. Try again."
+    },
+    "consent": "I agree that the data in this application is processed to assess the request and contact me, under the privacy policy.",
+    "fax": "Company fax",
+    "thanks": {
+      "a": {
+        "title": "You are a good fit.",
+        "body": "Choose a time for the 45-minute call now. We also sent you the link by email."
+      },
+      "b": {
+        "title": "We received your application.",
+        "body": "We reply within 24 business hours."
+      },
+      "c": {
+        "title": "Thank you for your honest answers.",
+        "body": "Right now we are not the best answer for your case. When the timing is different, you are welcome to apply again.",
+        "selfDiagnosis": "Take the self-assessment"
+      },
+      "generic": {
+        "title": "Thank you.",
+        "body": "We received your application and will get in touch if it makes sense to move forward."
+      }
+    }
   }
 }

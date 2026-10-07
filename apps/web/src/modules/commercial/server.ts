@@ -100,10 +100,12 @@ export { COMMERCIAL_FUNCTIONS } from './automations';
 export {
   closeFollowUp,
   commercialSession,
+  loadApplications,
   loadDealDetail,
   loadPipelineCards,
   moveDeal,
   recordOutcome,
+  reviewApplication,
   saveContact,
   scheduleCall,
   updateTracking,

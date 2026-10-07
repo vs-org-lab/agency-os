@@ -408,6 +408,52 @@
         },
         "stageChange": "{from} → {to}"
       }
+    },
+    "applications": {
+      "title": "Candidaturas",
+      "description": "Cada candidatura do site, com a pontuação, o caminho e a origem.",
+      "tabs": {
+        "label": "Filtro de candidaturas",
+        "all": "Todas",
+        "queueB": "Fila B ({count})"
+      },
+      "search": "Pesquisar empresa ou contacto",
+      "columns": {
+        "company": "Empresa",
+        "contact": "Contacto",
+        "score": "Pontuação",
+        "path": "Caminho",
+        "source": "Origem",
+        "date": "Data",
+        "actions": "Decisão"
+      },
+      "direct": "Direto",
+      "anonymized": "Anonimizada",
+      "decided": "Decidido: {path}",
+      "approve": "Aprovar para A",
+      "sendToC": "Enviar para C",
+      "confirm": {
+        "approveTitle": "Aprovar para o caminho A",
+        "approveBody": "O lead recebe por email o link para marcar a chamada.",
+        "rejectTitle": "Enviar para o caminho C",
+        "rejectBody": "O negócio é encerrado como perdido com o motivo caminho C.",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar"
+      },
+      "result": {
+        "approved": "Candidatura aprovada para A. O link de marcação segue por email.",
+        "rejected": "Candidatura enviada para C.",
+        "already_reviewed": "Esta candidatura já foi decidida.",
+        "not_found": "Não foi possível decidir esta candidatura."
+      },
+      "empty": {
+        "title": "Ainda não há candidaturas",
+        "description": "As candidaturas do site aparecem aqui assim que são enviadas."
+      },
+      "queueEmpty": {
+        "title": "A Fila B está vazia",
+        "description": "Não há candidaturas à espera de decisão."
+      }
     }
   },
   "email": {

@@ -408,6 +408,52 @@
         },
         "stageChange": "{from} → {to}"
       }
+    },
+    "applications": {
+      "title": "Applications",
+      "description": "Every application from the website, with score, path and source.",
+      "tabs": {
+        "label": "Application filter",
+        "all": "All",
+        "queueB": "Queue B ({count})"
+      },
+      "search": "Search company or contact",
+      "columns": {
+        "company": "Company",
+        "contact": "Contact",
+        "score": "Score",
+        "path": "Path",
+        "source": "Source",
+        "date": "Date",
+        "actions": "Decision"
+      },
+      "direct": "Direct",
+      "anonymized": "Anonymized",
+      "decided": "Decided: {path}",
+      "approve": "Approve for A",
+      "sendToC": "Send to C",
+      "confirm": {
+        "approveTitle": "Approve for path A",
+        "approveBody": "The lead receives the booking link by email.",
+        "rejectTitle": "Send to path C",
+        "rejectBody": "The deal is closed as lost with the reason path C.",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      },
+      "result": {
+        "approved": "Application approved for A. The booking link is sent by email.",
+        "rejected": "Application sent to C.",
+        "already_reviewed": "This application has already been decided.",
+        "not_found": "This application could not be decided."
+      },
+      "empty": {
+        "title": "No applications yet",
+        "description": "Applications from the website appear here as soon as they are sent."
+      },
+      "queueEmpty": {
+        "title": "Queue B is empty",
+        "description": "No applications are waiting for a decision."
+      }
     }
   },
   "email": {

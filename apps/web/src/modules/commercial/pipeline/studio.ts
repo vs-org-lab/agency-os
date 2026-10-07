@@ -7,6 +7,8 @@ import { recordCallOutcome, scheduleCallManually } from '../calls';
 import { hostCalendar } from '../calendar/integration';
 import { completeFollowUp, upsertContact, type ContactInput } from '../contacts';
 import { getDealDetail, type DealDetail } from '../deal-detail';
+import { listApplications, type ApplicationRow } from '../applications/list';
+import { reviewQueueB } from '../applications/review';
 import { listPipelineDeals, type PipelineCard, type PipelineFilters } from '../queries';
 import type { PipelineCode } from './codes';
 import {
@@ -85,4 +87,18 @@ export function closeFollowUp(
   input: { followUpId: string; status: 'done' | 'dismissed' },
 ) {
   return completeFollowUp(session.claims, input, { contexts: userContexts });
+}
+
+export function loadApplications(
+  session: CommercialSession,
+  input: { tab: 'all' | 'queue_b'; search?: string },
+): Promise<ApplicationRow[]> {
+  return withUserContext(session.claims, (tx) => listApplications(tx, input));
+}
+
+export function reviewApplication(
+  session: CommercialSession,
+  input: { applicationId: string; decision: 'a' | 'c' },
+) {
+  return reviewQueueB(session.claims, input, { contexts: userContexts });
 }

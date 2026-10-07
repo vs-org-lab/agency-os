@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                                   |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-07                                                                                                                                              |
-| Estado                  | Aprovado                                                                                                                                                |
+| Estado                  | Implementado (validação em staging pendente)                                                                                                            |
 | Vaga                    | 1 (sub-projetos 1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → 1D Faturação)                                                               |
 | Módulos                 | M02 CRM e pipeline, M01 Candidaturas, parte do M21 (definições comerciais)                                                                              |
 | Documentação de produto | `docs/product/01` (RF-001 a RF-017), `02` (S-05 a S-08, S-12, H-01, H-02, F1), `03` (US-01 a US-03), `04` (RN-01 a RN-11), `07` (AUT-01 a AUT-07), `08` |

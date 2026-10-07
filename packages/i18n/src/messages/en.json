@@ -83,7 +83,10 @@
     "noClients": "There are no clients yet.",
     "account": "Account",
     "studioNav": {
-      "home": "Home"
+      "home": "Home",
+      "pipeline": "Pipeline",
+      "applications": "Applications",
+      "acquisition": "Acquisition"
     },
     "room": {
       "dashboard": "Dashboard"
@@ -138,6 +141,21 @@
     "home": {
       "title": "The studio is ready",
       "description": "Work modules appear here as they are enabled."
+    },
+    "today": {
+      "title": "Today",
+      "description": "What needs you, in order of urgency.",
+      "empty": {
+        "title": "Nothing pending today",
+        "description": "Follow-ups, queue B and today's calls appear here."
+      },
+      "kinds": {
+        "follow_up": "Day {day} follow-up",
+        "queue_b": "Application in queue B",
+        "call": "Call at {time}"
+      },
+      "overdue": "Overdue",
+      "open": "Open"
     }
   },
   "room": {
@@ -150,6 +168,614 @@
     "home": {
       "title": "Welcome",
       "description": "Your project progress appears here."
+    }
+  },
+  "commercial": {
+    "pipeline": {
+      "codes": {
+        "p0_1": "Application received",
+        "p0_2": "Application qualified",
+        "p0_3": "Discovery scheduled",
+        "p0_4": "Discovery held",
+        "p1_1": "Core contracted",
+        "p1_2": "Information gathering",
+        "p1_3": "Analysis and architecture",
+        "p1_4": "Roadmap prepared",
+        "p1_5": "Presentation session",
+        "p1_6": "Core delivered",
+        "p2_1": "Orbit contracted",
+        "p2_2": "Kickoff held",
+        "p2_3": "Creative and technical discovery",
+        "p2_4": "Architecture approved",
+        "p2_5": "Production in progress",
+        "p2_6": "Internal QA",
+        "p2_7": "Presentation and feedback",
+        "p2_8": "Final adjustments",
+        "p2_9": "Launch",
+        "p2_10": "Orbit completed",
+        "p3_1": "Gravity contracted",
+        "p3_2": "Tracking setup",
+        "p3_3": "Campaigns configured",
+        "p3_4": "Learning and optimisation",
+        "p3_5": "Initial report",
+        "p3_6": "Gravity ongoing",
+        "p4_1": "Constellation active",
+        "p4_2": "Monthly cycle",
+        "p4_3": "QBR",
+        "p4_4": "Renewal and expansion",
+        "pX_1": "Paused",
+        "pX_2": "Blocked",
+        "pX_3": "Closed, completed",
+        "pX_4": "Closed, lost"
+      },
+      "stages": {
+        "pre_sale": "Pre-sale",
+        "core": "Core",
+        "orbit": "Orbit",
+        "gravity": "Gravity",
+        "constellation": "Constellation",
+        "off_cycle": "Off cycle"
+      },
+      "modules": {
+        "diagnosis": "Diagnosis",
+        "documents": "Documents and contracts",
+        "billing": "Billing",
+        "retainers": "Retainers"
+      },
+      "rules": {
+        "same_code": "The deal is already at this code.",
+        "not_allowed": "The pipeline moves one code at a time, in the defined order.",
+        "final_state": "A closed deal does not change code.",
+        "reason_required": "Give the reason for this change.",
+        "founder_only": "Only the founder can move a deal back.",
+        "call_required": "Schedule the call in the Calls tab before moving to 0.3.",
+        "call_outcome_required": "Record the call outcome before moving to 0.4.",
+        "module_pending": "Available once the {module} module exists.",
+        "not_found": "This deal does not exist or you do not have access to it."
+      },
+      "codeOption": "{code} · {name}"
+    },
+    "board": {
+      "title": "Pipeline",
+      "description": "Every deal at a single code, with the next step, the owner and the due date.",
+      "views": {
+        "label": "View",
+        "board": "Board",
+        "list": "List"
+      },
+      "stageCount": "{count, plural, =0 {No deals} one {# deal} other {# deals}}",
+      "emptyColumn": "No deals",
+      "moveTo": "Move {name} to…",
+      "moveDialog": {
+        "title": "Move deal",
+        "description": "The pipeline checks the rule of every change before applying it.",
+        "target": "Move to",
+        "reason": "Reason",
+        "reasonHint": "Required to close as lost or to move a code back.",
+        "submit": "Move",
+        "cancel": "Cancel"
+      },
+      "card": {
+        "value": "Estimated value",
+        "noNextStep": "No next step",
+        "due": "Due {date}",
+        "overdue": "Overdue",
+        "client": "Client",
+        "noOwner": "No owner"
+      },
+      "list": {
+        "client": "Company",
+        "code": "Code",
+        "nextStep": "Next step",
+        "owner": "Owner",
+        "due": "Due",
+        "value": "Value"
+      },
+      "filters": {
+        "label": "Filters",
+        "allStages": "All stages",
+        "overdue": "Overdue only",
+        "mine": "Mine only",
+        "search": "Search company or deal",
+        "apply": "Apply"
+      },
+      "empty": {
+        "title": "No deals yet",
+        "description": "Applications and acquisition create deals automatically."
+      },
+      "noResults": {
+        "title": "No deals match these filters",
+        "description": "Adjust or clear the filters to see more deals."
+      },
+      "clearFilters": "Clear filters",
+      "moved": "Deal moved to {code}.",
+      "drag": "Drag {name}"
+    },
+    "deal": {
+      "back": "Pipeline",
+      "move": "Move to…",
+      "tabs": {
+        "label": "Deal sections",
+        "summary": "Summary",
+        "application": "Application",
+        "calls": "Calls",
+        "timeline": "Timeline"
+      },
+      "tracking": {
+        "title": "Tracking",
+        "nextStep": "Next step",
+        "owner": "Owner",
+        "ownerNone": "No owner",
+        "ownerClient": "Client",
+        "dueOn": "Due date",
+        "value": "Estimated value",
+        "currency": "Currency",
+        "save": "Save",
+        "saved": "Tracking saved.",
+        "error": "The tracking could not be saved."
+      },
+      "summary": {
+        "company": "Company",
+        "website": "Website",
+        "sector": "Sector",
+        "revenue": "Revenue",
+        "source": "Source",
+        "lostReason": "Reason lost",
+        "sources": {
+          "application": "Application",
+          "acquisition": "Acquisition",
+          "referral": "Referral",
+          "client_request": "Client request"
+        }
+      },
+      "contacts": {
+        "title": "Contacts",
+        "empty": "No contacts yet.",
+        "add": "Add contact",
+        "edit": "Edit",
+        "fullName": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "jobTitle": "Job title",
+        "role": "Role",
+        "save": "Save contact",
+        "cancel": "Cancel",
+        "roles": {
+          "decision_maker": "Decision maker",
+          "operational": "Operational",
+          "client_finance": "Finance"
+        },
+        "errors": {
+          "duplicate_email": "A contact with this email already exists.",
+          "invalid_input": "Check the contact fields.",
+          "not_found": "The contact could not be saved."
+        }
+      },
+      "application": {
+        "empty": "This deal has no application.",
+        "submitted": "Received on {date}",
+        "score": "{score} points",
+        "path": "Path {path}",
+        "reviewed": "Queue B: decided for {path}",
+        "anonymized": "Application anonymized. Score, path and date remain.",
+        "costOfInaction": "What it costs not to solve this",
+        "question": "Question",
+        "answer": "Answer",
+        "points": "Points",
+        "knockout": "Knockout"
+      },
+      "calls": {
+        "empty": "No calls yet.",
+        "schedule": "Schedule call",
+        "scheduleHint": "For calls agreed by other means. The lead receives the confirmation by email.",
+        "start": "Date and time",
+        "duration": "Duration (minutes)",
+        "scheduled": "Scheduled",
+        "status": {
+          "scheduled": "Scheduled",
+          "cancelled": "Cancelled",
+          "completed": "Held",
+          "no_show": "No show"
+        },
+        "outcomes": {
+          "advance": "Advance",
+          "decline": "Decline",
+          "follow_up": "Follow up"
+        },
+        "meet": "Open Google Meet",
+        "record": "Record outcome",
+        "recordStatus": "Status",
+        "outcome": "Outcome",
+        "reason": "Reason",
+        "notes": "Notes",
+        "saveOutcome": "Save outcome",
+        "errors": {
+          "outcome_required": "Choose the call outcome.",
+          "reason_required": "Give the reason for declining.",
+          "invalid_input": "Check the fields.",
+          "not_found": "It could not be saved.",
+          "already_scheduled": "This deal already has a scheduled call."
+        }
+      },
+      "followUps": {
+        "title": "Follow-ups",
+        "empty": "No open follow-ups.",
+        "day": "Day {day}",
+        "due": "Due {date}",
+        "copy": "Copy message",
+        "copied": "Message copied",
+        "done": "Done",
+        "dismiss": "Dismiss"
+      },
+      "timeline": {
+        "empty": "No activity yet.",
+        "by": "by {name}",
+        "kinds": {
+          "application_submitted": "Application received",
+          "application_reviewed": "Queue B reviewed",
+          "stage_changed": "Code changed",
+          "call_booked": "Call booked",
+          "call_rescheduled": "Call rescheduled",
+          "call_cancelled": "Call cancelled",
+          "call_completed": "Call outcome recorded",
+          "follow_up_created": "Follow-up created",
+          "follow_up_completed": "Follow-up closed"
+        },
+        "stageChange": "{from} → {to}"
+      }
+    },
+    "applications": {
+      "title": "Applications",
+      "description": "Every application from the website, with score, path and source.",
+      "tabs": {
+        "label": "Application filter",
+        "all": "All",
+        "queueB": "Queue B ({count})"
+      },
+      "search": "Search company or contact",
+      "columns": {
+        "company": "Company",
+        "contact": "Contact",
+        "score": "Score",
+        "path": "Path",
+        "source": "Source",
+        "date": "Date",
+        "actions": "Decision"
+      },
+      "direct": "Direct",
+      "anonymized": "Anonymized",
+      "decided": "Decided: {path}",
+      "approve": "Approve for A",
+      "sendToC": "Send to C",
+      "confirm": {
+        "approveTitle": "Approve for path A",
+        "approveBody": "The lead receives the booking link by email.",
+        "rejectTitle": "Send to path C",
+        "rejectBody": "The deal is closed as lost with the reason path C.",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      },
+      "result": {
+        "approved": "Application approved for A. The booking link is sent by email.",
+        "rejected": "Application sent to C.",
+        "already_reviewed": "This application has already been decided.",
+        "not_found": "This application could not be decided.",
+        "stage_refused": "This deal is already closed and cannot be moved to C."
+      },
+      "empty": {
+        "title": "No applications yet",
+        "description": "Applications from the website appear here as soon as they are sent."
+      },
+      "queueEmpty": {
+        "title": "Queue B is empty",
+        "description": "No applications are waiting for a decision."
+      }
+    },
+    "acquisition": {
+      "title": "Acquisition",
+      "description": "Target companies by sector, approach notes and messages ready to copy.",
+      "add": "New target company",
+      "edit": "Edit",
+      "form": {
+        "companyName": "Company",
+        "sector": "Sector",
+        "website": "Website",
+        "notes": "Approach notes",
+        "status": "Status",
+        "save": "Save",
+        "error": "Check the fields and try again."
+      },
+      "statuses": {
+        "to_contact": "To contact",
+        "contacted": "Contacted",
+        "replied": "Replied",
+        "converted": "Converted",
+        "discarded": "Discarded"
+      },
+      "convert": "Convert into a deal",
+      "convertDialog": {
+        "title": "Convert into a deal",
+        "description": "Creates the client as a prospect, the contact and a deal at 0.1.",
+        "fullName": "Contact name",
+        "email": "Contact email",
+        "role": "Role",
+        "submit": "Convert",
+        "cancel": "Cancel",
+        "error": "This company could not be converted."
+      },
+      "converted": "Converted into a deal",
+      "openDeal": "Open deal",
+      "templates": {
+        "title": "Messages by sector",
+        "empty": "There are no acquisition messages yet. Create them in Settings › Templates.",
+        "allSectors": "All sectors",
+        "copy": "Copy",
+        "copied": "Copied"
+      },
+      "empty": {
+        "title": "No target companies yet",
+        "description": "Add the companies you want to approach, with notes for each one."
+      }
+    }
+  },
+  "email": {
+    "footer": "Automatic message from the project management system. Reply to this email if you need help.",
+    "lead": {
+      "booking_link": {
+        "subject": "Your call with {agencyName}",
+        "heading": "Choose a time for the call",
+        "body": "Hello {firstName}, thank you for applying.\n\nThe call lasts 45 minutes and helps us understand your context before any proposal. Choose the time that suits you best. The link is valid until {expiresOn}.",
+        "action": "Choose a time"
+      },
+      "booking_confirmed": {
+        "subject": "Call booked: {startsAtLabel}",
+        "heading": "Your call is booked",
+        "body": "Hello {firstName}, your call with {agencyName} is booked for {startsAtLabel}.\n\nIf you need to change the time or cancel, use the button below up to 2 hours before.",
+        "meetLine": "Call link: {meetUrl}",
+        "action": "Manage booking"
+      },
+      "call_reminder": {
+        "subject": "Reminder: call with {agencyName}",
+        "heading": "Your call is coming up",
+        "body": "Hello {firstName}, this is a reminder of your call with {agencyName} on {startsAtLabel}.",
+        "meetLine": "Call link: {meetUrl}",
+        "action": "Manage booking"
+      },
+      "booking_cancelled": {
+        "subject": "Call cancelled",
+        "heading": "Your call was cancelled",
+        "body": "Hello {firstName}, your call with {agencyName} was cancelled.\n\nIf you want to book another time, use the button below.",
+        "action": "Choose a new time"
+      }
+    },
+    "founder": {
+      "application_received": {
+        "subject": "Path {path} application: {companyName}",
+        "heading": "New application on path {path}",
+        "body": "{contactName} from {companyName} applied with {score} points.\n\nCost of not solving it: {costOfInaction}",
+        "action": "Open deal"
+      },
+      "queue_b_pending": {
+        "subject": "Queue B to review: {companyName}",
+        "heading": "An application has waited 24 hours for a decision",
+        "body": "The application from {companyName} is still in queue B. Approve it for A or send it to C.",
+        "action": "Review queue B"
+      },
+      "call_outcome_missing": {
+        "subject": "Outcome to record: {companyName}",
+        "heading": "Record the call outcome",
+        "body": "The call with {companyName} ended 2 hours ago and has no recorded outcome.",
+        "action": "Record outcome"
+      },
+      "integration_unavailable": {
+        "subject": "{integration} disconnected",
+        "heading": "The {integration} connection is not active",
+        "body": "Path A leads cannot book calls until the connection is active again.",
+        "action": "Open integrations"
+      },
+      "automation_failed": {
+        "subject": "Automation failed: {automation}",
+        "heading": "An automation failed",
+        "body": "The {automation} automation failed after 5 attempts, at {occurredAt}. The error is in Sentry.",
+        "action": "Open the studio"
+      }
+    }
+  },
+  "publicApply": {
+    "title": "Application",
+    "intro": "It takes about 3 minutes. We accept a limited number of companies each quarter.",
+    "progress": "Question {current} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Send application",
+    "fields": {
+      "fullName": "Name",
+      "email": "Work email",
+      "companyName": "Company",
+      "website": "Website",
+      "websitePlaceholder": "company.com"
+    },
+    "personalEmail": "This looks like a personal email. If you have a company email, please use it.",
+    "errors": {
+      "required": "Answer this question to continue.",
+      "email": "Enter a valid email.",
+      "consent": "To send it, accept the processing of your data.",
+      "throttled": "We received several applications from this address. Try again later.",
+      "invalid": "Some answers are not valid. Review them and send again.",
+      "generic": "The application could not be sent. Try again."
+    },
+    "consent": "I agree that the data in this application is processed to assess the request and contact me, under the privacy policy.",
+    "fax": "Company fax",
+    "thanks": {
+      "a": {
+        "title": "You are a good fit.",
+        "body": "Choose a time for the 45-minute call now. We also sent you the link by email."
+      },
+      "b": {
+        "title": "We received your application.",
+        "body": "We reply within 24 business hours."
+      },
+      "c": {
+        "title": "Thank you for your honest answers.",
+        "body": "Right now we are not the best answer for your case. When the timing is different, you are welcome to apply again.",
+        "selfDiagnosis": "Take the self-assessment"
+      },
+      "generic": {
+        "title": "Thank you.",
+        "body": "We received your application and will get in touch if it makes sense to move forward."
+      }
+    },
+    "booking": {
+      "title": "Choose a time",
+      "timeZone": "Time zone",
+      "duration": "{minutes}-minute video call.",
+      "days": "Available days",
+      "times": "Available times",
+      "noSlots": "There are no free times in the coming days. We will reply by email within 24 business hours.",
+      "confirmTitle": "Confirm the call",
+      "confirm": "Confirm booking",
+      "change": "Choose another time",
+      "booked": {
+        "title": "Your call is booked",
+        "body": "{when}. We sent the confirmation and the link to manage the booking by email."
+      },
+      "meet": "Call link",
+      "slotTaken": "This time was just taken. Choose another one.",
+      "unavailable": "Online booking is not available right now. We reply within 24 business hours.",
+      "closed": "This booking link is no longer active.",
+      "throttled": "Too many attempts. Wait a moment and try again.",
+      "tooLate": "This booking can no longer be changed online. Reply to the confirmation email.",
+      "error": "The booking could not be completed. Try again.",
+      "manage": {
+        "title": "Your booking",
+        "current": "Booked for {when}.",
+        "reschedule": "Change the time",
+        "cancel": "Cancel the call",
+        "cancelled": "The call was cancelled. You can choose another time if you want."
+      }
+    }
+  },
+  "settings": {
+    "integrations": {
+      "title": "Integrations",
+      "description": "External services connected to the studio.",
+      "google": {
+        "title": "Google Calendar",
+        "description": "Reads your availability and creates discovery calls with Google Meet."
+      },
+      "status": {
+        "none": "Not connected",
+        "active": "Connected as {email}",
+        "revoked": "Access revoked",
+        "error": "Connection error"
+      },
+      "connect": "Connect Google Calendar",
+      "reconnect": "Connect again",
+      "disconnect": "Disconnect",
+      "fakeProvider": "This environment uses a test calendar. The Google connection becomes available once the credentials are configured.",
+      "result": {
+        "connected": "Google Calendar connected.",
+        "disconnected": "Google Calendar disconnected.",
+        "error": "The Google Calendar connection could not be completed. Try again."
+      }
+    },
+    "nav": {
+      "label": "Settings",
+      "sessions": "Sessions",
+      "integrations": "Integrations",
+      "application": "Application",
+      "booking": "Booking",
+      "templates": "Templates"
+    },
+    "application": {
+      "title": "Application",
+      "description": "Questions, points, knockouts and path thresholds. Publishing creates a new version; applications keep the version they were scored with.",
+      "currentVersion": "Active version: {version}",
+      "thresholds": {
+        "title": "Path thresholds",
+        "a": "Minimum score for path A",
+        "b": "Minimum score for path B"
+      },
+      "question": {
+        "labelPt": "Question (Portuguese)",
+        "labelEn": "Question (English)",
+        "required": "Required",
+        "remove": "Remove question",
+        "kind": {
+          "contact": "Name and email",
+          "company": "Company and website",
+          "single_choice": "Single choice",
+          "long_text": "Free text"
+        },
+        "showIf": "Shown only when the previous answer requires it."
+      },
+      "option": {
+        "labelPt": "Option (Portuguese)",
+        "labelEn": "Option (English)",
+        "points": "Points",
+        "knockout": "Knockout",
+        "remove": "Remove option",
+        "add": "Add option"
+      },
+      "addChoice": "Add a choice question",
+      "addText": "Add a text question",
+      "maxScore": "Maximum score: {score}",
+      "preview": {
+        "title": "Score preview",
+        "description": "Choose answers to see the score and the path.",
+        "result": "{score} points · path {path}"
+      },
+      "publish": "Publish new version",
+      "published": "Version {version} published.",
+      "invalid": "The configuration has errors: {issues}"
+    },
+    "booking": {
+      "title": "Booking",
+      "description": "Hours when path A leads can book the discovery call.",
+      "timeZone": "Time zone",
+      "days": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      },
+      "start": "Start",
+      "end": "End",
+      "closed": "Closed",
+      "duration": "Call duration (minutes)",
+      "buffer": "Buffer between calls (minutes)",
+      "notice": "Minimum notice (hours)",
+      "horizon": "Booking horizon (days)",
+      "selfDiagnosis": "Self-assessment URL (path C)",
+      "anonymize": "Anonymize path C applications after (months)",
+      "save": "Save",
+      "saved": "Booking saved.",
+      "invalid": "Check the hours and the values."
+    },
+    "templates": {
+      "title": "Message templates",
+      "description": "Suggested messages for follow-ups and acquisition. Use '{firstName}', '{companyName}' and '{callDate}'.",
+      "kinds": {
+        "follow_up": "Follow-up",
+        "acquisition": "Acquisition",
+        "email": "Email"
+      },
+      "new": "New template",
+      "edit": "Edit",
+      "kind": "Type",
+      "name": "Name",
+      "sector": "Sector",
+      "day": "Day",
+      "locale": "Language",
+      "subject": "Subject",
+      "body": "Message",
+      "save": "Save template",
+      "saved": "Template saved.",
+      "invalid": "Check the template fields.",
+      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
     }
   }
 }

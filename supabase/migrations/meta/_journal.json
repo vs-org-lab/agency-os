@@ -57,6 +57,41 @@
       "when": 1791327920607,
       "tag": "20261006230520_client_membership_rights",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791377100126,
+      "tag": "20261007124500_commercial_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791377725836,
+      "tag": "20261007125525_commercial_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791381419581,
+      "tag": "20261007135659_calendar_vault",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791392912431,
+      "tag": "20261007170832_application_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791401823807,
+      "tag": "20261007193703_deal_stage_change_sequence",
+      "breakpoints": true
     }
   ]
 }

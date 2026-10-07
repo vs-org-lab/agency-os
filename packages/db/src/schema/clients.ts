@@ -1,5 +1,6 @@
 import { index, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core';
 import { archivedAt, id, timestamps } from './columns';
+import { clientLifecycleEnum } from './enums';
 import { organizations } from './organizations';
 
 export const clients = pgTable(
@@ -13,6 +14,9 @@ export const clients = pgTable(
     taxId: text('tax_id'),
     sector: text('sector'),
     size: text('size'),
+    website: text('website'),
+    revenueBand: text('revenue_band'),
+    lifecycle: clientLifecycleEnum('lifecycle').notNull().default('active'),
     logoPath: text('logo_path'),
     portalDomain: text('portal_domain').unique(),
     ...timestamps,

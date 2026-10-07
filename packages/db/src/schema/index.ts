@@ -5,3 +5,7 @@ export * from './clients';
 export * from './memberships';
 export * from './audit';
 export * from './events';
+export * from './contacts';
+export * from './deals';
+export * from './applications';
+export * from './commercial';

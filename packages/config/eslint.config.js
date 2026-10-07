@@ -9,8 +9,9 @@ import tseslint from 'typescript-eslint';
 const moduleBoundary = {
   patterns: [
     {
-      regex: '^@/modules/[^/]+/.+',
-      message: 'Import modules through their public entry point (@/modules/<name>).',
+      regex: '^@/modules/[^/]+/(?!server$).+',
+      message:
+        'Import modules through their public entry points (@/modules/<name> or @/modules/<name>/server).',
     },
   ],
 };

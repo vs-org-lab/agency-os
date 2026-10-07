@@ -1,6 +1,15 @@
 'use client';
 
-import { ArrowLeft, Home, LayoutDashboard, LogOut, Settings } from 'lucide-react';
+import {
+  ArrowLeft,
+  Home,
+  Inbox,
+  KanbanSquare,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Target,
+} from 'lucide-react';
 import { BrandSymbol } from '@agency-os/ui/brand';
 import {
   Sidebar,
@@ -46,7 +55,14 @@ export type AppSidebarProps = {
   };
 };
 
-const ICONS = { home: Home, settings: Settings, dashboard: LayoutDashboard } as const;
+const ICONS = {
+  home: Home,
+  settings: Settings,
+  dashboard: LayoutDashboard,
+  kanban: KanbanSquare,
+  inbox: Inbox,
+  target: Target,
+} as const;
 
 function initials(name: string): string {
   return name

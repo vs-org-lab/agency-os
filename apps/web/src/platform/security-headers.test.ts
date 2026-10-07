@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSecurityHeaders, generateNonce } from './security-headers';
+import { buildSecurityHeaders, embedOriginsForPath, generateNonce } from './security-headers';
 
 function directives(csp: string): Map<string, string[]> {
   return new Map(
@@ -69,6 +69,39 @@ describe('security headers', () => {
     for (const feature of ['camera=()', 'microphone=()', 'geolocation=()', 'payment=()']) {
       expect(permissions).toContain(feature);
     }
+  });
+
+  it('allows configured embed origins on apply routes', () => {
+    const configured =
+      'https://aurion.agency, https://www.aurion.agency/path, javascript:alert(1), nonsense';
+
+    expect(embedOriginsForPath('/apply', configured)).toEqual([
+      'https://aurion.agency',
+      'https://www.aurion.agency',
+    ]);
+    expect(embedOriginsForPath('/en/apply/thanks', configured)).toEqual([
+      'https://aurion.agency',
+      'https://www.aurion.agency',
+    ]);
+    expect(embedOriginsForPath('/applications', configured)).toEqual([]);
+    expect(embedOriginsForPath('/sign-in', configured)).toEqual([]);
+    expect(embedOriginsForPath('/apply', undefined)).toEqual([]);
+  });
+
+  it('keeps frame-ancestors none elsewhere', () => {
+    const csp = directives(
+      buildSecurityHeaders('n', { frameAncestors: [] }).get('Content-Security-Policy') ?? '',
+    );
+    expect(csp.get('frame-ancestors')).toEqual(["'none'"]);
+  });
+
+  it('drops X-Frame-Options only when embedding is allowed', () => {
+    const embedded = buildSecurityHeaders('n', { frameAncestors: ['https://aurion.agency'] });
+    const csp = directives(embedded.get('Content-Security-Policy') ?? '');
+
+    expect(csp.get('frame-ancestors')).toEqual(['https://aurion.agency']);
+    expect(embedded.get('X-Frame-Options')).toBeNull();
+    expect(buildSecurityHeaders('n').get('X-Frame-Options')).toBe('DENY');
   });
 
   it('generates unique base64 nonces of at least 128 bits', () => {

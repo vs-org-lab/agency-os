@@ -53,7 +53,12 @@ jobs:
             --env SUPABASE_SECRET_KEY="${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}" \
             --env SESSION_ACTIVITY_SECRET="${{ secrets.PREVIEW_SESSION_ACTIVITY_SECRET }}" \
             --env INNGEST_EVENT_KEY="${{ secrets.PREVIEW_INNGEST_EVENT_KEY }}" \
-            --env INNGEST_SIGNING_KEY="${{ secrets.PREVIEW_INNGEST_SIGNING_KEY }}")
+            --env INNGEST_SIGNING_KEY="${{ secrets.PREVIEW_INNGEST_SIGNING_KEY }}" \
+            --env PUBLIC_LINK_SECRET="${{ secrets.PREVIEW_PUBLIC_LINK_SECRET }}" \
+            --env PUBLIC_ORGANIZATION_SLUG=e2e-studio \
+            --env EMAIL_TRANSPORT=capture \
+            --env CALENDAR_PROVIDER=fake \
+            --env APPLY_IP_LIMIT_PER_HOUR=1000)
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Comment preview URL
         uses: actions/github-script@v8
@@ -85,6 +90,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SECRET_KEY: ${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}
       DATABASE_DIRECT_URL: ${{ secrets.PREVIEW_DATABASE_DIRECT_URL }}
+      PUBLIC_LINK_SECRET: ${{ secrets.PREVIEW_PUBLIC_LINK_SECRET }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

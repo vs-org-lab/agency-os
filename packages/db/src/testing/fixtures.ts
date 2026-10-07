@@ -137,3 +137,78 @@ export async function createFixtureWorld(sql: TransactionSql): Promise<World> {
     users: { founder, manager, freelancer, finance, decisionMakerA, operationalA, clientFinanceB },
   };
 }
+
+export type CommercialFixture = {
+  formId: string;
+  a: CommercialRecords;
+  b: CommercialRecords;
+};
+
+export type CommercialRecords = {
+  contactId: string;
+  dealId: string;
+  callId: string;
+  applicationId: string;
+};
+
+async function seedCommercialRecords(
+  sql: TransactionSql,
+  input: { organizationId: string; clientId: string; formId: string; hostUserId: string },
+): Promise<CommercialRecords> {
+  const { organizationId, clientId, formId, hostUserId } = input;
+  const suffix = randomUUID().slice(0, 8);
+  const [contact] = await sql<{ id: string }[]>`
+    insert into public.contacts (organization_id, client_id, full_name, email, role)
+    values (${organizationId}, ${clientId}, 'Contact', ${`contact-${suffix}@test.agency-os.invalid`}, 'decision_maker')
+    returning id
+  `;
+  const [deal] = await sql<{ id: string }[]>`
+    insert into public.deals (organization_id, client_id, title, pipeline_code, source)
+    values (${organizationId}, ${clientId}, 'Diagnosis', '0.3', 'application')
+    returning id
+  `;
+  if (!contact || !deal) throw new Error('Commercial fixture was not created');
+  const [call] = await sql<{ id: string }[]>`
+    insert into public.calls (organization_id, client_id, deal_id, contact_id, host_user_id, starts_at, ends_at)
+    values (${organizationId}, ${clientId}, ${deal.id}, ${contact.id}, ${hostUserId},
+            now() + interval '2 days', now() + interval '2 days 45 minutes')
+    returning id
+  `;
+  const [application] = await sql<{ id: string }[]>`
+    insert into public.applications (organization_id, client_id, contact_id, deal_id, form_id,
+                                     answers, score, path, consent_at, consent_text_version)
+    values (${organizationId}, ${clientId}, ${contact.id}, ${deal.id}, ${formId},
+            '{}'::jsonb, 10, 'a', now(), 'v1')
+    returning id
+  `;
+  if (!call || !application) throw new Error('Commercial fixture was not created');
+  await sql`
+    insert into public.follow_ups (organization_id, client_id, deal_id, call_id, due_on, sequence_day, suggested_message)
+    values (${organizationId}, ${clientId}, ${deal.id}, ${call.id}, current_date, 3, 'Message')
+  `;
+  await sql`
+    insert into public.timeline_entries (organization_id, client_id, deal_id, kind)
+    values (${organizationId}, ${clientId}, ${deal.id}, 'call_booked')
+  `;
+  return { contactId: contact.id, dealId: deal.id, callId: call.id, applicationId: application.id };
+}
+
+export async function createCommercialFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<CommercialFixture> {
+  const [form] = await sql<{ id: string }[]>`
+    insert into public.application_forms (organization_id, version, definition, is_active)
+    values (${world.organizationId}, 1, '{}'::jsonb, true)
+    returning id
+  `;
+  if (!form) throw new Error('Commercial fixture form was not created');
+  const seed = (clientId: string) =>
+    seedCommercialRecords(sql, {
+      organizationId: world.organizationId,
+      clientId,
+      formId: form.id,
+      hostUserId: world.users.founder,
+    });
+  return { formId: form.id, a: await seed(world.clients.a), b: await seed(world.clients.b) };
+}

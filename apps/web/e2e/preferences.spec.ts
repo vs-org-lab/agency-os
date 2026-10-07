@@ -12,7 +12,7 @@ test('theme and locale preferences apply across the shell', async ({ page }) => 
 
   await page.getByRole('radio', { name: 'English' }).click();
   await expect(page).toHaveURL(/\/en$/);
-  await expect(page.getByRole('heading', { name: 'The studio is ready' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Today', exact: true })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('html')).toHaveClass(/dark/);
 

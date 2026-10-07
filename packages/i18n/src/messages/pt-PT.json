@@ -83,7 +83,10 @@
     "noClients": "Ainda não há clientes.",
     "account": "Conta",
     "studioNav": {
-      "home": "Início"
+      "home": "Início",
+      "pipeline": "Pipeline",
+      "applications": "Candidaturas",
+      "acquisition": "Angariação"
     },
     "room": {
       "dashboard": "Dashboard"
@@ -138,6 +141,21 @@
     "home": {
       "title": "O estúdio está pronto",
       "description": "Os módulos de trabalho aparecem aqui à medida que forem ativados."
+    },
+    "today": {
+      "title": "Hoje",
+      "description": "O que precisa de si, por ordem de urgência.",
+      "empty": {
+        "title": "Nada pendente para hoje",
+        "description": "Os acompanhamentos, a Fila B e as chamadas do dia aparecem aqui."
+      },
+      "kinds": {
+        "follow_up": "Acompanhamento do dia {day}",
+        "queue_b": "Candidatura na Fila B",
+        "call": "Chamada às {time}"
+      },
+      "overdue": "Atrasado",
+      "open": "Abrir"
     }
   },
   "room": {
@@ -150,6 +168,614 @@
     "home": {
       "title": "Bem-vindo",
       "description": "O acompanhamento do seu projeto aparece aqui."
+    }
+  },
+  "commercial": {
+    "pipeline": {
+      "codes": {
+        "p0_1": "Candidatura recebida",
+        "p0_2": "Candidatura qualificada",
+        "p0_3": "Descoberta agendada",
+        "p0_4": "Descoberta realizada",
+        "p1_1": "Core contratado",
+        "p1_2": "Recolha de informação",
+        "p1_3": "Análise e arquitetura",
+        "p1_4": "Roadmap preparado",
+        "p1_5": "Sessão de apresentação",
+        "p1_6": "Core entregue",
+        "p2_1": "Orbit contratado",
+        "p2_2": "Kickoff realizado",
+        "p2_3": "Descoberta criativa e técnica",
+        "p2_4": "Arquitetura aprovada",
+        "p2_5": "Produção em curso",
+        "p2_6": "QA interno",
+        "p2_7": "Apresentação e feedback",
+        "p2_8": "Ajustes finais",
+        "p2_9": "Lançamento",
+        "p2_10": "Orbit concluído",
+        "p3_1": "Gravity contratado",
+        "p3_2": "Setup de tracking",
+        "p3_3": "Campanhas configuradas",
+        "p3_4": "Aprendizagem e otimização",
+        "p3_5": "Relatório inicial",
+        "p3_6": "Gravity em regime contínuo",
+        "p4_1": "Constellation ativo",
+        "p4_2": "Ciclo mensal",
+        "p4_3": "QBR",
+        "p4_4": "Renovação e expansão",
+        "pX_1": "Em pausa",
+        "pX_2": "Bloqueado",
+        "pX_3": "Encerrado, concluído",
+        "pX_4": "Encerrado, perdido"
+      },
+      "stages": {
+        "pre_sale": "Pré-venda",
+        "core": "Core",
+        "orbit": "Orbit",
+        "gravity": "Gravity",
+        "constellation": "Constellation",
+        "off_cycle": "Fora de ciclo"
+      },
+      "modules": {
+        "diagnosis": "Diagnóstico",
+        "documents": "Documentos e contratos",
+        "billing": "Faturação",
+        "retainers": "Retainers"
+      },
+      "rules": {
+        "same_code": "O negócio já está neste código.",
+        "not_allowed": "O pipeline avança um código de cada vez, pela ordem definida.",
+        "final_state": "Um negócio encerrado não muda de código.",
+        "reason_required": "Indique o motivo desta mudança.",
+        "founder_only": "Só o fundador pode recuar um negócio.",
+        "call_required": "Marque a chamada no separador Chamadas antes de passar a 0.3.",
+        "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
+        "module_pending": "Disponível quando o módulo {module} existir.",
+        "not_found": "Este negócio não existe ou não tem acesso a ele."
+      },
+      "codeOption": "{code} · {name}"
+    },
+    "board": {
+      "title": "Pipeline",
+      "description": "Cada negócio num único código, com o próximo passo, o responsável e o prazo.",
+      "views": {
+        "label": "Vista",
+        "board": "Quadro",
+        "list": "Lista"
+      },
+      "stageCount": "{count, plural, =0 {Sem negócios} one {# negócio} other {# negócios}}",
+      "emptyColumn": "Sem negócios",
+      "moveTo": "Mover {name} para…",
+      "moveDialog": {
+        "title": "Mover negócio",
+        "description": "O pipeline confirma a regra de cada mudança antes de a aplicar.",
+        "target": "Mover para",
+        "reason": "Motivo",
+        "reasonHint": "Obrigatório para encerrar como perdido ou para recuar um código.",
+        "submit": "Mover",
+        "cancel": "Cancelar"
+      },
+      "card": {
+        "value": "Valor estimado",
+        "noNextStep": "Sem próximo passo",
+        "due": "Prazo {date}",
+        "overdue": "Prazo ultrapassado",
+        "client": "Cliente",
+        "noOwner": "Sem responsável"
+      },
+      "list": {
+        "client": "Empresa",
+        "code": "Código",
+        "nextStep": "Próximo passo",
+        "owner": "Responsável",
+        "due": "Prazo",
+        "value": "Valor"
+      },
+      "filters": {
+        "label": "Filtros",
+        "allStages": "Todas as etapas",
+        "overdue": "Só prazos ultrapassados",
+        "mine": "Só os meus",
+        "search": "Pesquisar empresa ou negócio",
+        "apply": "Aplicar"
+      },
+      "empty": {
+        "title": "Ainda não há negócios",
+        "description": "As candidaturas e a angariação criam negócios automaticamente."
+      },
+      "noResults": {
+        "title": "Nenhum negócio com estes filtros",
+        "description": "Ajuste ou limpe os filtros para ver mais negócios."
+      },
+      "clearFilters": "Limpar filtros",
+      "moved": "Negócio movido para {code}.",
+      "drag": "Arrastar {name}"
+    },
+    "deal": {
+      "back": "Pipeline",
+      "move": "Mover para…",
+      "tabs": {
+        "label": "Secções do negócio",
+        "summary": "Resumo",
+        "application": "Candidatura",
+        "calls": "Chamadas",
+        "timeline": "Linha temporal"
+      },
+      "tracking": {
+        "title": "Rastreio",
+        "nextStep": "Próximo passo",
+        "owner": "Responsável",
+        "ownerNone": "Sem responsável",
+        "ownerClient": "Cliente",
+        "dueOn": "Prazo",
+        "value": "Valor estimado",
+        "currency": "Moeda",
+        "save": "Guardar",
+        "saved": "Rastreio guardado.",
+        "error": "Não foi possível guardar o rastreio."
+      },
+      "summary": {
+        "company": "Empresa",
+        "website": "Website",
+        "sector": "Setor",
+        "revenue": "Faturação",
+        "source": "Origem",
+        "lostReason": "Motivo de perda",
+        "sources": {
+          "application": "Candidatura",
+          "acquisition": "Angariação",
+          "referral": "Indicação",
+          "client_request": "Pedido do cliente"
+        }
+      },
+      "contacts": {
+        "title": "Contactos",
+        "empty": "Ainda não há contactos.",
+        "add": "Adicionar contacto",
+        "edit": "Editar",
+        "fullName": "Nome",
+        "email": "Email",
+        "phone": "Telefone",
+        "jobTitle": "Função",
+        "role": "Papel",
+        "save": "Guardar contacto",
+        "cancel": "Cancelar",
+        "roles": {
+          "decision_maker": "Decisor",
+          "operational": "Operacional",
+          "client_finance": "Financeiro"
+        },
+        "errors": {
+          "duplicate_email": "Já existe um contacto com este email.",
+          "invalid_input": "Verifique os campos do contacto.",
+          "not_found": "Não foi possível guardar o contacto."
+        }
+      },
+      "application": {
+        "empty": "Este negócio não tem candidatura.",
+        "submitted": "Recebida em {date}",
+        "score": "{score} pontos",
+        "path": "Caminho {path}",
+        "reviewed": "Fila B: decidido para {path}",
+        "anonymized": "Candidatura anonimizada. Restam a pontuação, o caminho e a data.",
+        "costOfInaction": "O que lhe custa não resolver isto",
+        "question": "Pergunta",
+        "answer": "Resposta",
+        "points": "Pontos",
+        "knockout": "Eliminatório"
+      },
+      "calls": {
+        "empty": "Ainda não há chamadas.",
+        "schedule": "Marcar chamada",
+        "scheduleHint": "Para chamadas combinadas por outro meio. O lead recebe a confirmação por email.",
+        "start": "Data e hora",
+        "duration": "Duração (minutos)",
+        "scheduled": "Marcada",
+        "status": {
+          "scheduled": "Marcada",
+          "cancelled": "Cancelada",
+          "completed": "Feita",
+          "no_show": "Faltou"
+        },
+        "outcomes": {
+          "advance": "Avança",
+          "decline": "Recusa",
+          "follow_up": "Acompanhar"
+        },
+        "meet": "Abrir Google Meet",
+        "record": "Registar resultado",
+        "recordStatus": "Estado",
+        "outcome": "Resultado",
+        "reason": "Motivo",
+        "notes": "Notas",
+        "saveOutcome": "Guardar resultado",
+        "errors": {
+          "outcome_required": "Escolha o resultado da chamada.",
+          "reason_required": "Indique o motivo da recusa.",
+          "invalid_input": "Verifique os campos.",
+          "not_found": "Não foi possível guardar.",
+          "already_scheduled": "Este negócio já tem uma chamada marcada."
+        }
+      },
+      "followUps": {
+        "title": "Acompanhamentos",
+        "empty": "Sem acompanhamentos em aberto.",
+        "day": "Dia {day}",
+        "due": "Para {date}",
+        "copy": "Copiar mensagem",
+        "copied": "Mensagem copiada",
+        "done": "Feito",
+        "dismiss": "Dispensar"
+      },
+      "timeline": {
+        "empty": "Ainda não há atividade.",
+        "by": "por {name}",
+        "kinds": {
+          "application_submitted": "Candidatura recebida",
+          "application_reviewed": "Fila B revista",
+          "stage_changed": "Código alterado",
+          "call_booked": "Chamada marcada",
+          "call_rescheduled": "Chamada remarcada",
+          "call_cancelled": "Chamada cancelada",
+          "call_completed": "Resultado da chamada registado",
+          "follow_up_created": "Acompanhamento criado",
+          "follow_up_completed": "Acompanhamento fechado"
+        },
+        "stageChange": "{from} → {to}"
+      }
+    },
+    "applications": {
+      "title": "Candidaturas",
+      "description": "Cada candidatura do site, com a pontuação, o caminho e a origem.",
+      "tabs": {
+        "label": "Filtro de candidaturas",
+        "all": "Todas",
+        "queueB": "Fila B ({count})"
+      },
+      "search": "Pesquisar empresa ou contacto",
+      "columns": {
+        "company": "Empresa",
+        "contact": "Contacto",
+        "score": "Pontuação",
+        "path": "Caminho",
+        "source": "Origem",
+        "date": "Data",
+        "actions": "Decisão"
+      },
+      "direct": "Direto",
+      "anonymized": "Anonimizada",
+      "decided": "Decidido: {path}",
+      "approve": "Aprovar para A",
+      "sendToC": "Enviar para C",
+      "confirm": {
+        "approveTitle": "Aprovar para o caminho A",
+        "approveBody": "O lead recebe por email o link para marcar a chamada.",
+        "rejectTitle": "Enviar para o caminho C",
+        "rejectBody": "O negócio é encerrado como perdido com o motivo caminho C.",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar"
+      },
+      "result": {
+        "approved": "Candidatura aprovada para A. O link de marcação segue por email.",
+        "rejected": "Candidatura enviada para C.",
+        "already_reviewed": "Esta candidatura já foi decidida.",
+        "not_found": "Não foi possível decidir esta candidatura.",
+        "stage_refused": "Este negócio já está fechado e não pode ser movido para C."
+      },
+      "empty": {
+        "title": "Ainda não há candidaturas",
+        "description": "As candidaturas do site aparecem aqui assim que são enviadas."
+      },
+      "queueEmpty": {
+        "title": "A Fila B está vazia",
+        "description": "Não há candidaturas à espera de decisão."
+      }
+    },
+    "acquisition": {
+      "title": "Angariação",
+      "description": "Empresas-alvo por setor, notas de abordagem e mensagens prontas a copiar.",
+      "add": "Nova empresa-alvo",
+      "edit": "Editar",
+      "form": {
+        "companyName": "Empresa",
+        "sector": "Setor",
+        "website": "Website",
+        "notes": "Notas de abordagem",
+        "status": "Estado",
+        "save": "Guardar",
+        "error": "Verifique os campos e tente de novo."
+      },
+      "statuses": {
+        "to_contact": "Por contactar",
+        "contacted": "Contactado",
+        "replied": "Respondeu",
+        "converted": "Convertido",
+        "discarded": "Descartado"
+      },
+      "convert": "Converter em negócio",
+      "convertDialog": {
+        "title": "Converter em negócio",
+        "description": "Cria o cliente como prospeto, o contacto e um negócio em 0.1.",
+        "fullName": "Nome do contacto",
+        "email": "Email do contacto",
+        "role": "Papel",
+        "submit": "Converter",
+        "cancel": "Cancelar",
+        "error": "Não foi possível converter esta empresa."
+      },
+      "converted": "Convertida em negócio",
+      "openDeal": "Abrir negócio",
+      "templates": {
+        "title": "Mensagens por setor",
+        "empty": "Ainda não há mensagens de angariação. Crie-as em Definições › Modelos.",
+        "allSectors": "Todos os setores",
+        "copy": "Copiar",
+        "copied": "Copiado"
+      },
+      "empty": {
+        "title": "Ainda não há empresas-alvo",
+        "description": "Acrescente as empresas que quer abordar, com as notas de cada uma."
+      }
+    }
+  },
+  "email": {
+    "footer": "Mensagem automática do sistema de gestão de projetos. Responda a este email se precisar de ajuda.",
+    "lead": {
+      "booking_link": {
+        "subject": "A sua chamada com a {agencyName}",
+        "heading": "Escolha o horário da chamada",
+        "body": "Olá {firstName}, obrigado pela candidatura.\n\nA chamada dura 45 minutos e serve para percebermos o seu contexto antes de qualquer proposta. Escolha o horário que lhe der mais jeito. O link é válido até {expiresOn}.",
+        "action": "Escolher horário"
+      },
+      "booking_confirmed": {
+        "subject": "Chamada marcada: {startsAtLabel}",
+        "heading": "A chamada está marcada",
+        "body": "Olá {firstName}, a sua chamada com a {agencyName} fica marcada para {startsAtLabel}.\n\nSe precisar de mudar a hora ou cancelar, use o botão abaixo até 2 horas antes.",
+        "meetLine": "Link da chamada: {meetUrl}",
+        "action": "Gerir marcação"
+      },
+      "call_reminder": {
+        "subject": "Lembrete: chamada com a {agencyName}",
+        "heading": "A chamada é em breve",
+        "body": "Olá {firstName}, lembramos a chamada com a {agencyName} marcada para {startsAtLabel}.",
+        "meetLine": "Link da chamada: {meetUrl}",
+        "action": "Gerir marcação"
+      },
+      "booking_cancelled": {
+        "subject": "Chamada cancelada",
+        "heading": "A chamada foi cancelada",
+        "body": "Olá {firstName}, a sua chamada com a {agencyName} foi cancelada.\n\nSe quiser marcar outra hora, use o botão abaixo.",
+        "action": "Escolher novo horário"
+      }
+    },
+    "founder": {
+      "application_received": {
+        "subject": "Candidatura {path}: {companyName}",
+        "heading": "Nova candidatura no caminho {path}",
+        "body": "{contactName}, da {companyName}, candidatou-se com {score} pontos.\n\nO que lhe custa não resolver: {costOfInaction}",
+        "action": "Abrir negócio"
+      },
+      "queue_b_pending": {
+        "subject": "Fila B por rever: {companyName}",
+        "heading": "Uma candidatura espera decisão há 24 horas",
+        "body": "A candidatura da {companyName} continua na Fila B. Aprove para A ou envie para C.",
+        "action": "Rever Fila B"
+      },
+      "call_outcome_missing": {
+        "subject": "Resultado por registar: {companyName}",
+        "heading": "Registe o resultado da chamada",
+        "body": "A chamada com a {companyName} terminou há 2 horas e ainda não tem resultado registado.",
+        "action": "Registar resultado"
+      },
+      "integration_unavailable": {
+        "subject": "{integration} desligado",
+        "heading": "A ligação ao {integration} não está ativa",
+        "body": "Os leads do caminho A não conseguem marcar chamadas até a ligação voltar a estar ativa.",
+        "action": "Abrir integrações"
+      },
+      "automation_failed": {
+        "subject": "Automação com falha: {automation}",
+        "heading": "Uma automação falhou",
+        "body": "A automação {automation} falhou depois de 5 tentativas, em {occurredAt}. O erro está no Sentry.",
+        "action": "Abrir o estúdio"
+      }
+    }
+  },
+  "publicApply": {
+    "title": "Candidatura",
+    "intro": "Demora cerca de 3 minutos. Aceitamos um número limitado de empresas por trimestre.",
+    "progress": "Pergunta {current} de {total}",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "submit": "Enviar candidatura",
+    "fields": {
+      "fullName": "Nome",
+      "email": "Email profissional",
+      "companyName": "Empresa",
+      "website": "Website",
+      "websitePlaceholder": "empresa.pt"
+    },
+    "personalEmail": "Este parece ser um email pessoal. Se tiver um email da empresa, prefira-o.",
+    "errors": {
+      "required": "Responda a esta pergunta para continuar.",
+      "email": "Indique um email válido.",
+      "consent": "Para enviar, aceite o tratamento dos dados.",
+      "throttled": "Recebemos várias candidaturas deste endereço. Tente de novo mais tarde.",
+      "invalid": "Algumas respostas não são válidas. Reveja-as e envie de novo.",
+      "generic": "Não foi possível enviar a candidatura. Tente de novo."
+    },
+    "consent": "Aceito que os dados desta candidatura sejam tratados para avaliar o pedido e entrar em contacto comigo, nos termos da política de privacidade.",
+    "fax": "Fax da empresa",
+    "thanks": {
+      "a": {
+        "title": "Está dentro do perfil.",
+        "body": "Escolha já o horário da chamada de 45 minutos. Também enviámos o link por email."
+      },
+      "b": {
+        "title": "Recebemos a sua candidatura.",
+        "body": "Respondemos em 24 horas úteis."
+      },
+      "c": {
+        "title": "Obrigado pela honestidade das respostas.",
+        "body": "Neste momento não somos a melhor resposta para o seu caso. Quando o momento for outro, pode voltar a candidatar-se.",
+        "selfDiagnosis": "Fazer o autodiagnóstico"
+      },
+      "generic": {
+        "title": "Obrigado.",
+        "body": "Recebemos a sua candidatura e entramos em contacto se fizer sentido avançar."
+      }
+    },
+    "booking": {
+      "title": "Escolha o horário",
+      "timeZone": "Fuso horário",
+      "duration": "Chamada de {minutes} minutos por vídeo.",
+      "days": "Dias disponíveis",
+      "times": "Horários disponíveis",
+      "noSlots": "Não há horários livres nos próximos dias. Respondemos por email em 24 horas úteis.",
+      "confirmTitle": "Confirmar a chamada",
+      "confirm": "Confirmar marcação",
+      "change": "Escolher outro horário",
+      "booked": {
+        "title": "A chamada está marcada",
+        "body": "{when}. Enviámos a confirmação e o link para gerir a marcação por email."
+      },
+      "meet": "Link da chamada",
+      "slotTaken": "Este horário acabou de ser ocupado. Escolha outro.",
+      "unavailable": "De momento não é possível marcar online. Respondemos em 24 horas úteis.",
+      "closed": "Este link de marcação já não está ativo.",
+      "throttled": "Demasiadas tentativas. Aguarde um pouco e tente de novo.",
+      "tooLate": "Já não é possível alterar esta marcação online. Responda ao email de confirmação.",
+      "error": "Não foi possível concluir a marcação. Tente de novo.",
+      "manage": {
+        "title": "A sua marcação",
+        "current": "Marcada para {when}.",
+        "reschedule": "Mudar de horário",
+        "cancel": "Cancelar chamada",
+        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário."
+      }
+    }
+  },
+  "settings": {
+    "integrations": {
+      "title": "Integrações",
+      "description": "Serviços externos ligados ao estúdio.",
+      "google": {
+        "title": "Google Calendar",
+        "description": "Lê a sua disponibilidade e cria as chamadas de descoberta com Google Meet."
+      },
+      "status": {
+        "none": "Por ligar",
+        "active": "Ligado como {email}",
+        "revoked": "Acesso revogado",
+        "error": "Erro na ligação"
+      },
+      "connect": "Ligar Google Calendar",
+      "reconnect": "Ligar de novo",
+      "disconnect": "Desligar",
+      "fakeProvider": "Este ambiente usa um calendário de teste. A ligação ao Google fica disponível quando as credenciais estiverem configuradas.",
+      "result": {
+        "connected": "Google Calendar ligado.",
+        "disconnected": "Google Calendar desligado.",
+        "error": "Não foi possível concluir a ligação ao Google Calendar. Tente de novo."
+      }
+    },
+    "nav": {
+      "label": "Definições",
+      "sessions": "Sessões",
+      "integrations": "Integrações",
+      "application": "Candidatura",
+      "booking": "Agenda",
+      "templates": "Modelos"
+    },
+    "application": {
+      "title": "Candidatura",
+      "description": "Perguntas, pontos, eliminatórios e limites dos caminhos. Publicar cria uma versão nova; as candidaturas guardam a versão com que foram pontuadas.",
+      "currentVersion": "Versão ativa: {version}",
+      "thresholds": {
+        "title": "Limites dos caminhos",
+        "a": "Pontuação mínima para o caminho A",
+        "b": "Pontuação mínima para o caminho B"
+      },
+      "question": {
+        "labelPt": "Pergunta (português)",
+        "labelEn": "Pergunta (inglês)",
+        "required": "Obrigatória",
+        "remove": "Remover pergunta",
+        "kind": {
+          "contact": "Nome e email",
+          "company": "Empresa e website",
+          "single_choice": "Escolha única",
+          "long_text": "Texto livre"
+        },
+        "showIf": "Só aparece quando a resposta anterior o exige."
+      },
+      "option": {
+        "labelPt": "Opção (português)",
+        "labelEn": "Opção (inglês)",
+        "points": "Pontos",
+        "knockout": "Eliminatório",
+        "remove": "Remover opção",
+        "add": "Adicionar opção"
+      },
+      "addChoice": "Adicionar pergunta de escolha",
+      "addText": "Adicionar pergunta de texto",
+      "maxScore": "Pontuação máxima: {score}",
+      "preview": {
+        "title": "Pré-visualização da pontuação",
+        "description": "Escolha respostas para ver a pontuação e o caminho.",
+        "result": "{score} pontos · caminho {path}"
+      },
+      "publish": "Publicar nova versão",
+      "published": "Versão {version} publicada.",
+      "invalid": "A configuração tem erros: {issues}"
+    },
+    "booking": {
+      "title": "Agenda",
+      "description": "Horário em que os leads do caminho A podem marcar a chamada de descoberta.",
+      "timeZone": "Fuso horário",
+      "days": {
+        "mon": "Segunda",
+        "tue": "Terça",
+        "wed": "Quarta",
+        "thu": "Quinta",
+        "fri": "Sexta",
+        "sat": "Sábado",
+        "sun": "Domingo"
+      },
+      "start": "Início",
+      "end": "Fim",
+      "closed": "Fechado",
+      "duration": "Duração da chamada (minutos)",
+      "buffer": "Intervalo entre chamadas (minutos)",
+      "notice": "Antecedência mínima (horas)",
+      "horizon": "Horizonte de marcação (dias)",
+      "selfDiagnosis": "URL do autodiagnóstico (caminho C)",
+      "anonymize": "Anonimizar candidaturas C ao fim de (meses)",
+      "save": "Guardar",
+      "saved": "Agenda guardada.",
+      "invalid": "Verifique os horários e os valores."
+    },
+    "templates": {
+      "title": "Modelos de mensagem",
+      "description": "Mensagens sugeridas nos acompanhamentos e na angariação. Use '{firstName}', '{companyName}' e '{callDate}'.",
+      "kinds": {
+        "follow_up": "Acompanhamento",
+        "acquisition": "Angariação",
+        "email": "Email"
+      },
+      "new": "Novo modelo",
+      "edit": "Editar",
+      "kind": "Tipo",
+      "name": "Nome",
+      "sector": "Setor",
+      "day": "Dia",
+      "locale": "Idioma",
+      "subject": "Assunto",
+      "body": "Mensagem",
+      "save": "Guardar modelo",
+      "saved": "Modelo guardado.",
+      "invalid": "Verifique os campos do modelo.",
+      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
     }
   }
 }

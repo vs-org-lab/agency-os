@@ -1,0 +1,270 @@
+import 'server-only';
+import * as Sentry from '@sentry/nextjs';
+import { eq } from 'drizzle-orm';
+import { schema } from '@agency-os/db';
+import { emailPort } from '@/modules/email/server';
+import { inngest } from '@/modules/events';
+import { withSystemContext } from '@/platform/db';
+import { commercialEnv } from '@/platform/env';
+import { logger } from '@/platform/logger';
+import { alertNewApplication, remindPendingQueueB } from './applications/alerts';
+import { anonymizeExpiredApplications } from './applications/anonymize';
+import {
+  alertFounders,
+  callOutcomeMissing,
+  sendBookingCancelled,
+  sendBookingLinkEmail,
+  sendCallConfirmation,
+  sendCallReminder,
+  type NotificationDeps,
+} from './booking/notifications';
+import { runCallBookedFlow } from './booking/call-flow';
+import { syncPendingCall } from './booking/service';
+import { hostCalendar } from './calendar/integration';
+import { createDueFollowUps } from './follow-ups/sweep';
+import { nextAllowedSendTime } from '@/modules/email';
+
+const { applications } = schema;
+
+const RETRIES = 5;
+
+type EventData<P> = { organizationId: string; clientId: string | null; payload: P };
+
+function notificationDeps(): NotificationDeps {
+  const env = commercialEnv();
+  return {
+    contexts: { withSystemContext },
+    email: emailPort(),
+    appBaseUrl: env.APP_BASE_URL,
+    linkSecret: env.PUBLIC_LINK_SECRET,
+    now: () => new Date(),
+  };
+}
+
+async function reportFailure(
+  functionId: string,
+  organizationId: string | undefined,
+  error: unknown,
+) {
+  logger.error('commercial.automation_failed', { functionId, error });
+  Sentry.captureException(error, { tags: { automation: functionId } });
+  if (!organizationId) return;
+  const deps = notificationDeps();
+  await alertFounders(
+    organizationId,
+    'founder.automation_failed',
+    {
+      automation: functionId,
+      occurredAt: new Date().toISOString(),
+      appUrl: new URL('/', deps.appBaseUrl).toString(),
+    },
+    deps,
+  );
+}
+
+function failureHandler(functionId: string) {
+  return async ({
+    error,
+    event,
+  }: {
+    error: unknown;
+    event: { data: { event?: { data?: unknown } } };
+  }) => {
+    const original = event.data.event?.data as { organizationId?: string } | undefined;
+    await reportFailure(functionId, original?.organizationId, error);
+  };
+}
+
+export const onApplicationSubmitted = inngest.createFunction(
+  {
+    id: 'commercial-application-submitted',
+    triggers: [{ event: 'commercial.application.submitted' }],
+    retries: RETRIES,
+    onFailure: failureHandler('commercial-application-submitted'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as EventData<{ applicationId: string; dealId: string; path: string }>;
+    const { applicationId, dealId, path } = data.payload;
+    if (path === 'c') return { skipped: true };
+
+    if (path === 'a') {
+      await step.run('send-booking-link', () => sendBookingLinkEmail(dealId, notificationDeps()));
+    }
+    await step.run('alert-founders', () => alertNewApplication(applicationId, notificationDeps()));
+    if (path === 'b') {
+      await step.sleep('wait-for-queue-b-review', '24h');
+      await step.run('remind-queue-b', () =>
+        remindPendingQueueB(applicationId, notificationDeps()),
+      );
+    }
+    return { skipped: false };
+  },
+);
+
+export const onApplicationReviewed = inngest.createFunction(
+  {
+    id: 'commercial-application-reviewed',
+    triggers: [{ event: 'commercial.application.reviewed' }],
+    retries: RETRIES,
+    onFailure: failureHandler('commercial-application-reviewed'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as EventData<{
+      applicationId: string;
+      dealId: string;
+      decision: string;
+    }>;
+    if (data.payload.decision !== 'a') return { skipped: true };
+
+    const timeZone = await step.run('lead-time-zone', async () => {
+      const [row] = await withSystemContext((tx) =>
+        tx
+          .select({ source: applications.source })
+          .from(applications)
+          .where(eq(applications.id, data.payload.applicationId)),
+      );
+      return (row?.source as { timeZone?: string } | undefined)?.timeZone ?? 'Europe/Lisbon';
+    });
+    const sendAt = await step.run('quiet-hours-send-time', () =>
+      nextAllowedSendTime(new Date(), timeZone).toISOString(),
+    );
+    await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
+    await step.run('send-booking-link', () =>
+      sendBookingLinkEmail(data.payload.dealId, notificationDeps()),
+    );
+    return { skipped: false };
+  },
+);
+
+export const onCallBooked = inngest.createFunction(
+  {
+    id: 'commercial-call-booked',
+    triggers: [{ event: 'commercial.call.booked' }, { event: 'commercial.call.rescheduled' }],
+    retries: RETRIES,
+    cancelOn: [
+      {
+        event: 'commercial.call.rescheduled',
+        if: 'async.data.payload.callId == event.data.payload.callId',
+      },
+      {
+        event: 'commercial.call.cancelled',
+        if: 'async.data.payload.callId == event.data.payload.callId',
+      },
+    ],
+    onFailure: failureHandler('commercial-call-booked'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as EventData<{ callId: string; startsAt: string }>;
+    const deps = notificationDeps();
+    return runCallBookedFlow(
+      { callId: data.payload.callId, startsAt: new Date(data.payload.startsAt) },
+      {
+        run: (id, operation) => step.run(id, operation) as never,
+        sleepUntil: async (id, at) => {
+          await step.sleepUntil(id, at);
+        },
+      },
+      {
+        now: () => new Date(),
+        syncCall: async (callId) => {
+          const result = await syncPendingCall(callId, {
+            contexts: { withSystemContext },
+            calendar: hostCalendar,
+          });
+          if (result?.sync === 'failed') logger.warn('commercial.call_sync_failed', { callId });
+          return result?.endsAt ?? null;
+        },
+        sendConfirmation: (callId) => sendCallConfirmation(callId, deps),
+        sendReminder: (callId, startsAt) => sendCallReminder(callId, startsAt, deps),
+        checkOutcome: (callId) => callOutcomeMissing(callId, deps),
+      },
+    );
+  },
+);
+
+export const onCallCancelled = inngest.createFunction(
+  {
+    id: 'commercial-call-cancelled',
+    triggers: [{ event: 'commercial.call.cancelled' }],
+    retries: RETRIES,
+    onFailure: failureHandler('commercial-call-cancelled'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as EventData<{
+      callId: string;
+      notifyLead?: boolean;
+      externalEventId?: string | null;
+    }>;
+    const { callId, notifyLead, externalEventId } = data.payload;
+    if (externalEventId) {
+      await step.run('delete-calendar-event', async () => {
+        const host = await hostCalendar(data.organizationId);
+        await host?.port.deleteEvent(externalEventId);
+      });
+    }
+    if (notifyLead !== false) {
+      await step.run('send-cancellation', () => sendBookingCancelled(callId, notificationDeps()));
+    }
+  },
+);
+
+export const onCalendarUnavailable = inngest.createFunction(
+  {
+    id: 'commercial-calendar-unavailable',
+    triggers: [{ event: 'commercial.calendar.unavailable' }],
+    retries: RETRIES,
+    rateLimit: { key: 'event.data.organizationId', limit: 1, period: '24h' },
+    onFailure: failureHandler('commercial-calendar-unavailable'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as EventData<unknown>;
+    await step.run('alert-founders', () => {
+      const deps = notificationDeps();
+      return alertFounders(
+        data.organizationId,
+        'founder.integration_unavailable',
+        {
+          integration: 'Google Calendar',
+          settingsUrl: new URL('/settings/integrations', deps.appBaseUrl).toString(),
+        },
+        deps,
+      );
+    });
+  },
+);
+
+export const followUpSweep = inngest.createFunction(
+  {
+    id: 'commercial-follow-up-sweep',
+    triggers: [{ cron: 'TZ=Europe/Lisbon 0 8 * * *' }],
+    retries: RETRIES,
+    onFailure: failureHandler('commercial-follow-up-sweep'),
+  },
+  async ({ step }) =>
+    step.run('create-due-follow-ups', () =>
+      createDueFollowUps(new Date(), { contexts: { withSystemContext } }),
+    ),
+);
+
+export const anonymizationSweep = inngest.createFunction(
+  {
+    id: 'commercial-anonymization-sweep',
+    triggers: [{ cron: 'TZ=Europe/Lisbon 30 3 * * *' }],
+    retries: RETRIES,
+    onFailure: failureHandler('commercial-anonymization-sweep'),
+  },
+  async ({ step }) =>
+    step.run('anonymize-expired-applications', () =>
+      anonymizeExpiredApplications(new Date(), { contexts: { withSystemContext } }),
+    ),
+);
+
+export const COMMERCIAL_FUNCTIONS = [
+  onApplicationSubmitted,
+  onApplicationReviewed,
+  onCallBooked,
+  onCallCancelled,
+  onCalendarUnavailable,
+  followUpSweep,
+  anonymizationSweep,
+];

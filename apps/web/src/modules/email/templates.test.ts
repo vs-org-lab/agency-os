@@ -1,0 +1,110 @@
+import { describe, expect, it } from 'vitest';
+import {
+  EMAIL_TEMPLATE_KEYS,
+  renderEmail,
+  type EmailParams,
+  type EmailTemplateKey,
+} from './templates';
+
+const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
+  'lead.booking_link': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    bookingUrl: 'https://os.example.com/apply/book/token',
+    expiresOn: '21 de outubro',
+  },
+  'lead.booking_confirmed': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    startsAtLabel: 'terça-feira, 13 de outubro, 10:00',
+    meetUrl: 'https://meet.google.com/abc-defg-hij',
+    manageUrl: 'https://os.example.com/apply/booking/token',
+  },
+  'lead.call_reminder': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    startsAtLabel: 'terça-feira, 13 de outubro, 10:00',
+    meetUrl: null,
+    manageUrl: 'https://os.example.com/apply/booking/token',
+  },
+  'lead.booking_cancelled': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    bookingUrl: 'https://os.example.com/apply/booking/token',
+  },
+  'founder.application_received': {
+    companyName: 'Empresa Exemplo',
+    contactName: 'Ana Costa',
+    path: 'A',
+    score: 11,
+    costOfInaction: 'Perdemos dois contratos por ano.',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.queue_b_pending': {
+    companyName: 'Empresa Exemplo',
+    queueUrl: 'https://os.example.com/applications?tab=queue_b',
+  },
+  'founder.call_outcome_missing': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.integration_unavailable': {
+    integration: 'Google Calendar',
+    settingsUrl: 'https://os.example.com/settings/integrations',
+  },
+  'founder.automation_failed': {
+    automation: 'call-reminders',
+    occurredAt: '7 de outubro, 14:00',
+    appUrl: 'https://os.example.com/',
+  },
+};
+
+describe('renderEmail', () => {
+  it('renders every template in both locales without missing keys', () => {
+    for (const locale of ['pt-PT', 'en'] as const) {
+      for (const key of EMAIL_TEMPLATE_KEYS) {
+        const rendered = renderEmail(key, locale, SAMPLE_PARAMS[key] as never);
+        expect(rendered.subject.trim(), `${locale} ${key}`).not.toBe('');
+        expect(rendered.html, `${locale} ${key}`).toContain('<html');
+        expect(rendered.text.trim(), `${locale} ${key}`).not.toBe('');
+      }
+    }
+  });
+
+  it('escapes html in parameters', () => {
+    const rendered = renderEmail('founder.application_received', 'pt-PT', {
+      ...SAMPLE_PARAMS['founder.application_received'],
+      companyName: '<script>alert(1)</script>',
+    });
+    expect(rendered.html).not.toContain('<script>');
+    expect(rendered.html).toContain('&lt;script&gt;');
+  });
+
+  it('includes exactly one action link', () => {
+    for (const key of EMAIL_TEMPLATE_KEYS) {
+      const rendered = renderEmail(key, 'pt-PT', SAMPLE_PARAMS[key] as never);
+      expect(rendered.html.match(/<a /g) ?? [], key).toHaveLength(1);
+    }
+  });
+
+  it('plain text contains the action url', () => {
+    const rendered = renderEmail('lead.booking_link', 'en', SAMPLE_PARAMS['lead.booking_link']);
+    expect(rendered.text).toContain('https://os.example.com/apply/book/token');
+    expect(rendered.subject).toContain('Aurion');
+  });
+
+  it('shows the meeting link only when there is one', () => {
+    const withMeet = renderEmail(
+      'lead.booking_confirmed',
+      'pt-PT',
+      SAMPLE_PARAMS['lead.booking_confirmed'],
+    );
+    const withoutMeet = renderEmail(
+      'lead.call_reminder',
+      'pt-PT',
+      SAMPLE_PARAMS['lead.call_reminder'],
+    );
+    expect(withMeet.text).toContain('https://meet.google.com/abc-defg-hij');
+    expect(withoutMeet.text).not.toContain('meet.google.com');
+  });
+});

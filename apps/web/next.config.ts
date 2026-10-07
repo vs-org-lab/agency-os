@@ -16,6 +16,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  agentRules: false,
   transpilePackages: ['@agency-os/ui', '@agency-os/i18n', '@agency-os/db'],
   serverExternalPackages: ['postgres'],
 };

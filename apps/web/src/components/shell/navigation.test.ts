@@ -13,11 +13,22 @@ describe('buildNavigation', () => {
   });
 
   it('studio level has no back link and links home and settings', () => {
-    const navigation = buildNavigation({ level: 'studio' });
+    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: false } });
 
     expect(navigation.back).toBeNull();
     expect(navigation.items.map((item) => item.href)).toEqual(['/']);
-    expect(navigation.footer.map((item) => item.href)).toEqual(['/settings/sessions']);
+    expect(navigation.footer.map((item) => item.href)).toEqual(['/settings']);
+  });
+
+  it('studio shows commercial items only with pipeline permission', () => {
+    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: true } });
+
+    expect(navigation.items.map((item) => [item.href, item.icon])).toEqual([
+      ['/', 'home'],
+      ['/pipeline', 'kanban'],
+      ['/applications', 'inbox'],
+      ['/acquisition', 'target'],
+    ]);
   });
 
   it('portal level links portal home and settings', () => {

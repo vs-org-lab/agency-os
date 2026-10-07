@@ -37,6 +37,22 @@ describe('organization queries', () => {
     });
   });
 
+  it('excludes prospect clients from the client list and from rooms', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await sql`update public.clients set lifecycle = 'prospect' where id = ${world.clients.b}`;
+      const { withUserContext } = createDbContexts(testDatabase(sql));
+
+      const result = await withUserContext(claimsFor(world.users.founder), async (tx) => ({
+        list: await listVisibleClients(tx),
+        prospect: await findVisibleClient(tx, world.clients.b),
+      }));
+
+      expect(result.list.map((client) => client.id)).toEqual([world.clients.a]);
+      expect(result.prospect).toBeNull();
+    });
+  });
+
   it('returns null for a client outside the user scope', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

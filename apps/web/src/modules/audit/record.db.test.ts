@@ -55,8 +55,8 @@ describe('recordAudit', () => {
   });
 
   it('exposes the foundation actions', () => {
-    expect([...AUDIT_ACTIONS].sort()).toEqual(
-      [
+    expect([...AUDIT_ACTIONS]).toEqual(
+      expect.arrayContaining([
         'auth.sign_in',
         'auth.sign_out',
         'auth.mfa_failed',
@@ -66,7 +66,7 @@ describe('recordAudit', () => {
         'membership.changed',
         'session.revoked',
         'password.changed',
-      ].sort(),
+      ]),
     );
   });
 });

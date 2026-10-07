@@ -71,7 +71,7 @@ function dispatcherWith(send: (events: OutboxEvent[]) => Promise<void>, reportFa
 
 describe('transactional outbox', () => {
   it('exposes the foundation event types', () => {
-    expect(DOMAIN_EVENTS).toEqual(['identity.user.invited']);
+    expect(DOMAIN_EVENTS).toEqual(expect.arrayContaining(['identity.user.invited']));
   });
 
   it('event emitted in rolled back transaction is never dispatched', async () => {

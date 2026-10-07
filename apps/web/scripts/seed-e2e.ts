@@ -106,6 +106,11 @@ async function main(): Promise<void> {
       values (${organizationId}, ${clientId}, ${clientUserId}, 'decision_maker', 'active')
       on conflict (client_id, user_id) do update set status = 'active'
     `;
+    await sql`
+      insert into public.commercial_settings (organization_id, host_user_id)
+      values (${organizationId}, ${founderId})
+      on conflict (organization_id) do update set host_user_id = excluded.host_user_id
+    `;
   } finally {
     await sql.end();
   }

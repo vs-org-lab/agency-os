@@ -23,8 +23,27 @@ async function seriousViolations(page: Page, theme: 'light' | 'dark') {
     }));
 }
 
-const anonymousScreens = ['/sign-in', '/magic-link', '/accept-invitation'];
-const studioScreens = ['/', `/c/${credentials.clientId}`, '/settings/sessions'];
+const anonymousScreens = [
+  '/sign-in',
+  '/magic-link',
+  '/accept-invitation',
+  '/apply',
+  '/apply/thanks',
+];
+const studioScreens = [
+  '/',
+  `/c/${credentials.clientId}`,
+  '/settings/sessions',
+  '/pipeline',
+  '/pipeline?view=list',
+  '/applications',
+  '/applications?tab=queue_b',
+  '/acquisition',
+  '/settings/integrations',
+  '/settings/application',
+  '/settings/booking',
+  '/settings/templates',
+];
 
 test.describe('accessibility @responsive', () => {
   for (const path of anonymousScreens) {
@@ -39,6 +58,7 @@ test.describe('accessibility @responsive', () => {
   test('studio screens have no serious or critical violations in light and dark', async ({
     page,
   }) => {
+    test.setTimeout(300_000);
     await signInWithPassword(page, credentials.founder);
     for (const path of studioScreens) {
       await page.goto(path);

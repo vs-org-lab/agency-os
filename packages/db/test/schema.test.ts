@@ -121,3 +121,99 @@ describe('foundation schema', () => {
     });
   });
 });
+
+const commercialTables = [
+  'contacts',
+  'application_forms',
+  'applications',
+  'deals',
+  'deal_stage_changes',
+  'calls',
+  'follow_ups',
+  'message_templates',
+  'acquisition_targets',
+  'timeline_entries',
+  'calendar_connections',
+  'commercial_settings',
+  'submission_throttle',
+  'captured_emails',
+];
+
+const pipelineCodes = [
+  '0.1',
+  '0.2',
+  '0.3',
+  '0.4',
+  '1.1',
+  '1.2',
+  '1.3',
+  '1.4',
+  '1.5',
+  '1.6',
+  '2.1',
+  '2.2',
+  '2.3',
+  '2.4',
+  '2.5',
+  '2.6',
+  '2.7',
+  '2.8',
+  '2.9',
+  '2.10',
+  '3.1',
+  '3.2',
+  '3.3',
+  '3.4',
+  '3.5',
+  '3.6',
+  '4.1',
+  '4.2',
+  '4.3',
+  '4.4',
+  'X.1',
+  'X.2',
+  'X.3',
+  'X.4',
+];
+
+describe('commercial schema', () => {
+  it('commercial tables exist with organization_id', async () => {
+    await withTestTransaction(async (sql) => {
+      const rows = await sql<{ table_name: string }[]>`
+        select table_name from information_schema.columns
+        where table_schema = 'public' and column_name = 'organization_id'
+      `;
+      const tables = new Set(rows.map((row) => row.table_name));
+
+      for (const table of commercialTables) {
+        expect(tables.has(table), table).toBe(true);
+      }
+    });
+  });
+
+  it('pipeline_code enum lists the 34 codes in order', async () => {
+    await withTestTransaction(async (sql) => {
+      const rows = await sql<{ label: string }[]>`
+        select e.enumlabel as label
+        from pg_enum e
+        join pg_type t on t.oid = e.enumtypid
+        join pg_namespace n on n.oid = t.typnamespace
+        where n.nspname = 'app' and t.typname = 'pipeline_code'
+        order by e.enumsortorder
+      `;
+
+      expect(rows.map((row) => row.label)).toEqual(pipelineCodes);
+    });
+  });
+
+  it('clients gain a lifecycle defaulting to active', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const [row] = await sql<{ lifecycle: string }[]>`
+        select lifecycle::text from public.clients where id = ${world.clients.a}
+      `;
+
+      expect(row?.lifecycle).toBe('active');
+    });
+  });
+});

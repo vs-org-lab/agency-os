@@ -1,7 +1,17 @@
 import { sql } from 'drizzle-orm';
 import type { DbExecutor } from '@agency-os/db';
 
-export const DOMAIN_EVENTS = ['identity.user.invited'] as const;
+export const DOMAIN_EVENTS = [
+  'identity.user.invited',
+  'commercial.application.submitted',
+  'commercial.application.reviewed',
+  'commercial.deal.stage_changed',
+  'commercial.call.booked',
+  'commercial.call.rescheduled',
+  'commercial.call.cancelled',
+  'commercial.call.completed',
+  'commercial.calendar.unavailable',
+] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];
 

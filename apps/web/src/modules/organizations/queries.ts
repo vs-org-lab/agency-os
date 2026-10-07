@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, ne } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
 
 const { clients, organizations, profiles } = schema;
@@ -9,7 +9,7 @@ export async function listVisibleClients(tx: DbTransaction): Promise<ClientSumma
   return tx
     .select({ id: clients.id, name: clients.name, logoPath: clients.logoPath })
     .from(clients)
-    .where(isNull(clients.archivedAt))
+    .where(and(isNull(clients.archivedAt), ne(clients.lifecycle, 'prospect')))
     .orderBy(asc(clients.name));
 }
 
@@ -20,7 +20,9 @@ export async function findVisibleClient(
   const [client] = await tx
     .select({ id: clients.id, name: clients.name, logoPath: clients.logoPath })
     .from(clients)
-    .where(and(eq(clients.id, clientId), isNull(clients.archivedAt)));
+    .where(
+      and(eq(clients.id, clientId), isNull(clients.archivedAt), ne(clients.lifecycle, 'prospect')),
+    );
   return client ?? null;
 }
 

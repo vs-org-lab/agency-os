@@ -57,6 +57,13 @@
       "when": 1791327920607,
       "tag": "20261006230520_client_membership_rights",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791377100126,
+      "tag": "20261007124500_commercial_schema",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,8 @@ import {
   evidenceKindEnum,
   findingOwnerEnum,
   orbitFrontEnum,
+  recordingSourceEnum,
+  recordingStatusEnum,
   roadmapLaneEnum,
 } from './enums';
 import { organizations } from './organizations';
@@ -185,5 +187,47 @@ export const coreScores = pgTable(
     }).onDelete('restrict'),
     unique('core_scores_criterion_key').on(table.engagementId, table.front, table.criterionId),
     check('core_scores_points_range', sql`${table.points} between 0 and 25`),
+  ],
+).enableRLS();
+
+export const coreRecordings = pgTable(
+  'core_recordings',
+  {
+    id: id(),
+    organizationId: uuid('organization_id').notNull(),
+    clientId: uuid('client_id').notNull(),
+    engagementId: uuid('engagement_id').notNull(),
+    source: recordingSourceEnum('source').notNull(),
+    status: recordingStatusEnum('status').notNull().default('pending_upload'),
+    clientTrackPath: text('client_track_path').notNull(),
+    studioTrackPath: text('studio_track_path'),
+    language: text('language').notNull(),
+    consentBy: uuid('consent_by')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'restrict' }),
+    consentAt: timestamp('consent_at', { withTimezone: true }).notNull(),
+    error: text('error'),
+    transcribedAt: timestamp('transcribed_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.engagementId, table.clientId],
+      foreignColumns: [coreEngagements.id, coreEngagements.clientId],
+      name: 'core_recordings_engagement_client_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.clientId, table.organizationId],
+      foreignColumns: [clients.id, clients.organizationId],
+      name: 'core_recordings_client_organization_fk',
+    }).onDelete('restrict'),
+    index('core_recordings_engagement_idx').on(table.engagementId, table.createdAt),
+    index('core_recordings_status_idx').on(table.status, table.createdAt),
+    check('core_recordings_language', sql`${table.language} in ('pt', 'en')`),
+    check(
+      'core_recordings_tracks',
+      sql`(${table.source} = 'call' and ${table.studioTrackPath} is not null)
+        or (${table.source} = 'upload' and ${table.studioTrackPath} is null)`,
+    ),
   ],
 ).enableRLS();

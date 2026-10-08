@@ -121,4 +121,29 @@ describe('core access', () => {
       }
     });
   });
+
+  it('staff reads recordings by pipeline access', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+
+      await asUser(sql, world.users.founder);
+      expect(await visibleIds(sql, 'core_recordings')).toEqual(
+        [core.a.recordingId, core.b.recordingId].sort(),
+      );
+      await asSystem(sql);
+      await asUser(sql, world.users.manager);
+      expect(await visibleIds(sql, 'core_recordings')).toEqual([core.a.recordingId]);
+    });
+  });
+
+  it('client users never read recordings', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await createCoreFixture(sql, world);
+      await asUser(sql, world.users.decisionMakerA);
+
+      expect(await visibleIds(sql, 'core_recordings')).toEqual([]);
+    });
+  });
 });

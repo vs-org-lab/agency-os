@@ -162,6 +162,16 @@ export const documentKindEnum = appSchema.enum('document_kind', ['figma_presenta
 
 export const documentStatusEnum = appSchema.enum('document_status', ['draft', 'with_client']);
 
+export const recordingSourceEnum = appSchema.enum('recording_source', ['call', 'upload']);
+
+export const recordingStatusEnum = appSchema.enum('recording_status', [
+  'pending_upload',
+  'uploaded',
+  'transcribing',
+  'done',
+  'failed',
+]);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -190,6 +200,8 @@ export type EvidenceKind = (typeof evidenceKindEnum.enumValues)[number];
 export type CallKind = (typeof callKindEnum.enumValues)[number];
 export type DocumentKind = (typeof documentKindEnum.enumValues)[number];
 export type DocumentStatus = (typeof documentStatusEnum.enumValues)[number];
+export type RecordingSource = (typeof recordingSourceEnum.enumValues)[number];
+export type RecordingStatus = (typeof recordingStatusEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

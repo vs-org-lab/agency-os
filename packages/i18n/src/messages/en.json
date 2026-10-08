@@ -894,7 +894,8 @@
       "saveBuyerTest": "Save link",
       "saved": "Saved.",
       "invalidLink": "Use an https link.",
-      "transcriptFailed": "The transcript could not be saved."
+      "transcriptFailed": "The transcript could not be saved.",
+      "transcriptUpdated": "A newer transcript arrived. Copy your changes and reload the page before saving."
     },
     "call": {
       "title": "Call mode",
@@ -1062,6 +1063,42 @@
         "no_decision_maker": "This deal has no decision maker with an email.",
         "already_granted": "The decision maker already has portal access.",
         "invite_failed": "The invitation was not sent. Try again."
+      }
+    },
+    "recording": {
+      "title": "Call recording",
+      "consent": "The client authorised the recording",
+      "consentHint": "Ask for authorisation at the start of the call. Recording is not possible without it.",
+      "start": "Record the call",
+      "stop": "Stop and upload",
+      "elapsed": "Recording · {time}",
+      "shareHint": "Pick the Meet tab and tick “Share tab audio”. Recording stops on its own after 2 hours.",
+      "upload": "Upload an audio file",
+      "uploadHint": "MP3, M4A, WAV, OGG or WEBM up to 25 MB, without speaker separation.",
+      "recovered": "An interrupted recording is stored in this browser.",
+      "sendRecovered": "Upload the interrupted recording",
+      "discardRecovered": "Discard",
+      "uploading": "Uploading the recording…",
+      "retry": "Try again",
+      "status": {
+        "pending_upload": "Upload not finished.",
+        "uploaded": "Transcribing…",
+        "transcribing": "Transcribing…",
+        "done": "Transcript ready.",
+        "failed": "The transcription failed.",
+        "expired": "The audio was deleted after 7 days without a transcript."
+      },
+      "errors": {
+        "consent_required": "Confirm that the client authorised the recording.",
+        "no_tab_audio": "The tab was shared without audio. Record again and tick “Share tab audio”.",
+        "permission_denied": "The browser did not grant access to the tab or the microphone.",
+        "unsupported": "This browser cannot record tab audio. Use Chrome or Edge on a computer.",
+        "file_too_large": "The file is larger than 25 MB.",
+        "file_type": "Unsupported audio format.",
+        "upload_failed": "The upload failed. Check the connection and try again.",
+        "upload_missing": "The upload did not arrive complete. Try again.",
+        "invalid_state": "This recording can no longer be retried.",
+        "not_found": "The recording could not be saved."
       }
     }
   }

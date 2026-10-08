@@ -1,4 +1,4 @@
-import { and, asc, eq, isNotNull } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull } from 'drizzle-orm';
 import {
   schema,
   type CoreLevel,
@@ -7,6 +7,8 @@ import {
   type EvidenceKind,
   type FindingOwner,
   type OrbitFront,
+  type RecordingSource,
+  type RecordingStatus,
   type RoadmapLane,
 } from '@agency-os/db';
 import { getBriefing, type BriefingView } from './briefing';
@@ -15,8 +17,9 @@ import type { CoreReadiness } from './domain/readiness';
 import { loadCoreReadiness } from './readiness-facts';
 import type { OrbitGrid } from './templates/definitions';
 import { getTemplateById } from './templates/service';
+import { EXPIRED_RECORDING_ERROR } from './transcribe';
 
-const { contacts, coreEngagements, coreFindings, coreScores, documents } = schema;
+const { contacts, coreEngagements, coreFindings, coreRecordings, coreScores, documents } = schema;
 
 export type FindingSummary = {
   id: string;
@@ -51,6 +54,14 @@ export type CoreDocument = {
   sharedAt: Date | null;
 };
 
+export type RecordingView = {
+  id: string;
+  source: RecordingSource;
+  status: RecordingStatus;
+  expired: boolean;
+  createdAt: Date;
+};
+
 export type CoreWorkspace = {
   engagementId: string;
   dealId: string;
@@ -66,6 +77,7 @@ export type CoreWorkspace = {
   crossReview: { by: string; at: Date; notes: string | null } | null;
   documents: CoreDocument[];
   portalAccess: boolean;
+  latestRecording: RecordingView | null;
   readiness: CoreReadiness;
 };
 
@@ -139,6 +151,19 @@ export async function getCoreWorkspace(
     .where(and(eq(contacts.clientId, engagement.clientId), isNotNull(contacts.portalUserId)))
     .limit(1);
 
+  const [recording] = await tx
+    .select({
+      id: coreRecordings.id,
+      source: coreRecordings.source,
+      status: coreRecordings.status,
+      error: coreRecordings.error,
+      createdAt: coreRecordings.createdAt,
+    })
+    .from(coreRecordings)
+    .where(eq(coreRecordings.engagementId, engagement.id))
+    .orderBy(desc(coreRecordings.createdAt))
+    .limit(1);
+
   const roadmap: RoadmapView = { days_30: [], days_90: [], months_12: [] };
   for (const finding of findings) roadmap[finding.lane].push(finding);
 
@@ -164,6 +189,15 @@ export async function getCoreWorkspace(
         : null,
     documents: presentations,
     portalAccess: portalContact !== undefined,
+    latestRecording: recording
+      ? {
+          id: recording.id,
+          source: recording.source,
+          status: recording.status,
+          expired: recording.error === EXPIRED_RECORDING_ERROR,
+          createdAt: recording.createdAt,
+        }
+      : null,
     readiness,
   };
 }

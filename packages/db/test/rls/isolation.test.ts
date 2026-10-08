@@ -37,6 +37,7 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'core_briefing_notes', clientColumn: 'client_id' },
   { table: 'core_findings', clientColumn: 'client_id' },
   { table: 'core_scores', clientColumn: 'client_id' },
+  { table: 'core_recordings', clientColumn: 'client_id' },
   { table: 'documents', clientColumn: 'client_id' },
 ];
 

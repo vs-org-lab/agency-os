@@ -2,7 +2,16 @@ import 'server-only';
 import * as Sentry from '@sentry/nextjs';
 import { eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
-import { ensureEngagementForCall } from '@/modules/diagnosis/server';
+import {
+  ensureEngagementForCall,
+  finishTranscription,
+  markRecordingFailed,
+  startTranscription,
+  stepFailure,
+  sweepExpiredRecordings,
+  transcribeDeps,
+  transcribeTrack,
+} from '@/modules/diagnosis/server';
 import { emailPort } from '@/modules/email/server';
 import { inngest } from '@/modules/events';
 import { withSystemContext } from '@/platform/db';
@@ -302,7 +311,74 @@ export const onCoreDocumentShared = portalNoticeFunction(
   'lead.presentation_shared',
 );
 
+const RECORDING_ERROR_CODES = ['file_too_large', 'rate_limited', 'provider_error'];
+
+function recordingErrorCode(error: unknown): string {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' && RECORDING_ERROR_CODES.includes(code)
+    ? code
+    : 'transcription_failed';
+}
+
+export const onCoreRecordingUploaded = inngest.createFunction(
+  {
+    id: 'core-recording-transcribe',
+    triggers: [{ event: 'core.recording.uploaded' }],
+    retries: RETRIES,
+    onFailure: async ({
+      error,
+      event,
+    }: {
+      error: unknown;
+      event: { data: { event?: { data?: unknown } } };
+    }) => {
+      const original = event.data.event?.data as EventData<{ recordingId?: string }> | undefined;
+      const recordingId = original?.payload.recordingId;
+      if (recordingId) {
+        await markRecordingFailed(recordingId, recordingErrorCode(error), {
+          contexts: { withSystemContext },
+        });
+      }
+      await reportFailure('core-recording-transcribe', original?.organizationId, error);
+    },
+  },
+  async ({ event, step }) => {
+    const { recordingId } = (event.data as EventData<{ recordingId: string }>).payload;
+    const job = await step.run('start-transcription', () =>
+      startTranscription(recordingId, transcribeDeps()),
+    );
+    if (!job) return { result: 'skipped' };
+    const segments: Awaited<ReturnType<typeof transcribeTrack>>[] = [];
+    for (let index = 0; index < job.tracks.length; index += 1) {
+      segments.push(
+        await step.run(`transcribe-track-${index}`, () =>
+          transcribeTrack(job, index, transcribeDeps()).catch((error: unknown) => {
+            throw stepFailure(error);
+          }),
+        ),
+      );
+    }
+    const result = await step.run('finish-transcription', () =>
+      finishTranscription(job, segments, transcribeDeps()),
+    );
+    return { result };
+  },
+);
+
+export const recordingSweep = inngest.createFunction(
+  {
+    id: 'core-recording-sweep',
+    triggers: [{ cron: 'TZ=Europe/Lisbon 45 3 * * *' }],
+    retries: RETRIES,
+    onFailure: failureHandler('core-recording-sweep'),
+  },
+  async ({ step }) =>
+    step.run('remove-expired-recordings', () => sweepExpiredRecordings(transcribeDeps())),
+);
+
 export const COMMERCIAL_FUNCTIONS = [
+  onCoreRecordingUploaded,
+  recordingSweep,
   onCoreBriefingShared,
   onCoreDocumentShared,
   onApplicationSubmitted,

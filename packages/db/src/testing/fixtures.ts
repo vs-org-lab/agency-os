@@ -221,6 +221,7 @@ export type CoreRecords = {
   noteId: string;
   findingId: string;
   documentId: string;
+  recordingId: string;
 };
 
 export type CoreFixture = {
@@ -297,7 +298,19 @@ export async function createCoreFixture(sql: TransactionSql, world: World): Prom
               'Apresentação', 'https://www.figma.com/deck/abc/Core')
       returning id
     `;
-    if (!note || !finding || !document) throw new Error('Core fixture records were not created');
+    const [recording] = await sql<{ id: string }[]>`
+      insert into public.core_recordings (organization_id, client_id, engagement_id, source, status,
+                                          client_track_path, studio_track_path, language,
+                                          consent_by, consent_at)
+      values (${world.organizationId}, ${clientId}, ${engagement.id}, 'call', 'uploaded',
+              ${`${world.organizationId}/${clientId}/fixture/client.webm`},
+              ${`${world.organizationId}/${clientId}/fixture/studio.webm`}, 'pt',
+              ${world.users.founder}, now())
+      returning id
+    `;
+    if (!note || !finding || !document || !recording) {
+      throw new Error('Core fixture records were not created');
+    }
     return {
       engagementId: engagement.id,
       dealId: records.dealId,
@@ -306,6 +319,7 @@ export async function createCoreFixture(sql: TransactionSql, world: World): Prom
       noteId: note.id,
       findingId: finding.id,
       documentId: document.id,
+      recordingId: recording.id,
     };
   };
 

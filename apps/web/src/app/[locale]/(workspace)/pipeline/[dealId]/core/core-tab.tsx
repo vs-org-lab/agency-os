@@ -78,6 +78,7 @@ export async function CoreTab({
         transcript={workspace.briefing.transcript}
         sharedAt={workspace.briefing.sharedAt}
         buyerTestUrl={workspace.buyerTestUrl}
+        latestRecording={workspace.latestRecording}
         writable={writable}
         locale={locale}
       />

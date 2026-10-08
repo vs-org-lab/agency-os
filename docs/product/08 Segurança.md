@@ -95,7 +95,7 @@ A IA e o agente são os pontos novos de risco da v2; as regras abaixo tratam-nos
 - **SEC-71** Acordos de tratamento de dados com todos os subcontratantes. Quando um serviço trata dados fora da UE, a transferência fica coberta por cláusulas contratuais-tipo ou mecanismo equivalente.
 - **SEC-72** Os titulares podem pedir acesso, correção, portabilidade e apagamento. As faturas e o que a lei obriga a guardar ficam pelo prazo legal, mesmo depois de um pedido de apagamento.
 - **SEC-73** Prazos de conservação definidos por categoria, com apagamento ou anonimização automáticos (por exemplo, candidaturas do caminho C sem relação comercial). Os prazos finais são definidos com o advogado.
-- **SEC-74** As transcrições de chamadas contêm dados pessoais: o cliente é informado no contrato, e a gravação só acontece com o seu acordo.
+- **SEC-74** As transcrições de chamadas contêm dados pessoais: o cliente é informado no contrato, e a gravação só acontece com o seu acordo. O OS só grava depois de o fundador confirmar a autorização do cliente (fica registado quem confirmou e quando); o áudio fica num bucket privado, é apagado depois da transcrição e nunca fica mais de 7 dias.
 - **SEC-75** Uma violação de dados pessoais é notificada à CNPD no prazo de 72 horas, quando aplicável.
 
 ### Faturação

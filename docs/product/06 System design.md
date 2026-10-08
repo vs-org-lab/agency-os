@@ -22,6 +22,7 @@ A v2 troca a arquitetura de microsserviços em Kubernetes da v1 por um monólito
 | Faturação | Software certificado pela AT, com API | Obrigação legal em Portugal; o OS nunca numera faturas |
 | Assinatura eletrónica | Serviço com dados na UE e trilho de auditoria | Validade legal sem construir assinatura |
 | IA | API da Anthropic (Claude) para mapas, estratégias e leitura de comprovativos | Mesma família de modelos do agente |
+| Transcrição de chamadas | Whisper large-v3 na Groq, com a call gravada no browser em duas faixas (cliente e estúdio) | Transcrição com quem falou, sem custo no plano gratuito; o fornecedor troca-se por um adaptador |
 | Brand Hubs | Projeto Next.js estático separado, publicado por deploy, com domínio do cliente por CNAME | Os sites dos clientes não partilham servidor com o OS |
 | Alojamento | Plataforma gerida com região UE para a aplicação e a base de dados | Deploy automático, sem servidores para manter |
 | Observabilidade | Sentry, registos estruturados e monitor de disponibilidade | Erros e falhas de integração detetados em minutos |

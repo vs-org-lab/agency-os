@@ -894,7 +894,8 @@
       "saveBuyerTest": "Guardar link",
       "saved": "Guardado.",
       "invalidLink": "Use um link https.",
-      "transcriptFailed": "Não foi possível guardar a transcrição."
+      "transcriptFailed": "Não foi possível guardar a transcrição.",
+      "transcriptUpdated": "Chegou uma transcrição nova. Copie as suas alterações e recarregue a página antes de guardar."
     },
     "call": {
       "title": "Modo call",
@@ -1062,6 +1063,42 @@
         "no_decision_maker": "Este negócio não tem um decisor com email.",
         "already_granted": "O decisor já tem acesso ao portal.",
         "invite_failed": "O convite não foi enviado. Tente de novo."
+      }
+    },
+    "recording": {
+      "title": "Gravação da call",
+      "consent": "O cliente autorizou a gravação",
+      "consentHint": "Peça a autorização no início da call. Sem ela não é possível gravar.",
+      "start": "Gravar a call",
+      "stop": "Parar e enviar",
+      "elapsed": "A gravar · {time}",
+      "shareHint": "Escolha o separador do Meet e marque «Partilhar áudio do separador». A gravação para sozinha às 2 horas.",
+      "upload": "Carregar ficheiro de áudio",
+      "uploadHint": "MP3, M4A, WAV, OGG ou WEBM até 25 MB, sem separação de vozes.",
+      "recovered": "Há uma gravação interrompida guardada neste browser.",
+      "sendRecovered": "Enviar gravação interrompida",
+      "discardRecovered": "Descartar",
+      "uploading": "A enviar a gravação…",
+      "retry": "Tentar de novo",
+      "status": {
+        "pending_upload": "Envio por concluir.",
+        "uploaded": "A transcrever…",
+        "transcribing": "A transcrever…",
+        "done": "Transcrição pronta.",
+        "failed": "A transcrição falhou.",
+        "expired": "O áudio foi apagado ao fim de 7 dias sem transcrição."
+      },
+      "errors": {
+        "consent_required": "Confirme que o cliente autorizou a gravação.",
+        "no_tab_audio": "O separador foi partilhado sem áudio. Grave de novo e marque «Partilhar áudio do separador».",
+        "permission_denied": "O browser não deu acesso ao separador ou ao microfone.",
+        "unsupported": "Este browser não grava o áudio de um separador. Use o Chrome ou o Edge num computador.",
+        "file_too_large": "O ficheiro tem mais de 25 MB.",
+        "file_type": "Formato de áudio não suportado.",
+        "upload_failed": "O envio falhou. Verifique a ligação e tente de novo.",
+        "upload_missing": "O envio não chegou completo. Tente de novo.",
+        "invalid_state": "Esta gravação já não pode ser repetida.",
+        "not_found": "Não foi possível guardar a gravação."
       }
     }
   }

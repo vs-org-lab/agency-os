@@ -13,6 +13,7 @@ export const DOMAIN_EVENTS = [
   'commercial.calendar.unavailable',
   'core.briefing.shared',
   'core.document.shared',
+  'core.recording.uploaded',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

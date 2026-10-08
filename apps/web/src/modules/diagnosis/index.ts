@@ -32,3 +32,9 @@ export {
   type CoreAssistantRequest,
   type NarrativeFinding,
 } from './assistant/prompts';
+export {
+  isRecordingContentType,
+  MAX_RECORDING_BYTES,
+  RECORDING_EXTENSIONS,
+  type RecordingContentType,
+} from './transcription/storage';

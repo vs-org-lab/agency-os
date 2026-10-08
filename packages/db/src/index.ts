@@ -32,6 +32,8 @@ export type {
   EvidenceKind,
   FindingOwner,
   OrbitFront,
+  RecordingSource,
+  RecordingStatus,
   RoadmapLane,
   SeenArea,
   ThrottleKind,

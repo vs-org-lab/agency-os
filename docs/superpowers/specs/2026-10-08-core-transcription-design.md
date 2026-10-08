@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                           |
 | ----------------------- | ------------------------------------------------------------------------------- |
 | Data                    | 2026-10-08                                                                      |
-| Estado                  | Em revisão                                                                      |
+| Estado                  | Aprovado                                                                        |
 | Vaga                    | 1 (complemento do 1B, antes do teste real do Core)                              |
 | Módulos                 | M03 Diagnóstico e estratégia (Aurion Core)                                      |
 | Documentação de produto | `docs/product/01` (RF-022, transcrição da call), `08` (SEC-30, subcontratantes) |

@@ -44,7 +44,7 @@ describe('TranscriptForm', () => {
     expect(field.value).toBe('Notas\n\n— Gravação —');
   });
 
-  it('keeps unsaved edits and warns when a newer transcript arrives', () => {
+  it('adds a newly appended section to unsaved edits', () => {
     const save = vi.fn(async () => ({ status: 'saved' as const }));
     const view = (initialValue: string) => (
       <NextIntlClientProvider locale="pt-PT" messages={messages}>
@@ -57,9 +57,29 @@ describe('TranscriptForm', () => {
 
     rerender(view('Notas\n\n— Gravação —'));
 
+    expect(field.value).toBe('Notas editadas\n\n— Gravação —');
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('blocks saving over a transcript changed elsewhere', () => {
+    const save = vi.fn(async () => ({ status: 'saved' as const }));
+    const view = (initialValue: string) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <TranscriptForm id="transcript" initialValue={initialValue} save={save} />
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(view('Notas'));
+    const field = screen.getByLabelText('Transcrição da call') as HTMLTextAreaElement;
+    fireEvent.change(field, { target: { value: 'Notas editadas' } });
+
+    rerender(view('Texto reescrito noutra sessão'));
+
     expect(field.value).toBe('Notas editadas');
     expect(screen.getByRole('status').textContent).toBe(
       'Chegou uma transcrição nova. Copie as suas alterações e recarregue a página antes de guardar.',
     );
+    expect(
+      (screen.getByRole('button', { name: 'Guardar transcrição' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 });

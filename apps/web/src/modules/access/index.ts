@@ -2,6 +2,7 @@ export { getActor } from './actor';
 export { authorize } from './authorize';
 export { ACCESS_MATRIX } from './matrix';
 export { loadAccessContext, resolveActor } from './scope';
+export { withActor } from './with-actor';
 export {
   ACTIONS,
   CLIENT_ROLES,

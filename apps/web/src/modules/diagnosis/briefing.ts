@@ -5,6 +5,7 @@ import { withActor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import { parseBriefingDraft } from './assistant/parse';
 import { scopedEngagement } from './authorization';
 import type { BriefingGuide } from './templates/definitions';
 import { getTemplateById } from './templates/service';
@@ -212,4 +213,125 @@ export async function getBriefing(
     transcript: engagement.transcript,
     sharedAt: engagement.sharedAt,
   };
+}
+
+const httpsUrl = z
+  .string()
+  .trim()
+  .max(2000)
+  .refine((value) => {
+    try {
+      return new URL(value).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  });
+
+const detailsSchema = z.object({
+  engagementId: z.uuid(),
+  buyerTestUrl: z.union([httpsUrl, z.literal(''), z.null()]).optional(),
+  narrative: z.string().max(MAX_NOTE_LENGTH).nullable().optional(),
+});
+
+export function saveEngagementDetails(
+  claims: VerifiedClaims,
+  input: { engagementId: string; buyerTestUrl?: string | null; narrative?: string | null },
+  deps: DiagnosisDeps,
+): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' }> {
+  const parsed = detailsSchema.safeParse(input);
+  if (!parsed.success) return Promise.resolve({ ok: false, rule: 'invalid_input' });
+  const { engagementId, buyerTestUrl, narrative } = parsed.data;
+
+  return withActor(
+    deps.contexts,
+    claims,
+    async (tx, actor) => {
+      const scope = await scopedEngagement(tx, actor, engagementId, 'write');
+      if (!scope) return { ok: false as const, rule: 'not_found' as const };
+      await tx
+        .update(coreEngagements)
+        .set({
+          ...(buyerTestUrl !== undefined ? { buyerTestUrl: buyerTestUrl || null } : {}),
+          ...(narrative !== undefined
+            ? { narrative: narrative && narrative.trim() !== '' ? narrative : null }
+            : {}),
+        })
+        .where(eq(coreEngagements.id, engagementId));
+      return { ok: true as const };
+    },
+    { ok: false as const, rule: 'not_found' as const },
+  );
+}
+
+export type ApplyDraftResult =
+  | { ok: true; blockIds: string[] }
+  | { ok: false; rule: 'not_found' | 'invalid_input' }
+  | { ok: false; rule: 'confirm_overwrite'; blockIds: string[] };
+
+/**
+ * Distributes a pasted assistant draft into the block notes. Existing notes are only
+ * replaced after explicit confirmation, so a paste never silently erases what was written.
+ */
+export function applyBriefingDraft(
+  claims: VerifiedClaims,
+  input: { engagementId: string; text: string; overwrite: boolean },
+  deps: DiagnosisDeps,
+): Promise<ApplyDraftResult> {
+  const valid =
+    z.uuid().safeParse(input.engagementId).success &&
+    input.text.trim() !== '' &&
+    input.text.length <= MAX_TRANSCRIPT_LENGTH;
+  if (!valid) return Promise.resolve({ ok: false, rule: 'invalid_input' });
+
+  return withActor<ApplyDraftResult>(
+    deps.contexts,
+    claims,
+    async (tx, actor) => {
+      const scope = await scopedEngagement(tx, actor, input.engagementId, 'write');
+      if (!scope) return { ok: false, rule: 'not_found' };
+      const guide = await getTemplateById(tx, scope.briefingTemplateId, 'briefing');
+      const sections = parseBriefingDraft(input.text, guide);
+      const blockIds = guide.blocks.map((block) => block.id).filter((id) => id in sections);
+
+      const existing = await tx
+        .select({ blockId: coreBriefingNotes.blockId })
+        .from(coreBriefingNotes)
+        .where(
+          and(
+            eq(coreBriefingNotes.engagementId, input.engagementId),
+            eq(coreBriefingNotes.questionId, ''),
+            sql`trim(${coreBriefingNotes.body}) <> ''`,
+          ),
+        );
+      const conflicts = blockIds.filter((id) => existing.some((row) => row.blockId === id));
+      if (conflicts.length > 0 && !input.overwrite) {
+        return { ok: false, rule: 'confirm_overwrite', blockIds: conflicts };
+      }
+
+      for (const blockId of blockIds) {
+        const body = sections[blockId] ?? '';
+        await tx
+          .insert(coreBriefingNotes)
+          .values({
+            organizationId: scope.organizationId,
+            clientId: scope.clientId,
+            engagementId: input.engagementId,
+            blockId,
+            questionId: '',
+            body,
+            authorId: actor.userId,
+          })
+          .onConflictDoUpdate({
+            target: [
+              coreBriefingNotes.engagementId,
+              coreBriefingNotes.blockId,
+              coreBriefingNotes.questionId,
+            ],
+            set: { body, authorId: actor.userId, updatedAt: new Date() },
+          });
+      }
+      return { ok: true, blockIds };
+    },
+    { ok: false, rule: 'not_found' },
+  );
 }

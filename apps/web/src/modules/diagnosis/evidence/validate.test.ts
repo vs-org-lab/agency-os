@@ -25,7 +25,7 @@ describe('detectEvidenceType', () => {
     expect(detectEvidenceType(new Uint8Array([0x89, 0x50]))).toBeNull();
   });
 
-  it('caps evidence at 10 MB', () => {
-    expect(MAX_EVIDENCE_BYTES).toBe(10_485_760);
+  it('caps evidence at 4 MB, below the hosting request limit', () => {
+    expect(MAX_EVIDENCE_BYTES).toBe(4_194_304);
   });
 });

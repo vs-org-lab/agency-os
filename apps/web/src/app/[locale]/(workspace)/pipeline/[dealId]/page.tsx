@@ -9,6 +9,7 @@ import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { canWritePipeline, isPipelineCode, pipelineCodeMessageKey } from '@/modules/commercial';
 import { commercialSession, loadDealDetail } from '@/modules/commercial/server';
+import { loadCoreWorkspace } from '@/modules/diagnosis/server';
 import { getVerifiedClaims } from '@/platform/session';
 import {
   closeFollowUpAction,
@@ -25,6 +26,7 @@ import {
   ScheduleCallForm,
   TrackingForm,
 } from './deal-forms';
+import { CoreTab } from './core/core-tab';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +39,10 @@ export default async function DealPage({ params }: PageProps) {
   if (!z.uuid().safeParse(dealId).success) notFound();
   const session = await commercialSession(await getVerifiedClaims());
   if (!session) notFound();
-  const detail = await loadDealDetail(session, dealId, locale);
+  const [detail, core] = await Promise.all([
+    loadDealDetail(session, dealId, locale),
+    loadCoreWorkspace(session, dealId),
+  ]);
   if (!detail) notFound();
 
   const t = await getTranslations('commercial');
@@ -70,9 +75,13 @@ export default async function DealPage({ params }: PageProps) {
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Tabs defaultValue="summary" className="min-w-0">
+        <Tabs
+          defaultValue={core && deal.code.startsWith('1.') ? 'core' : 'summary'}
+          className="min-w-0"
+        >
           <TabsList aria-label={t('deal.tabs.label')}>
             <TabsTrigger value="summary">{t('deal.tabs.summary')}</TabsTrigger>
+            {core ? <TabsTrigger value="core">{t('deal.tabs.core')}</TabsTrigger> : null}
             <TabsTrigger value="application">{t('deal.tabs.application')}</TabsTrigger>
             <TabsTrigger value="calls">{t('deal.tabs.calls')}</TabsTrigger>
             <TabsTrigger value="timeline">{t('deal.tabs.timeline')}</TabsTrigger>
@@ -173,6 +182,12 @@ export default async function DealPage({ params }: PageProps) {
               ) : null}
             </section>
           </TabsContent>
+
+          {core ? (
+            <TabsContent value="core" className="pt-4">
+              <CoreTab session={session} workspace={core} writable={writable} locale={locale} />
+            </TabsContent>
+          ) : null}
 
           <TabsContent value="application" className="flex flex-col gap-4 pt-4">
             {detail.applications.length === 0 ? (

@@ -1,4 +1,4 @@
-export const MAX_EVIDENCE_BYTES = 10_485_760;
+export const MAX_EVIDENCE_BYTES = 4_194_304;
 
 export type EvidenceContentType = 'image/png' | 'image/jpeg' | 'image/webp' | 'application/pdf';
 

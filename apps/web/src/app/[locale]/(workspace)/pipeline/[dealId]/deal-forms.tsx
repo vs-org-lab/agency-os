@@ -163,6 +163,13 @@ export function ScheduleCallForm({ action }: { action: BoundAction }) {
           />
         </div>
         <div className="flex flex-col gap-2">
+          <Label htmlFor="call-kind">{t('kind')}</Label>
+          <select id="call-kind" name="kind" defaultValue="discovery" className={FIELD}>
+            <option value="discovery">{t('kinds.discovery')}</option>
+            <option value="proposal_session">{t('kinds.proposal_session')}</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-2">
           <Label htmlFor="call-duration">{t('duration')}</Label>
           <Input
             id="call-duration"

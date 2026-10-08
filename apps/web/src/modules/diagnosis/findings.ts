@@ -32,6 +32,8 @@ export type FindingInput = {
   title: string;
   description: string;
   evidence: FindingEvidenceInput | null;
+  /** When editing, leaves the stored evidence untouched instead of applying `evidence`. */
+  keepEvidence?: boolean;
   impact: CoreLevel;
   effort: CoreLevel;
   lane?: RoadmapLane;
@@ -125,6 +127,7 @@ export async function saveFinding(
   const evidence = prepareEvidence(input.evidence);
   if (typeof evidence === 'string') return { ok: false, rule: evidence };
   const data = parsed.data;
+  const keepEvidence = Boolean(input.keepEvidence && data.findingId);
   let uploadedPath: string | null = null;
 
   try {
@@ -171,7 +174,14 @@ export async function saveFinding(
           evidenceValue: string | null;
           evidenceNote: string | null;
         };
-        if (evidence.kind === 'file') {
+        if (keepEvidence) {
+          evidenceColumns = {
+            evidenceKind: null,
+            evidencePath: null,
+            evidenceValue: null,
+            evidenceNote: null,
+          };
+        } else if (evidence.kind === 'file') {
           uploadedPath = `${scope.organizationId}/${scope.clientId}/${scope.engagementId}/${randomUUID()}.${evidence.extension}`;
           await deps.storage.upload(uploadedPath, evidence.bytes, evidence.contentType);
           evidenceColumns = {
@@ -205,7 +215,7 @@ export async function saveFinding(
           lane: data.lane ?? proposeLane(data.impact, data.effort),
           owner: data.owner,
           bringToCall: data.bringToCall,
-          ...evidenceColumns,
+          ...(keepEvidence ? {} : evidenceColumns),
         };
 
         let findingId = data.findingId;
@@ -240,7 +250,9 @@ export async function saveFinding(
           metadata: { front: data.front, evidence: evidenceColumns.evidenceKind },
         });
         const replacedPath =
-          previous?.evidencePath && previous.evidencePath !== evidenceColumns.evidencePath
+          !keepEvidence &&
+          previous?.evidencePath &&
+          previous.evidencePath !== evidenceColumns.evidencePath
             ? previous.evidencePath
             : null;
         return { ok: true, findingId, replacedPath };

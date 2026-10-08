@@ -9,7 +9,12 @@ import {
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
-import { saveBriefingNote, shareBriefing } from './briefing';
+import {
+  applyBriefingDraft,
+  saveBriefingNote,
+  saveEngagementDetails,
+  shareBriefing,
+} from './briefing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -169,6 +174,77 @@ describe('briefing', () => {
       );
 
       expect(result).toEqual({ ok: false, rule: 'not_found' });
+    });
+  });
+
+  it('saves the buyer test link only when it is https', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const deps = depsFor(sql);
+      const founder = claimsFor(world.users.founder);
+
+      expect(
+        await saveEngagementDetails(
+          founder,
+          { engagementId: core.a.engagementId, buyerTestUrl: 'http://loom.com/share/abc' },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
+      expect(
+        await saveEngagementDetails(
+          founder,
+          {
+            engagementId: core.a.engagementId,
+            buyerTestUrl: 'https://www.loom.com/share/abc',
+            narrative: 'Onde estão, o que custa, o que proponho, decisão.',
+          },
+          deps,
+        ),
+      ).toEqual({ ok: true });
+
+      await sql`reset role`;
+      const [row] = await sql<{ url: string; narrative: string }[]>`
+        select buyer_test_url as url, narrative from public.core_engagements where id = ${core.a.engagementId}
+      `;
+      expect(row).toEqual({
+        url: 'https://www.loom.com/share/abc',
+        narrative: 'Onde estão, o que custa, o que proponho, decisão.',
+      });
+    });
+  });
+
+  it('pasted draft never overwrites notes without confirmation', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const deps = depsFor(sql);
+      const founder = claimsFor(world.users.founder);
+      const draft = [
+        '## block_1',
+        'Resumo novo do bloco 1.',
+        '## block_2',
+        'Resumo do bloco 2.',
+      ].join('\n');
+
+      const first = await applyBriefingDraft(
+        founder,
+        { engagementId: core.a.engagementId, text: draft, overwrite: false },
+        deps,
+      );
+      expect(first).toEqual({ ok: false, rule: 'confirm_overwrite', blockIds: ['block_1'] });
+      expect((await notes(sql, core.a.engagementId)).map((note) => note.body)).toEqual(['Notes']);
+
+      const confirmed = await applyBriefingDraft(
+        founder,
+        { engagementId: core.a.engagementId, text: draft, overwrite: true },
+        deps,
+      );
+      expect(confirmed).toEqual({ ok: true, blockIds: ['block_1', 'block_2'] });
+      expect(await notes(sql, core.a.engagementId)).toEqual([
+        { block: 'block_1', question: '', body: 'Resumo novo do bloco 1.' },
+        { block: 'block_2', question: '', body: 'Resumo do bloco 2.' },
+      ]);
     });
   });
 });

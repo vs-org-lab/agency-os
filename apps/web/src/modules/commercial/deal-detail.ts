@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
 import {
   schema,
   type ApplicationPath,
+  type CallKind,
   type CallOutcome,
   type CallStatus,
   type ClientRole,
@@ -81,6 +82,7 @@ export type DealDetail = {
   }>;
   calls: Array<{
     id: string;
+    kind: CallKind;
     startsAt: Date;
     endsAt: Date;
     status: CallStatus;
@@ -254,6 +256,7 @@ export async function getDealDetail(
     }),
     calls: callRows.map((call) => ({
       id: call.id,
+      kind: call.kind,
       startsAt: call.startsAt,
       endsAt: call.endsAt,
       status: call.status,

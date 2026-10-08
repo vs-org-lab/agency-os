@@ -68,7 +68,7 @@ describe('findings', () => {
     });
   });
 
-  it('rejects files above 10 MB', async () => {
+  it('rejects files above 4 MB', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const core = await createCoreFixture(sql, world);
@@ -171,6 +171,40 @@ describe('findings', () => {
           ),
         ).toEqual({ ok: false, rule: 'invalid_input' });
       }
+    });
+  });
+
+  it('editing without a new file keeps the stored evidence', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const storage = createMemoryEvidenceStorage();
+      const deps = depsFor(sql, storage);
+      const founder = claimsFor(world.users.founder);
+      const saved = await saveFinding(founder, finding(core.a.engagementId), deps);
+      if (!saved.ok) throw new Error(`save failed: ${saved.rule}`);
+
+      const edited = await saveFinding(
+        founder,
+        finding(core.a.engagementId, {
+          findingId: saved.findingId,
+          title: 'Título revisto',
+          evidence: null,
+          keepEvidence: true,
+        }),
+        deps,
+      );
+
+      expect(edited).toEqual({ ok: true, findingId: saved.findingId });
+      expect(storage.files.size).toBe(1);
+      await sql`reset role`;
+      const [row] = await sql<{ title: string; kind: string; path: string | null }[]>`
+        select title, evidence_kind::text as kind, evidence_path as path
+        from public.core_findings where id = ${saved.findingId}
+      `;
+      expect(row?.title).toBe('Título revisto');
+      expect(row?.kind).toBe('file');
+      expect(row?.path).toBe([...storage.files.keys()][0]);
     });
   });
 

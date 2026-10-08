@@ -7,11 +7,18 @@ import { Button } from '@agency-os/ui/components/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { Link } from '@/i18n/navigation';
 import type { BriefingGuide } from '@/modules/diagnosis';
+import type { RecordingView } from '@/modules/diagnosis/server';
 import { saveNoteAction, saveTranscriptAction } from '../actions';
+import {
+  confirmRecordingAction,
+  retryRecordingAction,
+  startRecordingAction,
+} from '../recording-actions';
 import { useNoteValues, type BriefingNoteView } from '../briefing-section';
 import { EvidenceLink } from '../findings-section';
 import { NoteField } from '../note-field';
 import { TranscriptForm } from '../transcript-form';
+import { RecordingPanel } from './recording-panel';
 
 type Observation = {
   id: string;
@@ -19,6 +26,12 @@ type Observation = {
   description: string;
   evidenceKind: 'file' | 'link' | 'number' | 'page' | null;
   evidenceValue: string | null;
+};
+
+const RECORDING_ACTIONS = {
+  start: startRecordingAction,
+  confirm: confirmRecordingAction,
+  retry: retryRecordingAction,
 };
 
 export function CallMode({
@@ -29,6 +42,7 @@ export function CallMode({
   notes,
   observations,
   transcript,
+  latestRecording,
   locale,
 }: {
   engagementId: string;
@@ -38,6 +52,7 @@ export function CallMode({
   notes: BriefingNoteView[];
   observations: Observation[];
   transcript: string | null;
+  latestRecording: RecordingView | null;
   locale: Locale;
 }) {
   const t = useTranslations('diagnosis');
@@ -60,6 +75,13 @@ export function CallMode({
           </Link>
         </div>
       </header>
+
+      <RecordingPanel
+        engagementId={engagementId}
+        dealId={dealId}
+        latest={latestRecording}
+        actions={RECORDING_ACTIONS}
+      />
 
       <Tabs defaultValue="briefing">
         <TabsList aria-label={t('call.tabs.label')}>

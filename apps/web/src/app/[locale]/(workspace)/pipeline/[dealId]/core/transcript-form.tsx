@@ -8,7 +8,11 @@ import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
 import type { CoreFormState } from './actions';
 
-/** A controlled transcript field: a failed save never discards a long paste. */
+/**
+ * A controlled transcript field: a failed save never discards a long paste. A newer server value
+ * (a transcribed recording) replaces an untouched field and is flagged over unsaved edits, so a
+ * save never silently drops the appended text.
+ */
 export function TranscriptForm({
   id,
   initialValue,
@@ -22,8 +26,20 @@ export function TranscriptForm({
 }) {
   const t = useTranslations('diagnosis.briefing');
   const [value, setValue] = useState(initialValue);
+  const [baseline, setBaseline] = useState(initialValue);
+  const [outdated, setOutdated] = useState(false);
   const [result, setResult] = useState<CoreFormState>({ status: 'idle' });
   const [pending, startTransition] = useTransition();
+
+  if (initialValue !== baseline) {
+    setBaseline(initialValue);
+    if (value === baseline || value === initialValue) {
+      setValue(initialValue);
+      setOutdated(false);
+    } else {
+      setOutdated(true);
+    }
+  }
 
   return (
     <form
@@ -48,6 +64,7 @@ export function TranscriptForm({
           setResult({ status: 'idle' });
         }}
       />
+      {outdated ? <FormMessage tone="warning">{t('transcriptUpdated')}</FormMessage> : null}
       {result.status === 'error' ? (
         <FormMessage tone="danger">{t('transcriptFailed')}</FormMessage>
       ) : null}

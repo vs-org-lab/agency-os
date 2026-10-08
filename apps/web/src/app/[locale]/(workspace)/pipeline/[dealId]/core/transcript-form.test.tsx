@@ -28,4 +28,38 @@ describe('TranscriptForm', () => {
     expect(field.value).toBe('Uma transcrição longa colada da chamada.');
     expect(screen.getByRole('alert').textContent).toBe('Não foi possível guardar a transcrição.');
   });
+
+  it('adopts a newer transcript when the field is untouched', () => {
+    const save = vi.fn(async () => ({ status: 'saved' as const }));
+    const view = (initialValue: string) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <TranscriptForm id="transcript" initialValue={initialValue} save={save} />
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(view('Notas'));
+
+    rerender(view('Notas\n\n— Gravação —'));
+
+    const field = screen.getByLabelText('Transcrição da call') as HTMLTextAreaElement;
+    expect(field.value).toBe('Notas\n\n— Gravação —');
+  });
+
+  it('keeps unsaved edits and warns when a newer transcript arrives', () => {
+    const save = vi.fn(async () => ({ status: 'saved' as const }));
+    const view = (initialValue: string) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <TranscriptForm id="transcript" initialValue={initialValue} save={save} />
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(view('Notas'));
+    const field = screen.getByLabelText('Transcrição da call') as HTMLTextAreaElement;
+    fireEvent.change(field, { target: { value: 'Notas editadas' } });
+
+    rerender(view('Notas\n\n— Gravação —'));
+
+    expect(field.value).toBe('Notas editadas');
+    expect(screen.getByRole('status').textContent).toBe(
+      'Chegou uma transcrição nova. Copie as suas alterações e recarregue a página antes de guardar.',
+    );
+  });
 });

@@ -9,6 +9,7 @@ import {
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
+import { getCoreWorkspace } from './queries';
 import { confirmRecordingUpload, createRecording, retryRecording } from './recordings';
 import {
   createMemoryRecordingStorage,
@@ -329,6 +330,50 @@ describe('recordings', () => {
       await confirmRecordingUpload(claims, { recordingId: created.recordingId }, deps);
 
       expect(transcribed).toEqual([created.recordingId]);
+    });
+  });
+
+  it('the Core workspace shows the latest recording', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const deps = depsFor(sql, createMemoryRecordingStorage());
+      const claims = claimsFor(world.users.founder);
+      await sql`
+        update public.core_recordings set status = 'failed', error = 'expired',
+               created_at = now() - interval '8 days'
+        where id = ${core.a.recordingId}
+      `;
+
+      const before = await deps.contexts.withUserContext(claims, (tx) =>
+        getCoreWorkspace(tx, core.a.dealId),
+      );
+      const created = await createRecording(
+        claims,
+        {
+          engagementId: core.a.engagementId,
+          source: 'upload',
+          consent: true,
+          contentType: 'audio/mpeg',
+        },
+        deps,
+      );
+      if (!created.ok) throw new Error('Recording was not created');
+      const after = await deps.contexts.withUserContext(claims, (tx) =>
+        getCoreWorkspace(tx, core.a.dealId),
+      );
+
+      expect(before?.latestRecording).toMatchObject({
+        id: core.a.recordingId,
+        status: 'failed',
+        expired: true,
+      });
+      expect(after?.latestRecording).toMatchObject({
+        id: created.recordingId,
+        source: 'upload',
+        status: 'pending_upload',
+        expired: false,
+      });
     });
   });
 });

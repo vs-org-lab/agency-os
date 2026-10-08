@@ -12,8 +12,7 @@ import { getVerifiedClaims } from '@/platform/session';
 export type RecordingUpload = { track: 'client' | 'studio'; url: string };
 
 export type StartRecordingResult =
-  | { ok: true; recordingId: string; uploads: RecordingUpload[] }
-  | { ok: false; code: string };
+  { ok: true; recordingId: string; uploads: RecordingUpload[] } | { ok: false; code: string };
 
 export type RecordingActionResult = { ok: true } | { ok: false; code: string };
 

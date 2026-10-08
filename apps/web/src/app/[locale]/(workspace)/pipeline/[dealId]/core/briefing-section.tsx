@@ -9,6 +9,7 @@ import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { Link } from '@/i18n/navigation';
+import type { RecordingView } from '@/modules/diagnosis/server';
 import type { BriefingGuide } from '@/modules/diagnosis';
 import {
   saveBuyerTestAction,
@@ -17,6 +18,8 @@ import {
   shareBriefingAction,
 } from './actions';
 import { NoteField } from './note-field';
+import { retryRecordingAction } from './recording-actions';
+import { RecordingStatus } from './recording-status';
 import { TranscriptForm } from './transcript-form';
 
 export type BriefingNoteView = { blockId: string; questionId: string | null; body: string };
@@ -60,6 +63,7 @@ export function BriefingSection({
   transcript,
   sharedAt,
   buyerTestUrl,
+  latestRecording,
   writable,
   locale,
 }: {
@@ -70,6 +74,7 @@ export function BriefingSection({
   transcript: string | null;
   sharedAt: Date | null;
   buyerTestUrl: string | null;
+  latestRecording: RecordingView | null;
   writable: boolean;
   locale: Locale;
 }) {
@@ -163,11 +168,20 @@ export function BriefingSection({
 
       {writable ? (
         <div className="grid gap-4 border-t border-border pt-4 lg:grid-cols-2">
-          <TranscriptForm
-            id="core-transcript"
-            initialValue={transcript ?? ''}
-            save={(text) => saveTranscriptAction(engagementId, dealId, text)}
-          />
+          <div className="flex flex-col gap-3">
+            <TranscriptForm
+              id="core-transcript"
+              initialValue={transcript ?? ''}
+              save={(text) => saveTranscriptAction(engagementId, dealId, text)}
+            />
+            {latestRecording ? (
+              <RecordingStatus
+                latest={latestRecording}
+                dealId={dealId}
+                retry={retryRecordingAction}
+              />
+            ) : null}
+          </div>
           <form action={buyerAction} className="flex flex-col gap-2">
             <Label htmlFor="core-buyer-test">{t('buyerTest')}</Label>
             <Input

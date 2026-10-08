@@ -26,7 +26,13 @@ export {
   type CorePrompts,
   type StudioSession,
 } from './studio';
-export type { CoreDocument, CoreWorkspace, FindingSummary, RoadmapView } from './queries';
+export type {
+  CoreDocument,
+  CoreWorkspace,
+  FindingSummary,
+  RecordingView,
+  RoadmapView,
+} from './queries';
 export type { FindingEvidenceInput } from './findings';
 export { getPortalCore, type PortalCore } from './portal';
 export { transcribeDeps } from './recording-runtime';

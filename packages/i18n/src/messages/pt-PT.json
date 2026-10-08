@@ -176,9 +176,9 @@
       "codes": {
         "p0_1": "Candidatura recebida",
         "p0_2": "Candidatura qualificada",
-        "p0_3": "Descoberta agendada",
-        "p0_4": "Descoberta realizada",
-        "p1_1": "Core contratado",
+        "p0_3": "Call Core marcada",
+        "p0_4": "Call Core feita",
+        "p1_1": "Core iniciado",
         "p1_2": "Recolha de informação",
         "p1_3": "Análise e arquitetura",
         "p1_4": "Roadmap preparado",
@@ -232,9 +232,20 @@
         "call_required": "Marque a chamada no separador Chamadas antes de passar a 0.3.",
         "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
         "module_pending": "Disponível quando o módulo {module} existir.",
-        "not_found": "Este negócio não existe ou não tem acesso a ele."
+        "not_found": "Este negócio não existe ou não tem acesso a ele.",
+        "core_criteria": "Falta cumprir: {gaps}."
       },
-      "codeOption": "{code} · {name}"
+      "codeOption": "{code} · {name}",
+      "gaps": {
+        "briefing_empty": "pelo menos um bloco do briefing preenchido",
+        "fronts_unscored": "todas as frentes do Índice Orbit pontuadas",
+        "findings_without_evidence": "prova em todos os achados",
+        "internal_items_below_minimum": "pelo menos 2 itens internos no roadmap",
+        "cross_review_missing": "a revisão cruzada",
+        "presentation_missing": "a apresentação Figma anexada",
+        "proposal_session_missing": "a sessão de proposta marcada",
+        "presentation_not_shared": "a apresentação partilhada com o cliente"
+      }
     },
     "board": {
       "title": "Pipeline",

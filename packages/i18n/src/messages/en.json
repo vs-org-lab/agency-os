@@ -176,9 +176,9 @@
       "codes": {
         "p0_1": "Application received",
         "p0_2": "Application qualified",
-        "p0_3": "Discovery scheduled",
-        "p0_4": "Discovery held",
-        "p1_1": "Core contracted",
+        "p0_3": "Core call booked",
+        "p0_4": "Core call held",
+        "p1_1": "Core started",
         "p1_2": "Information gathering",
         "p1_3": "Analysis and architecture",
         "p1_4": "Roadmap prepared",
@@ -232,9 +232,20 @@
         "call_required": "Schedule the call in the Calls tab before moving to 0.3.",
         "call_outcome_required": "Record the call outcome before moving to 0.4.",
         "module_pending": "Available once the {module} module exists.",
-        "not_found": "This deal does not exist or you do not have access to it."
+        "not_found": "This deal does not exist or you do not have access to it.",
+        "core_criteria": "Still missing: {gaps}."
       },
-      "codeOption": "{code} · {name}"
+      "codeOption": "{code} · {name}",
+      "gaps": {
+        "briefing_empty": "at least one briefing block filled in",
+        "fronts_unscored": "every Orbit Index front scored",
+        "findings_without_evidence": "evidence on every finding",
+        "internal_items_below_minimum": "at least 2 internal roadmap items",
+        "cross_review_missing": "the cross review",
+        "presentation_missing": "the Figma presentation attached",
+        "proposal_session_missing": "the proposal session scheduled",
+        "presentation_not_shared": "the presentation shared with the client"
+      }
     },
     "board": {
       "title": "Pipeline",

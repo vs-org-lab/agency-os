@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getTranslations } from 'next-intl/server';
+import { getFormatter, getTranslations } from 'next-intl/server';
 import { z } from 'zod';
 import { isPipelineCode } from '@/modules/commercial';
 import { commercialSession, moveDeal } from '@/modules/commercial/server';
@@ -39,6 +39,15 @@ export async function moveDealAction(input: {
     return {
       ok: false,
       message: t('rules.module_pending', { module: t(`modules.${result.module}`) }),
+    };
+  }
+  if (result.rule === 'core_criteria' && 'gaps' in result && result.gaps) {
+    const format = await getFormatter();
+    return {
+      ok: false,
+      message: t('rules.core_criteria', {
+        gaps: format.list(result.gaps.map((gap) => t(`gaps.${gap}`))),
+      }),
     };
   }
   return { ok: false, message: t(`rules.${result.rule}`) };

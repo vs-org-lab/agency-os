@@ -1,3 +1,4 @@
+import { stageOneGaps, type CoreReadiness, type ReadinessGap } from '@/modules/diagnosis';
 import {
   FINAL_CODES,
   PIPELINE_STAGES,
@@ -16,11 +17,13 @@ export type TransitionRefusal =
   | 'founder_only'
   | 'call_required'
   | 'call_outcome_required'
+  | 'core_criteria'
   | 'module_pending';
 
 export type TransitionFacts = {
   hasScheduledCall: boolean;
   hasCompletedCallWithOutcome: boolean;
+  coreReadiness: CoreReadiness | null;
 };
 
 export type TransitionActor = 'system' | 'founder' | 'staff';
@@ -35,9 +38,14 @@ export type TransitionInput = {
 };
 
 export type TransitionDecision =
-  { allowed: true } | { allowed: false; rule: TransitionRefusal; module?: PendingModule };
+  | { allowed: true }
+  | { allowed: false; rule: TransitionRefusal; module?: PendingModule; gaps?: ReadinessGap[] };
 
-export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set(['pre_sale', 'off_cycle']);
+export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set([
+  'pre_sale',
+  'core',
+  'off_cycle',
+]);
 
 export const STAGE_MODULE: Readonly<Partial<Record<PipelineStage, PendingModule>>> = {
   core: 'diagnosis',
@@ -57,6 +65,17 @@ const STAGE_LINKS: ReadonlyArray<readonly [PipelineCode, PipelineCode]> = [
 ];
 
 const PAUSED_CODES: readonly PipelineCode[] = ['X.1', 'X.2'];
+
+const MISSING_CORE: CoreReadiness = {
+  briefingHasContent: false,
+  frontsScored: false,
+  findingsWithoutEvidence: 0,
+  internalItems: 0,
+  crossReviewed: false,
+  presentationAttached: false,
+  proposalSessionScheduled: false,
+  presentationShared: false,
+};
 
 type Movement = 'forward' | 'back';
 
@@ -115,6 +134,10 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
   if (from === '0.2' && to === '0.3' && !facts.hasScheduledCall) return refuse('call_required');
   if (from === '0.3' && to === '0.4' && !facts.hasCompletedCallWithOutcome) {
     return refuse('call_outcome_required');
+  }
+  if (stageOf(from) === 'core' && targetStage === 'core') {
+    const gaps = stageOneGaps(to, facts.coreReadiness ?? MISSING_CORE);
+    if (gaps.length > 0) return { allowed: false, rule: 'core_criteria', gaps };
   }
   return { allowed: true };
 }

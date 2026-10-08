@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { PIPELINE_CODES, type PipelineCode } from './codes';
+import type { CoreReadiness } from '@/modules/diagnosis';
 import { evaluateTransition, type TransitionInput } from './transitions';
+
+const READY: CoreReadiness = {
+  briefingHasContent: true,
+  frontsScored: true,
+  findingsWithoutEvidence: 0,
+  internalItems: 2,
+  crossReviewed: true,
+  presentationAttached: true,
+  proposalSessionScheduled: true,
+  presentationShared: true,
+};
 
 const OFF_CYCLE: PipelineCode[] = ['X.1', 'X.2', 'X.3', 'X.4'];
 
@@ -8,13 +20,13 @@ const ALLOWED_FOR_FOUNDER: Record<PipelineCode, PipelineCode[]> = {
   '0.1': ['0.2', ...OFF_CYCLE],
   '0.2': ['0.3', '0.1', ...OFF_CYCLE],
   '0.3': ['0.4', '0.2', ...OFF_CYCLE],
-  '0.4': ['0.3', ...OFF_CYCLE],
-  '1.1': OFF_CYCLE,
-  '1.2': OFF_CYCLE,
-  '1.3': OFF_CYCLE,
-  '1.4': OFF_CYCLE,
-  '1.5': OFF_CYCLE,
-  '1.6': OFF_CYCLE,
+  '0.4': ['0.3', '1.1', ...OFF_CYCLE],
+  '1.1': ['1.2', ...OFF_CYCLE],
+  '1.2': ['1.3', '1.1', ...OFF_CYCLE],
+  '1.3': ['1.4', '1.2', ...OFF_CYCLE],
+  '1.4': ['1.5', '1.3', ...OFF_CYCLE],
+  '1.5': ['1.6', '1.4', ...OFF_CYCLE],
+  '1.6': ['1.5', ...OFF_CYCLE],
   '2.1': OFF_CYCLE,
   '2.2': OFF_CYCLE,
   '2.3': OFF_CYCLE,
@@ -48,7 +60,7 @@ function input(
     previousOpenCode: '0.2',
     actor: 'founder',
     reason: 'Reason',
-    facts: { hasScheduledCall: true, hasCompletedCallWithOutcome: true },
+    facts: { hasScheduledCall: true, hasCompletedCallWithOutcome: true, coreReadiness: READY },
     ...overrides,
   };
 }
@@ -75,7 +87,11 @@ describe('evaluateTransition', () => {
         input({
           from: '0.2',
           to: '0.3',
-          facts: { hasScheduledCall: false, hasCompletedCallWithOutcome: false },
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: false,
+            coreReadiness: null,
+          },
         }),
       ),
     ).toEqual({ allowed: false, rule: 'call_required' });
@@ -87,18 +103,98 @@ describe('evaluateTransition', () => {
         input({
           from: '0.3',
           to: '0.4',
-          facts: { hasScheduledCall: true, hasCompletedCallWithOutcome: false },
+          facts: {
+            hasScheduledCall: true,
+            hasCompletedCallWithOutcome: false,
+            coreReadiness: null,
+          },
         }),
       ),
     ).toEqual({ allowed: false, rule: 'call_outcome_required' });
   });
 
-  it('refuses entering core while diagnosis is pending with module diagnosis', () => {
-    expect(evaluateTransition(input({ from: '0.4', to: '1.1' }))).toEqual({
+  it('0.4 to 1.1 is allowed', () => {
+    expect(
+      evaluateTransition(
+        input({
+          from: '0.4',
+          to: '1.1',
+          actor: 'system',
+          reason: null,
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: true,
+            coreReadiness: null,
+          },
+        }),
+      ),
+    ).toEqual({ allowed: true });
+  });
+
+  it('advancing inside stage one checks the criteria', () => {
+    expect(
+      evaluateTransition(
+        input({
+          from: '1.3',
+          to: '1.4',
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: true,
+            coreReadiness: { ...READY, crossReviewed: false, internalItems: 1 },
+          },
+        }),
+      ),
+    ).toEqual({
       allowed: false,
-      rule: 'module_pending',
-      module: 'diagnosis',
+      rule: 'core_criteria',
+      gaps: ['internal_items_below_minimum', 'cross_review_missing'],
     });
+    expect(
+      evaluateTransition(
+        input({
+          from: '1.2',
+          to: '1.3',
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: true,
+            coreReadiness: null,
+          },
+        }),
+      ),
+    ).toMatchObject({ allowed: false, rule: 'core_criteria' });
+  });
+
+  it('reopening a paused Core returns to its code without checking criteria', () => {
+    expect(
+      evaluateTransition(
+        input({
+          from: 'X.1',
+          to: '1.4',
+          previousOpenCode: '1.4',
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: true,
+            coreReadiness: null,
+          },
+        }),
+      ),
+    ).toEqual({ allowed: true });
+    expect(
+      evaluateTransition(
+        input({
+          from: '1.4',
+          to: '1.3',
+          facts: {
+            hasScheduledCall: false,
+            hasCompletedCallWithOutcome: true,
+            coreReadiness: null,
+          },
+        }),
+      ),
+    ).toEqual({ allowed: true });
+  });
+
+  it('refuses entering orbit while documents are pending', () => {
     expect(evaluateTransition(input({ from: '0.4', to: '2.1' }))).toEqual({
       allowed: false,
       rule: 'module_pending',

@@ -102,7 +102,7 @@ describe('calls', () => {
     });
   });
 
-  it('advance and follow up move the deal to 0.4', async () => {
+  it('advance outcome moves the deal to 1.1 and follow up to 0.4', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const fixture = await createCommercialFixture(sql, world);
@@ -131,7 +131,7 @@ describe('calls', () => {
         deps,
       );
 
-      expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('0.4');
+      expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('1.1');
       expect((await dealCode(sql, fixture.b.dealId))?.code).toBe('0.4');
     });
   });

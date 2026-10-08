@@ -186,12 +186,20 @@ export async function recordCallOutcome(
       if (outcome === 'decline' && deal?.code !== 'X.4') {
         await applyStageChange(tx, { dealId: call.dealId, to: 'X.4', reason, actor: stageActor });
       } else if ((outcome === 'advance' || outcome === 'follow_up') && deal?.code === '0.3') {
-        await applyStageChange(tx, {
+        const reached = await applyStageChange(tx, {
           dealId: call.dealId,
           to: '0.4',
           reason: null,
           actor: stageActor,
         });
+        if (reached.ok && outcome === 'advance') {
+          await applyStageChange(tx, {
+            dealId: call.dealId,
+            to: '1.1',
+            reason: null,
+            actor: 'system',
+          });
+        }
       }
 
       await addTimelineEntry(tx, {

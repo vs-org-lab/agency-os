@@ -5,7 +5,9 @@ export { ensureEngagement, ensureEngagementForCall } from './engagement';
 export {
   applyCoreBriefingDraft,
   coreEvidenceUrl,
+  grantCorePortalAccess,
   loadCorePrompts,
+  loadPortalCore,
   loadCoreTemplates,
   publishCoreTemplate,
   type CoreTemplates,
@@ -23,3 +25,4 @@ export {
 } from './studio';
 export type { CoreDocument, CoreWorkspace, FindingSummary, RoadmapView } from './queries';
 export type { FindingEvidenceInput } from './findings';
+export { getPortalCore, type PortalCore } from './portal';

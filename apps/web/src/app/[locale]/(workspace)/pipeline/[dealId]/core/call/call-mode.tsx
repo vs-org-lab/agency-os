@@ -55,7 +55,7 @@ export function CallMode({
     saveNoteAction(engagementId, blockId, questionId, body);
 
   return (
-    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
       <header className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <span className="text-body-sm text-text-secondary">

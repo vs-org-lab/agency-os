@@ -169,6 +169,15 @@
     "home": {
       "title": "Bem-vindo",
       "description": "O acompanhamento do seu projeto aparece aqui."
+    },
+    "core": {
+      "briefingTitle": "O resumo da nossa conversa",
+      "briefingDescription": "O que ouvimos na call, tal como o registámos. Se alguma coisa não estiver certa, diga-nos.",
+      "sharedOn": "Partilhado a {date}",
+      "presentations": "Apresentações",
+      "open": "Ver apresentação",
+      "back": "Voltar ao início",
+      "openInFigma": "Abrir no Figma"
     }
   },
   "commercial": {
@@ -1043,6 +1052,18 @@
       "errors": {
         "not_found": "Não foi possível guardar.",
         "invalid_input": "A resposta está vazia ou é demasiado longa."
+      }
+    },
+    "access": {
+      "title": "Portal do cliente",
+      "grant": "Dar acesso ao portal",
+      "granted": "O decisor tem acesso ao portal.",
+      "sent": "Convite enviado ao decisor.",
+      "errors": {
+        "not_found": "Não foi possível dar acesso.",
+        "no_decision_maker": "Este negócio não tem um decisor com email.",
+        "already_granted": "O decisor já tem acesso ao portal.",
+        "invite_failed": "O convite não foi enviado. Tente de novo."
       }
     }
   }

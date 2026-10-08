@@ -169,6 +169,15 @@
     "home": {
       "title": "Welcome",
       "description": "Your project progress appears here."
+    },
+    "core": {
+      "briefingTitle": "The summary of our conversation",
+      "briefingDescription": "What we heard on the call, as we recorded it. If anything is not right, let us know.",
+      "sharedOn": "Shared on {date}",
+      "presentations": "Presentations",
+      "open": "View presentation",
+      "back": "Back to home",
+      "openInFigma": "Open in Figma"
     }
   },
   "commercial": {
@@ -1043,6 +1052,18 @@
       "errors": {
         "not_found": "Could not save.",
         "invalid_input": "The answer is empty or too long."
+      }
+    },
+    "access": {
+      "title": "Client portal",
+      "grant": "Give portal access",
+      "granted": "The decision maker has portal access.",
+      "sent": "Invitation sent to the decision maker.",
+      "errors": {
+        "not_found": "Access could not be given.",
+        "no_decision_maker": "This deal has no decision maker with an email.",
+        "already_granted": "The decision maker already has portal access.",
+        "invite_failed": "The invitation was not sent. Try again."
       }
     }
   }

@@ -216,6 +216,7 @@ export async function createCommercialFixture(
 export type CoreRecords = {
   engagementId: string;
   dealId: string;
+  contactId: string;
   callId: string;
   noteId: string;
   findingId: string;
@@ -300,6 +301,7 @@ export async function createCoreFixture(sql: TransactionSql, world: World): Prom
     return {
       engagementId: engagement.id,
       dealId: records.dealId,
+      contactId: records.contactId,
       callId: records.callId,
       noteId: note.id,
       findingId: finding.id,

@@ -1,10 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getLocale } from 'next-intl/server';
+import { requireLocale } from '@/i18n/require-locale';
 import type { CoreLevel, FindingOwner, OrbitFront, RoadmapLane } from '@agency-os/db';
 import { commercialSession } from '@/modules/commercial/server';
 import {
   applyCoreBriefingDraft,
+  grantCorePortalAccess,
   coreEvidenceUrl,
   recordCoreCrossReview,
   removeCoreFinding,
@@ -284,5 +287,14 @@ export async function changeDocumentAction(
   if (!result.ok) return { ok: false, code: result.rule };
   refresh(dealId);
   revalidatePath(`/pipeline/${dealId}/documents/${documentId}`);
+  return { ok: true };
+}
+
+export async function grantPortalAccessAction(dealId: string): Promise<CoreActionResult> {
+  const current = await session();
+  if (!current) return { ok: false, code: 'not_found' };
+  const result = await grantCorePortalAccess(current, dealId, requireLocale(await getLocale()));
+  if (!result.ok) return { ok: false, code: result.rule };
+  refresh(dealId);
   return { ok: true };
 }

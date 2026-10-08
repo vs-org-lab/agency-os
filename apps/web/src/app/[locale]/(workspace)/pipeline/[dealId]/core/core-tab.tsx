@@ -7,6 +7,7 @@ import { AssistantSection } from './assistant-section';
 import { BriefingSection } from './briefing-section';
 import { FindingsSection } from './findings-section';
 import { OrbitSection } from './orbit-section';
+import { PortalAccess } from './portal-access';
 import { PresentationSection } from './presentation-section';
 import { CrossReviewSection, RoadmapSection } from './review-section';
 
@@ -66,6 +67,9 @@ export async function CoreTab({
   return (
     <div className="flex flex-col gap-6">
       <ReadinessPanel readiness={workspace.readiness} />
+      {writable ? (
+        <PortalAccess dealId={workspace.dealId} granted={workspace.portalAccess} />
+      ) : null}
       <BriefingSection
         engagementId={workspace.engagementId}
         dealId={workspace.dealId}

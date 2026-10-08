@@ -3,6 +3,8 @@ import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import { getPortalDocument, listPortalDocuments } from './portal';
 import { removeDocument, saveDocument, shareDocument, withdrawDocument } from './service';
 
+export { getPortalDocument, listPortalDocuments };
+
 const contexts = { withUserContext };
 
 type Session = { claims: VerifiedClaims };

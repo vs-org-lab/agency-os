@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, isNotNull } from 'drizzle-orm';
 import {
   schema,
   type CoreLevel,
@@ -16,7 +16,7 @@ import { loadCoreReadiness } from './readiness-facts';
 import type { OrbitGrid } from './templates/definitions';
 import { getTemplateById } from './templates/service';
 
-const { coreEngagements, coreFindings, coreScores, documents } = schema;
+const { contacts, coreEngagements, coreFindings, coreScores, documents } = schema;
 
 export type FindingSummary = {
   id: string;
@@ -65,6 +65,7 @@ export type CoreWorkspace = {
   internalItems: number;
   crossReview: { by: string; at: Date; notes: string | null } | null;
   documents: CoreDocument[];
+  portalAccess: boolean;
   readiness: CoreReadiness;
 };
 
@@ -75,6 +76,7 @@ export async function getCoreWorkspace(
   const [engagement] = await tx
     .select({
       id: coreEngagements.id,
+      clientId: coreEngagements.clientId,
       gridTemplateId: coreEngagements.gridTemplateId,
       buyerTestUrl: coreEngagements.buyerTestUrl,
       narrative: coreEngagements.narrative,
@@ -131,6 +133,12 @@ export async function getCoreWorkspace(
     .where(eq(documents.dealId, dealId))
     .orderBy(asc(documents.createdAt));
 
+  const [portalContact] = await tx
+    .select({ id: contacts.id })
+    .from(contacts)
+    .where(and(eq(contacts.clientId, engagement.clientId), isNotNull(contacts.portalUserId)))
+    .limit(1);
+
   const roadmap: RoadmapView = { days_30: [], days_90: [], months_12: [] };
   for (const finding of findings) roadmap[finding.lane].push(finding);
 
@@ -155,6 +163,7 @@ export async function getCoreWorkspace(
           }
         : null,
     documents: presentations,
+    portalAccess: portalContact !== undefined,
     readiness,
   };
 }

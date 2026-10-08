@@ -2,6 +2,8 @@ import 'server-only';
 import { desc, eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import type { Locale } from '@agency-os/i18n';
+import type { Actor } from '@/modules/access';
+import { createInvitationDeps, inviteClientUser } from '@/modules/identity';
 import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import { buildPrompt } from './assistant/prompts';
 import {
@@ -14,12 +16,13 @@ import {
 import { recordCrossReview } from './cross-review';
 import { createSupabaseEvidenceStorage } from './evidence/supabase';
 import { evidenceUrl, removeFinding, saveFinding, type FindingInput } from './findings';
+import { getPortalCore, grantPortalAccess } from './portal';
 import { getCoreWorkspace, type CoreWorkspace } from './queries';
 import { saveScores, type ScoreInput } from './scores';
 import type { BriefingGuide, OrbitGrid } from './templates/definitions';
 import { getActiveTemplate, publishTemplate } from './templates/service';
 
-const { applications } = schema;
+const { applications, clientMemberships } = schema;
 
 export type StudioSession = { claims: VerifiedClaims };
 
@@ -160,4 +163,35 @@ export function publishCoreTemplate(
   input: { kind: 'briefing' | 'orbit_grid'; definition: unknown },
 ) {
   return publishTemplate(session.claims, input, { contexts });
+}
+
+/** Invites the deal's decision maker through the identity module and links the contact. */
+export async function grantCorePortalAccess(
+  session: StudioSession & { actor: Actor },
+  dealId: string,
+  locale: Locale,
+) {
+  const invitationDeps = await createInvitationDeps(locale);
+  return grantPortalAccess(
+    session.claims,
+    { dealId },
+    {
+      contexts,
+      invite: async (input) => {
+        const result = await inviteClientUser(session, input, invitationDeps);
+        if ('error' in result) return result;
+        const [membership] = await withUserContext(session.claims, (tx) =>
+          tx
+            .select({ userId: clientMemberships.userId })
+            .from(clientMemberships)
+            .where(eq(clientMemberships.id, result.membershipId)),
+        );
+        return membership ? { userId: membership.userId } : { error: 'forbidden' };
+      },
+    },
+  );
+}
+
+export function loadPortalCore(claims: VerifiedClaims, clientId: string) {
+  return withUserContext(claims, (tx) => getPortalCore(tx, clientId));
 }

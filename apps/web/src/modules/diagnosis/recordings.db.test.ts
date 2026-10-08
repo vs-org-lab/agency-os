@@ -296,4 +296,39 @@ describe('recordings', () => {
       expect(await uploadedEvents(sql, core.a.recordingId)).toBe(1);
     });
   });
+
+  it('runs the inline transcription once after the upload is confirmed', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const storage = createMemoryRecordingStorage();
+      const transcribed: string[] = [];
+      const deps = {
+        ...depsFor(sql, storage),
+        afterUpload: async (recordingId: string) => {
+          transcribed.push(recordingId);
+        },
+      };
+      const claims = claimsFor(world.users.founder);
+      const created = await createRecording(
+        claims,
+        {
+          engagementId: core.a.engagementId,
+          source: 'upload',
+          consent: true,
+          contentType: 'audio/webm',
+        },
+        deps,
+      );
+      if (!created.ok) throw new Error('Recording was not created');
+      for (const upload of created.uploads) {
+        storage.put(upload.url.replace('memory://upload/', ''), new Uint8Array([1]));
+      }
+
+      await confirmRecordingUpload(claims, { recordingId: created.recordingId }, deps);
+      await confirmRecordingUpload(claims, { recordingId: created.recordingId }, deps);
+
+      expect(transcribed).toEqual([created.recordingId]);
+    });
+  });
 });

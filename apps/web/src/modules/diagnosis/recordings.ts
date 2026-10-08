@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, isNull, ne, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type RecordingStatus } from '@agency-os/db';
 import { withActor } from '@/modules/access';
@@ -7,6 +7,7 @@ import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { scopedEngagement, type EngagementScope } from './authorization';
+import { EXPIRED_RECORDING_ERROR } from './transcribe';
 import type { TranscriptionLanguage } from './transcription/port';
 import {
   isRecordingContentType,
@@ -23,6 +24,8 @@ export type RecordingDeps = {
   contexts: Pick<DbContexts, 'withUserContext'>;
   storage: RecordingStorage;
   flush?: () => Promise<void>;
+  /** Runs the transcription in the request when no background worker is available. */
+  afterUpload?: (recordingId: string) => Promise<void>;
 };
 
 export type CreateRecordingInput = {
@@ -201,7 +204,10 @@ export async function confirmRecordingUpload(
   );
 
   if (!result.ok) return result;
-  if (result.emitted) await (deps.flush ?? requestFlush)();
+  if (result.emitted) {
+    await (deps.flush ?? requestFlush)();
+    await deps.afterUpload?.(input.recordingId);
+  }
   return { ok: true, status: result.status };
 }
 
@@ -221,7 +227,13 @@ export async function retryRecording(
       const updated = await tx
         .update(coreRecordings)
         .set({ status: 'uploaded', error: null })
-        .where(and(eq(coreRecordings.id, input.recordingId), eq(coreRecordings.status, 'failed')))
+        .where(
+          and(
+            eq(coreRecordings.id, input.recordingId),
+            eq(coreRecordings.status, 'failed'),
+            or(isNull(coreRecordings.error), ne(coreRecordings.error, EXPIRED_RECORDING_ERROR)),
+          ),
+        )
         .returning({ id: coreRecordings.id });
       if (updated.length === 0) return { ok: false, rule: 'invalid_state' };
       await emitUploaded(tx, scoped.scope, input.recordingId);
@@ -230,6 +242,9 @@ export async function retryRecording(
     { ok: false, rule: 'not_found' },
   );
 
-  if (result.ok) await (deps.flush ?? requestFlush)();
+  if (result.ok) {
+    await (deps.flush ?? requestFlush)();
+    await deps.afterUpload?.(input.recordingId);
+  }
   return result;
 }

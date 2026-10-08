@@ -18,9 +18,18 @@ import { createSupabaseEvidenceStorage } from './evidence/supabase';
 import { evidenceUrl, removeFinding, saveFinding, type FindingInput } from './findings';
 import { getPortalCore, grantPortalAccess } from './portal';
 import { getCoreWorkspace, type CoreWorkspace } from './queries';
+import {
+  confirmRecordingUpload,
+  createRecording,
+  retryRecording,
+  type CreateRecordingInput,
+} from './recordings';
+import { transcribeDeps, transcribesInline } from './recording-runtime';
 import { saveScores, type ScoreInput } from './scores';
 import type { BriefingGuide, OrbitGrid } from './templates/definitions';
 import { getActiveTemplate, publishTemplate } from './templates/service';
+import { transcribeRecording } from './transcribe';
+import { createSupabaseRecordingStorage } from './transcription/supabase-storage';
 
 const { applications, clientMemberships } = schema;
 
@@ -30,6 +39,30 @@ const contexts = { withUserContext };
 
 function findingDeps() {
   return { contexts, storage: createSupabaseEvidenceStorage() };
+}
+
+function recordingDeps() {
+  return {
+    contexts,
+    storage: createSupabaseRecordingStorage(),
+    afterUpload: transcribesInline()
+      ? async (recordingId: string) => {
+          await transcribeRecording(recordingId, transcribeDeps());
+        }
+      : undefined,
+  };
+}
+
+export function startCoreRecording(session: StudioSession, input: CreateRecordingInput) {
+  return createRecording(session.claims, input, recordingDeps());
+}
+
+export function confirmCoreRecording(session: StudioSession, input: { recordingId: string }) {
+  return confirmRecordingUpload(session.claims, input, recordingDeps());
+}
+
+export function retryCoreRecording(session: StudioSession, input: { recordingId: string }) {
+  return retryRecording(session.claims, input, recordingDeps());
 }
 
 export function loadCoreWorkspace(

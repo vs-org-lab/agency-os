@@ -19,6 +19,9 @@ export {
   saveCoreNote,
   saveCoreScores,
   saveCoreTranscript,
+  startCoreRecording,
+  confirmCoreRecording,
+  retryCoreRecording,
   shareCoreBriefing,
   type CorePrompts,
   type StudioSession,
@@ -26,3 +29,6 @@ export {
 export type { CoreDocument, CoreWorkspace, FindingSummary, RoadmapView } from './queries';
 export type { FindingEvidenceInput } from './findings';
 export { getPortalCore, type PortalCore } from './portal';
+export { transcribeDeps } from './recording-runtime';
+export { markRecordingFailed, sweepExpiredRecordings, transcribeRecording } from './transcribe';
+export { TranscriptionError } from './transcription/port';

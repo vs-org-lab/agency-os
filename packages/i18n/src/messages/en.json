@@ -418,11 +418,8 @@
           "not_found": "It could not be saved.",
           "already_scheduled": "This deal already has a scheduled call."
         },
-        "kind": "Kind",
-        "kinds": {
-          "discovery": "Core call",
-          "proposal_session": "Proposal session"
-        }
+        "scheduleSession": "Schedule proposal session",
+        "scheduleSessionHint": "The session that presents the diagnosis and the options. The decision maker gets the confirmation by email."
       },
       "followUps": {
         "title": "Follow-ups",

@@ -8,8 +8,8 @@ As regras são verificadas no servidor, nunca só na interface. Quando uma açã
 
 - **RN-01** Cada relação comercial tem exatamente um código ativo: 0.1 a 4.4, ou X.1 a X.4.
 - **RN-02** As transições seguem a ordem do pipeline. Os estados X (pausa, bloqueado, concluído, perdido) podem ser aplicados a partir de qualquer estado; reabrir X.1 ou X.2 devolve o estado anterior.
-- **RN-03** Ninguém entra diretamente num projeto: passar de 0.4 para 2.1 só é permitido a clientes com diagnóstico aprovado nos últimos 12 meses.
-- **RN-04** Cada código só é deixado quando o seu critério se cumpre: 1.6 exige mapa aprovado; 2.1 exige contrato assinado e primeiro pagamento; 2.9 exige aprovação final e fatura final emitida.
+- **RN-03** Ninguém entra diretamente num projeto: passar a 2.1 só é permitido a clientes com um Core entregue (1.6) nos últimos 12 meses.
+- **RN-04** Cada código só é deixado quando o seu critério se cumpre: 1.3 exige briefing preenchido; 1.4 exige as 4 frentes pontuadas, prova em todos os achados, pelo menos 2 itens internos e revisão cruzada; 1.5 exige apresentação anexada e sessão de proposta marcada; 1.6 exige a apresentação partilhada com o cliente; 2.1 exige contrato assinado e primeiro pagamento; 2.9 exige aprovação final e fatura final emitida.
 
 ### Candidaturas
 
@@ -20,7 +20,7 @@ As regras são verificadas no servidor, nunca só na interface. Quando uma açã
 
 - **RN-20** Um documento aprovado ou assinado não muda. Uma alteração cria uma nova versão, e a anterior continua acessível.
 - **RN-21** "Retirar para rascunho" só é possível antes de o documento ser aprovado ou assinado.
-- **RN-22** O mapa aprovado é a fonte do resultado acordado. Mudar o resultado depois do contrato exige uma adenda assinada.
+- **RN-22** O roadmap do Core entregue é a fonte do âmbito e do resultado acordado. Mudar o resultado depois do contrato exige uma adenda assinada.
 - **RN-23** Um comentário da equipa num documento visível ao cliente é enviado ao cliente por email; comentários internos ficam marcados e nunca saem.
 
 ### Faturação

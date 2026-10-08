@@ -71,7 +71,7 @@ São 27 ecrãs da equipa, cada um construído a partir de um de nove arquétipos
 | C-04 | Documentos | /c/:cliente/docs | Lista | Cartões com tipo, estado e origem (Proposta · Com o cliente; Contrato · Assinado; Faturas · Tudo pago); "Novo documento" | B1 |
 | C-05 | Documento | /c/:cliente/docs/:id | Visualizador | Figma ou PDF com navegação de diapositivos e ecrã inteiro; comentários à direita, enviados ao cliente por email; Retirar para rascunho, Substituir, Mudar link, Abrir no Figma, Remover | B1 |
 | C-06 | Biblioteca | /c/:cliente/library | Lista | Pastas com contador; filtros Pastas, Imagens, Vídeo, Documentos; Ligar Dropbox, Descarregar tudo, Nova pasta, Carregar pasta, Carregar | B2 |
-| C-07 | Diagnóstico e estratégia | /c/:cliente/discovery | Foco | Workshop, Respostas (notas e transcrição), Estratégia ou Mapa; "Escrever de novo" e "Trazer o seu"; selo de estado (Rascunho, Enviado, Aprovado) | B1 |
+| C-07 | Core | /pipeline/:negocio (separador Core) e /pipeline/:negocio/core/call | Foco | Briefing por blocos com modo call, transcrição, auditoria com prova, Índice Orbit, roadmap, revisão cruzada, apresentação Figma, assistente; critérios da etapa 1 | B1 |
 | C-08 | Brand Hub | /c/:cliente/hub | Editor | Páginas e blocos; painel Design (cores, cantos, mosaicos, layout) e Ficheiros; Editar, Pré-visualizar, Partilhar, Publicar | B2 |
 | C-09 | Faturas | /c/:cliente/invoices | Lista | Plano de faturação do projeto e estado de cada fatura | B1 |
 | C-10 | Retainer | /c/:cliente/retainer | Painel | Limites do mês e consumo por barra; pedidos extra | B3 |
@@ -93,7 +93,7 @@ O cliente tem 11 ecrãs no portal e há 3 ecrãs públicos. Todos usam os mesmos
 | P-04 | Biblioteca | /portal/library | Lista | Só as pastas visíveis; descarregar pasta ou tudo | B2 |
 | P-05 | Atualizações | /portal/updates | Lista | O feed do projeto, com ficheiros | B2 |
 | P-06 | Faturas | /portal/invoices | Lista | PDF certificado e botão Pagar nas faturas enviadas ou vencidas | B1 |
-| P-07 | Workshop | /portal/discovery | Foco | Os passos que o cliente preenche sozinho, com gravação automática | B1 |
+| P-07 | Core | /portal | Leitura | O briefing partilhado e as apresentações com o cliente | B1 |
 | P-08 | Brand Hub | /portal/hub | Visualizador | O hub da marca dentro do portal, com downloads | B2 |
 | P-09 | Academia | /portal/academy | Lista | Tutoriais e manuais da equipa do cliente | B3 |
 | P-10 | Resultado e retainer | /portal/progress | Painel | Evolução do resultado acordado; consumo do retainer no mês | B3 |
@@ -130,14 +130,14 @@ Oito fluxos cobrem o percurso completo de um cliente. Cada passo indica o ecrã 
 5. Antes da chamada, o evento mostra o resumo da candidatura e a resposta à pergunta 9.
 6. Depois da chamada, o fundador regista o resultado no negócio (S-07) (0.4).
 
-### F2 · Do diagnóstico ao mapa aprovado
+### F2 · Aurion Core: da call à sessão de proposta
 
-1. O diagnóstico é pago (1.1) e a sala do cliente é criada com o modelo de processo Diagnóstico.
-2. O fundador conduz o workshop em modo foco (C-07); o cliente pode preencher passos sozinho (P-07).
-3. A transcrição da chamada é colada em Respostas e passa a ser a primeira fonte.
-4. "Escrever o mapa" gera o rascunho; a equipa edita (1.3 → 1.4).
-5. "Enviar ao cliente" coloca o mapa em P-03 com os botões Aprovar e Pedir alterações (1.5).
-6. Aprovado, o mapa fica bloqueado, vai para Documentos e preenche a proposta (1.6).
+1. A call Core é marcada (0.3); o OS cria o Core do negócio. O fundador decide quando dar acesso ao portal ao decisor.
+2. Antes da call: pré-auditoria do que é público, com prova, e três achados escolhidos para o bloco 4.
+3. Na call, o fundador preenche o briefing em modo call (C-07) e partilha-o; o cliente vê-o no portal (P-07). "Avançar" leva o negócio a 1.1.
+4. Auditoria completa nas 4 frentes, Índice Orbit e roadmap (1.2 → 1.3 → 1.4, com revisão cruzada).
+5. A apresentação Figma é anexada e a sessão de proposta marcada (1.5).
+6. Depois da sessão, a apresentação é partilhada com o cliente (1.6). Sem decisão em 5 dias úteis, o OS sugere um follow-up sobre um item do roadmap.
 
 ### F3 · Da proposta à sala ativa
 

@@ -8,7 +8,7 @@ O Agency OS tem 22 módulos. Todos fazem parte da versão final; a coluna Vaga d
 | --- | --- | --- | --- |
 | M01 | Candidaturas | Qualifica cada lead do site em A, B ou C | B1 |
 | M02 | CRM e pipeline | Empresas, contactos, negócios e o pipeline 0.1 a 4.4 | B1 |
-| M03 | Diagnóstico e estratégia | Workshop, transcrição, mapa e estratégia gerados por IA | B1 |
+| M03 | Diagnóstico e estratégia | Aurion Core: briefing da call, auditoria com prova, Índice Orbit e roadmap | B1 |
 | M04 | Documentos | Propostas Figma, contratos, assinatura, versões e comentários | B1 |
 | M05 | Faturação e pagamentos | Marcos, emissão certificada por API, cobrança e conciliação | B1 |
 | M21 | Configurações e auditoria | Modelos, integrações, marca do portal, registo de auditoria | B1 |
@@ -78,6 +78,8 @@ Cada requisito é uma capacidade obrigatória da versão final. O código do mó
 - **RF-017** Área de angariação: lista de empresas-alvo, notas de abordagem e modelos de mensagem por setor.
 
 ### M03 · Diagnóstico e estratégia
+
+> O Aurion Core substitui o diagnóstico pago descrito nos requisitos seguintes ([ADR 0007](../decisions/0007-aurion-core.md)). Em vigor: briefing da call pelos 4 blocos do guia de perguntas, partilhado com o cliente; auditoria nas 4 frentes com prova em cada achado; Índice Orbit de 0 a 25 por frente; roadmap em três faixas com responsável interno ou Aurion; revisão cruzada; apresentação Figma no portal; guia e grelha editáveis e versionados; assistente de IA em modo manual até ao lançamento. RF-020, RF-021 (workshop), RF-026 (aprovação do mapa) e RF-027 (mapa a preencher a proposta) deixam de se aplicar; a proposta usa o roadmap do Core entregue (1C).
 
 - **RF-020** Construtor de workshop com fases e passos, e estes tipos de pergunta: texto livre, escolher traços (até N), escala hoje/meta, mapa de posicionamento em dois eixos, escolha múltipla e carregamento de ficheiros.
 - **RF-021** Modo workshop em ecrã inteiro, para conduzir a sessão com o cliente: progresso por fase e passo, gravação automática, voltar atrás.

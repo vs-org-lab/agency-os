@@ -32,9 +32,9 @@ São 30 automações, pela ordem em que acontecem na vida de um cliente. A colun
 | AUT-05 | chamada.marcada | — | Cria o evento com o resumo da candidatura; lembretes 24h e 1h antes | 0.3 | OS |
 | AUT-06 | chamada.terminada | 2h sem resultado registado | Lembra o fundador de registar o resultado | — | OS |
 | AUT-07 | negocio.sem\_resposta | 3, 7, 14 e 30 dias | Cria tarefa de acompanhamento com mensagem sugerida | — | OS |
-| AUT-08 | diagnostico.pago | Pagamento confirmado | Cria a sala com o processo Diagnóstico; envia o questionário; propõe datas para o workshop | 1.1 | OS |
-| AUT-09 | mapa.enviado | — | Email ao decisor; lembretes aos 3 e 7 dias | 1.5 | OS |
-| AUT-10 | mapa.aprovado | — | Bloqueia o mapa; cria o documento; pré-preenche a proposta | 1.6 | OS |
+| AUT-08 | commercial.call.booked | Call Core marcada | Cria o Core do negócio (briefing e auditoria a partir dos modelos ativos) | 0.3 | OS |
+| AUT-09 | core.briefing.shared, core.document.shared | Partilha pelo fundador | Email ao decisor com acesso ao portal, respeitando as horas de silêncio | 1.x | OS |
+| AUT-10 | varrimento diário | 5 dias úteis em 1.6 | Acompanhamento único em "Hoje" com uma pergunta sobre um item do roadmap | 1.6 | OS |
 | AUT-11 | proposta.aceite | — | Gera o contrato e envia-o para assinatura | — | OS |
 | AUT-12 | contrato.assinado | Todos assinaram | Prepara a fatura do primeiro marco e o link de pagamento | 2.1 | OS |
 | AUT-13 | fatura.paga | Primeiro marco | Convida o cliente para o portal; arranca o processo; agenda o kickoff; cria a tarefa do kit de boas-vindas | 2.2 | OS |
@@ -65,8 +65,8 @@ Cada email pede uma única ação, com um botão que abre o sítio exato no port
 | Momento | Destinatário | Assunto (exemplo) | Botão |
 | --- | --- | --- | --- |
 | Link de marcação (caminho A) | Candidato | A sua chamada com a Aurion | Escolher horário |
-| Questionário do diagnóstico | Decisor | Bloom: 20 minutos antes do workshop | Responder |
-| Mapa enviado | Decisor | Bloom: o mapa do diagnóstico está pronto | Ver o mapa |
+| Briefing partilhado | Decisor | O resumo da nossa conversa está no portal | Ver o briefing |
+| Apresentação partilhada | Decisor | A apresentação está no portal | Ver a apresentação |
 | Proposta enviada | Decisor | Bloom: proposta e investimento | Ver a proposta |
 | Contrato para assinar | Signatários | Bloom: contrato pronto para assinar | Assinar |
 | Fatura emitida | Financeiro | Fatura FT 2026/014: Bloom, marco 1 de 3 | Pagar |

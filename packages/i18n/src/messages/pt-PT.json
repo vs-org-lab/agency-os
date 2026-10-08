@@ -418,11 +418,8 @@
           "not_found": "Não foi possível guardar.",
           "already_scheduled": "Este negócio já tem uma chamada marcada."
         },
-        "kind": "Tipo",
-        "kinds": {
-          "discovery": "Call Core",
-          "proposal_session": "Sessão de proposta"
-        }
+        "scheduleSession": "Marcar sessão de proposta",
+        "scheduleSessionHint": "A sessão em que se apresenta o diagnóstico e as opções. O decisor recebe a confirmação por email."
       },
       "followUps": {
         "title": "Acompanhamentos",

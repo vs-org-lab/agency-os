@@ -6,7 +6,7 @@ import {
   appendTranscriptSection,
   mergeTracks,
   transcriptSection,
-  type SpeakerTrack,
+  type TranscriptSegment,
 } from './transcription/merge';
 import type { TranscriptionLanguage, TranscriptionPort } from './transcription/port';
 import { contentTypeForPath, type RecordingStorage } from './transcription/storage';
@@ -81,39 +81,21 @@ async function lockRecording(tx: DbTransaction, recordingId: string): Promise<Re
   return recording ?? null;
 }
 
-async function transcribeTracks(recording: RecordingRow, deps: TranscribeDeps): Promise<string> {
-  const language: TranscriptionLanguage = recording.language === 'en' ? 'en' : 'pt';
-  const labelled = recording.source === 'call';
-  const tracks: Array<{ path: string; speaker: string | null }> = [
-    { path: recording.clientTrackPath, speaker: labelled ? CLIENT_SPEAKER : null },
-  ];
-  if (recording.studioTrackPath) {
-    tracks.push({ path: recording.studioTrackPath, speaker: STUDIO_SPEAKER });
-  }
-
-  const transcribed: SpeakerTrack[] = [];
-  for (const track of tracks) {
-    const bytes = await deps.storage.download(track.path);
-    const segments = await deps.transcription.transcribe({
-      bytes,
-      fileName: track.path.slice(track.path.lastIndexOf('/') + 1),
-      contentType: contentTypeForPath(track.path),
-      language,
-    });
-    transcribed.push({ speaker: track.speaker, segments });
-  }
-  return mergeTracks(transcribed);
-}
+export type TranscriptionJob = {
+  recordingId: string;
+  language: TranscriptionLanguage;
+  header: string;
+  tracks: Array<{ path: string; speaker: string | null }>;
+};
 
 /**
- * Transcribes an uploaded recording, appends the result to the Core transcript and deletes the
- * audio. Safe to run again for the same recording: a recording already done only has its audio
- * removed, and the transcript is appended under a row lock exactly once.
+ * Claims an uploaded recording for transcription. Returns null when there is nothing to do; a
+ * recording already done only has its leftover audio removed.
  */
-export async function transcribeRecording(
+export async function startTranscription(
   recordingId: string,
   deps: TranscribeDeps,
-): Promise<'done' | 'skipped'> {
+): Promise<TranscriptionJob | null> {
   const recording = await deps.contexts.withSystemContext(async (tx) => {
     const locked = await lockRecording(tx, recordingId);
     if (!locked || !['uploaded', 'transcribing', 'failed'].includes(locked.status)) return locked;
@@ -123,18 +105,61 @@ export async function transcribeRecording(
       .where(eq(coreRecordings.id, recordingId));
     return { ...locked, status: 'transcribing' };
   });
-  if (!recording) return 'skipped';
+  if (!recording) return null;
   if (recording.status === 'done') {
     await deps.storage.remove(trackPaths(recording));
-    return 'skipped';
+    return null;
   }
-  if (recording.status !== 'transcribing') return 'skipped';
+  if (recording.status !== 'transcribing') return null;
 
-  const body = (await transcribeTracks(recording, deps)) || NO_SPEECH;
-  const section = transcriptSection(sectionHeader(recording.createdAt), body);
+  const labelled = recording.source === 'call';
+  const tracks: TranscriptionJob['tracks'] = [
+    { path: recording.clientTrackPath, speaker: labelled ? CLIENT_SPEAKER : null },
+  ];
+  if (recording.studioTrackPath) {
+    tracks.push({ path: recording.studioTrackPath, speaker: STUDIO_SPEAKER });
+  }
+  return {
+    recordingId,
+    language: recording.language === 'en' ? 'en' : 'pt',
+    header: sectionHeader(recording.createdAt),
+    tracks,
+  };
+}
+
+export async function transcribeTrack(
+  job: TranscriptionJob,
+  index: number,
+  deps: Pick<TranscribeDeps, 'storage' | 'transcription'>,
+): Promise<TranscriptSegment[]> {
+  const track = job.tracks[index];
+  if (!track) throw new Error(`Recording ${job.recordingId} has no track ${index}`);
+  const bytes = await deps.storage.download(track.path);
+  return deps.transcription.transcribe({
+    bytes,
+    fileName: track.path.slice(track.path.lastIndexOf('/') + 1),
+    contentType: contentTypeForPath(track.path),
+    language: job.language,
+  });
+}
+
+/** Appends the merged tracks to the Core transcript exactly once, then deletes the audio. */
+export async function finishTranscription(
+  job: TranscriptionJob,
+  segments: TranscriptSegment[][],
+  deps: TranscribeDeps,
+): Promise<'done' | 'skipped'> {
+  const body =
+    mergeTracks(
+      job.tracks.map((track, index) => ({
+        speaker: track.speaker,
+        segments: segments[index] ?? [],
+      })),
+    ) || NO_SPEECH;
+  const section = transcriptSection(job.header, body);
 
   const appended = await deps.contexts.withSystemContext(async (tx) => {
-    const locked = await lockRecording(tx, recordingId);
+    const locked = await lockRecording(tx, job.recordingId);
     if (!locked || locked.status === 'done') return false;
     const [engagement] = await tx
       .select({ transcript: coreEngagements.transcript })
@@ -150,20 +175,37 @@ export async function transcribeRecording(
     await tx
       .update(coreRecordings)
       .set({ status: 'done', error: null, transcribedAt: deps.now() })
-      .where(eq(coreRecordings.id, recordingId));
+      .where(eq(coreRecordings.id, job.recordingId));
     await recordAudit(tx, {
       organizationId: locked.organizationId,
       action: 'core.recording.transcribed',
       resourceType: 'core_recording',
-      resourceId: recordingId,
+      resourceId: job.recordingId,
       clientId: locked.clientId,
       metadata: { engagementId: locked.engagementId },
     });
     return true;
   });
 
-  await deps.storage.remove(trackPaths(recording));
+  await deps.storage.remove(job.tracks.map((track) => track.path));
   return appended ? 'done' : 'skipped';
+}
+
+/**
+ * Transcribes an uploaded recording in one run. Safe to run again for the same recording: the
+ * transcript is appended under a row lock exactly once.
+ */
+export async function transcribeRecording(
+  recordingId: string,
+  deps: TranscribeDeps,
+): Promise<'done' | 'skipped'> {
+  const job = await startTranscription(recordingId, deps);
+  if (!job) return 'skipped';
+  const segments: TranscriptSegment[][] = [];
+  for (let index = 0; index < job.tracks.length; index += 1) {
+    segments.push(await transcribeTrack(job, index, deps));
+  }
+  return finishTranscription(job, segments, deps);
 }
 
 export async function markRecordingFailed(

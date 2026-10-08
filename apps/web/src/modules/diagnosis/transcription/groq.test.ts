@@ -90,4 +90,15 @@ describe('groq transcription', () => {
 
     expect((failure as TranscriptionError).code).toBe('provider_error');
   });
+
+  it('keeps the wait the provider asks for on a rate limit', async () => {
+    const transcription = createGroqTranscription({
+      apiKey: 'test-key',
+      fetch: fakeFetch(new Response('{}', { status: 429, headers: { 'retry-after': '1800' } })),
+    });
+
+    const failure = await transcription.transcribe(request).catch((error: unknown) => error);
+
+    expect((failure as TranscriptionError).retryAfterSeconds).toBe(1800);
+  });
 });

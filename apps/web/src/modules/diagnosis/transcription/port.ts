@@ -19,6 +19,7 @@ export class TranscriptionError extends Error {
   constructor(
     readonly code: TranscriptionErrorCode,
     message: string,
+    readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = 'TranscriptionError';

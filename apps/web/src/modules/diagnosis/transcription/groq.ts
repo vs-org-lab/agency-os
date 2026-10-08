@@ -14,6 +14,11 @@ function errorCode(status: number): TranscriptionErrorCode {
   return 'provider_error';
 }
 
+function retryAfterSeconds(response: Response): number | undefined {
+  const seconds = Number(response.headers.get('retry-after'));
+  return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : undefined;
+}
+
 export function createGroqTranscription(options: {
   apiKey: string;
   fetch?: typeof fetch;
@@ -40,6 +45,7 @@ export function createGroqTranscription(options: {
         throw new TranscriptionError(
           errorCode(response.status),
           `Transcription request failed with status ${response.status}`,
+          retryAfterSeconds(response),
         );
       }
 

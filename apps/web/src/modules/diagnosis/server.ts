@@ -36,5 +36,13 @@ export type {
 export type { FindingEvidenceInput } from './findings';
 export { getPortalCore, type PortalCore } from './portal';
 export { transcribeDeps } from './recording-runtime';
-export { markRecordingFailed, sweepExpiredRecordings, transcribeRecording } from './transcribe';
+export {
+  finishTranscription,
+  markRecordingFailed,
+  startTranscription,
+  sweepExpiredRecordings,
+  transcribeTrack,
+  type TranscriptionJob,
+} from './transcribe';
+export { stepFailure } from './transcription/step-errors';
 export { TranscriptionError } from './transcription/port';

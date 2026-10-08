@@ -4,10 +4,13 @@ import { eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import {
   ensureEngagementForCall,
+  finishTranscription,
   markRecordingFailed,
+  startTranscription,
+  stepFailure,
   sweepExpiredRecordings,
   transcribeDeps,
-  transcribeRecording,
+  transcribeTrack,
 } from '@/modules/diagnosis/server';
 import { emailPort } from '@/modules/email/server';
 import { inngest } from '@/modules/events';
@@ -341,8 +344,22 @@ export const onCoreRecordingUploaded = inngest.createFunction(
   },
   async ({ event, step }) => {
     const { recordingId } = (event.data as EventData<{ recordingId: string }>).payload;
-    const result = await step.run('transcribe-recording', () =>
-      transcribeRecording(recordingId, transcribeDeps()),
+    const job = await step.run('start-transcription', () =>
+      startTranscription(recordingId, transcribeDeps()),
+    );
+    if (!job) return { result: 'skipped' };
+    const segments: Awaited<ReturnType<typeof transcribeTrack>>[] = [];
+    for (let index = 0; index < job.tracks.length; index += 1) {
+      segments.push(
+        await step.run(`transcribe-track-${index}`, () =>
+          transcribeTrack(job, index, transcribeDeps()).catch((error: unknown) => {
+            throw stepFailure(error);
+          }),
+        ),
+      );
+    }
+    const result = await step.run('finish-transcription', () =>
+      finishTranscription(job, segments, transcribeDeps()),
     );
     return { result };
   },

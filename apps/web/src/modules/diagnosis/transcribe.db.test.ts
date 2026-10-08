@@ -10,7 +10,14 @@ import {
 } from '@agency-os/db/testing';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
 import { retryRecording } from './recordings';
-import { markRecordingFailed, sweepExpiredRecordings, transcribeRecording } from './transcribe';
+import {
+  finishTranscription,
+  markRecordingFailed,
+  startTranscription,
+  sweepExpiredRecordings,
+  transcribeRecording,
+  transcribeTrack,
+} from './transcribe';
 import { createMemoryRecordingStorage } from './transcription/memory-storage';
 import type { TranscriptionPort, TranscriptionRequest } from './transcription/port';
 
@@ -114,6 +121,33 @@ describe('transcribeRecording', () => {
         where action = 'core.recording.transcribed' and resource_id = ${core.a.recordingId}
       `;
       expect(audits).toHaveLength(1);
+    });
+  });
+
+  it('transcribes each track once when a later track has to be retried', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const storage = createMemoryRecordingStorage();
+      await prepareRecording(sql, core.a.recordingId, storage);
+      const requests: TranscriptionRequest[] = [];
+      const deps = depsFor(sql, storage, scriptedTranscription(requests));
+      const limited: TranscriptionPort = {
+        transcribe: async () => {
+          throw new Error('rate limited');
+        },
+      };
+
+      const job = await startTranscription(core.a.recordingId, deps);
+      if (!job) throw new Error('Transcription job was not started');
+      const client = await transcribeTrack(job, 0, deps);
+      await expect(transcribeTrack(job, 1, { ...deps, transcription: limited })).rejects.toThrow();
+      const studio = await transcribeTrack(job, 1, deps);
+      const result = await finishTranscription(job, [client, studio], deps);
+
+      expect(result).toBe('done');
+      expect(requests.map((request) => request.fileName)).toEqual(['client.webm', 'studio.webm']);
+      expect(await engagementTranscript(sql, core.a.engagementId)).toBe(`Transcript\n\n${SECTION}`);
     });
   });
 

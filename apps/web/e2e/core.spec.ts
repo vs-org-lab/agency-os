@@ -127,7 +127,7 @@ test.describe('Aurion Core', () => {
     const { company } = uniqueCompany('Core Gravação');
     const { dealId } = await seedDeal(credentials.organizationId, {
       company,
-      code: '1.1',
+      code: '0.3',
       withCall: true,
     });
     await seedCore(credentials.organizationId, dealId);

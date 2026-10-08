@@ -893,7 +893,8 @@
       "buyerTestHint": "Loom, Drive or unlisted YouTube link.",
       "saveBuyerTest": "Save link",
       "saved": "Saved.",
-      "invalidLink": "Use an https link."
+      "invalidLink": "Use an https link.",
+      "transcriptFailed": "The transcript could not be saved."
     },
     "call": {
       "title": "Call mode",

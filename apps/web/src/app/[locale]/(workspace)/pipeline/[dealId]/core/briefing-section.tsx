@@ -1,12 +1,11 @@
 'use client';
 
-import { useActionState, useState, useTransition } from 'react';
+import { useActionState, useCallback, useEffect, useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
-import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { Link } from '@/i18n/navigation';
@@ -18,17 +17,39 @@ import {
   shareBriefingAction,
 } from './actions';
 import { NoteField } from './note-field';
+import { TranscriptForm } from './transcript-form';
 
 export type BriefingNoteView = { blockId: string; questionId: string | null; body: string };
 
-export function noteBody(
-  notes: BriefingNoteView[],
-  blockId: string,
-  questionId: string | null,
-): string {
-  return (
-    notes.find((note) => note.blockId === blockId && note.questionId === questionId)?.body ?? ''
+function noteKey(blockId: string, questionId: string | null): string {
+  return `${blockId}:${questionId ?? ''}`;
+}
+
+function toValues(notes: BriefingNoteView[]): Record<string, string> {
+  return Object.fromEntries(
+    notes.map((note) => [noteKey(note.blockId, note.questionId), note.body]),
   );
+}
+
+/**
+ * Keeps the latest saved text of every note on the client, so a field that unmounts and
+ * mounts again (next block, another tab) shows what was saved rather than the first render.
+ */
+export function useNoteValues(notes: BriefingNoteView[]) {
+  const [values, setValues] = useState(() => toValues(notes));
+  useEffect(() => {
+    setValues((current) => ({ ...current, ...toValues(notes) }));
+  }, [notes]);
+  const value = useCallback(
+    (blockId: string, questionId: string | null) => values[noteKey(blockId, questionId)] ?? '',
+    [values],
+  );
+  const remember = useCallback(
+    (blockId: string, questionId: string | null, body: string) =>
+      setValues((current) => ({ ...current, [noteKey(blockId, questionId)]: body })),
+    [],
+  );
+  return { value, remember };
 }
 
 export function BriefingSection({
@@ -56,14 +77,11 @@ export function BriefingSection({
   const format = useFormatter();
   const [shareError, setShareError] = useState<string | null>(null);
   const [sharing, startShare] = useTransition();
-  const [transcriptState, transcriptAction] = useActionState(
-    saveTranscriptAction.bind(null, engagementId, dealId),
-    { status: 'idle' },
-  );
   const [buyerState, buyerAction] = useActionState(
     saveBuyerTestAction.bind(null, engagementId, dealId),
     { status: 'idle' },
   );
+  const { value, remember } = useNoteValues(notes);
   const save = (blockId: string, questionId: string | null) => (body: string) =>
     saveNoteAction(engagementId, blockId, questionId, body);
 
@@ -123,7 +141,8 @@ export function BriefingSection({
                 key={question.id}
                 id={`note-${block.id}-${question.id}`}
                 label={question.text[locale]}
-                initialValue={noteBody(notes, block.id, question.id)}
+                initialValue={value(block.id, question.id)}
+                onSaved={(body) => remember(block.id, question.id, body)}
                 save={save(block.id, question.id)}
                 rows={2}
                 disabled={!writable}
@@ -132,7 +151,8 @@ export function BriefingSection({
             <NoteField
               id={`note-${block.id}`}
               label={t('blockNotes')}
-              initialValue={noteBody(notes, block.id, null)}
+              initialValue={value(block.id, null)}
+              onSaved={(body) => remember(block.id, null, body)}
               save={save(block.id, null)}
               rows={3}
               disabled={!writable}
@@ -143,22 +163,11 @@ export function BriefingSection({
 
       {writable ? (
         <div className="grid gap-4 border-t border-border pt-4 lg:grid-cols-2">
-          <form action={transcriptAction} className="flex flex-col gap-2">
-            <Label htmlFor="core-transcript">{t('transcript')}</Label>
-            <Textarea
-              id="core-transcript"
-              name="transcript"
-              rows={6}
-              defaultValue={transcript ?? ''}
-              maxLength={200_000}
-            />
-            {transcriptState.status === 'saved' ? (
-              <FormMessage tone="success">{t('saved')}</FormMessage>
-            ) : null}
-            <div className="md:w-56">
-              <SubmitButton>{t('saveTranscript')}</SubmitButton>
-            </div>
-          </form>
+          <TranscriptForm
+            id="core-transcript"
+            initialValue={transcript ?? ''}
+            save={(text) => saveTranscriptAction(engagementId, dealId, text)}
+          />
           <form action={buyerAction} className="flex flex-col gap-2">
             <Label htmlFor="core-buyer-test">{t('buyerTest')}</Label>
             <Input

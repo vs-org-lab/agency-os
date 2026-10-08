@@ -893,7 +893,8 @@
       "buyerTestHint": "Link do Loom, Drive ou YouTube não listado.",
       "saveBuyerTest": "Guardar link",
       "saved": "Guardado.",
-      "invalidLink": "Use um link https."
+      "invalidLink": "Use um link https.",
+      "transcriptFailed": "Não foi possível guardar a transcrição."
     },
     "call": {
       "title": "Modo call",

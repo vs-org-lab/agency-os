@@ -66,16 +66,11 @@ export async function saveNoteAction(
 export async function saveTranscriptAction(
   engagementId: string,
   dealId: string,
-  _state: CoreFormState,
-  formData: FormData,
+  transcript: string,
 ): Promise<CoreFormState> {
   const current = await session();
   if (!current) return NOT_FOUND;
-  const transcript = formData.get('transcript');
-  const result = await saveCoreTranscript(current, {
-    engagementId,
-    transcript: typeof transcript === 'string' ? transcript : '',
-  });
+  const result = await saveCoreTranscript(current, { engagementId, transcript });
   if (!result.ok) return { status: 'error', code: result.rule };
   refresh(dealId);
   return { status: 'saved' };

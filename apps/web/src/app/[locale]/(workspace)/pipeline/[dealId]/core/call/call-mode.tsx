@@ -1,20 +1,17 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
-import { Label } from '@agency-os/ui/components/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
-import { Textarea } from '@agency-os/ui/components/textarea';
-import { FormMessage } from '@/components/forms/form-message';
-import { SubmitButton } from '@/components/forms/submit-button';
 import { Link } from '@/i18n/navigation';
 import type { BriefingGuide } from '@/modules/diagnosis';
 import { saveNoteAction, saveTranscriptAction } from '../actions';
-import { noteBody, type BriefingNoteView } from '../briefing-section';
+import { useNoteValues, type BriefingNoteView } from '../briefing-section';
 import { EvidenceButton } from '../findings-section';
 import { NoteField } from '../note-field';
+import { TranscriptForm } from '../transcript-form';
 
 type Observation = {
   id: string;
@@ -45,10 +42,7 @@ export function CallMode({
 }) {
   const t = useTranslations('diagnosis');
   const [index, setIndex] = useState(0);
-  const [transcriptState, transcriptAction] = useActionState(
-    saveTranscriptAction.bind(null, engagementId, dealId),
-    { status: 'idle' },
-  );
+  const { value, remember } = useNoteValues(notes);
   const block = guide.blocks[index];
   if (!block) return null;
   const save = (blockId: string, questionId: string | null) => (body: string) =>
@@ -115,7 +109,8 @@ export function CallMode({
                 key={question.id}
                 id={`call-${question.id}`}
                 label={question.text[locale]}
-                initialValue={noteBody(notes, block.id, question.id)}
+                initialValue={value(block.id, question.id)}
+                onSaved={(body) => remember(block.id, question.id, body)}
                 save={save(block.id, question.id)}
                 rows={3}
               />
@@ -123,7 +118,8 @@ export function CallMode({
             <NoteField
               id={`call-${block.id}`}
               label={t('briefing.blockNotes')}
-              initialValue={noteBody(notes, block.id, null)}
+              initialValue={value(block.id, null)}
+              onSaved={(body) => remember(block.id, null, body)}
               save={save(block.id, null)}
               rows={4}
             />
@@ -190,22 +186,12 @@ export function CallMode({
         </TabsContent>
 
         <TabsContent value="transcript" className="pt-6">
-          <form action={transcriptAction} className="flex flex-col gap-2">
-            <Label htmlFor="call-transcript">{t('briefing.transcript')}</Label>
-            <Textarea
-              id="call-transcript"
-              name="transcript"
-              rows={14}
-              defaultValue={transcript ?? ''}
-              maxLength={200_000}
-            />
-            {transcriptState.status === 'saved' ? (
-              <FormMessage tone="success">{t('briefing.saved')}</FormMessage>
-            ) : null}
-            <div className="md:w-56">
-              <SubmitButton>{t('briefing.saveTranscript')}</SubmitButton>
-            </div>
-          </form>
+          <TranscriptForm
+            id="call-transcript"
+            rows={14}
+            initialValue={transcript ?? ''}
+            save={(text) => saveTranscriptAction(engagementId, dealId, text)}
+          />
         </TabsContent>
       </Tabs>
     </div>

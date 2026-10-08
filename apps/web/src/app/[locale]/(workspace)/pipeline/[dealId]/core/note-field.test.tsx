@@ -58,4 +58,59 @@ describe('NoteField', () => {
     expect(save).toHaveBeenCalledTimes(2);
     expect(screen.getByText('Guardado')).toBeTruthy();
   });
+
+  it('flushes a pending note when the field unmounts', async () => {
+    const save = vi.fn(async () => true);
+    const view = render(
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <NoteField id="note-1" label="Notas do bloco" initialValue="" save={save} />
+      </NextIntlClientProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Notas do bloco'), {
+      target: { value: 'Escrito antes de mudar de bloco' },
+    });
+    view.unmount();
+
+    expect(save).toHaveBeenCalledWith('Escrito antes de mudar de bloco');
+  });
+
+  it('shows a newer saved value when the field is not being edited', async () => {
+    const save = vi.fn(async () => true);
+    const view = render(
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <NoteField id="note-1" label="Notas do bloco" initialValue="Antes" save={save} />
+      </NextIntlClientProvider>,
+    );
+
+    view.rerender(
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <NoteField
+          id="note-1"
+          label="Notas do bloco"
+          initialValue="Resumo do assistente"
+          save={save}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    expect((screen.getByLabelText('Notas do bloco') as HTMLTextAreaElement).value).toBe(
+      'Resumo do assistente',
+    );
+  });
+
+  it('hides the saved state while there are unsaved edits', async () => {
+    const save = vi.fn(async () => true);
+    const field = renderField(save);
+
+    fireEvent.change(field, { target: { value: 'Primeira' } });
+    await act(async () => {
+      vi.advanceTimersByTime(900);
+    });
+    expect(screen.getByText('Guardado')).toBeTruthy();
+
+    fireEvent.change(field, { target: { value: 'Primeira e segunda' } });
+
+    expect(screen.queryByText('Guardado')).toBeNull();
+  });
 });

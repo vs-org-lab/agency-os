@@ -212,3 +212,105 @@ export async function createCommercialFixture(
     });
   return { formId: form.id, a: await seed(world.clients.a), b: await seed(world.clients.b) };
 }
+
+export type CoreRecords = {
+  engagementId: string;
+  dealId: string;
+  callId: string;
+  noteId: string;
+  findingId: string;
+  documentId: string;
+};
+
+export type CoreFixture = {
+  briefingTemplateId: string;
+  gridTemplateId: string;
+  a: CoreRecords;
+  b: CoreRecords;
+};
+
+const FIXTURE_BRIEFING_GUIDE = {
+  blocks: [1, 2, 3, 4].map((index) => ({
+    id: `block_${index}`,
+    title: { 'pt-PT': `Bloco ${index}`, en: `Block ${index}` },
+    minutes: 15,
+    goal: { 'pt-PT': 'Objetivo', en: 'Goal' },
+    questions: [{ id: `block_${index}_q1`, text: { 'pt-PT': 'Pergunta', en: 'Question' } }],
+  })),
+};
+
+const FIXTURE_ORBIT_GRID = {
+  fronts: (['core', 'orbit', 'gravity', 'constellation'] as const).map((front) => ({
+    front,
+    criteria: [1, 2, 3, 4, 5].map((index) => ({
+      id: `${front}_${index}`,
+      name: { 'pt-PT': `Critério ${index}`, en: `Criterion ${index}` },
+      observes: { 'pt-PT': 'O que se observa', en: 'What is observed' },
+      maxPoints: 5,
+    })),
+  })),
+};
+
+export async function createCoreFixture(sql: TransactionSql, world: World): Promise<CoreFixture> {
+  const commercial = await createCommercialFixture(sql, world);
+  const templates = await sql<{ id: string; kind: string }[]>`
+    insert into public.core_templates (organization_id, kind, version, definition, is_active)
+    values
+      (${world.organizationId}, 'briefing', 1, ${JSON.stringify(FIXTURE_BRIEFING_GUIDE)}::jsonb, true),
+      (${world.organizationId}, 'orbit_grid', 1, ${JSON.stringify(FIXTURE_ORBIT_GRID)}::jsonb, true)
+    returning id, kind::text
+  `;
+  const briefingTemplateId = templates.find((row) => row.kind === 'briefing')?.id;
+  const gridTemplateId = templates.find((row) => row.kind === 'orbit_grid')?.id;
+  if (!briefingTemplateId || !gridTemplateId) throw new Error('Core fixture templates missing');
+
+  const seed = async (clientId: string, records: CommercialRecords): Promise<CoreRecords> => {
+    const [engagement] = await sql<{ id: string }[]>`
+      insert into public.core_engagements (organization_id, client_id, deal_id, briefing_template_id,
+                                           grid_template_id, transcript)
+      values (${world.organizationId}, ${clientId}, ${records.dealId}, ${briefingTemplateId},
+              ${gridTemplateId}, 'Transcript')
+      returning id
+    `;
+    if (!engagement) throw new Error('Core fixture engagement was not created');
+    const [note] = await sql<{ id: string }[]>`
+      insert into public.core_briefing_notes (organization_id, client_id, engagement_id, block_id, body)
+      values (${world.organizationId}, ${clientId}, ${engagement.id}, 'block_1', 'Notes')
+      returning id
+    `;
+    const [finding] = await sql<{ id: string }[]>`
+      insert into public.core_findings (organization_id, client_id, engagement_id, front, title,
+                                        evidence_kind, evidence_value, impact, effort, lane, owner)
+      values (${world.organizationId}, ${clientId}, ${engagement.id}, 'orbit', 'Slow mobile site',
+              'link', 'https://example.com/report', 'high', 'low', 'days_30', 'internal')
+      returning id
+    `;
+    await sql`
+      insert into public.core_scores (organization_id, client_id, engagement_id, front, criterion_id,
+                                      points, justification)
+      values (${world.organizationId}, ${clientId}, ${engagement.id}, 'orbit', 'orbit_1', 3, 'Evidence')
+    `;
+    const [document] = await sql<{ id: string }[]>`
+      insert into public.documents (organization_id, client_id, deal_id, kind, title, url)
+      values (${world.organizationId}, ${clientId}, ${records.dealId}, 'figma_presentation',
+              'Apresentação', 'https://www.figma.com/deck/abc/Core')
+      returning id
+    `;
+    if (!note || !finding || !document) throw new Error('Core fixture records were not created');
+    return {
+      engagementId: engagement.id,
+      dealId: records.dealId,
+      callId: records.callId,
+      noteId: note.id,
+      findingId: finding.id,
+      documentId: document.id,
+    };
+  };
+
+  return {
+    briefingTemplateId,
+    gridTemplateId,
+    a: await seed(world.clients.a, commercial.a),
+    b: await seed(world.clients.b, commercial.b),
+  };
+}

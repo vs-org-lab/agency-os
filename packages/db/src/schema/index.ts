@@ -10,3 +10,5 @@ export * from './deals';
 export * from './applications';
 export * from './commercial';
 export * from './seen-markers';
+export * from './diagnosis';
+export * from './documents';

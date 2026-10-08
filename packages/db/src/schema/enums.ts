@@ -136,6 +136,32 @@ export const timelineKindEnum = appSchema.enum('timeline_kind', [
   'follow_up_completed',
 ]);
 
+export const coreTemplateKindEnum = appSchema.enum('core_template_kind', [
+  'briefing',
+  'orbit_grid',
+]);
+
+export const orbitFrontEnum = appSchema.enum('orbit_front', [
+  'core',
+  'orbit',
+  'gravity',
+  'constellation',
+]);
+
+export const coreLevelEnum = appSchema.enum('core_level', ['low', 'medium', 'high']);
+
+export const roadmapLaneEnum = appSchema.enum('roadmap_lane', ['days_30', 'days_90', 'months_12']);
+
+export const findingOwnerEnum = appSchema.enum('finding_owner', ['internal', 'aurion']);
+
+export const evidenceKindEnum = appSchema.enum('evidence_kind', ['file', 'link', 'number', 'page']);
+
+export const callKindEnum = appSchema.enum('call_kind', ['discovery', 'proposal_session']);
+
+export const documentKindEnum = appSchema.enum('document_kind', ['figma_presentation']);
+
+export const documentStatusEnum = appSchema.enum('document_status', ['draft', 'with_client']);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -155,6 +181,15 @@ export type CallStatus = (typeof callStatusEnum.enumValues)[number];
 export type CallSyncStatus = (typeof callSyncStatusEnum.enumValues)[number];
 export type CallOutcome = (typeof callOutcomeEnum.enumValues)[number];
 export type FollowUpStatus = (typeof followUpStatusEnum.enumValues)[number];
+export type CoreTemplateKind = (typeof coreTemplateKindEnum.enumValues)[number];
+export type OrbitFront = (typeof orbitFrontEnum.enumValues)[number];
+export type CoreLevel = (typeof coreLevelEnum.enumValues)[number];
+export type RoadmapLane = (typeof roadmapLaneEnum.enumValues)[number];
+export type FindingOwner = (typeof findingOwnerEnum.enumValues)[number];
+export type EvidenceKind = (typeof evidenceKindEnum.enumValues)[number];
+export type CallKind = (typeof callKindEnum.enumValues)[number];
+export type DocumentKind = (typeof documentKindEnum.enumValues)[number];
+export type DocumentStatus = (typeof documentStatusEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

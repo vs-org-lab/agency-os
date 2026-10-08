@@ -19,6 +19,7 @@ import { clients } from './clients';
 import { archivedAt, id, timestamps } from './columns';
 import { contacts } from './contacts';
 import {
+  callKindEnum,
   callOutcomeEnum,
   callStatusEnum,
   callSyncStatusEnum,
@@ -109,6 +110,7 @@ export const calls = pgTable(
     startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
     endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
     leadTimeZone: text('lead_time_zone'),
+    kind: callKindEnum('kind').notNull().default('discovery'),
     status: callStatusEnum('status').notNull().default('scheduled'),
     syncStatus: callSyncStatusEnum('sync_status').notNull().default('pending'),
     externalEventId: text('external_event_id'),
@@ -131,8 +133,8 @@ export const calls = pgTable(
       name: 'calls_client_organization_fk',
     }).onDelete('restrict'),
     unique('calls_id_client_id_key').on(table.id, table.clientId),
-    uniqueIndex('calls_scheduled_per_deal_key')
-      .on(table.dealId)
+    uniqueIndex('calls_scheduled_per_deal_kind_key')
+      .on(table.dealId, table.kind)
       .where(sql`${table.status} = 'scheduled'`),
     index('calls_host_starts_idx').on(table.hostUserId, table.startsAt),
     check('calls_ends_after_start', sql`${table.endsAt} > ${table.startsAt}`),

@@ -7,26 +7,19 @@ import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
 import { FormMessage } from '@/components/forms/form-message';
 import { ORBIT_FRONTS } from '@/modules/diagnosis';
-import { evidenceUrlAction, removeFindingAction, saveFindingAction } from './actions';
+import { removeFindingAction, saveFindingAction } from './actions';
 import { FindingForm, type FindingDefaults } from './finding-form';
 
-export function EvidenceButton({ findingId, label }: { findingId: string; label: string }) {
-  const [pending, startTransition] = useTransition();
+export function EvidenceLink({ findingId, label }: { findingId: string; label: string }) {
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      disabled={pending}
-      onClick={() =>
-        startTransition(async () => {
-          const url = await evidenceUrlAction(findingId);
-          if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        })
-      }
+    <a
+      href={`/api/core/evidence/${findingId}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-body-sm text-link hover:underline"
     >
       {label}
-    </Button>
+    </a>
   );
 }
 
@@ -36,7 +29,7 @@ function EvidenceLine({ finding }: { finding: FindingDefaults }) {
     return <span className="text-caption text-warning">{t('withoutEvidence')}</span>;
   }
   if (finding.evidenceKind === 'file') {
-    return <EvidenceButton findingId={finding.id} label={t('viewEvidence')} />;
+    return <EvidenceLink findingId={finding.id} label={t('viewEvidence')} />;
   }
   if (finding.evidenceKind === 'link' && finding.evidenceValue) {
     return (

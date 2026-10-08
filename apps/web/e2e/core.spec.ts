@@ -56,7 +56,15 @@ test.describe('Aurion Core', () => {
     await page
       .getByLabel('Como descreves a empresa a alguém que a ouve pela primeira vez?')
       .fill('Consultora de energia com vinte anos de mercado.');
-    await expect(page.getByText('Guardado')).toBeVisible();
+    await page.getByRole('button', { name: 'Seguinte' }).click();
+    await page.getByRole('button', { name: 'Voltar' }).click();
+    await expect(
+      page.getByLabel('Como descreves a empresa a alguém que a ouve pela primeira vez?'),
+    ).toHaveValue('Consultora de energia com vinte anos de mercado.');
+    await page.reload();
+    await expect(
+      page.getByLabel('Como descreves a empresa a alguém que a ouve pela primeira vez?'),
+    ).toHaveValue('Consultora de energia com vinte anos de mercado.');
 
     await page.goto(`/pipeline/${dealId}`);
     await expect(page.getByRole('tab', { name: 'Core', selected: true })).toBeVisible();
@@ -65,6 +73,10 @@ test.describe('Aurion Core', () => {
       evidence: 'file',
       owner: 'Interno',
     });
+    const evidence = page.getByRole('link', { name: 'Ver prova' }).first();
+    const evidenceResponse = await page.request.get((await evidence.getAttribute('href')) ?? '');
+    expect(evidenceResponse.status()).toBe(200);
+    expect(evidenceResponse.headers()['content-type']).toContain('image/png');
     await addFinding(page, {
       title: 'Sem rastreamento de conversões',
       evidence: 'link',
@@ -75,13 +87,18 @@ test.describe('Aurion Core', () => {
     for (const justification of await page.getByLabel('Justificação').all()) {
       await justification.fill('Prova na auditoria');
     }
-    for (const save of await page.getByRole('button', { name: 'Guardar pontuação' }).all()) {
-      await save.click();
-      await expect(page.getByText('Pontuação guardada.').first()).toBeVisible();
+    const scoreForms = page
+      .locator('form')
+      .filter({ has: page.getByRole('button', { name: 'Guardar pontuação' }) });
+    for (let index = 0; index < (await scoreForms.count()); index += 1) {
+      const form = scoreForms.nth(index);
+      await form.getByRole('button', { name: 'Guardar pontuação' }).click();
+      await expect(form.getByText('Pontuação guardada.')).toBeVisible();
     }
 
     await page.getByLabel('Notas da revisão').fill('Nada óbvio para este CEO.');
     await page.getByRole('button', { name: 'Registar revisão' }).click();
+    await expect(page.getByText(/Revista a/)).toBeVisible();
 
     await page.getByRole('button', { name: 'Anexar apresentação Figma' }).click();
     await page.getByLabel('Título').fill('Sessão de proposta');
@@ -101,6 +118,7 @@ test.describe('Aurion Core', () => {
 
     await page.getByRole('tab', { name: 'Core' }).click();
     await page.getByRole('button', { name: 'Partilhar com o cliente' }).click();
+    await expect(page.getByText('Com o cliente', { exact: true })).toBeVisible();
     await moveTo(page, '1.6');
   });
 

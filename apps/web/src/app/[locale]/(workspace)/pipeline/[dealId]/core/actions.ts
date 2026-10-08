@@ -8,7 +8,6 @@ import { commercialSession } from '@/modules/commercial/server';
 import {
   applyCoreBriefingDraft,
   grantCorePortalAccess,
-  coreEvidenceUrl,
   recordCoreCrossReview,
   removeCoreFinding,
   saveCoreDetails,
@@ -161,12 +160,6 @@ export async function removeFindingAction(
   if (!result.ok) return { ok: false, code: result.rule };
   refresh(dealId);
   return { ok: true };
-}
-
-export async function evidenceUrlAction(findingId: string): Promise<string | null> {
-  const current = await session();
-  if (!current) return null;
-  return coreEvidenceUrl(current, { findingId });
 }
 
 export async function saveScoresAction(

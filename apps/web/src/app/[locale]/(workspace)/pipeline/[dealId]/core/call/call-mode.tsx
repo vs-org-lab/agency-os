@@ -9,7 +9,7 @@ import { Link } from '@/i18n/navigation';
 import type { BriefingGuide } from '@/modules/diagnosis';
 import { saveNoteAction, saveTranscriptAction } from '../actions';
 import { useNoteValues, type BriefingNoteView } from '../briefing-section';
-import { EvidenceButton } from '../findings-section';
+import { EvidenceLink } from '../findings-section';
 import { NoteField } from '../note-field';
 import { TranscriptForm } from '../transcript-form';
 
@@ -160,10 +160,7 @@ export function CallMode({
                   ) : null}
                   {observation.evidenceKind === 'file' ? (
                     <div>
-                      <EvidenceButton
-                        findingId={observation.id}
-                        label={t('findings.viewEvidence')}
-                      />
+                      <EvidenceLink findingId={observation.id} label={t('findings.viewEvidence')} />
                     </div>
                   ) : observation.evidenceKind === 'link' && observation.evidenceValue ? (
                     <a

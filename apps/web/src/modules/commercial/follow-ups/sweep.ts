@@ -2,9 +2,14 @@ import { TZDate } from '@date-fns/tz';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
 import type { Locale } from '@agency-os/i18n';
+import { addBusinessDays } from '@/modules/diagnosis';
 import type { DbContexts } from '@/platform/db';
 import { addTimelineEntry } from '../timeline';
-import { DEFAULT_FOLLOW_UP_TEMPLATES } from './default-templates';
+import {
+  CORE_FOLLOW_UP_DAY,
+  CORE_FOLLOW_UP_TEMPLATES,
+  DEFAULT_FOLLOW_UP_TEMPLATES,
+} from './default-templates';
 import { renderFollowUpMessage } from './render';
 
 const { followUps, messageTemplates } = schema;
@@ -173,6 +178,99 @@ export async function createDueFollowUps(now: Date, deps: SweepDeps): Promise<nu
         actorUserId: null,
       });
     }
-    return created;
+    return created + (await createCoreFollowUps(tx, now));
   });
+}
+
+type CoreCandidate = {
+  deal_id: string;
+  organization_id: string;
+  client_id: string;
+  entered_at: string;
+  call_id: string;
+  host_user_id: string;
+  contact_name: string | null;
+  item_title: string | null;
+  time_zone: string;
+  locale: Locale;
+};
+
+const CORE_FOLLOW_UP_BUSINESS_DAYS = 5;
+
+async function createCoreFollowUps(tx: DbTransaction, now: Date): Promise<number> {
+  const candidates = await tx.execute<CoreCandidate>(sql`
+    select d.id as deal_id, d.organization_id, d.client_id,
+           entered.at as entered_at, c.id as call_id, c.host_user_id,
+           ct.full_name as contact_name, item.title as item_title,
+           coalesce(cs.time_zone, 'Europe/Lisbon') as time_zone,
+           o.default_locale::text as locale
+    from public.deals d
+    join public.organizations o on o.id = d.organization_id
+    left join public.commercial_settings cs on cs.organization_id = d.organization_id
+    join lateral (
+      select h.created_at as at from public.deal_stage_changes h
+      where h.deal_id = d.id and h.to_code = '1.6'
+      order by h.sequence desc limit 1
+    ) entered on true
+    join lateral (
+      select calls.* from public.calls where calls.deal_id = d.id
+      order by calls.starts_at desc limit 1
+    ) c on true
+    left join public.contacts ct on ct.id = c.contact_id
+    left join lateral (
+      select f.title from public.core_findings f
+      join public.core_engagements e on e.id = f.engagement_id
+      where e.deal_id = d.id
+      order by (f.lane = 'days_90') desc, f.position, f.created_at
+      limit 1
+    ) item on true
+    where d.archived_at is null and d.pipeline_code = '1.6'
+      and not exists (
+        select 1 from public.follow_ups fu
+        where fu.deal_id = d.id and fu.sequence_day = ${CORE_FOLLOW_UP_DAY}
+      )
+  `);
+
+  let created = 0;
+  for (const candidate of candidates) {
+    const due = addBusinessDays(
+      new Date(candidate.entered_at),
+      CORE_FOLLOW_UP_BUSINESS_DAYS,
+      candidate.time_zone,
+    );
+    if (due.getTime() > now.getTime()) continue;
+
+    const message = CORE_FOLLOW_UP_TEMPLATES[candidate.locale]
+      .replace('{firstName}', (candidate.contact_name ?? '').trim().split(/s+/)[0] ?? '')
+      .replace('{itemTitle}', candidate.item_title ?? '');
+    const inserted = await tx
+      .insert(followUps)
+      .values({
+        organizationId: candidate.organization_id,
+        clientId: candidate.client_id,
+        dealId: candidate.deal_id,
+        callId: candidate.call_id,
+        dueOn: localDate(now, candidate.time_zone),
+        sequenceDay: CORE_FOLLOW_UP_DAY,
+        suggestedMessage: message,
+        assignedTo: candidate.host_user_id,
+      })
+      .onConflictDoNothing()
+      .returning({ id: followUps.id });
+    const followUp = inserted[0];
+    if (!followUp) continue;
+
+    created += 1;
+    await addTimelineEntry(tx, {
+      organizationId: candidate.organization_id,
+      clientId: candidate.client_id,
+      dealId: candidate.deal_id,
+      kind: 'follow_up_created',
+      summary: { sequenceDay: CORE_FOLLOW_UP_DAY, core: true },
+      itemType: 'follow_up',
+      itemId: followUp.id,
+      actorUserId: null,
+    });
+  }
+  return created;
 }

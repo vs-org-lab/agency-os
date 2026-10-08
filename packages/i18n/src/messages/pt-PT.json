@@ -559,6 +559,30 @@
         "heading": "A chamada foi cancelada",
         "body": "Olá {firstName}, a sua chamada com a {agencyName} foi cancelada.\n\nSe quiser marcar outra hora, use o botão abaixo.",
         "action": "Escolher novo horário"
+      },
+      "session_confirmed": {
+        "subject": "Sessão de proposta: {startsAtLabel}",
+        "heading": "A sessão está marcada",
+        "body": "Olá {firstName}, a sessão em que a {agencyName} apresenta o que encontrou e o que propõe fica marcada para {startsAtLabel}.\n\nSão sessenta minutos, com quem decide.",
+        "action": "Entrar na chamada"
+      },
+      "session_reminder": {
+        "subject": "Lembrete: sessão com a {agencyName}",
+        "heading": "A sessão é em breve",
+        "body": "Olá {firstName}, lembramos a sessão de proposta com a {agencyName} marcada para {startsAtLabel}.",
+        "action": "Entrar na chamada"
+      },
+      "briefing_shared": {
+        "subject": "O resumo da nossa conversa está no portal",
+        "heading": "O briefing está no portal",
+        "body": "Olá {firstName}, deixámos no portal o resumo do que falámos, tal como o ouvimos.\n\nSe alguma coisa não estiver certa, diga-nos.",
+        "action": "Ver o briefing"
+      },
+      "presentation_shared": {
+        "subject": "A apresentação está no portal",
+        "heading": "A apresentação está no portal",
+        "body": "Olá {firstName}, a apresentação da nossa sessão já está no portal, para a rever com calma ou partilhar com quem decide consigo.",
+        "action": "Ver a apresentação"
       }
     },
     "founder": {

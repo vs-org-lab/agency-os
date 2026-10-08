@@ -32,6 +32,28 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     bookingUrl: 'https://os.example.com/apply/booking/token',
   },
+  'lead.session_confirmed': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    startsAtLabel: 'quinta-feira, 15 de outubro, 11:00',
+    joinUrl: 'https://meet.google.com/abc-defg-hij',
+  },
+  'lead.session_reminder': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    startsAtLabel: 'quinta-feira, 15 de outubro, 11:00',
+    joinUrl: 'https://os.example.com/portal',
+  },
+  'lead.briefing_shared': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.presentation_shared': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
   'founder.application_received': {
     companyName: 'Empresa Exemplo',
     contactName: 'Ana Costa',

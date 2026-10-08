@@ -174,7 +174,7 @@ export const followUps = pgTable(
       name: 'follow_ups_client_organization_fk',
     }).onDelete('restrict'),
     unique('follow_ups_deal_call_day_key').on(table.dealId, table.callId, table.sequenceDay),
-    check('follow_ups_sequence_day', sql`${table.sequenceDay} in (3, 7, 14, 30)`),
+    check('follow_ups_sequence_day', sql`${table.sequenceDay} in (3, 5, 7, 14, 30)`),
     index('follow_ups_status_due_idx').on(table.status, table.dueOn),
   ],
 ).enableRLS();

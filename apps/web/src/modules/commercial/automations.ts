@@ -13,6 +13,9 @@ import { anonymizeExpiredApplications } from './applications/anonymize';
 import {
   alertFounders,
   callOutcomeMissing,
+  leadTimeZoneForDeal,
+  sendPortalNotice,
+  type PortalNoticeTemplate,
   sendBookingCancelled,
   sendBookingLinkEmail,
   sendCallConfirmation,
@@ -262,7 +265,46 @@ export const anonymizationSweep = inngest.createFunction(
     ),
 );
 
+function portalNoticeFunction(
+  id: string,
+  trigger: 'core.briefing.shared' | 'core.document.shared',
+  template: PortalNoticeTemplate,
+) {
+  return inngest.createFunction(
+    { id, triggers: [{ event: trigger }], retries: RETRIES, onFailure: failureHandler(id) },
+    async ({ event, step }) => {
+      const { dealId } = (event.data as EventData<{ dealId: string | null }>).payload;
+      if (!dealId) return { sent: false };
+      const sendAt = await step.run('quiet-hours-send-time', async () =>
+        nextAllowedSendTime(
+          new Date(),
+          await leadTimeZoneForDeal(dealId, notificationDeps()),
+        ).toISOString(),
+      );
+      await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
+      const sent = await step.run('send-portal-notice', () =>
+        sendPortalNotice(dealId, template, notificationDeps()),
+      );
+      return { sent };
+    },
+  );
+}
+
+export const onCoreBriefingShared = portalNoticeFunction(
+  'core-briefing-shared',
+  'core.briefing.shared',
+  'lead.briefing_shared',
+);
+
+export const onCoreDocumentShared = portalNoticeFunction(
+  'core-document-shared',
+  'core.document.shared',
+  'lead.presentation_shared',
+);
+
 export const COMMERCIAL_FUNCTIONS = [
+  onCoreBriefingShared,
+  onCoreDocumentShared,
   onApplicationSubmitted,
   onApplicationReviewed,
   onCallBooked,

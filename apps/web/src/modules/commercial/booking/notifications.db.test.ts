@@ -18,6 +18,7 @@ import {
   sendBookingLinkEmail,
   sendCallConfirmation,
   sendCallReminder,
+  sendPortalNotice,
   type NotificationDeps,
 } from './notifications';
 import { syncCallEvent } from './service';
@@ -108,6 +109,48 @@ describe('notifications', () => {
       `;
       expect(call?.hash).toBe(hashManageToken(tokens[1] ?? ''));
       expect(email.sent[0]?.text).toContain('10:00');
+    });
+  });
+
+  it('proposal session confirmation uses the session wording', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { callId } = await bookedCall(sql, world);
+      await sql`update public.calls set kind = 'proposal_session', meet_url = 'https://meet.google.com/abc' where id = ${callId}`;
+      const email = recordingEmail();
+
+      await sendCallConfirmation(callId, depsFor(sql, email));
+      await sendCallReminder(callId, STARTS_AT, depsFor(sql, email));
+
+      expect(email.sent.map((message) => message.template)).toEqual([
+        'lead.session_confirmed',
+        'lead.session_reminder',
+      ]);
+      expect(email.sent[0]?.text).toContain('https://meet.google.com/abc');
+      expect(email.sent[0]?.text).not.toContain('/apply/booking/');
+    });
+  });
+
+  it('briefing shared email goes only to a contact with portal access', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { dealId } = await bookedCall(sql, world);
+      const email = recordingEmail();
+      const deps = depsFor(sql, email);
+
+      expect(await sendPortalNotice(dealId, 'lead.briefing_shared', deps)).toBe(false);
+      await sql`
+        update public.contacts set portal_user_id = ${world.users.decisionMakerA}
+        where client_id = ${world.clients.a} and email = 'ana@empresa.pt'
+      `;
+      expect(await sendPortalNotice(dealId, 'lead.briefing_shared', deps)).toBe(true);
+
+      expect(email.sent).toHaveLength(1);
+      expect(email.sent[0]).toMatchObject({
+        to: 'ana@empresa.pt',
+        template: 'lead.briefing_shared',
+      });
+      expect(email.sent[0]?.text).toContain('https://os.example.com/en/portal');
     });
   });
 

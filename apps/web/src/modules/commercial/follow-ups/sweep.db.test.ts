@@ -2,6 +2,7 @@ import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
+  createCoreFixture,
   createFixtureWorld,
   testDatabase,
   withTestTransaction,
@@ -127,6 +128,38 @@ describe('createDueFollowUps', () => {
       await createDueFollowUps(daysAfter(3), deps);
 
       expect(await followUpDays(sql, dealId)).toEqual([]);
+    });
+  });
+
+  it('creates the Core follow-up five business days after 1.6 once', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      await sql`
+        insert into public.core_findings (organization_id, client_id, engagement_id, front, title,
+                                          evidence_kind, evidence_value, impact, effort, lane, owner)
+        values (${world.organizationId}, ${world.clients.a}, ${core.a.engagementId}, 'gravity',
+                'Sem rastreamento de conversões', 'page', 'Analytics', 'high', 'high', 'days_90', 'aurion')
+      `;
+      await sql`update public.deals set pipeline_code = '1.6' where id = ${core.a.dealId}`;
+      const [entry] = await sql<{ at: string }[]>`select now() as at`;
+      const enteredAt = new Date(entry?.at ?? 0);
+      const deps = { contexts: createDbContexts(testDatabase(sql)) };
+
+      const early = await createDueFollowUps(new Date(enteredAt.getTime() + 2 * 86_400_000), deps);
+      const due = new Date(enteredAt.getTime() + 8 * 86_400_000);
+      await createDueFollowUps(due, deps);
+      await createDueFollowUps(due, deps);
+
+      await sql`reset role`;
+      const rows = await sql<{ day: number; message: string }[]>`
+        select sequence_day as day, suggested_message as message from public.follow_ups
+        where deal_id = ${core.a.dealId} and sequence_day = 5
+      `;
+      expect(early).toBe(0);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.day).toBe(5);
+      expect(rows[0]?.message).toContain('Sem rastreamento de conversões');
     });
   });
 });

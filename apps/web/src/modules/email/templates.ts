@@ -8,6 +8,10 @@ export const EMAIL_TEMPLATE_KEYS = [
   'lead.booking_confirmed',
   'lead.call_reminder',
   'lead.booking_cancelled',
+  'lead.session_confirmed',
+  'lead.session_reminder',
+  'lead.briefing_shared',
+  'lead.presentation_shared',
   'founder.application_received',
   'founder.queue_b_pending',
   'founder.call_outcome_missing',
@@ -19,12 +23,18 @@ export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
 
 type LeadBase = { firstName: string; agencyName: string };
 type CallDetails = LeadBase & { startsAtLabel: string; meetUrl: string | null; manageUrl: string };
+type SessionDetails = LeadBase & { startsAtLabel: string; joinUrl: string };
+type PortalNotice = LeadBase & { portalUrl: string };
 
 export type EmailParams = {
   'lead.booking_link': LeadBase & { bookingUrl: string; expiresOn: string };
   'lead.booking_confirmed': CallDetails;
   'lead.call_reminder': CallDetails;
   'lead.booking_cancelled': LeadBase & { bookingUrl: string };
+  'lead.session_confirmed': SessionDetails;
+  'lead.session_reminder': SessionDetails;
+  'lead.briefing_shared': PortalNotice;
+  'lead.presentation_shared': PortalNotice;
   'founder.application_received': {
     companyName: string;
     contactName: string;
@@ -46,6 +56,10 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'lead.booking_confirmed': 'manageUrl',
   'lead.call_reminder': 'manageUrl',
   'lead.booking_cancelled': 'bookingUrl',
+  'lead.session_confirmed': 'joinUrl',
+  'lead.session_reminder': 'joinUrl',
+  'lead.briefing_shared': 'portalUrl',
+  'lead.presentation_shared': 'portalUrl',
   'founder.application_received': 'dealUrl',
   'founder.queue_b_pending': 'queueUrl',
   'founder.call_outcome_missing': 'dealUrl',

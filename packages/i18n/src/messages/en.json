@@ -559,6 +559,30 @@
         "heading": "Your call was cancelled",
         "body": "Hello {firstName}, your call with {agencyName} was cancelled.\n\nIf you want to book another time, use the button below.",
         "action": "Choose a new time"
+      },
+      "session_confirmed": {
+        "subject": "Proposal session: {startsAtLabel}",
+        "heading": "The session is booked",
+        "body": "Hello {firstName}, the session where {agencyName} presents what we found and what we propose is booked for {startsAtLabel}.\n\nIt takes sixty minutes, with whoever decides.",
+        "action": "Join the call"
+      },
+      "session_reminder": {
+        "subject": "Reminder: session with {agencyName}",
+        "heading": "The session is coming up",
+        "body": "Hello {firstName}, a reminder of the proposal session with {agencyName} booked for {startsAtLabel}.",
+        "action": "Join the call"
+      },
+      "briefing_shared": {
+        "subject": "The summary of our conversation is in the portal",
+        "heading": "The briefing is in the portal",
+        "body": "Hello {firstName}, we left in the portal the summary of what we discussed, as we heard it.\n\nIf anything is not right, let us know.",
+        "action": "View the briefing"
+      },
+      "presentation_shared": {
+        "subject": "The presentation is in the portal",
+        "heading": "The presentation is in the portal",
+        "body": "Hello {firstName}, the presentation from our session is now in the portal, to review at your own pace or share with whoever decides with you.",
+        "action": "View the presentation"
       }
     },
     "founder": {

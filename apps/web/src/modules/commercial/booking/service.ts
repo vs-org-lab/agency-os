@@ -157,7 +157,9 @@ async function dealState(tx: DbTransaction, dealId: string, lock: boolean) {
   const [scheduled] = await tx
     .select({ id: calls.id, startsAt: calls.startsAt })
     .from(calls)
-    .where(and(eq(calls.dealId, dealId), eq(calls.status, 'scheduled')));
+    .where(
+      and(eq(calls.dealId, dealId), eq(calls.status, 'scheduled'), eq(calls.kind, 'discovery')),
+    );
   return { code: deal?.code ?? null, scheduled: scheduled ?? null };
 }
 

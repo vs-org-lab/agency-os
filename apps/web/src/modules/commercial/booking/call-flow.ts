@@ -27,6 +27,7 @@ export type FlowStep = {
 
 export type CallFlowDeps = {
   now: () => Date;
+  ensureCore: (callId: string) => Promise<boolean>;
   syncCall: (callId: string) => Promise<string | null>;
   sendConfirmation: (callId: string) => Promise<boolean>;
   sendReminder: (callId: string, startsAt: Date) => Promise<'sent' | 'skipped'>;
@@ -39,6 +40,7 @@ export async function runCallBookedFlow(
   deps: CallFlowDeps,
 ): Promise<{ skipped: boolean }> {
   const { callId, startsAt } = input;
+  await step.run('ensure-core', () => deps.ensureCore(callId));
   const endsAt = await step.run('sync-calendar-event', () => deps.syncCall(callId));
   if (!endsAt) return { skipped: true };
 

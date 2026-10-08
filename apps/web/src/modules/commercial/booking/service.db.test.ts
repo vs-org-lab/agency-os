@@ -196,6 +196,25 @@ describe('booking service', () => {
     });
   });
 
+  it('public booking ignores proposal sessions', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { dealId, contactId } = await prospectDeal(sql, world, world.clients.a);
+      await sql`
+        insert into public.calls (organization_id, client_id, deal_id, contact_id, host_user_id,
+                                  starts_at, ends_at, kind)
+        values (${world.organizationId}, ${world.clients.a}, ${dealId}, ${contactId},
+                ${world.users.founder}, '2026-10-20T10:00:00Z', '2026-10-20T11:00:00Z',
+                'proposal_session')
+      `;
+      const deps = depsFor(sql, world, fakeCalendar());
+
+      const slots = await listSlots(await linkAccess(deps, dealId), deps);
+
+      expect(slots.status).toBe('available');
+    });
+  });
+
   it('without a calendar connection slots are unavailable and an event is emitted', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

@@ -2,6 +2,7 @@ import 'server-only';
 import * as Sentry from '@sentry/nextjs';
 import { eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
+import { ensureEngagementForCall } from '@/modules/diagnosis/server';
 import { emailPort } from '@/modules/email/server';
 import { inngest } from '@/modules/events';
 import { withSystemContext } from '@/platform/db';
@@ -166,6 +167,8 @@ export const onCallBooked = inngest.createFunction(
       },
       {
         now: () => new Date(),
+        ensureCore: async (callId) =>
+          (await withSystemContext((tx) => ensureEngagementForCall(tx, callId))) !== null,
         syncCall: async (callId) => {
           const result = await syncPendingCall(callId, {
             contexts: { withSystemContext },

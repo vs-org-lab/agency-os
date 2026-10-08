@@ -1,6 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { schema, type CallOutcome } from '@agency-os/db';
+import { schema, type CallKind, type CallOutcome } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
@@ -24,11 +24,12 @@ const scheduleSchema = z.object({
   dealId: z.uuid(),
   start: z.date(),
   durationMinutes: z.number().int().min(15).max(180),
+  kind: z.enum(['discovery', 'proposal_session']).default('discovery'),
 });
 
 export async function scheduleCallManually(
   claims: VerifiedClaims,
-  input: { dealId: string; start: Date; durationMinutes: number },
+  input: { dealId: string; start: Date; durationMinutes: number; kind?: CallKind },
   deps: CallDeps,
 ): Promise<
   | { ok: true; callId: string }
@@ -38,7 +39,7 @@ export async function scheduleCallManually(
   if (!parsed.success || parsed.data.start.getTime() <= Date.now()) {
     return { ok: false, rule: 'invalid_input' };
   }
-  const { dealId, start, durationMinutes } = parsed.data;
+  const { dealId, start, durationMinutes, kind } = parsed.data;
 
   const result = await withActor(
     deps.contexts,
@@ -49,7 +50,7 @@ export async function scheduleCallManually(
       const [scheduled] = await tx
         .select({ id: calls.id })
         .from(calls)
-        .where(and(eq(calls.dealId, dealId), eq(calls.status, 'scheduled')));
+        .where(and(eq(calls.dealId, dealId), eq(calls.status, 'scheduled'), eq(calls.kind, kind)));
       if (scheduled) return { ok: false as const, rule: 'already_scheduled' as const };
 
       const [application] = await tx
@@ -74,6 +75,7 @@ export async function scheduleCallManually(
           dealId,
           contactId: contact?.id ?? null,
           hostUserId: actor.userId,
+          kind,
           startsAt: start,
           endsAt: new Date(start.getTime() + durationMinutes * 60_000),
         })
@@ -84,7 +86,7 @@ export async function scheduleCallManually(
         .select({ code: deals.pipelineCode })
         .from(deals)
         .where(eq(deals.id, dealId));
-      if (current?.code === '0.2') {
+      if (kind === 'discovery' && current?.code === '0.2') {
         await applyStageChange(tx, {
           dealId,
           to: '0.3',
@@ -97,7 +99,7 @@ export async function scheduleCallManually(
         clientId: deal.clientId,
         dealId,
         kind: 'call_booked',
-        summary: { startsAt: start.toISOString(), bookedBy: 'staff' },
+        summary: { startsAt: start.toISOString(), bookedBy: 'staff', kind },
         itemType: 'call',
         itemId: call.id,
         actorUserId: actor.userId,
@@ -108,13 +110,13 @@ export async function scheduleCallManually(
         resourceType: 'call',
         resourceId: call.id,
         clientId: deal.clientId,
-        metadata: { startsAt: start.toISOString(), manual: true },
+        metadata: { startsAt: start.toISOString(), manual: true, kind },
       });
       await emit(tx, {
         type: 'commercial.call.booked',
         organizationId: deal.organizationId,
         clientId: deal.clientId,
-        payload: { callId: call.id, dealId, startsAt: start.toISOString() },
+        payload: { callId: call.id, dealId, startsAt: start.toISOString(), kind },
       });
       return { ok: true as const, callId: call.id, organizationId: deal.organizationId };
     },

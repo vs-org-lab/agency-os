@@ -84,6 +84,19 @@ export function RecordingPanel({
     return () => window.clearInterval(timer);
   }, [phase.kind]);
 
+  // Leaving call mode mid-recording finalises the chunks kept in the browser and frees the tab and
+  // microphone; the call is then offered as an interrupted recording on the next visit.
+  useEffect(
+    () => () => {
+      const current = session.current;
+      if (!current) return;
+      session.current = null;
+      window.clearTimeout(current.limit);
+      void current.recording.stop().finally(() => current.streams.release());
+    },
+    [],
+  );
+
   useEffect(() => {
     if (phase.kind === 'idle') return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();

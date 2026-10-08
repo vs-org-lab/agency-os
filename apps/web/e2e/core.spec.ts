@@ -122,6 +122,36 @@ test.describe('Aurion Core', () => {
     await moveTo(page, '1.6');
   });
 
+  test('uploaded audio becomes the Core transcript', async ({ page }) => {
+    test.setTimeout(120_000);
+    const { company } = uniqueCompany('Core Gravação');
+    const { dealId } = await seedDeal(credentials.organizationId, {
+      company,
+      code: '1.1',
+      withCall: true,
+    });
+    await seedCore(credentials.organizationId, dealId);
+    await signInWithPassword(page, credentials.founder);
+    const audio = {
+      name: 'call.mp3',
+      mimeType: 'audio/mpeg',
+      buffer: Buffer.from([0xff, 0xfb, 0x90, 0x00]),
+    };
+
+    await page.goto(`/pipeline/${dealId}/core/call`);
+    await page.getByLabel('Carregar ficheiro de áudio').setInputFiles(audio);
+    await expect(page.getByText('Confirme que o cliente autorizou a gravação.')).toBeVisible();
+
+    await page.getByRole('checkbox', { name: 'O cliente autorizou a gravação' }).click();
+    await page.getByLabel('Carregar ficheiro de áudio').setInputFiles(audio);
+    await expect(page.getByText('Transcrição pronta.')).toBeVisible({ timeout: 60_000 });
+
+    await page.getByRole('tab', { name: 'Transcrição' }).click();
+    await expect(page.getByLabel('Transcrição da call')).toHaveValue(
+      /— Gravação de .+ —\n\n\[00:00\] Transcrição automática de teste\./,
+    );
+  });
+
   test('prospect sees only the shared briefing and presentation', async ({ page }) => {
     const shared = await seedSharedCore(credentials.organizationId, credentials.clientId);
 

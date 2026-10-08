@@ -58,6 +58,7 @@ jobs:
             --env PUBLIC_ORGANIZATION_SLUG=e2e-studio \
             --env EMAIL_TRANSPORT=capture \
             --env CALENDAR_PROVIDER=fake \
+            --env TRANSCRIPTION_PROVIDER=fake \
             --env APPLY_IP_LIMIT_PER_HOUR=1000)
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Comment preview URL

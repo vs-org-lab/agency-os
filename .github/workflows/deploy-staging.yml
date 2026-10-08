@@ -121,7 +121,9 @@ jobs:
             --env SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}" \
             --env CALENDAR_PROVIDER="${{ secrets.STAGING_GOOGLE_CLIENT_ID != '' && 'google' || 'fake' }}" \
             --env GOOGLE_CLIENT_ID="${{ secrets.STAGING_GOOGLE_CLIENT_ID }}" \
-            --env GOOGLE_CLIENT_SECRET="${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}")
+            --env GOOGLE_CLIENT_SECRET="${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}" \
+            --env TRANSCRIPTION_PROVIDER="${{ secrets.STAGING_GROQ_API_KEY != '' && 'groq' || 'fake' }}" \
+            --env GROQ_API_KEY="${{ secrets.STAGING_GROQ_API_KEY }}")
           host="${url#https://}"
           curl --fail-with-body -sS -o /dev/null -X POST \
             "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \

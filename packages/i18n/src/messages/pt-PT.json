@@ -819,6 +819,40 @@
       "saved": "Modelo guardado.",
       "invalid": "Verifique os campos do modelo.",
       "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
+    },
+    "coreTemplates": {
+      "title": "Modelos do Core",
+      "description": "O guia de perguntas da call e a grelha do Índice Orbit. Cada publicação cria uma versão nova; os Cores já começados mantêm a versão com que começaram.",
+      "version": "Versão {version}",
+      "publish": "Publicar nova versão",
+      "published": "Publicada a versão {version}.",
+      "errors": {
+        "invalid_input": "Reveja os campos: há textos vazios ou identificadores repetidos.",
+        "not_found": "Só o fundador publica modelos."
+      },
+      "portuguese": "Português",
+      "english": "Inglês",
+      "guide": {
+        "title": "Guia do briefing",
+        "block": "Bloco {number}",
+        "blockTitle": "Título",
+        "minutes": "Minutos",
+        "goal": "O que se obtém",
+        "questions": "Perguntas-guia",
+        "question": "Pergunta",
+        "addQuestion": "Acrescentar pergunta",
+        "removeQuestion": "Remover pergunta"
+      },
+      "grid": {
+        "title": "Grelha do Índice Orbit",
+        "total": "{total} de 25",
+        "criterion": "Critério",
+        "observes": "O que se observa",
+        "maxPoints": "Pontos máximos",
+        "addCriterion": "Acrescentar critério",
+        "removeCriterion": "Remover critério",
+        "mustSum": "Cada frente tem de somar 25 pontos."
+      }
     }
   },
   "diagnosis": {

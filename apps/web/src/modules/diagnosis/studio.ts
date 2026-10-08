@@ -16,6 +16,8 @@ import { createSupabaseEvidenceStorage } from './evidence/supabase';
 import { evidenceUrl, removeFinding, saveFinding, type FindingInput } from './findings';
 import { getCoreWorkspace, type CoreWorkspace } from './queries';
 import { saveScores, type ScoreInput } from './scores';
+import type { BriefingGuide, OrbitGrid } from './templates/definitions';
+import { getActiveTemplate, publishTemplate } from './templates/service';
 
 const { applications } = schema;
 
@@ -133,4 +135,29 @@ export async function loadCorePrompts(
       locale,
     }),
   };
+}
+
+export type CoreTemplates = {
+  briefing: { version: number; definition: BriefingGuide };
+  grid: { version: number; definition: OrbitGrid };
+};
+
+export function loadCoreTemplates(
+  session: StudioSession & { organizationId: string },
+): Promise<CoreTemplates> {
+  return withUserContext(session.claims, async (tx) => {
+    const briefing = await getActiveTemplate(tx, session.organizationId, 'briefing');
+    const grid = await getActiveTemplate(tx, session.organizationId, 'orbit_grid');
+    return {
+      briefing: { version: briefing.version, definition: briefing.definition },
+      grid: { version: grid.version, definition: grid.definition },
+    };
+  });
+}
+
+export function publishCoreTemplate(
+  session: StudioSession,
+  input: { kind: 'briefing' | 'orbit_grid'; definition: unknown },
+) {
+  return publishTemplate(session.claims, input, { contexts });
 }

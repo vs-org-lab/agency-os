@@ -819,6 +819,40 @@
       "saved": "Template saved.",
       "invalid": "Check the template fields.",
       "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
+    },
+    "coreTemplates": {
+      "title": "Core templates",
+      "description": "The call question guide and the Orbit Index grid. Each publication creates a new version; Cores already started keep the version they began with.",
+      "version": "Version {version}",
+      "publish": "Publish new version",
+      "published": "Version {version} published.",
+      "errors": {
+        "invalid_input": "Check the fields: there are empty texts or repeated identifiers.",
+        "not_found": "Only the founder publishes templates."
+      },
+      "portuguese": "Portuguese",
+      "english": "English",
+      "guide": {
+        "title": "Briefing guide",
+        "block": "Block {number}",
+        "blockTitle": "Title",
+        "minutes": "Minutes",
+        "goal": "What it yields",
+        "questions": "Guide questions",
+        "question": "Question",
+        "addQuestion": "Add question",
+        "removeQuestion": "Remove question"
+      },
+      "grid": {
+        "title": "Orbit Index grid",
+        "total": "{total} of 25",
+        "criterion": "Criterion",
+        "observes": "What is observed",
+        "maxPoints": "Maximum points",
+        "addCriterion": "Add criterion",
+        "removeCriterion": "Remove criterion",
+        "mustSum": "Each front must sum to 25 points."
+      }
     }
   },
   "diagnosis": {

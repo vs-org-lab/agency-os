@@ -43,7 +43,7 @@ test('client signs in with magic link and reaches portal', async ({ page }) => {
   await page.goto(await magicLinkPath(credentials.client.email));
 
   await expect(page).toHaveURL(/\/portal$/);
-  await expect(page.getByRole('heading', { name: 'Bem-vindo' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Início' })).toBeVisible();
 });
 
 test('client cannot open the studio', async ({ page }) => {

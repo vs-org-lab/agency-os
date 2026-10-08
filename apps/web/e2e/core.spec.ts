@@ -122,7 +122,7 @@ test.describe('Aurion Core', () => {
     await moveTo(page, '1.6');
   });
 
-  test('uploaded audio becomes the Core transcript', async ({ page }) => {
+  test('uploaded audio becomes the Core transcript @fake-transcription', async ({ page }) => {
     test.setTimeout(120_000);
     const { company } = uniqueCompany('Core Gravação');
     const { dealId } = await seedDeal(credentials.organizationId, {

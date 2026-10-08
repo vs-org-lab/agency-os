@@ -82,6 +82,26 @@ export function calendarEnv(): CalendarEnv {
   return cachedCalendarEnv;
 }
 
+const transcriptionEnvSchema = z.discriminatedUnion('TRANSCRIPTION_PROVIDER', [
+  z.object({ TRANSCRIPTION_PROVIDER: z.literal('fake') }),
+  z.object({
+    TRANSCRIPTION_PROVIDER: z.literal('groq'),
+    GROQ_API_KEY: z.string().min(1),
+  }),
+]);
+
+export type TranscriptionEnv = z.infer<typeof transcriptionEnvSchema>;
+
+let cachedTranscriptionEnv: TranscriptionEnv | undefined;
+
+export function transcriptionEnv(): TranscriptionEnv {
+  cachedTranscriptionEnv ??= transcriptionEnvSchema.parse({
+    TRANSCRIPTION_PROVIDER: process.env.TRANSCRIPTION_PROVIDER ?? 'fake',
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+  });
+  return cachedTranscriptionEnv;
+}
+
 const emailEnvSchema = z.discriminatedUnion('EMAIL_TRANSPORT', [
   z.object({ EMAIL_TRANSPORT: z.literal('capture') }),
   z.object({

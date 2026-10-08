@@ -32,6 +32,8 @@ export const AUDIT_ACTIONS = [
   'core.finding.removed',
   'core.scores.saved',
   'core.cross_review.recorded',
+  'core.recording.created',
+  'core.recording.transcribed',
   'core_template.published',
   'document.saved',
   'document.shared',

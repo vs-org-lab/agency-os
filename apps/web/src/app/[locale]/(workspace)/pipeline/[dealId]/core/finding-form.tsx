@@ -1,14 +1,17 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import type { CoreLevel, OrbitFront, RoadmapLane } from '@agency-os/db';
+import { Button } from '@agency-os/ui/components/button';
 import { FormMessage } from '@/components/forms/form-message';
-import { SubmitButton } from '@/components/forms/submit-button';
 import { ORBIT_FRONTS, proposeLane } from '@/modules/diagnosis';
+
+const MAX_EVIDENCE_BYTES = 4_194_304;
+const EVIDENCE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'application/pdf']);
 
 export type FindingFormState = { status: 'idle' | 'saved' } | { status: 'error'; code: string };
 
@@ -44,7 +47,9 @@ export function FindingForm({
   onSaved?: () => void;
 }) {
   const t = useTranslations('diagnosis');
-  const [state, formAction] = useActionState(action, { status: 'idle' });
+  const [state, setState] = useState<FindingFormState>({ status: 'idle' });
+  const [pending, startTransition] = useTransition();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [impact, setImpact] = useState<CoreLevel>(defaults?.impact ?? 'medium');
   const [effort, setEffort] = useState<CoreLevel>(defaults?.effort ?? 'medium');
   const [lane, setLane] = useState<RoadmapLane>(
@@ -52,7 +57,7 @@ export function FindingForm({
   );
   const [laneChosen, setLaneChosen] = useState(defaults !== undefined);
   const [evidenceKind, setEvidenceKind] = useState<(typeof EVIDENCE_KINDS)[number]>(
-    defaults?.evidenceKind ?? 'file',
+    defaults ? (defaults.evidenceKind ?? 'none') : 'file',
   );
   const prefix = defaults?.id ?? 'new';
 
@@ -69,7 +74,31 @@ export function FindingForm({
   };
 
   return (
-    <form action={formAction} className="grid gap-3 md:grid-cols-2">
+    <form
+      className="grid gap-3 md:grid-cols-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const file = fileInput.current?.files?.[0];
+        if (evidenceKind === 'file' && file && file.size > 0) {
+          if (file.size > MAX_EVIDENCE_BYTES) {
+            setState({ status: 'error', code: 'file_too_large' });
+            return;
+          }
+          if (file.type && !EVIDENCE_TYPES.has(file.type)) {
+            setState({ status: 'error', code: 'file_type' });
+            return;
+          }
+        }
+        startTransition(async () => {
+          setState(
+            await action(state, formData).catch(
+              () => ({ status: 'error', code: 'not_found' }) as const,
+            ),
+          );
+        });
+      }}
+    >
       {defaults ? <input type="hidden" name="findingId" value={defaults.id} /> : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor={`${prefix}-front`}>{t('findings.front')}</Label>
@@ -129,6 +158,7 @@ export function FindingForm({
           <Label htmlFor={`${prefix}-evidence-file`}>{t('findings.evidenceFile')}</Label>
           <Input
             id={`${prefix}-evidence-file`}
+            ref={fileInput}
             name="evidenceFile"
             type="file"
             accept="image/png,image/jpeg,image/webp,application/pdf"
@@ -249,7 +279,9 @@ export function FindingForm({
         </div>
       ) : null}
       <div className="md:col-span-2 md:w-56">
-        <SubmitButton>{t('findings.save')}</SubmitButton>
+        <Button type="submit" disabled={pending} className="w-full">
+          {t('findings.save')}
+        </Button>
       </div>
     </form>
   );

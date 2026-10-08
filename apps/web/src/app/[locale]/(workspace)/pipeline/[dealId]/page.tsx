@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/componen
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
-import { canWritePipeline, isPipelineCode, pipelineCodeMessageKey } from '@/modules/commercial';
+import { canWritePipeline, pipelineCodeMessageKey } from '@/modules/commercial';
 import { commercialSession, loadDealDetail } from '@/modules/commercial/server';
 import { loadCoreWorkspace } from '@/modules/diagnosis/server';
 import { getVerifiedClaims } from '@/platform/session';
@@ -297,11 +297,17 @@ export default async function DealPage({ params }: PageProps) {
                 </section>
               ))
             )}
+            {writable && !scheduledCall && ['0.2', '0.3', '0.4'].includes(deal.code) ? (
+              <ScheduleCallForm action={scheduleCallAction.bind(null, deal.id)} kind="discovery" />
+            ) : null}
             {writable &&
             !scheduledCall &&
-            isPipelineCode(deal.code) &&
-            ['0.2', '0.3', '0.4'].includes(deal.code) ? (
-              <ScheduleCallForm action={scheduleCallAction.bind(null, deal.id)} />
+            core &&
+            ['1.1', '1.2', '1.3', '1.4', '1.5'].includes(deal.code) ? (
+              <ScheduleCallForm
+                action={scheduleCallAction.bind(null, deal.id)}
+                kind="proposal_session"
+              />
             ) : null}
           </TabsContent>
 

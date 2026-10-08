@@ -39,7 +39,11 @@ export async function getPortalCore(tx: DbTransaction, clientId: string): Promis
   const documents = await listPortalDocuments(tx, clientId);
   if (!engagement) return { briefing: null, documents };
 
-  const guide = briefingGuideSchema.safeParse(engagement.briefing_guide);
+  const rawGuide =
+    typeof engagement.briefing_guide === 'string'
+      ? (JSON.parse(engagement.briefing_guide) as unknown)
+      : engagement.briefing_guide;
+  const guide = briefingGuideSchema.safeParse(rawGuide);
   if (!guide.success) return { briefing: null, documents };
   const notes = await tx
     .select({

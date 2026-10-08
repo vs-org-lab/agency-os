@@ -136,7 +136,13 @@ export function TrackingForm({
   );
 }
 
-export function ScheduleCallForm({ action }: { action: BoundAction }) {
+export function ScheduleCallForm({
+  action,
+  kind,
+}: {
+  action: BoundAction;
+  kind: 'discovery' | 'proposal_session';
+}) {
   const t = useTranslations('commercial.deal.calls');
   const [state, formAction] = useActionState(action, { status: 'idle' });
   const [startIso, setStartIso] = useState('');
@@ -146,9 +152,14 @@ export function ScheduleCallForm({ action }: { action: BoundAction }) {
       action={formAction}
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
     >
-      <h3 className="text-title-sm text-text">{t('schedule')}</h3>
-      <p className="text-body-sm text-text-secondary">{t('scheduleHint')}</p>
+      <h3 className="text-title-sm text-text">
+        {kind === 'proposal_session' ? t('scheduleSession') : t('schedule')}
+      </h3>
+      <p className="text-body-sm text-text-secondary">
+        {kind === 'proposal_session' ? t('scheduleSessionHint') : t('scheduleHint')}
+      </p>
       <input type="hidden" name="start" value={startIso} />
+      <input type="hidden" name="kind" value={kind} />
       <div className="grid gap-3 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="call-start">{t('start')}</Label>
@@ -163,13 +174,6 @@ export function ScheduleCallForm({ action }: { action: BoundAction }) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="call-kind">{t('kind')}</Label>
-          <select id="call-kind" name="kind" defaultValue="discovery" className={FIELD}>
-            <option value="discovery">{t('kinds.discovery')}</option>
-            <option value="proposal_session">{t('kinds.proposal_session')}</option>
-          </select>
-        </div>
-        <div className="flex flex-col gap-2">
           <Label htmlFor="call-duration">{t('duration')}</Label>
           <Input
             id="call-duration"
@@ -178,7 +182,7 @@ export function ScheduleCallForm({ action }: { action: BoundAction }) {
             min={15}
             max={180}
             step={15}
-            defaultValue={45}
+            defaultValue={kind === 'proposal_session' ? 60 : 45}
           />
         </div>
       </div>
@@ -186,7 +190,9 @@ export function ScheduleCallForm({ action }: { action: BoundAction }) {
         <FormMessage tone="danger">{t(`errors.${state.code}` as never)}</FormMessage>
       ) : null}
       <div className="md:w-48">
-        <SubmitButton>{t('schedule')}</SubmitButton>
+        <SubmitButton>
+          {kind === 'proposal_session' ? t('scheduleSession') : t('schedule')}
+        </SubmitButton>
       </div>
     </form>
   );

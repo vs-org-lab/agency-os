@@ -8,7 +8,12 @@ export function FigmaFrame({
   className?: string;
 }) {
   return (
-    <div className={className ?? 'aspect-video w-full overflow-hidden rounded-lg border border-border bg-surface-muted'}>
+    <div
+      className={
+        className ??
+        'aspect-video w-full overflow-hidden rounded-lg border border-border bg-surface-muted'
+      }
+    >
       <iframe
         src={embedUrl}
         title={title}

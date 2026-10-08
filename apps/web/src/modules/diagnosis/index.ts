@@ -20,3 +20,15 @@ export {
   type CoreReadiness,
   type ReadinessGap,
 } from './domain/readiness';
+export { parseBriefingDraft } from './assistant/parse';
+export {
+  createManualAssistant,
+  type CoreAssistant,
+  type CoreAssistantDraft,
+} from './assistant/port';
+export {
+  buildPrompt,
+  redactContactDetails,
+  type CoreAssistantRequest,
+  type NarrativeFinding,
+} from './assistant/prompts';

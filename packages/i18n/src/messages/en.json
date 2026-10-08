@@ -169,6 +169,15 @@
     "home": {
       "title": "Welcome",
       "description": "Your project progress appears here."
+    },
+    "core": {
+      "briefingTitle": "The summary of our conversation",
+      "briefingDescription": "What we heard on the call, as we recorded it. If anything is not right, let us know.",
+      "sharedOn": "Shared on {date}",
+      "presentations": "Presentations",
+      "open": "View presentation",
+      "back": "Back to home",
+      "openInFigma": "Open in Figma"
     }
   },
   "commercial": {
@@ -176,9 +185,9 @@
       "codes": {
         "p0_1": "Application received",
         "p0_2": "Application qualified",
-        "p0_3": "Discovery scheduled",
-        "p0_4": "Discovery held",
-        "p1_1": "Core contracted",
+        "p0_3": "Core call booked",
+        "p0_4": "Core call held",
+        "p1_1": "Core started",
         "p1_2": "Information gathering",
         "p1_3": "Analysis and architecture",
         "p1_4": "Roadmap prepared",
@@ -232,9 +241,20 @@
         "call_required": "Schedule the call in the Calls tab before moving to 0.3.",
         "call_outcome_required": "Record the call outcome before moving to 0.4.",
         "module_pending": "Available once the {module} module exists.",
-        "not_found": "This deal does not exist or you do not have access to it."
+        "not_found": "This deal does not exist or you do not have access to it.",
+        "core_criteria": "Still missing: {gaps}."
       },
-      "codeOption": "{code} · {name}"
+      "codeOption": "{code} · {name}",
+      "gaps": {
+        "briefing_empty": "at least one briefing block filled in",
+        "fronts_unscored": "every Orbit Index front scored",
+        "findings_without_evidence": "evidence on every finding",
+        "internal_items_below_minimum": "at least 2 internal roadmap items",
+        "cross_review_missing": "the cross review",
+        "presentation_missing": "the Figma presentation attached",
+        "proposal_session_missing": "the proposal session scheduled",
+        "presentation_not_shared": "the presentation shared with the client"
+      }
     },
     "board": {
       "title": "Pipeline",
@@ -300,7 +320,8 @@
         "summary": "Summary",
         "application": "Application",
         "calls": "Calls",
-        "timeline": "Timeline"
+        "timeline": "Timeline",
+        "core": "Core"
       },
       "tracking": {
         "title": "Tracking",
@@ -396,7 +417,9 @@
           "invalid_input": "Check the fields.",
           "not_found": "It could not be saved.",
           "already_scheduled": "This deal already has a scheduled call."
-        }
+        },
+        "scheduleSession": "Schedule proposal session",
+        "scheduleSessionHint": "The session that presents the diagnosis and the options. The decision maker gets the confirmation by email."
       },
       "followUps": {
         "title": "Follow-ups",
@@ -548,6 +571,30 @@
         "heading": "Your call was cancelled",
         "body": "Hello {firstName}, your call with {agencyName} was cancelled.\n\nIf you want to book another time, use the button below.",
         "action": "Choose a new time"
+      },
+      "session_confirmed": {
+        "subject": "Proposal session: {startsAtLabel}",
+        "heading": "The session is booked",
+        "body": "Hello {firstName}, the session where {agencyName} presents what we found and what we propose is booked for {startsAtLabel}.\n\nIt takes sixty minutes, with whoever decides.",
+        "action": "Join the call"
+      },
+      "session_reminder": {
+        "subject": "Reminder: session with {agencyName}",
+        "heading": "The session is coming up",
+        "body": "Hello {firstName}, a reminder of the proposal session with {agencyName} booked for {startsAtLabel}.",
+        "action": "Join the call"
+      },
+      "briefing_shared": {
+        "subject": "The summary of our conversation is in the portal",
+        "heading": "The briefing is in the portal",
+        "body": "Hello {firstName}, we left in the portal the summary of what we discussed, as we heard it.\n\nIf anything is not right, let us know.",
+        "action": "View the briefing"
+      },
+      "presentation_shared": {
+        "subject": "The presentation is in the portal",
+        "heading": "The presentation is in the portal",
+        "body": "Hello {firstName}, the presentation from our session is now in the portal, to review at your own pace or share with whoever decides with you.",
+        "action": "View the presentation"
       }
     },
     "founder": {
@@ -778,6 +825,244 @@
       "saved": "Template saved.",
       "invalid": "Check the template fields.",
       "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
+    },
+    "coreTemplates": {
+      "title": "Core templates",
+      "description": "The call question guide and the Orbit Index grid. Each publication creates a new version; Cores already started keep the version they began with.",
+      "version": "Version {version}",
+      "publish": "Publish new version",
+      "published": "Version {version} published.",
+      "errors": {
+        "invalid_input": "Check the fields: there are empty texts or repeated identifiers.",
+        "not_found": "Only the founder publishes templates."
+      },
+      "portuguese": "Portuguese",
+      "english": "English",
+      "guide": {
+        "title": "Briefing guide",
+        "block": "Block {number}",
+        "blockTitle": "Title",
+        "minutes": "Minutes",
+        "goal": "What it yields",
+        "questions": "Guide questions",
+        "question": "Question",
+        "addQuestion": "Add question",
+        "removeQuestion": "Remove question"
+      },
+      "grid": {
+        "title": "Orbit Index grid",
+        "total": "{total} of 25",
+        "criterion": "Criterion",
+        "observes": "What is observed",
+        "maxPoints": "Maximum points",
+        "addCriterion": "Add criterion",
+        "removeCriterion": "Remove criterion",
+        "mustSum": "Each front must sum to 25 points."
+      }
+    }
+  },
+  "diagnosis": {
+    "tab": "Core",
+    "noCore": "The Core starts when the call is booked.",
+    "readiness": {
+      "title": "Stage one criteria",
+      "ready": "Everything stage one asks for is in place.",
+      "missing": "Still missing to move on:"
+    },
+    "note": {
+      "saving": "Saving",
+      "saved": "Saved",
+      "failed": "Not saved",
+      "retry": "Try again"
+    },
+    "briefing": {
+      "title": "Briefing",
+      "description": "What the call must leave answered, block by block. The client only sees it once shared.",
+      "openCall": "Open call mode",
+      "blockNotes": "Block notes",
+      "minutes": "{minutes} min",
+      "share": "Share briefing with the client",
+      "shared": "Shared with the client on {date}",
+      "errors": {
+        "not_found": "This briefing could not be shared.",
+        "briefing_empty": "Write at least one note before sharing."
+      },
+      "transcript": "Call transcript",
+      "saveTranscript": "Save transcript",
+      "buyerTest": "Buyer test video",
+      "buyerTestHint": "Loom, Drive or unlisted YouTube link.",
+      "saveBuyerTest": "Save link",
+      "saved": "Saved.",
+      "invalidLink": "Use an https link.",
+      "transcriptFailed": "The transcript could not be saved."
+    },
+    "call": {
+      "title": "Call mode",
+      "progress": "Block {current} of {total}",
+      "tabs": {
+        "label": "Call mode sections",
+        "briefing": "Briefing",
+        "observations": "Observations",
+        "transcript": "Transcript"
+      },
+      "back": "Back",
+      "next": "Next",
+      "exit": "Leave call mode",
+      "noObservations": "No findings marked to bring to the call yet.",
+      "guide": "Guide questions",
+      "heading": "{company} · Call mode",
+      "blockMeta": "{goal} · {minutes} min"
+    },
+    "fronts": {
+      "core": "Core · Brand",
+      "orbit": "Orbit · Ecosystem",
+      "gravity": "Gravity · Activation",
+      "constellation": "Constellation · Authority"
+    },
+    "levels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "lanes": {
+      "days_30": "30 days",
+      "days_90": "90 days",
+      "months_12": "12 months"
+    },
+    "owners": {
+      "internal": "Internal",
+      "aurion": "Aurion"
+    },
+    "findings": {
+      "title": "Audit",
+      "description": "Every finding carries evidence: a screenshot, a number or a page.",
+      "add": "New finding",
+      "edit": "Edit",
+      "remove": "Remove",
+      "confirmRemove": "Remove this finding and its evidence?",
+      "cancel": "Cancel",
+      "empty": "No findings on this front yet.",
+      "front": "Front",
+      "name": "Finding",
+      "details": "Description",
+      "evidenceKind": "Evidence",
+      "evidenceKinds": {
+        "none": "No evidence",
+        "file": "Image or PDF",
+        "link": "Link",
+        "number": "Number",
+        "page": "Page"
+      },
+      "evidenceFile": "File (PNG, JPEG, WebP or PDF up to 4 MB)",
+      "evidenceValue": "Evidence value",
+      "evidenceNote": "Note on the evidence",
+      "impact": "Impact",
+      "effort": "Effort",
+      "lane": "Lane",
+      "laneHint": "Proposed from impact and effort.",
+      "owner": "Owner",
+      "bringToCall": "Bring to the call",
+      "bringToCallHint": "At most three findings per call.",
+      "save": "Save finding",
+      "viewEvidence": "View evidence",
+      "withoutEvidence": "No evidence",
+      "forCall": "For the call",
+      "errors": {
+        "not_found": "This finding could not be saved.",
+        "invalid_input": "Check the finding fields.",
+        "file_type": "The file must be PNG, JPEG, WebP or PDF.",
+        "file_too_large": "The file is larger than 4 MB.",
+        "call_limit": "Three findings are already marked for the call."
+      }
+    },
+    "orbit": {
+      "title": "Orbit Index",
+      "description": "Each front is worth 25 points, justified by evidence.",
+      "total": "{total} of {max}",
+      "points": "Points (0 to {max})",
+      "justification": "Justification",
+      "save": "Save score",
+      "saved": "Score saved.",
+      "errors": {
+        "not_found": "The score could not be saved.",
+        "invalid_input": "Fill in points and justification for every criterion."
+      }
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "internalCount": "{count, plural, one {# internal item} other {# internal items}} (minimum {min})",
+      "empty": "No items in this lane."
+    },
+    "crossReview": {
+      "title": "Cross review",
+      "description": "Someone who did not run the audit reads everything with one question: what would look obvious or already known to this CEO?",
+      "notes": "Review notes",
+      "record": "Record review",
+      "recorded": "Reviewed on {date}.",
+      "sameAuthor": "The reviewer wrote most findings. The script asks for someone else.",
+      "errors": {
+        "not_found": "The review could not be recorded.",
+        "invalid_input": "The notes are too long."
+      }
+    },
+    "presentation": {
+      "title": "Presentation",
+      "description": "The proposal session is presented from Figma.",
+      "empty": "No presentation yet.",
+      "add": "Attach Figma presentation",
+      "name": "Title",
+      "url": "Figma link",
+      "save": "Save",
+      "publicHint": "The client sees Figma as it is shared: it needs \"Anyone with the link can view\".",
+      "status": {
+        "draft": "Draft",
+        "with_client": "With the client"
+      },
+      "open": "Open",
+      "share": "Share with the client",
+      "withdraw": "Pull back to draft",
+      "replace": "Replace link",
+      "remove": "Remove",
+      "confirmRemove": "Remove this presentation?",
+      "openInFigma": "Open in Figma",
+      "back": "Back to the deal",
+      "errors": {
+        "not_found": "The presentation could not be saved.",
+        "invalid_input": "Use an https figma.com link."
+      }
+    },
+    "assistant": {
+      "title": "Assistant",
+      "description": "The OS builds the prompt. Paste it into Claude and bring the answer back here.",
+      "briefingTitle": "Briefing from the transcript",
+      "narrativeTitle": "Session narrative",
+      "clientNumbers": "Numbers the client gave",
+      "copy": "Copy prompt",
+      "copied": "Prompt copied.",
+      "response": "Claude answer",
+      "applyBriefing": "Distribute into the briefing",
+      "applyNarrative": "Save narrative",
+      "confirmOverwrite": "There are notes in: {blocks}. Replace them?",
+      "overwrite": "Replace",
+      "applied": "Saved.",
+      "narrative": "Saved narrative",
+      "needsTranscript": "Save the transcript before asking for the briefing.",
+      "errors": {
+        "not_found": "Could not save.",
+        "invalid_input": "The answer is empty or too long."
+      }
+    },
+    "access": {
+      "title": "Client portal",
+      "grant": "Give portal access",
+      "granted": "The decision maker has portal access.",
+      "sent": "Invitation sent to the decision maker.",
+      "errors": {
+        "not_found": "Access could not be given.",
+        "no_decision_maker": "This deal has no decision maker with an email.",
+        "already_granted": "The decision maker already has portal access.",
+        "invite_failed": "The invitation was not sent. Try again."
+      }
     }
   }
 }

@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createCommercialFixture,
+  createCoreFixture,
   createFixtureWorld,
   testDatabase,
   withTestTransaction,
@@ -46,6 +47,68 @@ async function countRows(sql: TransactionSql, table: string, dealId: string): Pr
 }
 
 describe('pipeline stage service', () => {
+  async function coreAt(sql: TransactionSql, code: string) {
+    const world = await createFixtureWorld(sql);
+    const core = await createCoreFixture(sql, world);
+    await sql`update public.deals set pipeline_code = ${code} where id = ${core.a.dealId}`;
+    return { world, core };
+  }
+
+  it('moving to 1.4 without cross review is refused with gaps', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, core } = await coreAt(sql, '1.3');
+      const deps = { contexts: createDbContexts(testDatabase(sql)), flush: noFlush };
+
+      const result = await changeDealStage(
+        claimsFor(world.users.founder),
+        { dealId: core.a.dealId, to: '1.4', reason: null },
+        deps,
+      );
+
+      expect(result).toEqual({
+        ok: false,
+        rule: 'core_criteria',
+        gaps: ['fronts_unscored', 'internal_items_below_minimum', 'cross_review_missing'],
+      });
+    });
+  });
+
+  it('moving to 1.4 with every criterion met succeeds', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, core } = await coreAt(sql, '1.3');
+      await sql`
+        insert into public.core_findings (organization_id, client_id, engagement_id, front, title,
+                                          evidence_kind, evidence_value, impact, effort, lane, owner)
+        values (${world.organizationId}, ${world.clients.a}, ${core.a.engagementId}, 'core',
+                'Unclear proposition', 'page', 'Homepage', 'high', 'low', 'days_30', 'internal')
+      `;
+      await sql`delete from public.core_scores where engagement_id = ${core.a.engagementId}`;
+      for (const front of ['core', 'orbit', 'gravity', 'constellation']) {
+        for (const index of [1, 2, 3, 4, 5]) {
+          await sql`
+            insert into public.core_scores (organization_id, client_id, engagement_id, front,
+                                            criterion_id, points, justification)
+            values (${world.organizationId}, ${world.clients.a}, ${core.a.engagementId},
+                    ${front}, ${front + '_' + index}, 3, 'Evidence')
+          `;
+        }
+      }
+      await sql`
+        update public.core_engagements set cross_review_at = now(), cross_review_by = ${world.users.manager}
+        where id = ${core.a.engagementId}
+      `;
+      const deps = { contexts: createDbContexts(testDatabase(sql)), flush: noFlush };
+
+      const result = await changeDealStage(
+        claimsFor(world.users.founder),
+        { dealId: core.a.dealId, to: '1.4', reason: null },
+        deps,
+      );
+
+      expect(result).toEqual({ ok: true, from: '1.3', to: '1.4' });
+    });
+  });
+
   it('closing a deal cancels its scheduled call without notifying the lead', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

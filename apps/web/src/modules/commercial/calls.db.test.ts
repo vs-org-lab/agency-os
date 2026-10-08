@@ -102,7 +102,7 @@ describe('calls', () => {
     });
   });
 
-  it('advance and follow up move the deal to 0.4', async () => {
+  it('advance outcome moves the deal to 1.1 and follow up to 0.4', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const fixture = await createCommercialFixture(sql, world);
@@ -131,7 +131,7 @@ describe('calls', () => {
         deps,
       );
 
-      expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('0.4');
+      expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('1.1');
       expect((await dealCode(sql, fixture.b.dealId))?.code).toBe('0.4');
     });
   });
@@ -156,6 +156,41 @@ describe('calls', () => {
 
       expect(result).toMatchObject({ ok: true });
       expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('0.3');
+    });
+  });
+
+  it('a proposal session can be scheduled while the discovery call is scheduled', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+      const deps = depsFor(sql);
+      const start = new Date(Date.now() + 4 * 86_400_000);
+
+      const session = await scheduleCallManually(
+        claimsFor(world.users.founder),
+        { dealId: fixture.a.dealId, start, durationMinutes: 60, kind: 'proposal_session' },
+        deps,
+      );
+      const duplicate = await scheduleCallManually(
+        claimsFor(world.users.founder),
+        { dealId: fixture.a.dealId, start, durationMinutes: 60, kind: 'proposal_session' },
+        deps,
+      );
+      const discovery = await scheduleCallManually(
+        claimsFor(world.users.founder),
+        { dealId: fixture.a.dealId, start, durationMinutes: 45 },
+        deps,
+      );
+
+      expect(session).toMatchObject({ ok: true });
+      expect(duplicate).toEqual({ ok: false, rule: 'already_scheduled' });
+      expect(discovery).toEqual({ ok: false, rule: 'already_scheduled' });
+      await sql`reset role`;
+      const kinds = await sql<{ kind: string }[]>`
+        select kind::text from public.calls where deal_id = ${fixture.a.dealId} and status = 'scheduled'
+        order by kind
+      `;
+      expect(kinds.map((row) => row.kind)).toEqual(['discovery', 'proposal_session']);
     });
   });
 

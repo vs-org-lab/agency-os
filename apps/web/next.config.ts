@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
   agentRules: false,
   transpilePackages: ['@agency-os/ui', '@agency-os/i18n', '@agency-os/db'],
   serverExternalPackages: ['postgres'],
+  experimental: { serverActions: { bodySizeLimit: '5mb' } },
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

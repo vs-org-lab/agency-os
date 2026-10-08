@@ -87,7 +87,8 @@ export async function scheduleCallAction(
   const start = new Date(text(formData, 'start') ?? '');
   const duration = Number(text(formData, 'duration') ?? '45');
   if (Number.isNaN(start.getTime())) return { status: 'error', code: 'invalid_input' };
-  const result = await scheduleCall(current, { dealId, start, durationMinutes: duration });
+  const kind = text(formData, 'kind') === 'proposal_session' ? 'proposal_session' : 'discovery';
+  const result = await scheduleCall(current, { dealId, start, durationMinutes: duration, kind });
   if (!result.ok) return { status: 'error', code: result.rule };
   refresh(dealId);
   return { status: 'saved' };

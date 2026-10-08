@@ -1,5 +1,5 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
-import { schema, type DbTransaction } from '@agency-os/db';
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { schema, type CallKind, type DbTransaction } from '@agency-os/db';
 import { isLocale, type Locale } from '@agency-os/i18n';
 import {
   renderEmail,
@@ -19,7 +19,7 @@ import {
 } from './links';
 import { resolveTimeZone } from './slots';
 
-const { applications, calls, clients, contacts, organizations } = schema;
+const { applications, calls, clients, contacts, deals, organizations } = schema;
 
 export type NotificationDeps = {
   contexts: Pick<DbContexts, 'withSystemContext'>;
@@ -186,6 +186,7 @@ export async function sendBookingLinkEmail(
 
 type CallContext = {
   callId: string;
+  kind: CallKind;
   organizationId: string;
   dealId: string;
   status: string;
@@ -201,6 +202,7 @@ async function callContext(tx: DbTransaction, callId: string): Promise<CallConte
   const [row] = await tx
     .select({
       callId: calls.id,
+      kind: calls.kind,
       organizationId: calls.organizationId,
       dealId: calls.dealId,
       status: calls.status,
@@ -258,6 +260,95 @@ async function leadCallMessage(
   });
 }
 
+function portalUrl(appBaseUrl: string, locale: Locale): string {
+  return new URL(locale === 'pt-PT' ? '/portal' : `/${locale}/portal`, appBaseUrl).toString();
+}
+
+/**
+ * The booking management page only serves the discovery call, so proposal session emails
+ * carry the meeting link (or the portal) as their single action instead of a manage link.
+ */
+async function sendSessionEmail(
+  deps: NotificationDeps,
+  template: 'lead.session_confirmed' | 'lead.session_reminder',
+  input: { to: string; call: CallContext; locale: Locale; sender: Sender; timeZone: string },
+): Promise<void> {
+  await send(deps, {
+    to: input.to,
+    template,
+    locale: input.locale,
+    sender: input.sender,
+    organizationId: input.call.organizationId,
+    params: {
+      firstName: (input.call.contactName ?? '').trim().split(/\s+/)[0] ?? '',
+      agencyName: input.sender.agencyName,
+      startsAtLabel: startsAtLabel(input.call.startsAt, input.locale, input.timeZone),
+      joinUrl: input.call.meetUrl ?? portalUrl(deps.appBaseUrl, input.locale),
+    },
+  });
+}
+
+export type PortalNoticeTemplate = 'lead.briefing_shared' | 'lead.presentation_shared';
+
+/** Tells the decision maker with portal access that something new was shared with them. */
+export async function sendPortalNotice(
+  dealId: string,
+  template: PortalNoticeTemplate,
+  deps: NotificationDeps,
+): Promise<boolean> {
+  const context = await deps.contexts.withSystemContext(async (tx) => {
+    const [deal] = await tx
+      .select({ organizationId: deals.organizationId, clientId: deals.clientId })
+      .from(deals)
+      .where(eq(deals.id, dealId));
+    if (!deal) return null;
+    const [contact] = await tx
+      .select({ email: contacts.email, fullName: contacts.fullName })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.clientId, deal.clientId),
+          eq(contacts.role, 'decision_maker'),
+          isNotNull(contacts.portalUserId),
+          isNotNull(contacts.email),
+        ),
+      )
+      .limit(1);
+    if (!contact?.email) return null;
+    return {
+      organizationId: deal.organizationId,
+      to: contact.email,
+      firstName: contact.fullName.trim().split(/\s+/)[0] ?? '',
+      lead: await leadForDeal(tx, dealId),
+      sender: await senderFor(tx, deal.organizationId),
+    };
+  });
+  if (!context) return false;
+  const locale = context.lead?.locale ?? context.sender.defaultLocale;
+
+  await send(deps, {
+    to: context.to,
+    template,
+    locale,
+    sender: context.sender,
+    organizationId: context.organizationId,
+    params: {
+      firstName: context.firstName,
+      agencyName: context.sender.agencyName,
+      portalUrl: portalUrl(deps.appBaseUrl, locale),
+    },
+  });
+  return true;
+}
+
+export async function leadTimeZoneForDeal(
+  dealId: string,
+  deps: Pick<NotificationDeps, 'contexts'>,
+): Promise<string> {
+  const lead = await deps.contexts.withSystemContext((tx) => leadForDeal(tx, dealId));
+  return resolveTimeZone(lead?.timeZone ?? null, 'Europe/Lisbon');
+}
+
 export async function sendCallConfirmation(
   callId: string,
   deps: NotificationDeps,
@@ -269,6 +360,10 @@ export async function sendCallConfirmation(
   const locale = lead?.locale ?? sender.defaultLocale;
   const timeZone = resolveTimeZone(call.leadTimeZone, 'Europe/Lisbon');
 
+  if (call.kind === 'proposal_session') {
+    await sendSessionEmail(deps, 'lead.session_confirmed', { to, call, locale, sender, timeZone });
+    return true;
+  }
   await send(deps, {
     to,
     template: 'lead.booking_confirmed',
@@ -304,6 +399,16 @@ export async function sendCallReminder(
   const { call, lead, sender, manageToken: token } = context;
   const locale = lead?.locale ?? sender.defaultLocale;
 
+  if (call.kind === 'proposal_session') {
+    await sendSessionEmail(deps, 'lead.session_reminder', {
+      to,
+      call,
+      locale,
+      sender,
+      timeZone: resolveTimeZone(call.leadTimeZone, 'Europe/Lisbon'),
+    });
+    return 'sent';
+  }
   await send(deps, {
     to,
     template: 'lead.call_reminder',

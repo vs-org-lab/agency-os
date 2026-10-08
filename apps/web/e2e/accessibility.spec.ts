@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { signInWithPassword } from './support/auth';
+import { seedDeal, uniqueCompany } from './support/commercial';
+import { seedCore } from './support/core';
 import { readCredentials } from './support/credentials';
 
 const credentials = readCredentials();
@@ -59,8 +61,14 @@ test.describe('accessibility @responsive', () => {
     page,
   }) => {
     test.setTimeout(300_000);
+    const { dealId } = await seedDeal(credentials.organizationId, {
+      ...uniqueCompany('Core Acessibilidade'),
+      code: '0.3',
+      withCall: true,
+    });
+    await seedCore(credentials.organizationId, dealId, { code: '1.1' });
     await signInWithPassword(page, credentials.founder);
-    for (const path of studioScreens) {
+    for (const path of [...studioScreens, `/pipeline/${dealId}`, `/pipeline/${dealId}/core/call`]) {
       await page.goto(path);
       await page.waitForLoadState('networkidle');
       for (const theme of ['light', 'dark'] as const) {

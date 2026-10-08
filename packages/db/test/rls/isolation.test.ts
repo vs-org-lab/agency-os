@@ -5,7 +5,7 @@ import {
   asSystem,
   asUser,
   closeTestSql,
-  createCommercialFixture,
+  createCoreFixture,
   createFixtureWorld,
   withTestTransaction,
   type World,
@@ -33,10 +33,19 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'calls', clientColumn: 'client_id' },
   { table: 'follow_ups', clientColumn: 'client_id' },
   { table: 'timeline_entries', clientColumn: 'client_id' },
+  { table: 'core_engagements', clientColumn: 'client_id' },
+  { table: 'core_briefing_notes', clientColumn: 'client_id' },
+  { table: 'core_findings', clientColumn: 'client_id' },
+  { table: 'core_scores', clientColumn: 'client_id' },
+  { table: 'documents', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
-  await createCommercialFixture(sql, world);
+  const core = await createCoreFixture(sql, world);
+  for (const records of [core.a, core.b]) {
+    await sql`update public.core_engagements set briefing_shared_at = now() where id = ${records.engagementId}`;
+    await sql`update public.documents set status = 'with_client', shared_at = now() where id = ${records.documentId}`;
+  }
   for (const clientId of [world.clients.a, world.clients.b]) {
     await sql`
       insert into public.audit_log (organization_id, actor_kind, action, resource_type, client_id)

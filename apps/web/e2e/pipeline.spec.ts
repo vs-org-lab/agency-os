@@ -55,7 +55,7 @@ test.describe('pipeline', () => {
     await page.getByLabel('Resultado').selectOption('advance');
     await page.getByRole('button', { name: 'Guardar resultado' }).click();
 
-    await expect(page.getByText('0.4', { exact: true })).toBeVisible();
+    await expect(page.getByText('1.1', { exact: true })).toBeVisible();
   });
 
   test('prospect clients have no room', async ({ page }) => {

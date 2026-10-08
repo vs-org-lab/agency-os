@@ -40,8 +40,13 @@ function recordingDeps(clock: Clock) {
   const reminders: Date[] = [];
   const outcomeChecks: Date[] = [];
   const confirmations: Date[] = [];
+  const coreChecks: string[] = [];
   const deps: CallFlowDeps = {
     now: () => clock.now,
+    ensureCore: async (callId) => {
+      coreChecks.push(callId);
+      return true;
+    },
     syncCall: async () => ENDS_AT.toISOString(),
     sendConfirmation: async () => {
       confirmations.push(clock.now);
@@ -56,18 +61,19 @@ function recordingDeps(clock: Clock) {
       return true;
     },
   };
-  return { deps, reminders, outcomeChecks, confirmations };
+  return { deps, reminders, outcomeChecks, confirmations, coreChecks };
 }
 
 describe('runCallBookedFlow', () => {
   it('sends the day-before and hour-before reminders across replays', async () => {
     const clock: Clock = { now: new Date('2026-10-12T10:00:00Z') };
-    const { deps, reminders, outcomeChecks, confirmations } = recordingDeps(clock);
+    const { deps, reminders, outcomeChecks, confirmations, coreChecks } = recordingDeps(clock);
     const step = replayingStep(clock);
 
     await replay(() => runCallBookedFlow({ callId: 'call-1', startsAt: STARTS_AT }, step, deps));
 
     expect(confirmations).toHaveLength(1);
+    expect(coreChecks).toEqual(['call-1']);
     expect(reminders).toEqual([new Date('2026-10-14T09:00:00Z'), new Date('2026-10-15T08:00:00Z')]);
     expect(outcomeChecks).toEqual([new Date('2026-10-15T11:45:00Z')]);
   });

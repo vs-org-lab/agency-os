@@ -4,9 +4,13 @@ import { Badge } from '@agency-os/ui/components/badge';
 import { requireLocale } from '@/i18n/require-locale';
 import { isFounderActor } from '@/modules/commercial';
 import { commercialSession, loadSettingsData } from '@/modules/commercial/server';
+import { loadCoreTemplates } from '@/modules/diagnosis/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { saveTemplateAction } from '../commercial-actions';
 import { TemplateForm } from '../settings-forms';
+import { publishCoreTemplateAction } from './actions';
+import { BriefingGuideEditor } from './briefing-guide-editor';
+import { OrbitGridEditor } from './orbit-grid-editor';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +22,11 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
   if (!session || !isFounderActor(session.actor)) notFound();
 
   const t = await getTranslations('settings.templates');
-  const { templates } = await loadSettingsData(session);
+  const [{ templates }, core] = await Promise.all([
+    loadSettingsData(session),
+    loadCoreTemplates({ claims: session.claims, organizationId: session.actor.organizationId }),
+  ]);
+  const tc = await getTranslations('settings.coreTemplates');
 
   return (
     <div className="flex max-w-[720px] flex-col gap-6">
@@ -26,6 +34,35 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
         <h1 className="text-title text-text">{t('title')}</h1>
         <p className="text-body text-text-secondary">{t('description')}</p>
       </header>
+
+      <section aria-labelledby="core-templates-title" className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 id="core-templates-title" className="text-title-sm text-text">
+            {tc('title')}
+          </h2>
+          <p className="text-body-sm text-text-secondary">{tc('description')}</p>
+        </div>
+        <details className="rounded-lg border border-border bg-surface p-4">
+          <summary className="cursor-pointer text-label text-text">{tc('guide.title')}</summary>
+          <div className="pt-4">
+            <BriefingGuideEditor
+              guide={core.briefing.definition}
+              version={core.briefing.version}
+              publish={publishCoreTemplateAction.bind(null, 'briefing')}
+            />
+          </div>
+        </details>
+        <details className="rounded-lg border border-border bg-surface p-4">
+          <summary className="cursor-pointer text-label text-text">{tc('grid.title')}</summary>
+          <div className="pt-4">
+            <OrbitGridEditor
+              grid={core.grid.definition}
+              version={core.grid.version}
+              publish={publishCoreTemplateAction.bind(null, 'orbit_grid')}
+            />
+          </div>
+        </details>
+      </section>
 
       <details className="rounded-lg border border-border bg-surface p-4">
         <summary className="cursor-pointer text-label text-text">{t('new')}</summary>

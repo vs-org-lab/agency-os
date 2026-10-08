@@ -1,7 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
-import { authorize, loadAccessContext, resolveActor, type Actor } from '@/modules/access';
-import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import { authorize, loadAccessContext, type Actor } from '@/modules/access';
 
 const { deals } = schema;
 
@@ -27,14 +26,4 @@ export async function writableDeal(
   return { dealId, clientId: deal.clientId, organizationId: deal.organizationId };
 }
 
-export function withActor<T>(
-  contexts: Pick<DbContexts, 'withUserContext'>,
-  claims: VerifiedClaims,
-  fn: (tx: DbTransaction, actor: Actor) => Promise<T>,
-  onMissingActor: T,
-): Promise<T> {
-  return contexts.withUserContext(claims, async (tx) => {
-    const actor = await resolveActor(tx, claims);
-    return actor ? fn(tx, actor) : onMissingActor;
-  });
-}
+export { withActor } from '@/modules/access';

@@ -5,8 +5,10 @@ import { authorize, loadAccessContext, resolveActor, type Actor } from '@/module
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import type { ReadinessGap } from '@/modules/diagnosis';
+import { loadCoreReadiness } from '@/modules/diagnosis/server';
 import { addTimelineEntry } from '../timeline';
-import { FINAL_CODES, OFF_CYCLE_CODES, type PipelineCode } from './codes';
+import { FINAL_CODES, OFF_CYCLE_CODES, stageOf, type PipelineCode } from './codes';
 import {
   evaluateTransition,
   type PendingModule,
@@ -20,7 +22,7 @@ export type StageActor = 'system' | { userId: string; isFounder: boolean };
 
 export type StageChangeResult =
   | { ok: true; from: PipelineCode; to: PipelineCode }
-  | { ok: false; rule: TransitionRefusal; module?: PendingModule }
+  | { ok: false; rule: TransitionRefusal; module?: PendingModule; gaps?: ReadinessGap[] }
   | { ok: false; rule: 'not_found' };
 
 export type StageChangeInput = {
@@ -150,12 +152,18 @@ export async function applyStageChange(
     previousOpenCode: await previousOpenCode(tx, deal.id),
     actor: transitionActor(input.actor),
     reason,
-    facts: await callFacts(tx, deal.id),
+    facts: {
+      ...(await callFacts(tx, deal.id)),
+      coreReadiness: stageOf(input.to) === 'core' ? await loadCoreReadiness(tx, deal.id) : null,
+    },
   });
   if (!decision.allowed) {
-    return decision.module
-      ? { ok: false, rule: decision.rule, module: decision.module }
-      : { ok: false, rule: decision.rule };
+    return {
+      ok: false,
+      rule: decision.rule,
+      ...(decision.module ? { module: decision.module } : {}),
+      ...(decision.gaps ? { gaps: decision.gaps } : {}),
+    };
   }
 
   await tx.execute(sql`select set_config('app.stage_change_reason', ${reason ?? ''}, true)`);

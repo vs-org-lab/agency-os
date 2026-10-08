@@ -169,6 +169,15 @@
     "home": {
       "title": "Bem-vindo",
       "description": "O acompanhamento do seu projeto aparece aqui."
+    },
+    "core": {
+      "briefingTitle": "O resumo da nossa conversa",
+      "briefingDescription": "O que ouvimos na call, tal como o registámos. Se alguma coisa não estiver certa, diga-nos.",
+      "sharedOn": "Partilhado a {date}",
+      "presentations": "Apresentações",
+      "open": "Ver apresentação",
+      "back": "Voltar ao início",
+      "openInFigma": "Abrir no Figma"
     }
   },
   "commercial": {
@@ -176,9 +185,9 @@
       "codes": {
         "p0_1": "Candidatura recebida",
         "p0_2": "Candidatura qualificada",
-        "p0_3": "Descoberta agendada",
-        "p0_4": "Descoberta realizada",
-        "p1_1": "Core contratado",
+        "p0_3": "Call Core marcada",
+        "p0_4": "Call Core feita",
+        "p1_1": "Core iniciado",
         "p1_2": "Recolha de informação",
         "p1_3": "Análise e arquitetura",
         "p1_4": "Roadmap preparado",
@@ -232,9 +241,20 @@
         "call_required": "Marque a chamada no separador Chamadas antes de passar a 0.3.",
         "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
         "module_pending": "Disponível quando o módulo {module} existir.",
-        "not_found": "Este negócio não existe ou não tem acesso a ele."
+        "not_found": "Este negócio não existe ou não tem acesso a ele.",
+        "core_criteria": "Falta cumprir: {gaps}."
       },
-      "codeOption": "{code} · {name}"
+      "codeOption": "{code} · {name}",
+      "gaps": {
+        "briefing_empty": "pelo menos um bloco do briefing preenchido",
+        "fronts_unscored": "todas as frentes do Índice Orbit pontuadas",
+        "findings_without_evidence": "prova em todos os achados",
+        "internal_items_below_minimum": "pelo menos 2 itens internos no roadmap",
+        "cross_review_missing": "a revisão cruzada",
+        "presentation_missing": "a apresentação Figma anexada",
+        "proposal_session_missing": "a sessão de proposta marcada",
+        "presentation_not_shared": "a apresentação partilhada com o cliente"
+      }
     },
     "board": {
       "title": "Pipeline",
@@ -300,7 +320,8 @@
         "summary": "Resumo",
         "application": "Candidatura",
         "calls": "Chamadas",
-        "timeline": "Linha temporal"
+        "timeline": "Linha temporal",
+        "core": "Core"
       },
       "tracking": {
         "title": "Rastreio",
@@ -396,7 +417,9 @@
           "invalid_input": "Verifique os campos.",
           "not_found": "Não foi possível guardar.",
           "already_scheduled": "Este negócio já tem uma chamada marcada."
-        }
+        },
+        "scheduleSession": "Marcar sessão de proposta",
+        "scheduleSessionHint": "A sessão em que se apresenta o diagnóstico e as opções. O decisor recebe a confirmação por email."
       },
       "followUps": {
         "title": "Acompanhamentos",
@@ -548,6 +571,30 @@
         "heading": "A chamada foi cancelada",
         "body": "Olá {firstName}, a sua chamada com a {agencyName} foi cancelada.\n\nSe quiser marcar outra hora, use o botão abaixo.",
         "action": "Escolher novo horário"
+      },
+      "session_confirmed": {
+        "subject": "Sessão de proposta: {startsAtLabel}",
+        "heading": "A sessão está marcada",
+        "body": "Olá {firstName}, a sessão em que a {agencyName} apresenta o que encontrou e o que propõe fica marcada para {startsAtLabel}.\n\nSão sessenta minutos, com quem decide.",
+        "action": "Entrar na chamada"
+      },
+      "session_reminder": {
+        "subject": "Lembrete: sessão com a {agencyName}",
+        "heading": "A sessão é em breve",
+        "body": "Olá {firstName}, lembramos a sessão de proposta com a {agencyName} marcada para {startsAtLabel}.",
+        "action": "Entrar na chamada"
+      },
+      "briefing_shared": {
+        "subject": "O resumo da nossa conversa está no portal",
+        "heading": "O briefing está no portal",
+        "body": "Olá {firstName}, deixámos no portal o resumo do que falámos, tal como o ouvimos.\n\nSe alguma coisa não estiver certa, diga-nos.",
+        "action": "Ver o briefing"
+      },
+      "presentation_shared": {
+        "subject": "A apresentação está no portal",
+        "heading": "A apresentação está no portal",
+        "body": "Olá {firstName}, a apresentação da nossa sessão já está no portal, para a rever com calma ou partilhar com quem decide consigo.",
+        "action": "Ver a apresentação"
       }
     },
     "founder": {
@@ -778,6 +825,244 @@
       "saved": "Modelo guardado.",
       "invalid": "Verifique os campos do modelo.",
       "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
+    },
+    "coreTemplates": {
+      "title": "Modelos do Core",
+      "description": "O guia de perguntas da call e a grelha do Índice Orbit. Cada publicação cria uma versão nova; os Cores já começados mantêm a versão com que começaram.",
+      "version": "Versão {version}",
+      "publish": "Publicar nova versão",
+      "published": "Publicada a versão {version}.",
+      "errors": {
+        "invalid_input": "Reveja os campos: há textos vazios ou identificadores repetidos.",
+        "not_found": "Só o fundador publica modelos."
+      },
+      "portuguese": "Português",
+      "english": "Inglês",
+      "guide": {
+        "title": "Guia do briefing",
+        "block": "Bloco {number}",
+        "blockTitle": "Título",
+        "minutes": "Minutos",
+        "goal": "O que se obtém",
+        "questions": "Perguntas-guia",
+        "question": "Pergunta",
+        "addQuestion": "Acrescentar pergunta",
+        "removeQuestion": "Remover pergunta"
+      },
+      "grid": {
+        "title": "Grelha do Índice Orbit",
+        "total": "{total} de 25",
+        "criterion": "Critério",
+        "observes": "O que se observa",
+        "maxPoints": "Pontos máximos",
+        "addCriterion": "Acrescentar critério",
+        "removeCriterion": "Remover critério",
+        "mustSum": "Cada frente tem de somar 25 pontos."
+      }
+    }
+  },
+  "diagnosis": {
+    "tab": "Core",
+    "noCore": "O Core começa quando a call é marcada.",
+    "readiness": {
+      "title": "Critérios da etapa 1",
+      "ready": "Tudo o que a etapa 1 pede está cumprido.",
+      "missing": "Para avançar falta:"
+    },
+    "note": {
+      "saving": "A guardar",
+      "saved": "Guardado",
+      "failed": "Não guardado",
+      "retry": "Tentar de novo"
+    },
+    "briefing": {
+      "title": "Briefing",
+      "description": "O que a call tem de deixar respondido, bloco a bloco. O cliente só vê depois de partilhar.",
+      "openCall": "Abrir modo call",
+      "blockNotes": "Notas do bloco",
+      "minutes": "{minutes} min",
+      "share": "Partilhar briefing com o cliente",
+      "shared": "Partilhado com o cliente a {date}",
+      "errors": {
+        "not_found": "Não foi possível partilhar este briefing.",
+        "briefing_empty": "Escreva pelo menos uma nota antes de partilhar."
+      },
+      "transcript": "Transcrição da call",
+      "saveTranscript": "Guardar transcrição",
+      "buyerTest": "Vídeo do teste do comprador",
+      "buyerTestHint": "Link do Loom, Drive ou YouTube não listado.",
+      "saveBuyerTest": "Guardar link",
+      "saved": "Guardado.",
+      "invalidLink": "Use um link https.",
+      "transcriptFailed": "Não foi possível guardar a transcrição."
+    },
+    "call": {
+      "title": "Modo call",
+      "progress": "Bloco {current} de {total}",
+      "tabs": {
+        "label": "Secções do modo call",
+        "briefing": "Briefing",
+        "observations": "Observações",
+        "transcript": "Transcrição"
+      },
+      "back": "Voltar",
+      "next": "Seguinte",
+      "exit": "Sair do modo call",
+      "noObservations": "Ainda não marcou achados para levar para a call.",
+      "guide": "Perguntas-guia",
+      "heading": "{company} · Modo call",
+      "blockMeta": "{goal} · {minutes} min"
+    },
+    "fronts": {
+      "core": "Core · Marca",
+      "orbit": "Orbit · Ecossistema",
+      "gravity": "Gravity · Ativação",
+      "constellation": "Constellation · Autoridade"
+    },
+    "levels": {
+      "low": "Baixo",
+      "medium": "Médio",
+      "high": "Alto"
+    },
+    "lanes": {
+      "days_30": "30 dias",
+      "days_90": "90 dias",
+      "months_12": "12 meses"
+    },
+    "owners": {
+      "internal": "Interno",
+      "aurion": "Aurion"
+    },
+    "findings": {
+      "title": "Auditoria",
+      "description": "Cada achado leva prova: captura de ecrã, número ou página.",
+      "add": "Novo achado",
+      "edit": "Editar",
+      "remove": "Remover",
+      "confirmRemove": "Remover este achado e a sua prova?",
+      "cancel": "Cancelar",
+      "empty": "Ainda não há achados nesta frente.",
+      "front": "Frente",
+      "name": "Achado",
+      "details": "Descrição",
+      "evidenceKind": "Prova",
+      "evidenceKinds": {
+        "none": "Sem prova",
+        "file": "Imagem ou PDF",
+        "link": "Link",
+        "number": "Número",
+        "page": "Página"
+      },
+      "evidenceFile": "Ficheiro (PNG, JPEG, WebP ou PDF até 4 MB)",
+      "evidenceValue": "Valor da prova",
+      "evidenceNote": "Nota sobre a prova",
+      "impact": "Impacto",
+      "effort": "Esforço",
+      "lane": "Faixa",
+      "laneHint": "Proposta a partir do impacto e do esforço.",
+      "owner": "Responsável",
+      "bringToCall": "Levar para a call",
+      "bringToCallHint": "No máximo três achados por call.",
+      "save": "Guardar achado",
+      "viewEvidence": "Ver prova",
+      "withoutEvidence": "Sem prova",
+      "forCall": "Para a call",
+      "errors": {
+        "not_found": "Não foi possível guardar este achado.",
+        "invalid_input": "Reveja os campos do achado.",
+        "file_type": "O ficheiro tem de ser PNG, JPEG, WebP ou PDF.",
+        "file_too_large": "O ficheiro tem mais de 4 MB.",
+        "call_limit": "Já há três achados marcados para a call."
+      }
+    },
+    "orbit": {
+      "title": "Índice Orbit",
+      "description": "Cada frente vale 25 pontos, justificados por prova.",
+      "total": "{total} de {max}",
+      "points": "Pontos (0 a {max})",
+      "justification": "Justificação",
+      "save": "Guardar pontuação",
+      "saved": "Pontuação guardada.",
+      "errors": {
+        "not_found": "Não foi possível guardar a pontuação.",
+        "invalid_input": "Preencha os pontos e a justificação de todos os critérios."
+      }
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "internalCount": "{count, plural, one {# item interno} other {# itens internos}} (mínimo {min})",
+      "empty": "Sem itens nesta faixa."
+    },
+    "crossReview": {
+      "title": "Revisão cruzada",
+      "description": "Alguém que não fez a auditoria lê tudo com uma pergunta: o que pareceria óbvio ou já sabido a este CEO?",
+      "notes": "Notas da revisão",
+      "record": "Registar revisão",
+      "recorded": "Revista a {date}.",
+      "sameAuthor": "Quem reviu escreveu a maioria dos achados. O guião pede outra pessoa.",
+      "errors": {
+        "not_found": "Não foi possível registar a revisão.",
+        "invalid_input": "As notas são demasiado longas."
+      }
+    },
+    "presentation": {
+      "title": "Apresentação",
+      "description": "A sessão de proposta é apresentada a partir do Figma.",
+      "empty": "Ainda não há apresentação.",
+      "add": "Anexar apresentação Figma",
+      "name": "Título",
+      "url": "Link do Figma",
+      "save": "Guardar",
+      "publicHint": "O cliente vê o Figma tal como está partilhado: precisa de \"Qualquer pessoa com o link pode ver\".",
+      "status": {
+        "draft": "Rascunho",
+        "with_client": "Com o cliente"
+      },
+      "open": "Abrir",
+      "share": "Partilhar com o cliente",
+      "withdraw": "Retirar para rascunho",
+      "replace": "Substituir link",
+      "remove": "Remover",
+      "confirmRemove": "Remover esta apresentação?",
+      "openInFigma": "Abrir no Figma",
+      "back": "Voltar ao negócio",
+      "errors": {
+        "not_found": "Não foi possível guardar a apresentação.",
+        "invalid_input": "Use um link https de figma.com."
+      }
+    },
+    "assistant": {
+      "title": "Assistente",
+      "description": "O OS monta o pedido. Cole-o no Claude e traga a resposta para aqui.",
+      "briefingTitle": "Briefing a partir da transcrição",
+      "narrativeTitle": "Narrativa da sessão",
+      "clientNumbers": "Números que o cliente deu",
+      "copy": "Copiar pedido",
+      "copied": "Pedido copiado.",
+      "response": "Resposta do Claude",
+      "applyBriefing": "Distribuir pelo briefing",
+      "applyNarrative": "Guardar narrativa",
+      "confirmOverwrite": "Já há notas em: {blocks}. Substituir?",
+      "overwrite": "Substituir",
+      "applied": "Guardado.",
+      "narrative": "Narrativa guardada",
+      "needsTranscript": "Guarde a transcrição antes de pedir o briefing.",
+      "errors": {
+        "not_found": "Não foi possível guardar.",
+        "invalid_input": "A resposta está vazia ou é demasiado longa."
+      }
+    },
+    "access": {
+      "title": "Portal do cliente",
+      "grant": "Dar acesso ao portal",
+      "granted": "O decisor tem acesso ao portal.",
+      "sent": "Convite enviado ao decisor.",
+      "errors": {
+        "not_found": "Não foi possível dar acesso.",
+        "no_decision_maker": "Este negócio não tem um decisor com email.",
+        "already_granted": "O decisor já tem acesso ao portal.",
+        "invite_failed": "O convite não foi enviado. Tente de novo."
+      }
     }
   }
 }

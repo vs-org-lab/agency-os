@@ -57,3 +57,12 @@ export const DEFAULT_FOLLOW_UP_TEMPLATES: readonly DefaultFollowUpTemplate[] = [
     body: 'Hello {firstName}, I am closing the follow-up on our conversation from {callDate} for now. When the timing is different for {companyName}, just reply to this message.',
   },
 ];
+
+export const CORE_FOLLOW_UP_DAY = 5;
+
+/** The single Core follow-up: a concrete question about one roadmap item, never "just checking". */
+export const CORE_FOLLOW_UP_TEMPLATES: Readonly<Record<Locale, string>> = {
+  'pt-PT':
+    'Olá {firstName}, fiquei a pensar no ponto "{itemTitle}" do roadmap. Já conseguiram olhar para ele, ou há alguma informação que vos faça falta para decidir?',
+  en: 'Hello {firstName}, I kept thinking about the roadmap item "{itemTitle}". Have you had a chance to look at it, or is there information you need to decide?',
+};

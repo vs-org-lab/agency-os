@@ -72,13 +72,14 @@ Estes termos são os únicos usados na interface, nos emails e no código. Um te
 | Passo | Uma ação dentro de uma fase, visível ou não para o cliente | Item |
 | Tarefa | Trabalho interno atribuído a uma pessoa, com data | Ticket |
 | Candidatura | O formulário do site, com pontuação e caminho A, B ou C | Lead form |
-| Diagnóstico | A primeira peça: workshop, análise e mapa | Discovery, na interface em português |
-| Mapa | O resultado do diagnóstico: manter, mudar, integrar, criar, com porquê e impacto | Relatório |
+| Diagnóstico | A primeira peça, gratuita: o Aurion Core (call, auditoria, Índice Orbit, roadmap, sessão de proposta) | Discovery, na interface em português |
+| Roadmap | O resultado do Core: achados com prova em três faixas (30 dias, 90 dias, 12 meses), internos ou Aurion | Relatório, mapa |
 | Proposta | Documento comercial, normalmente um Figma incorporado | Orçamento |
 | Marco | Um ponto do projeto que dispara aprovação e, quando aplicável, fatura | Milestone |
 | Retainer | Contrato mensal contínuo com limites de âmbito | Avença |
 | Pedido extra | Trabalho acima do limite do retainer, orçado à parte | Extra grátis |
-| Resultado acordado | A meta, a linha de base e o prazo definidos no diagnóstico | KPI |
+| Resultado acordado | A meta, a linha de base e o prazo definidos a partir do roadmap do Core | KPI |
+| Índice Orbit | Pontuação de 0 a 25 por frente (Core, Orbit, Gravity, Constellation), justificada por prova | Score |
 | Garantia | Trabalho sem custo, até 3 meses, se o resultado acordado não for atingido e o cliente tiver cumprido as condições | Reembolso |
 | Brand Hub | O site publicado com estratégia, identidade e downloads de uma marca | Manual em PDF |
 | Biblioteca | Os ficheiros de uma sala, organizados em pastas | Drive |

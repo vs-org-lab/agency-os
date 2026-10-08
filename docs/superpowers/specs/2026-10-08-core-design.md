@@ -133,7 +133,7 @@ Achados, pontuações, transcrição, narrativa e revisão cruzada nunca chegam 
 
 ### Provas carregadas
 
-- Imagens PNG, JPEG ou WebP e PDF, até 10 MB, validados pelo conteúdo do ficheiro e não pela extensão.
+- Imagens PNG, JPEG ou WebP e PDF, até 4 MB (a Vercel no plano Hobby limita cada pedido a 4,5 MB), validados pelo conteúdo do ficheiro e não pela extensão.
 - Guardadas num bucket privado do Supabase Storage (`core-evidence`), com caminho `organização/cliente/core/uuid`. As políticas do Storage recusam acesso direto; o servidor verifica a permissão e devolve links assinados com validade de 5 minutos.
 - Links de prova e do teste do comprador: só `https`. O vídeo abre num separador novo e não é incorporado.
 
@@ -210,6 +210,6 @@ Os emails de partilha respeitam as horas de silêncio do 1A. Eventos novos: `cor
 | Risco                                                   | Mitigação                                                                                 |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Link Figma privado mostra um ecrã de login ao cliente   | Aviso permanente no estúdio; o fundador vê a mesma pré-visualização que o cliente         |
-| Quota de 1 GB do Storage                                | Limite de 10 MB por ficheiro, só imagens e PDF; vídeo por link                            |
+| Quota de 1 GB do Storage                                | Limite de 4 MB por ficheiro, só imagens e PDF; vídeo por link                             |
 | Critérios da etapa 1 demasiado rígidos para casos reais | Critérios numa função pura, fácil de ajustar; o fundador pode recuar um código com motivo |
 | O guião muda                                            | Guia e grelha são modelos versionados, editáveis sem código                               |

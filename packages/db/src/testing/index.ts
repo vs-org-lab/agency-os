@@ -7,8 +7,11 @@ export {
   assignStaff,
   createAuthUser,
   createCommercialFixture,
+  createCoreFixture,
   createFixtureWorld,
   type CommercialFixture,
   type CommercialRecords,
+  type CoreFixture,
+  type CoreRecords,
   type World,
 } from './fixtures';

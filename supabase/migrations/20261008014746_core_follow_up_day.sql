@@ -1,0 +1,2 @@
+ALTER TABLE "follow_ups" DROP CONSTRAINT "follow_ups_sequence_day";--> statement-breakpoint
+ALTER TABLE "follow_ups" ADD CONSTRAINT "follow_ups_sequence_day" CHECK ("follow_ups"."sequence_day" in (3, 5, 7, 14, 30));

@@ -26,6 +26,18 @@ export const AUDIT_ACTIONS = [
   'acquisition_target.converted',
   'contact.saved',
   'follow_up.completed',
+  'core.created',
+  'core.briefing.shared',
+  'core.finding.saved',
+  'core.finding.removed',
+  'core.scores.saved',
+  'core.cross_review.recorded',
+  'core_template.published',
+  'document.saved',
+  'document.shared',
+  'document.withdrawn',
+  'document.removed',
+  'portal.access.granted',
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

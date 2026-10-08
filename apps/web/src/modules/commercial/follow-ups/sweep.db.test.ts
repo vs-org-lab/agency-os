@@ -142,6 +142,7 @@ describe('createDueFollowUps', () => {
                 'Sem rastreamento de conversões', 'page', 'Analytics', 'high', 'high', 'days_90', 'aurion')
       `;
       await sql`update public.deals set pipeline_code = '1.6' where id = ${core.a.dealId}`;
+      await sql`update public.contacts set full_name = 'Rosa Lima' where id = ${core.a.contactId}`;
       const [entry] = await sql<{ at: string }[]>`select now() as at`;
       const enteredAt = new Date(entry?.at ?? 0);
       const deps = { contexts: createDbContexts(testDatabase(sql)) };
@@ -160,6 +161,20 @@ describe('createDueFollowUps', () => {
       expect(rows).toHaveLength(1);
       expect(rows[0]?.day).toBe(5);
       expect(rows[0]?.message).toContain('Sem rastreamento de conversões');
+      expect(rows[0]?.message).toMatch(/^Olá Rosa,/);
+    });
+  });
+
+  it('stops the call follow ups once the deal enters the Core', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const dealId = await heldCall(sql, world, '1.2');
+      await sql`update public.calls set outcome = 'follow_up' where deal_id = ${dealId}`;
+      const deps = { contexts: createDbContexts(testDatabase(sql)) };
+
+      await createDueFollowUps(daysAfter(3), deps);
+
+      expect(await followUpDays(sql, dealId)).toEqual([]);
     });
   });
 });

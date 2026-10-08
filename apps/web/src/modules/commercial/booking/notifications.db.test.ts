@@ -128,6 +128,7 @@ describe('notifications', () => {
       ]);
       expect(email.sent[0]?.text).toContain('https://meet.google.com/abc');
       expect(email.sent[0]?.text).not.toContain('/apply/booking/');
+      expect(email.sent[0]?.text).toContain('Hello Ana,');
     });
   });
 
@@ -151,6 +152,7 @@ describe('notifications', () => {
         template: 'lead.briefing_shared',
       });
       expect(email.sent[0]?.text).toContain('https://os.example.com/en/portal');
+      expect(email.sent[0]?.text).toContain('Hello Ana,');
     });
   });
 

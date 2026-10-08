@@ -280,7 +280,7 @@ async function sendSessionEmail(
     sender: input.sender,
     organizationId: input.call.organizationId,
     params: {
-      firstName: (input.call.contactName ?? '').trim().split(/s+/)[0] ?? '',
+      firstName: (input.call.contactName ?? '').trim().split(/\s+/)[0] ?? '',
       agencyName: input.sender.agencyName,
       startsAtLabel: startsAtLabel(input.call.startsAt, input.locale, input.timeZone),
       joinUrl: input.call.meetUrl ?? portalUrl(deps.appBaseUrl, input.locale),
@@ -318,7 +318,7 @@ export async function sendPortalNotice(
     return {
       organizationId: deal.organizationId,
       to: contact.email,
-      firstName: contact.fullName.trim().split(/s+/)[0] ?? '',
+      firstName: contact.fullName.trim().split(/\s+/)[0] ?? '',
       lead: await leadForDeal(tx, dealId),
       sender: await senderFor(tx, deal.organizationId),
     };

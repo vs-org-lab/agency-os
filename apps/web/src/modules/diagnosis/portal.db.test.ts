@@ -83,6 +83,24 @@ describe('prospect portal', () => {
     });
   });
 
+  it('never invites an applicant who is not the decision maker', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      await sql`update public.contacts set role = 'operational' where id = ${core.a.contactId}`;
+      const invite = vi.fn(async () => ({ userId: world.users.decisionMakerA }));
+
+      const result = await grantPortalAccess(
+        claimsFor(world.users.founder),
+        { dealId: core.a.dealId },
+        { contexts: createDbContexts(testDatabase(sql)), invite },
+      );
+
+      expect(result).toEqual({ ok: false, rule: 'no_decision_maker' });
+      expect(invite).not.toHaveBeenCalled();
+    });
+  });
+
   it('a manager of another client cannot grant access', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

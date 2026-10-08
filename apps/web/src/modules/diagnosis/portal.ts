@@ -132,13 +132,13 @@ export async function grantPortalAccess(
         })
         .from(contacts)
         .where(
-          fromApplication
-            ? eq(contacts.id, fromApplication.contactId)
-            : and(
-                eq(contacts.clientId, deal.clientId),
-                eq(contacts.role, 'decision_maker'),
-                isNotNull(contacts.email),
-              ),
+          and(
+            fromApplication
+              ? eq(contacts.id, fromApplication.contactId)
+              : eq(contacts.clientId, deal.clientId),
+            eq(contacts.role, 'decision_maker'),
+            isNotNull(contacts.email),
+          ),
         )
         .limit(1);
       if (!contact?.email) return { kind: 'refused', rule: 'no_decision_maker' };

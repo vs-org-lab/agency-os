@@ -124,7 +124,11 @@ export async function createDueFollowUps(now: Date, deps: SweepDeps): Promise<nu
         where t.deal_id = d.id and t.kind not in ('follow_up_created', 'follow_up_completed')
       ) activity on true
       where d.archived_at is null
-        and (d.pipeline_code = '0.4' or (c.outcome = 'follow_up' and d.pipeline_code not in ('X.3', 'X.4')))
+        and (
+          d.pipeline_code = '0.4'
+          or (c.outcome = 'follow_up' and d.pipeline_code not in ('X.3', 'X.4')
+              and d.pipeline_code::text not like '1.%')
+        )
     `);
 
     let created = 0;
@@ -241,7 +245,7 @@ async function createCoreFollowUps(tx: DbTransaction, now: Date): Promise<number
     if (due.getTime() > now.getTime()) continue;
 
     const message = CORE_FOLLOW_UP_TEMPLATES[candidate.locale]
-      .replace('{firstName}', (candidate.contact_name ?? '').trim().split(/s+/)[0] ?? '')
+      .replace('{firstName}', (candidate.contact_name ?? '').trim().split(/\s+/)[0] ?? '')
       .replace('{itemTitle}', candidate.item_title ?? '');
     const inserted = await tx
       .insert(followUps)

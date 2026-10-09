@@ -325,7 +325,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
-        "rooms": "Salas e processo",
+        "approvals": "Aprovações",
         "retainers": "Retainers"
       },
       "rules": {
@@ -341,7 +341,8 @@
         "core_criteria": "Falta cumprir: {gaps}.",
         "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
         "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses.",
-        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2."
+        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2.",
+        "process_driven": "De 2.3 a 2.9 o negócio acompanha as fases do projeto; avance a fase na sala do cliente."
       },
       "codeOption": "{code} · {name}",
       "gaps": {

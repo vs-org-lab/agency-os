@@ -7,7 +7,7 @@ import {
   type PipelineStage,
 } from './codes';
 
-export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'rooms' | 'retainers';
+export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'approvals' | 'retainers';
 
 export type TransitionRefusal =
   | 'same_code'
@@ -21,6 +21,7 @@ export type TransitionRefusal =
   | 'contract_required'
   | 'core_required'
   | 'payment_required'
+  | 'process_driven'
   | 'module_pending';
 
 export type TransitionFacts = {
@@ -59,7 +60,7 @@ export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set([
 
 export const STAGE_MODULE: Readonly<Partial<Record<PipelineStage, PendingModule>>> = {
   core: 'diagnosis',
-  orbit: 'rooms',
+  orbit: 'approvals',
   gravity: 'retainers',
   constellation: 'retainers',
 };
@@ -80,7 +81,11 @@ const PROJECT_START: PipelineCode = '2.1';
 
 const KICKOFF: PipelineCode = '2.2';
 
-const BILLING_CODES: readonly PipelineCode[] = [PROJECT_START, KICKOFF];
+/** The project's process moves the deal through these codes as its phases start and end. */
+const PROCESS_CODES: readonly PipelineCode[] = ['2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9'];
+
+/** Leaving 2.9 needs the final approval and the final invoice (RN-04), built with approvals. */
+const PROJECT_DELIVERED: PipelineCode = '2.10';
 
 const MISSING_CORE: CoreReadiness = {
   briefingHasContent: false,
@@ -140,8 +145,7 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
 
   const targetStage = stageOf(to);
   if (!ENABLED_STAGES.has(targetStage)) return refuse('module_pending', STAGE_MODULE[targetStage]);
-  if (targetStage === 'orbit' && !BILLING_CODES.includes(to))
-    return refuse('module_pending', 'rooms');
+  if (to === PROJECT_DELIVERED) return refuse('module_pending', 'approvals');
 
   if (movement === 'back') {
     if (actor === 'staff') return refuse('founder_only');
@@ -160,6 +164,7 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
   if (from === PROJECT_START && to === KICKOFF && !facts.firstPaymentReceived) {
     return refuse('payment_required');
   }
+  if (PROCESS_CODES.includes(to) && actor === 'staff') return refuse('process_driven');
   if (stageOf(from) === 'core' && targetStage === 'core') {
     const gaps = stageOneGaps(to, facts.coreReadiness ?? MISSING_CORE);
     if (gaps.length > 0) return { allowed: false, rule: 'core_criteria', gaps };

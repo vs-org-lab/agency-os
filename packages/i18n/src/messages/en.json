@@ -325,7 +325,7 @@
         "diagnosis": "Diagnosis",
         "documents": "Documents and contracts",
         "billing": "Billing",
-        "rooms": "Rooms and process",
+        "approvals": "Approvals",
         "retainers": "Retainers"
       },
       "rules": {
@@ -341,7 +341,8 @@
         "core_criteria": "Still missing: {gaps}.",
         "contract_required": "Without a signed contract, the deal cannot enter 2.1.",
         "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core.",
-        "payment_required": "Without the first reconciled payment, the deal cannot move to 2.2."
+        "payment_required": "Without the first reconciled payment, the deal cannot move to 2.2.",
+        "process_driven": "From 2.3 to 2.9 the deal follows the project phases; move the phase forward in the client room."
       },
       "codeOption": "{code} · {name}",
       "gaps": {

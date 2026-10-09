@@ -28,15 +28,15 @@ const ALLOWED_FOR_FOUNDER: Record<PipelineCode, PipelineCode[]> = {
   '1.5': ['1.6', '1.4', ...OFF_CYCLE],
   '1.6': ['1.5', '2.1', ...OFF_CYCLE],
   '2.1': ['2.2', ...OFF_CYCLE],
-  '2.2': ['2.1', ...OFF_CYCLE],
-  '2.3': ['2.2', ...OFF_CYCLE],
-  '2.4': OFF_CYCLE,
-  '2.5': OFF_CYCLE,
-  '2.6': OFF_CYCLE,
-  '2.7': OFF_CYCLE,
-  '2.8': OFF_CYCLE,
-  '2.9': OFF_CYCLE,
-  '2.10': OFF_CYCLE,
+  '2.2': ['2.1', '2.3', ...OFF_CYCLE],
+  '2.3': ['2.2', '2.4', ...OFF_CYCLE],
+  '2.4': ['2.3', '2.5', ...OFF_CYCLE],
+  '2.5': ['2.4', '2.6', ...OFF_CYCLE],
+  '2.6': ['2.5', '2.7', ...OFF_CYCLE],
+  '2.7': ['2.6', '2.8', ...OFF_CYCLE],
+  '2.8': ['2.7', '2.9', ...OFF_CYCLE],
+  '2.9': ['2.8', ...OFF_CYCLE],
+  '2.10': ['2.9', ...OFF_CYCLE],
   '3.1': OFF_CYCLE,
   '3.2': OFF_CYCLE,
   '3.3': OFF_CYCLE,
@@ -254,11 +254,29 @@ describe('evaluateTransition', () => {
     ).toEqual({ allowed: true });
   });
 
-  it('2.3 waits for rooms', () => {
-    expect(evaluateTransition(input({ from: '2.2', to: '2.3' }))).toEqual({
+  it('manager cannot move 2.3 to 2.4 by hand', () => {
+    expect(evaluateTransition(input({ from: '2.3', to: '2.4', actor: 'staff' }))).toEqual({
+      allowed: false,
+      rule: 'process_driven',
+    });
+    expect(evaluateTransition(input({ from: '2.2', to: '2.3', actor: 'staff' }))).toEqual({
+      allowed: false,
+      rule: 'process_driven',
+    });
+  });
+
+  it('founder can, and the process moves as the system', () => {
+    expect(evaluateTransition(input({ from: '2.3', to: '2.4' }))).toEqual({ allowed: true });
+    expect(
+      evaluateTransition(input({ from: '2.4', to: '2.5', actor: 'system', reason: null })),
+    ).toEqual({ allowed: true });
+  });
+
+  it('2.10 waits for approvals', () => {
+    expect(evaluateTransition(input({ from: '2.9', to: '2.10' }))).toEqual({
       allowed: false,
       rule: 'module_pending',
-      module: 'rooms',
+      module: 'approvals',
     });
   });
 

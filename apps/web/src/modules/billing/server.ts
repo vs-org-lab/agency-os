@@ -21,8 +21,10 @@ import {
   type BillingDeps,
 } from './requests';
 import { processProviderEvent, startCheckout } from './stripe-events';
+import { lisbonDate } from './domain/plan';
 import { createSupabaseBillingStorage } from './supabase-storage';
 import { handleStripeWebhook } from './webhook-handler';
+import { billingPdfUrl, getDealBilling, type BillingPdfKind } from './workspace';
 
 /** The stage a deal enters with its first reconciled payment (AUT-13). */
 const KICKOFF_CODE = '2.2';
@@ -104,4 +106,17 @@ export function receiveStripeWebhook(rawBody: string, signature: string | null) 
     secret: env.PAYMENTS_PROVIDER === 'stripe' ? env.STRIPE_WEBHOOK_SECRET : null,
     process: (event) => processProviderEvent(event, billingDeps()),
   });
+}
+
+export function loadDealBilling(session: BillingSession, dealId: string) {
+  return withUserContext(session.claims, (tx) =>
+    getDealBilling(tx, dealId, lisbonDate(new Date())),
+  );
+}
+
+export function billingPdfLink(
+  claims: VerifiedClaims,
+  input: { kind: BillingPdfKind; id: string },
+) {
+  return billingPdfUrl(claims, input, billingDeps());
 }

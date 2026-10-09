@@ -384,7 +384,8 @@
         "application": "Candidatura",
         "calls": "Chamadas",
         "timeline": "Linha temporal",
-        "core": "Core"
+        "core": "Core",
+        "billing": "Faturação"
       },
       "tracking": {
         "title": "Rastreio",
@@ -1417,6 +1418,86 @@
         "invalid_input": "Escreva o motivo.",
         "invalid_state": "O contrato já não pode ser anulado.",
         "not_found": "Não foi possível concluir a ação."
+      }
+    }
+  },
+  "billing": {
+    "deal": {
+      "title": "Faturação",
+      "nonFiscal": "O OS emite pedidos de pagamento não fiscais. A fatura legal é emitida no software certificado (AT) ou no Portal do Contribuinte (AGT) e registada aqui.",
+      "empty": "O plano de pagamentos é criado quando o contrato fica assinado pelas duas partes.",
+      "milestone": "{position}. {label} · {percent}%",
+      "milestoneStatus": {
+        "pending": "Por pedir",
+        "requested": "Pedido enviado",
+        "paid": "Pago"
+      },
+      "request": "{number} · vence a {date}",
+      "paidOn": "Pago a {date}",
+      "overdue": "Em atraso há {days, plural, one {# dia} other {# dias}}",
+      "requestPdf": "PDF do pedido {number}",
+      "invoicePdf": "PDF da fatura {number}",
+      "payments": "Pagamentos",
+      "paymentLine": "{amount} · {method} · {date}",
+      "methods": {
+        "stripe": "Cartão (Stripe)",
+        "bank_transfer": "Transferência bancária",
+        "multicaixa": "Multicaixa Express",
+        "other": "Outro"
+      },
+      "paymentStatus": {
+        "reconciled": "Conciliado",
+        "review": "Por rever"
+      },
+      "missingInvoice": "Falta registar a fatura legal.",
+      "invoice": "Fatura {number} · {issuer} · {date}",
+      "issuers": {
+        "at_certified": "Software certificado (AT)",
+        "agt_portal": "Portal do Contribuinte (AGT)"
+      },
+      "actions": {
+        "request": "Pedir pagamento",
+        "chase": "Cobrar",
+        "void": "Anular pedido",
+        "confirmVoid": "Confirmar anulação",
+        "record": "Registar pagamento",
+        "saveRecord": "Guardar pagamento",
+        "settle": "Conciliar",
+        "registerInvoice": "Registar fatura legal",
+        "saveInvoice": "Guardar fatura",
+        "cancel": "Cancelar"
+      },
+      "forms": {
+        "record": "Registar pagamento {number}",
+        "void": "Anular {number}",
+        "invoice": "Registar fatura legal de {number}"
+      },
+      "fields": {
+        "method": "Meio",
+        "amount": "Valor",
+        "receivedOn": "Recebido em",
+        "reference": "Referência",
+        "voidReason": "Motivo da anulação",
+        "issuer": "Emitida em",
+        "number": "Número da fatura",
+        "issuedOn": "Data da fatura",
+        "file": "PDF da fatura (até 10 MB)"
+      },
+      "done": {
+        "request": "Pedido enviado ao cliente.",
+        "chase": "Lembrete enviado ao cliente.",
+        "void": "Pedido anulado.",
+        "record": "Pagamento registado.",
+        "settle": "Pagamento conciliado.",
+        "registerInvoice": "Fatura legal registada."
+      },
+      "errors": {
+        "not_found": "Não encontrado ou sem permissão.",
+        "invalid_input": "Confirme os campos.",
+        "invalid_state": "O estado mudou entretanto. Atualize a página.",
+        "too_soon": "O cliente já foi lembrado nas últimas 24 horas.",
+        "missing_file": "Carregue o PDF da fatura (até 10 MB).",
+        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
       }
     }
   }

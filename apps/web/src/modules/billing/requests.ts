@@ -394,7 +394,8 @@ export async function chasePaymentRequest(
       metadata: { number: request.number },
     });
     await emit(tx, {
-      type: 'billing.request.reminded',
+      type:
+        lisbonDate(now) > request.dueDate ? 'billing.request.overdue' : 'billing.request.reminded',
       organizationId: request.organizationId,
       clientId: request.clientId,
       payload: { dealId: request.dealId, requestId: request.id },

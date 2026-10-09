@@ -293,7 +293,11 @@ export type PortalNoticeTemplate =
   | 'lead.presentation_shared'
   | 'lead.proposal_shared'
   | 'lead.contract_ready'
-  | 'lead.contract_signed';
+  | 'lead.contract_signed'
+  | 'lead.payment_requested'
+  | 'lead.payment_reminder'
+  | 'lead.payment_overdue'
+  | 'lead.payment_received';
 
 /** Tells the decision maker with portal access that something new was shared with them. */
 export async function sendPortalNotice(

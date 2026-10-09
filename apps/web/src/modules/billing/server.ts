@@ -1,10 +1,7 @@
 import 'server-only';
 import Stripe from 'stripe';
-import type { DbTransaction } from '@agency-os/db';
-import { applyStageChange } from '@/modules/commercial/server';
-import { commercialEnv, paymentsEnv } from '@/platform/env';
-import { logger } from '@/platform/logger';
-import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import { paymentsEnv } from '@/platform/env';
+import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import {
   legalInvoiceUploadUrl,
   registerLegalInvoice,
@@ -16,38 +13,14 @@ import { getPortalInvoices } from './portal';
 import { createStripeProvider } from './payments-provider/stripe';
 import {
   chasePaymentRequest,
-  createPlanForContract,
   requestPayment,
   voidPaymentRequest,
-  type BillingDeps,
 } from './requests';
+import { billingDeps } from './runtime';
 import { processProviderEvent, startCheckout } from './stripe-events';
 import { lisbonDate } from './domain/plan';
-import { createSupabaseBillingStorage } from './supabase-storage';
 import { handleStripeWebhook } from './webhook-handler';
 import { billingPdfUrl, getDealBilling, type BillingPdfKind } from './workspace';
-
-/** The stage a deal enters with its first reconciled payment (AUT-13). */
-const KICKOFF_CODE = '2.2';
-
-async function moveDealToKickoff(tx: DbTransaction, dealId: string): Promise<void> {
-  const change = await applyStageChange(tx, {
-    dealId,
-    to: KICKOFF_CODE,
-    reason: null,
-    actor: 'system',
-  });
-  if (!change.ok) logger.warn('billing.deal_not_moved', { dealId, rule: change.rule });
-}
-
-export function billingDeps(): BillingDeps {
-  return {
-    contexts: { withUserContext, withSystemContext },
-    storage: createSupabaseBillingStorage(),
-    appBaseUrl: commercialEnv().APP_BASE_URL,
-    moveDeal: moveDealToKickoff,
-  };
-}
 
 let stripeClient: Stripe | undefined;
 
@@ -64,10 +37,6 @@ export function cardPaymentsEnabled(): boolean {
 }
 
 export type BillingSession = { claims: VerifiedClaims };
-
-export function planForSignedContract(contractId: string) {
-  return createPlanForContract(contractId, billingDeps());
-}
 
 export function requestMilestonePayment(session: BillingSession, input: { milestoneId: string }) {
   return requestPayment(session.claims, input, billingDeps());
@@ -125,3 +94,4 @@ export function billingPdfLink(
 export function loadPortalInvoices(claims: VerifiedClaims, clientId: string) {
   return withUserContext(claims, (tx) => getPortalInvoices(tx, clientId, lisbonDate(new Date())));
 }
+export { BILLING_FUNCTIONS } from './automations';

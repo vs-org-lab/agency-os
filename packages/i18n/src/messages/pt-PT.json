@@ -289,6 +289,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
+        "rooms": "Salas e processo",
         "retainers": "Retainers"
       },
       "rules": {
@@ -303,7 +304,8 @@
         "not_found": "Este negócio não existe ou não tem acesso a ele.",
         "core_criteria": "Falta cumprir: {gaps}.",
         "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
-        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses."
+        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses.",
+        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -674,6 +676,30 @@
         "heading": "Contrato assinado",
         "body": "Olá {firstName}, o contrato está assinado pelas duas partes. O PDF assinado está no portal.",
         "action": "Ver o contrato"
+      },
+      "payment_requested": {
+        "subject": "Pedido de pagamento disponível",
+        "heading": "Pedido de pagamento disponível",
+        "body": "Olá {firstName}, o pedido de pagamento está no portal, com o valor, o vencimento e as formas de pagamento.\n\nA fatura é emitida depois do pagamento.",
+        "action": "Ver o pedido"
+      },
+      "payment_reminder": {
+        "subject": "Pagamento a vencer em breve",
+        "heading": "Pagamento a vencer em breve",
+        "body": "Olá {firstName}, um pedido de pagamento vence nos próximos dias. Os dados para pagar estão no portal.\n\nSe já pagou, ignore esta mensagem.",
+        "action": "Ver o pedido"
+      },
+      "payment_overdue": {
+        "subject": "Pagamento em atraso",
+        "heading": "Pagamento em atraso",
+        "body": "Olá {firstName}, um pedido de pagamento passou o vencimento. Os dados para pagar estão no portal.\n\nSe já pagou, ignore esta mensagem: a confirmação chega assim que o pagamento for conciliado.",
+        "action": "Ver o pedido"
+      },
+      "payment_received": {
+        "subject": "Pagamento recebido",
+        "heading": "Pagamento recebido",
+        "body": "Olá {firstName}, recebemos o seu pagamento. Obrigado.\n\nA fatura fica disponível no portal assim que for emitida.",
+        "action": "Abrir o portal"
       }
     },
     "founder": {
@@ -729,6 +755,24 @@
         "subject": "Contrato assinado com {companyName}",
         "heading": "Contrato assinado com {companyName}",
         "body": "O contrato está assinado pelas duas partes e o negócio passou a 2.1. O PDF assinado está no separador Core.",
+        "action": "Abrir o negócio"
+      },
+      "payment_received": {
+        "subject": "Pagamento recebido de {companyName}",
+        "heading": "Pagamento recebido de {companyName}",
+        "body": "Um pedido de pagamento de {companyName} foi pago e conciliado. Emita a fatura no software certificado e registe-a no separador Faturação.",
+        "action": "Abrir o negócio"
+      },
+      "payment_review": {
+        "subject": "Pagamento por rever de {companyName}",
+        "heading": "Pagamento por rever de {companyName}",
+        "body": "Chegou um pagamento de {companyName} que não coincide com o pedido (valor, moeda ou referência). Confirme-o no separador Faturação.",
+        "action": "Rever o pagamento"
+      },
+      "payment_overdue": {
+        "subject": "Pagamento de {companyName} em atraso há {days} dias",
+        "heading": "Pagamento de {companyName} em atraso há {days} dias",
+        "body": "O cliente recebeu um novo lembrete. A partir dos 30 dias pode pausar o projeto (X.1).",
         "action": "Abrir o negócio"
       }
     }

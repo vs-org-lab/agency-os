@@ -289,6 +289,7 @@
         "diagnosis": "Diagnosis",
         "documents": "Documents and contracts",
         "billing": "Billing",
+        "rooms": "Rooms and process",
         "retainers": "Retainers"
       },
       "rules": {
@@ -303,7 +304,8 @@
         "not_found": "This deal does not exist or you do not have access to it.",
         "core_criteria": "Still missing: {gaps}.",
         "contract_required": "Without a signed contract, the deal cannot enter 2.1.",
-        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core."
+        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core.",
+        "payment_required": "Without the first reconciled payment, the deal cannot move to 2.2."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -674,6 +676,30 @@
         "heading": "Agreement signed",
         "body": "Hello {firstName}, the agreement is signed by both parties. The signed PDF is in the portal.",
         "action": "View the agreement"
+      },
+      "payment_requested": {
+        "subject": "Payment request available",
+        "heading": "Payment request available",
+        "body": "Hi {firstName}, the payment request is in the portal, with the amount, the due date and the ways to pay.\n\nThe invoice is issued once the payment is received.",
+        "action": "View the request"
+      },
+      "payment_reminder": {
+        "subject": "Payment due soon",
+        "heading": "Payment due soon",
+        "body": "Hi {firstName}, a payment request is due in the next few days. The payment details are in the portal.\n\nIf you have already paid, please ignore this message.",
+        "action": "View the request"
+      },
+      "payment_overdue": {
+        "subject": "Payment overdue",
+        "heading": "Payment overdue",
+        "body": "Hi {firstName}, a payment request is past its due date. The payment details are in the portal.\n\nIf you have already paid, please ignore this message: the confirmation follows once the payment is reconciled.",
+        "action": "View the request"
+      },
+      "payment_received": {
+        "subject": "Payment received",
+        "heading": "Payment received",
+        "body": "Hi {firstName}, we have received your payment. Thank you.\n\nThe invoice will be available in the portal once it is issued.",
+        "action": "Open the portal"
       }
     },
     "founder": {
@@ -729,6 +755,24 @@
         "subject": "Agreement signed with {companyName}",
         "heading": "Agreement signed with {companyName}",
         "body": "The agreement is signed by both parties and the deal moved to 2.1. The signed PDF is in the Core tab.",
+        "action": "Open the deal"
+      },
+      "payment_received": {
+        "subject": "Payment received from {companyName}",
+        "heading": "Payment received from {companyName}",
+        "body": "A payment request from {companyName} has been paid and reconciled. Issue the invoice in the certified software and record it in the Billing tab.",
+        "action": "Open the deal"
+      },
+      "payment_review": {
+        "subject": "Payment to review from {companyName}",
+        "heading": "Payment to review from {companyName}",
+        "body": "A payment from {companyName} does not match its request (amount, currency or reference). Confirm it in the Billing tab.",
+        "action": "Review the payment"
+      },
+      "payment_overdue": {
+        "subject": "{companyName} payment overdue for {days} days",
+        "heading": "{companyName} payment overdue for {days} days",
+        "body": "The client has received a new reminder. From 30 days you may pause the project (X.1).",
         "action": "Open the deal"
       }
     }

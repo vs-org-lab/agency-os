@@ -69,6 +69,39 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal',
   },
+  'lead.payment_requested': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/invoices',
+  },
+  'lead.payment_reminder': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/invoices',
+  },
+  'lead.payment_overdue': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/invoices',
+  },
+  'lead.payment_received': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/invoices',
+  },
+  'founder.payment_received': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.payment_review': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.payment_overdue': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+    days: 15,
+  },
   'founder.proposal_accepted': {
     companyName: 'Empresa Exemplo',
     optionName: 'Orbit com Gravity',
@@ -135,6 +168,16 @@ describe('renderEmail', () => {
     expect(rendered.subject).toBe('Empresa Exemplo aceitou a proposta');
     expect(rendered.text).toContain('Orbit com Gravity');
     expect(rendered.html).toContain('https://os.example.com/pipeline/deal');
+  });
+
+  it('tells the founder how long a payment request is overdue', () => {
+    const email = renderEmail('founder.payment_overdue', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      dealUrl: 'https://os.example.com/pipeline/deal',
+      days: 30,
+    });
+
+    expect(email.subject).toBe('Pagamento de Empresa Exemplo em atraso há 30 dias');
   });
 
   it('escapes html in parameters', () => {

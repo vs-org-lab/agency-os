@@ -1492,6 +1492,7 @@
         "agt_portal": "Portal do Contribuinte (AGT)"
       },
       "actions": {
+        "createPlan": "Criar plano de pagamentos",
         "request": "Pedir pagamento",
         "chase": "Cobrar",
         "void": "Anular pedido",
@@ -1520,6 +1521,7 @@
         "file": "PDF da fatura (até 10 MB)"
       },
       "done": {
+        "createPlan": "Plano criado e primeiro pedido enviado.",
         "request": "Pedido enviado ao cliente.",
         "chase": "Lembrete enviado ao cliente.",
         "void": "Pedido anulado.",

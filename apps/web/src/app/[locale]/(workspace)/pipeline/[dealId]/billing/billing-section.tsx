@@ -28,6 +28,7 @@ import {
 export type { BillingActionResult } from './billing-forms';
 
 export type BillingActions = {
+  createPlan(dealId: string): Promise<BillingActionResult>;
   request(milestoneId: string): Promise<BillingActionResult>;
   chase(requestId: string): Promise<BillingActionResult>;
   void(requestId: string, reason: string): Promise<BillingActionResult>;
@@ -37,7 +38,8 @@ export type BillingActions = {
   registerInvoice(input: RegisterLegalInvoiceInput): Promise<BillingActionResult>;
 };
 
-type DoneKey = 'request' | 'chase' | 'void' | 'record' | 'settle' | 'registerInvoice';
+type DoneKey =
+  'createPlan' | 'request' | 'chase' | 'void' | 'record' | 'settle' | 'registerInvoice';
 
 type Feedback = { tone: 'success'; key: DoneKey } | { tone: 'danger'; error: BillingError };
 
@@ -293,16 +295,35 @@ function MilestoneCard({
 
 /** S-10 summarised: the deal's milestones, payment requests, payments and legal invoices. */
 export function BillingSection({
+  dealId,
   billing,
   writable,
+  canCreatePlan,
   actions,
 }: {
+  dealId: string;
   billing: DealBilling | null;
   writable: boolean;
+  /** A signed contract exists without a plan, e.g. signed before billing or its event pending. */
+  canCreatePlan: boolean;
   actions: BillingActions;
 }) {
   const t = useTranslations('billing.deal');
+  const router = useRouter();
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [pending, startTransition] = useTransition();
+  const createPlan = () =>
+    startTransition(async () => {
+      const result = await actions
+        .createPlan(dealId)
+        .catch(() => ({ ok: false, code: 'not_found' }) as const);
+      setFeedback(
+        result.ok
+          ? { tone: 'success', key: 'createPlan' }
+          : { tone: 'danger', error: billingError(result.code) },
+      );
+      if (result.ok) router.refresh();
+    });
 
   return (
     <section
@@ -335,6 +356,12 @@ export function BillingSection({
             />
           ))}
         </ol>
+      ) : writable && canCreatePlan ? (
+        <div>
+          <Button disabled={pending} onClick={createPlan}>
+            {t('actions.createPlan')}
+          </Button>
+        </div>
       ) : (
         <p className="text-body-sm text-text-secondary">{t('empty')}</p>
       )}

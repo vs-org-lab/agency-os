@@ -3,6 +3,7 @@
 import type { RecordPaymentInput, RegisterLegalInvoiceInput } from '@/modules/billing';
 import {
   chaseRequest,
+  createDealPlan,
   legalInvoiceUploadLink,
   recordManualPayment,
   registerInvoice,
@@ -21,6 +22,12 @@ async function session() {
 
 function outcome(result: { ok: true } | { ok: false; rule: string }): BillingActionResult {
   return result.ok ? { ok: true } : { ok: false, code: result.rule };
+}
+
+export async function createPlanAction(dealId: string): Promise<BillingActionResult> {
+  const current = await session();
+  if (!current) return { ok: false, code: 'not_found' };
+  return outcome(await createDealPlan(current, { dealId }));
 }
 
 export async function requestPaymentAction(milestoneId: string): Promise<BillingActionResult> {

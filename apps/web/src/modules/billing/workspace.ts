@@ -178,3 +178,13 @@ export async function billingPdfUrl(
   if (!file?.path) return null;
   return deps.storage.signedUrl(file.path, BILLING_URL_TTL_SECONDS);
 }
+
+/** True when the deal has a fully signed contract the caller can read. */
+export async function hasSignedContract(tx: DbTransaction, dealId: string): Promise<boolean> {
+  const rows = await tx
+    .select({ id: schema.contracts.id })
+    .from(schema.contracts)
+    .where(and(eq(schema.contracts.dealId, dealId), eq(schema.contracts.status, 'signed')))
+    .limit(1);
+  return rows.length > 0;
+}

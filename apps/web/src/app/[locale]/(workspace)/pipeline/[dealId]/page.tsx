@@ -31,6 +31,7 @@ import {
 import { CoreTab } from './core/core-tab';
 import {
   chaseRequestAction,
+  createPlanAction,
   invoiceUploadAction,
   recordPaymentAction,
   registerInvoiceAction,
@@ -55,7 +56,9 @@ export default async function DealPage({ params }: PageProps) {
   const [detail, core, billing] = await Promise.all([
     loadDealDetail(session, dealId, locale),
     loadCoreWorkspace(session, dealId),
-    billingVisible ? loadDealBilling(session, dealId) : Promise.resolve(null),
+    billingVisible
+      ? loadDealBilling(session, dealId)
+      : Promise.resolve({ billing: null, canCreatePlan: false }),
   ]);
   if (!detail) notFound();
 
@@ -209,9 +212,12 @@ export default async function DealPage({ params }: PageProps) {
           {billingVisible ? (
             <TabsContent value="billing" className="pt-4">
               <BillingSection
-                billing={billing}
+                dealId={dealId}
+                billing={billing.billing}
                 writable={canWriteBilling(session.actor)}
+                canCreatePlan={billing.canCreatePlan}
                 actions={{
+                  createPlan: createPlanAction,
                   request: requestPaymentAction,
                   chase: chaseRequestAction,
                   void: voidRequestAction,

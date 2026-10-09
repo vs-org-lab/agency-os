@@ -1492,6 +1492,7 @@
         "agt_portal": "AGT taxpayer portal"
       },
       "actions": {
+        "createPlan": "Create payment plan",
         "request": "Request payment",
         "chase": "Chase",
         "void": "Void request",
@@ -1520,6 +1521,7 @@
         "file": "Invoice PDF (up to 10 MB)"
       },
       "done": {
+        "createPlan": "Plan created and first request sent.",
         "request": "Request sent to the client.",
         "chase": "Reminder sent to the client.",
         "void": "Request voided.",

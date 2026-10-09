@@ -58,6 +58,7 @@ function billing(request: Partial<PaymentRequestView> | null): DealBilling {
 function actionsMock(overrides: Partial<BillingActions> = {}): BillingActions {
   const ok = async () => ({ ok: true }) as const;
   return {
+    createPlan: vi.fn(ok),
     request: vi.fn(ok),
     chase: vi.fn(ok),
     void: vi.fn(ok),
@@ -69,10 +70,21 @@ function actionsMock(overrides: Partial<BillingActions> = {}): BillingActions {
   };
 }
 
-function renderSection(data: DealBilling, writable: boolean, actions = actionsMock()) {
+function renderSection(
+  data: DealBilling | null,
+  writable: boolean,
+  actions = actionsMock(),
+  canCreatePlan = false,
+) {
   render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      <BillingSection billing={data} writable={writable} actions={actions} />
+      <BillingSection
+        dealId="33333333-3333-4333-8333-333333333333"
+        billing={data}
+        writable={writable}
+        canCreatePlan={canCreatePlan}
+        actions={actions}
+      />
     </NextIntlClientProvider>,
   );
   return actions;
@@ -122,6 +134,28 @@ describe('BillingSection', () => {
     renderSection(billing({}), false);
 
     expect(screen.getByText(/^PP-2026-0001 · vence a/)).toBeDefined();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('offers to create the plan of a signed contract without one', async () => {
+    const actions = renderSection(null, true, actionsMock(), true);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Criar plano de pagamentos' }));
+    });
+
+    expect(actions.createPlan).toHaveBeenCalledWith('33333333-3333-4333-8333-333333333333');
+    expect(screen.getByRole('status').textContent).toBe('Plano criado e primeiro pedido enviado.');
+  });
+
+  it('explains the empty plan before the contract is signed', () => {
+    renderSection(null, true);
+
+    expect(
+      screen.getByText(
+        'O plano de pagamentos é criado quando o contrato fica assinado pelas duas partes.',
+      ),
+    ).toBeDefined();
     expect(screen.queryByRole('button')).toBeNull();
   });
 });

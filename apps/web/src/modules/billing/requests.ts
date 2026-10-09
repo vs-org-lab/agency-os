@@ -406,3 +406,32 @@ export async function chasePaymentRequest(
   if (result.ok) await (deps.flush ?? requestFlush)();
   return result;
 }
+
+/**
+ * Creates the plan of the deal's signed contract on request, for contracts signed before billing
+ * existed or whose signing event has not been processed. Refused once a plan exists.
+ */
+export async function createPlanForDeal(
+  claims: VerifiedClaims,
+  input: { dealId: string },
+  deps: BillingDeps,
+): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_state' }> {
+  if (!z.uuid().safeParse(input.dealId).success) return NOT_FOUND;
+  const contractId = await withActor(
+    deps.contexts,
+    claims,
+    async (tx, actor) => {
+      if (!canWriteBilling(actor)) return null;
+      const [contract] = await tx
+        .select({ id: contracts.id })
+        .from(contracts)
+        .where(and(eq(contracts.dealId, input.dealId), eq(contracts.status, 'signed')))
+        .limit(1);
+      return contract?.id ?? null;
+    },
+    null,
+  );
+  if (!contractId) return NOT_FOUND;
+  const plan = await createPlanForContract(contractId, deps);
+  return plan.created ? { ok: true } : { ok: false, rule: 'invalid_state' };
+}

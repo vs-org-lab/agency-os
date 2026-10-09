@@ -13,6 +13,7 @@ import { getPortalInvoices } from './portal';
 import { createStripeProvider } from './payments-provider/stripe';
 import {
   chasePaymentRequest,
+  createPlanForDeal,
   requestPayment,
   voidPaymentRequest,
 } from './requests';
@@ -20,7 +21,7 @@ import { billingDeps } from './runtime';
 import { processProviderEvent, startCheckout } from './stripe-events';
 import { lisbonDate } from './domain/plan';
 import { handleStripeWebhook } from './webhook-handler';
-import { billingPdfUrl, getDealBilling, type BillingPdfKind } from './workspace';
+import { billingPdfUrl, getDealBilling, hasSignedContract, type BillingPdfKind } from './workspace';
 
 let stripeClient: Stripe | undefined;
 
@@ -78,10 +79,15 @@ export function receiveStripeWebhook(rawBody: string, signature: string | null) 
   });
 }
 
-export function loadDealBilling(session: BillingSession, dealId: string) {
-  return withUserContext(session.claims, (tx) =>
-    getDealBilling(tx, dealId, lisbonDate(new Date())),
-  );
+export async function loadDealBilling(session: BillingSession, dealId: string) {
+  return withUserContext(session.claims, async (tx) => {
+    const billing = await getDealBilling(tx, dealId, lisbonDate(new Date()));
+    return { billing, canCreatePlan: !billing && (await hasSignedContract(tx, dealId)) };
+  });
+}
+
+export function createDealPlan(session: BillingSession, input: { dealId: string }) {
+  return createPlanForDeal(session.claims, input, billingDeps());
 }
 
 export function billingPdfLink(

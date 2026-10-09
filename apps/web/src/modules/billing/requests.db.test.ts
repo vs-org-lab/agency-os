@@ -3,6 +3,7 @@ import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-o
 import {
   chasePaymentRequest,
   createPlanForContract,
+  createPlanForDeal,
   requestPayment,
   voidPaymentRequest,
 } from './requests';
@@ -62,6 +63,30 @@ describe('payment plans and requests', () => {
           and organization_id = ${world.organizationId}
       `;
       expect(events).toHaveLength(1);
+    });
+  });
+
+  it('finance creates the plan of a signed contract once, managers cannot', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await signedContract(sql, world);
+      const { deps } = billingDeps(sql);
+      const input = { dealId: contract.dealId };
+
+      expect(await createPlanForDeal(billingClaims(world.users.manager), input, deps)).toEqual({
+        ok: false,
+        rule: 'not_found',
+      });
+      expect(await createPlanForDeal(billingClaims(world.users.finance), input, deps)).toEqual({
+        ok: true,
+      });
+      expect(await createPlanForDeal(billingClaims(world.users.finance), input, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_state',
+      });
+      const requests =
+        await sql`select id from public.payment_requests where deal_id = ${contract.dealId}`;
+      expect(requests).toHaveLength(1);
     });
   });
 

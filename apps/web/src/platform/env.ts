@@ -102,6 +102,29 @@ export function transcriptionEnv(): TranscriptionEnv {
   return cachedTranscriptionEnv;
 }
 
+const paymentsEnvSchema = z.discriminatedUnion('PAYMENTS_PROVIDER', [
+  z.object({ PAYMENTS_PROVIDER: z.literal('fake') }),
+  z.object({
+    PAYMENTS_PROVIDER: z.literal('stripe'),
+    STRIPE_SECRET_KEY: z.string().regex(/^(sk|rk)_(test|live)_/),
+    STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
+  }),
+]);
+
+export type PaymentsEnv = z.infer<typeof paymentsEnvSchema>;
+
+let cachedPaymentsEnv: PaymentsEnv | undefined;
+
+/** Card payments run only with Stripe keys; with `fake` the OS records payments by hand. */
+export function paymentsEnv(): PaymentsEnv {
+  cachedPaymentsEnv ??= paymentsEnvSchema.parse({
+    PAYMENTS_PROVIDER: process.env.PAYMENTS_PROVIDER ?? 'fake',
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  });
+  return cachedPaymentsEnv;
+}
+
 const emailEnvSchema = z.discriminatedUnion('EMAIL_TRANSPORT', [
   z.object({ EMAIL_TRANSPORT: z.literal('capture') }),
   z.object({

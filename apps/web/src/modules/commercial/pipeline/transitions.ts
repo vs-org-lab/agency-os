@@ -18,12 +18,18 @@ export type TransitionRefusal =
   | 'call_required'
   | 'call_outcome_required'
   | 'core_criteria'
+  | 'contract_required'
+  | 'core_required'
   | 'module_pending';
 
 export type TransitionFacts = {
   hasScheduledCall: boolean;
   hasCompletedCallWithOutcome: boolean;
   coreReadiness: CoreReadiness | null;
+  /** A signed contract exists for the deal (RN-04, entry into 2.1). */
+  contractSigned: boolean;
+  /** The client had a Core delivered (1.6) in the last 12 months (RN-03). */
+  coreDeliveredWithinYear: boolean;
 };
 
 export type TransitionActor = 'system' | 'founder' | 'staff';
@@ -44,12 +50,13 @@ export type TransitionDecision =
 export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set([
   'pre_sale',
   'core',
+  'orbit',
   'off_cycle',
 ]);
 
 export const STAGE_MODULE: Readonly<Partial<Record<PipelineStage, PendingModule>>> = {
   core: 'diagnosis',
-  orbit: 'documents',
+  orbit: 'billing',
   gravity: 'retainers',
   constellation: 'retainers',
 };
@@ -65,6 +72,8 @@ const STAGE_LINKS: ReadonlyArray<readonly [PipelineCode, PipelineCode]> = [
 ];
 
 const PAUSED_CODES: readonly PipelineCode[] = ['X.1', 'X.2'];
+
+const PROJECT_START: PipelineCode = '2.1';
 
 const MISSING_CORE: CoreReadiness = {
   briefingHasContent: false,
@@ -124,6 +133,7 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
 
   const targetStage = stageOf(to);
   if (!ENABLED_STAGES.has(targetStage)) return refuse('module_pending', STAGE_MODULE[targetStage]);
+  if (targetStage === 'orbit' && to !== PROJECT_START) return refuse('module_pending', 'billing');
 
   if (movement === 'back') {
     if (actor === 'staff') return refuse('founder_only');
@@ -134,6 +144,10 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
   if (from === '0.2' && to === '0.3' && !facts.hasScheduledCall) return refuse('call_required');
   if (from === '0.3' && to === '0.4' && !facts.hasCompletedCallWithOutcome) {
     return refuse('call_outcome_required');
+  }
+  if (to === PROJECT_START) {
+    if (!facts.contractSigned) return refuse('contract_required');
+    if (from === '0.4' && !facts.coreDeliveredWithinYear) return refuse('core_required');
   }
   if (stageOf(from) === 'core' && targetStage === 'core') {
     const gaps = stageOneGaps(to, facts.coreReadiness ?? MISSING_CORE);

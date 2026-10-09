@@ -2,13 +2,24 @@ import { getTranslations } from 'next-intl/server';
 import type { Locale } from '@agency-os/i18n';
 import { stageOneGaps, type CoreReadiness, type ReadinessGap } from '@/modules/diagnosis';
 import { loadCorePrompts, type CoreWorkspace } from '@/modules/diagnosis/server';
+import { isFounderActor } from '@/modules/commercial';
 import type { CommercialSession } from '@/modules/commercial/server';
+import { loadDealContract, loadProposalWorkspace } from '@/modules/contracts/server';
 import { AssistantSection } from './assistant-section';
 import { BriefingSection } from './briefing-section';
 import { FindingsSection } from './findings-section';
 import { OrbitSection } from './orbit-section';
 import { PortalAccess } from './portal-access';
+import {
+  saveProposalAction,
+  sendProposalAction,
+  signContractAction,
+  voidContractAction,
+  withdrawProposalAction,
+} from './contract-actions';
+import { ContractSection } from './contract-section';
 import { PresentationSection } from './presentation-section';
+import { ProposalSection } from './proposal-section';
 import { CrossReviewSection, RoadmapSection } from './review-section';
 
 const STAGE_ONE_TARGETS = ['1.3', '1.4', '1.5', '1.6'] as const;
@@ -59,7 +70,11 @@ export async function CoreTab({
     .map((note) => note.body.trim())
     .filter((body) => body !== '')
     .join('\n');
-  const prompts = await loadCorePrompts(session, workspace, locale, clientNumbers);
+  const [prompts, proposal, contract] = await Promise.all([
+    loadCorePrompts(session, workspace, locale, clientNumbers),
+    loadProposalWorkspace(session, workspace.dealId),
+    loadDealContract(session, workspace.dealId),
+  ]);
   const blockTitles = Object.fromEntries(
     workspace.briefing.guide.blocks.map((block) => [block.id, block.title[locale]]),
   );
@@ -109,6 +124,25 @@ export async function CoreTab({
         documents={workspace.documents}
         writable={writable}
       />
+      {proposal && writable ? (
+        <ProposalSection
+          workspace={proposal}
+          founder={isFounderActor(session.actor)}
+          actions={{
+            save: saveProposalAction,
+            send: sendProposalAction,
+            withdraw: withdrawProposalAction,
+          }}
+        />
+      ) : null}
+      {contract ? (
+        <ContractSection
+          contract={contract}
+          dealId={workspace.dealId}
+          founder={isFounderActor(session.actor)}
+          actions={{ sign: signContractAction, void: voidContractAction }}
+        />
+      ) : null}
       {writable ? (
         <AssistantSection
           engagementId={workspace.engagementId}

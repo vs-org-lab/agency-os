@@ -14,6 +14,11 @@ export const DOMAIN_EVENTS = [
   'core.briefing.shared',
   'core.document.shared',
   'core.recording.uploaded',
+  'contracts.proposal.sent',
+  'contracts.proposal.accepted',
+  'contracts.proposal.change_requested',
+  'contracts.contract.client_signed',
+  'contracts.contract.signed',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

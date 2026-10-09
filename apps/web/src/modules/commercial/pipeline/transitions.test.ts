@@ -20,15 +20,15 @@ const ALLOWED_FOR_FOUNDER: Record<PipelineCode, PipelineCode[]> = {
   '0.1': ['0.2', ...OFF_CYCLE],
   '0.2': ['0.3', '0.1', ...OFF_CYCLE],
   '0.3': ['0.4', '0.2', ...OFF_CYCLE],
-  '0.4': ['0.3', '1.1', ...OFF_CYCLE],
+  '0.4': ['0.3', '1.1', '2.1', ...OFF_CYCLE],
   '1.1': ['1.2', ...OFF_CYCLE],
   '1.2': ['1.3', '1.1', ...OFF_CYCLE],
   '1.3': ['1.4', '1.2', ...OFF_CYCLE],
   '1.4': ['1.5', '1.3', ...OFF_CYCLE],
   '1.5': ['1.6', '1.4', ...OFF_CYCLE],
-  '1.6': ['1.5', ...OFF_CYCLE],
+  '1.6': ['1.5', '2.1', ...OFF_CYCLE],
   '2.1': OFF_CYCLE,
-  '2.2': OFF_CYCLE,
+  '2.2': ['2.1', ...OFF_CYCLE],
   '2.3': OFF_CYCLE,
   '2.4': OFF_CYCLE,
   '2.5': OFF_CYCLE,
@@ -60,7 +60,13 @@ function input(
     previousOpenCode: '0.2',
     actor: 'founder',
     reason: 'Reason',
-    facts: { hasScheduledCall: true, hasCompletedCallWithOutcome: true, coreReadiness: READY },
+    facts: {
+      hasScheduledCall: true,
+      hasCompletedCallWithOutcome: true,
+      coreReadiness: READY,
+      contractSigned: true,
+      coreDeliveredWithinYear: true,
+    },
     ...overrides,
   };
 }
@@ -91,6 +97,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: false,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -107,6 +115,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: true,
             hasCompletedCallWithOutcome: false,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -125,6 +135,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: true,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -141,6 +153,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: true,
             coreReadiness: { ...READY, crossReviewed: false, internalItems: 1 },
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -158,6 +172,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: true,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -175,6 +191,8 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: true,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
@@ -188,17 +206,38 @@ describe('evaluateTransition', () => {
             hasScheduledCall: false,
             hasCompletedCallWithOutcome: true,
             coreReadiness: null,
+            contractSigned: false,
+            coreDeliveredWithinYear: false,
           },
         }),
       ),
     ).toEqual({ allowed: true });
   });
 
-  it('refuses entering orbit while documents are pending', () => {
-    expect(evaluateTransition(input({ from: '0.4', to: '2.1' }))).toEqual({
+  it('2.1 needs a signed contract', () => {
+    const facts = { ...input({ from: '1.6', to: '2.1' }).facts, contractSigned: false };
+
+    expect(evaluateTransition(input({ from: '1.6', to: '2.1', facts }))).toEqual({
+      allowed: false,
+      rule: 'contract_required',
+    });
+    expect(evaluateTransition(input({ from: '1.6', to: '2.1' }))).toEqual({ allowed: true });
+  });
+
+  it('0.4 to 2.1 needs a Core delivered in the last 12 months', () => {
+    const facts = { ...input({ from: '0.4', to: '2.1' }).facts, coreDeliveredWithinYear: false };
+
+    expect(evaluateTransition(input({ from: '0.4', to: '2.1', facts }))).toEqual({
+      allowed: false,
+      rule: 'core_required',
+    });
+  });
+
+  it('2.2 waits for billing', () => {
+    expect(evaluateTransition(input({ from: '2.1', to: '2.2' }))).toEqual({
       allowed: false,
       rule: 'module_pending',
-      module: 'documents',
+      module: 'billing',
     });
   });
 

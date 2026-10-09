@@ -13,7 +13,7 @@ import {
   transcribeTrack,
 } from '@/modules/diagnosis/server';
 import { emailPort } from '@/modules/email/server';
-import { inngest } from '@/modules/events';
+import { inngest, type DomainEventType } from '@/modules/events';
 import { withSystemContext } from '@/platform/db';
 import { commercialEnv } from '@/platform/env';
 import { logger } from '@/platform/logger';
@@ -39,11 +39,11 @@ import { nextAllowedSendTime } from '@/modules/email';
 
 const { applications } = schema;
 
-const RETRIES = 5;
+export const RETRIES = 5;
 
 type EventData<P> = { organizationId: string; clientId: string | null; payload: P };
 
-function notificationDeps(): NotificationDeps {
+export function notificationDeps(): NotificationDeps {
   const env = commercialEnv();
   return {
     contexts: { withSystemContext },
@@ -75,7 +75,7 @@ async function reportFailure(
   );
 }
 
-function failureHandler(functionId: string) {
+export function failureHandler(functionId: string) {
   return async ({
     error,
     event,
@@ -274,9 +274,9 @@ export const anonymizationSweep = inngest.createFunction(
     ),
 );
 
-function portalNoticeFunction(
+export function portalNoticeFunction(
   id: string,
-  trigger: 'core.briefing.shared' | 'core.document.shared',
+  trigger: DomainEventType,
   template: PortalNoticeTemplate,
 ) {
   return inngest.createFunction(

@@ -96,7 +96,15 @@ export {
   type PublicBookingView,
 } from './booking/public';
 export type { BookingSource } from './booking/service';
-export { COMMERCIAL_FUNCTIONS } from './automations';
+export {
+  COMMERCIAL_FUNCTIONS,
+  failureHandler,
+  notificationDeps,
+  portalNoticeFunction,
+  RETRIES,
+} from './automations';
+export { alertFounders } from './booking/notifications';
+export { applyStageChange } from './pipeline/service';
 
 export {
   closeFollowUp,

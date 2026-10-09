@@ -25,6 +25,8 @@ export type {
   OrgRole,
   PipelineCodeValue,
   CallKind,
+  ContractStatus,
+  CountryCode,
   CoreLevel,
   CoreTemplateKind,
   DocumentKind,
@@ -32,11 +34,19 @@ export type {
   EvidenceKind,
   FindingOwner,
   OrbitFront,
+  ProposalStatus,
   RecordingSource,
   RecordingStatus,
   RoadmapLane,
   SeenArea,
+  SignatureParty,
   ThrottleKind,
   TimelineKind,
 } from './schema/enums';
 export type { WeeklyHours } from './schema/commercial';
+export type {
+  ContractStudioDetails,
+  PaymentStep,
+  ProposalClientDetails,
+  ProposalScopeLine,
+} from './schema/contracts';

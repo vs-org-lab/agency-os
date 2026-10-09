@@ -54,6 +54,38 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal',
   },
+  'lead.proposal_shared': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.contract_ready': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.contract_signed': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'founder.proposal_accepted': {
+    companyName: 'Empresa Exemplo',
+    optionName: 'Orbit com Gravity',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.proposal_changes': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.contract_client_signed': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
+  'founder.contract_signed': {
+    companyName: 'Empresa Exemplo',
+    dealUrl: 'https://os.example.com/pipeline/deal',
+  },
   'founder.application_received': {
     companyName: 'Empresa Exemplo',
     contactName: 'Ana Costa',
@@ -91,6 +123,18 @@ describe('renderEmail', () => {
         expect(rendered.text.trim(), `${locale} ${key}`).not.toBe('');
       }
     }
+  });
+
+  it('names the chosen option when a proposal is accepted', () => {
+    const rendered = renderEmail(
+      'founder.proposal_accepted',
+      'pt-PT',
+      SAMPLE_PARAMS['founder.proposal_accepted'],
+    );
+
+    expect(rendered.subject).toBe('Empresa Exemplo aceitou a proposta');
+    expect(rendered.text).toContain('Orbit com Gravity');
+    expect(rendered.html).toContain('https://os.example.com/pipeline/deal');
   });
 
   it('escapes html in parameters', () => {

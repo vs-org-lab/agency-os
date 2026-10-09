@@ -168,7 +168,12 @@
   "portal": {
     "home": {
       "title": "Bem-vindo",
-      "description": "O acompanhamento do seu projeto aparece aqui."
+      "description": "O acompanhamento do seu projeto aparece aqui.",
+      "proposalTitle": "A sua proposta",
+      "proposalBody": "Escolha a opção Orbit com que quer avançar.",
+      "proposalOpen": "Ver a proposta",
+      "proposalExpiredTitle": "A proposta expirou",
+      "proposalExpiredBody": "Fale connosco para receber uma nova proposta."
     },
     "core": {
       "briefingTitle": "O resumo da nossa conversa",
@@ -178,6 +183,60 @@
       "open": "Ver apresentação",
       "back": "Voltar ao início",
       "openInFigma": "Abrir no Figma"
+    },
+    "proposal": {
+      "title": "Proposta",
+      "intro": "Escolha a opção com que quer avançar. Ao aceitar, o contrato fica pronto para assinar.",
+      "from": "Proposta de {entity}",
+      "validUntil": "Válida até {date}",
+      "expired": "Esta proposta expirou a {date}. Fale connosco para receber uma nova.",
+      "choose": "Escolha uma opção",
+      "oneOff": "Valor",
+      "retainer": "{amount} por mês, durante {months} meses",
+      "payments": "Pagamentos",
+      "payment": "{label}: {percent}%",
+      "scope": "Inclui",
+      "guarantee": "Garantia",
+      "details": "Dados para o contrato",
+      "detailsHint": "O contrato é assinado em nome da empresa por quem aceita a proposta.",
+      "fields": {
+        "legalName": "Denominação da empresa",
+        "taxId": "NIF",
+        "address": "Morada da sede",
+        "signerName": "O seu nome completo",
+        "signerRole": "O seu cargo"
+      },
+      "accept": "Aceitar proposta e preparar contrato",
+      "acceptedTitle": "Proposta aceite",
+      "acceptedBody": "Escolheu \"{option}\". O contrato está pronto para assinar.",
+      "openContract": "Abrir o contrato",
+      "changes": "Pedir alterações",
+      "changesHint": "Diga-nos o que quer mudar. A proposta mantém-se até respondermos.",
+      "changesMessage": "O que quer mudar",
+      "sendChanges": "Enviar pedido",
+      "changesSent": "Pedido enviado. Respondemos em breve.",
+      "empty": "Ainda não há proposta.",
+      "errors": {
+        "choose": "Escolha uma opção.",
+        "invalid_input": "Preencha os dados da empresa e do signatário.",
+        "expired": "A proposta expirou.",
+        "invalid_state": "A proposta já não pode ser aceite.",
+        "not_found": "Não foi possível concluir o pedido."
+      }
+    },
+    "contract": {
+      "title": "Contrato",
+      "intro": "Leia o contrato até ao fim. Depois de assinarem as duas partes, recebe o PDF assinado.",
+      "waitingStudio": "Já assinou. Falta a assinatura da Aurion.",
+      "waitingClient": "A Aurion já assinou. Falta a sua assinatura.",
+      "signedTitle": "Contrato assinado por ambas as partes",
+      "notSigner": "Este contrato é assinado por quem aceitou a proposta.",
+      "sign": "Assinar contrato",
+      "download": "Descarregar o contrato assinado (PDF)",
+      "homeTitle": "O seu contrato",
+      "homeSign": "O contrato está pronto a assinar.",
+      "homeSigned": "O contrato está assinado.",
+      "homeOpen": "Abrir o contrato"
     }
   },
   "commercial": {
@@ -242,7 +301,9 @@
         "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
         "module_pending": "Disponível quando o módulo {module} existir.",
         "not_found": "Este negócio não existe ou não tem acesso a ele.",
-        "core_criteria": "Falta cumprir: {gaps}."
+        "core_criteria": "Falta cumprir: {gaps}.",
+        "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
+        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -595,6 +656,24 @@
         "heading": "A apresentação está no portal",
         "body": "Olá {firstName}, a apresentação da nossa sessão já está no portal, para a rever com calma ou partilhar com quem decide consigo.",
         "action": "Ver a apresentação"
+      },
+      "proposal_shared": {
+        "subject": "A sua proposta está no portal",
+        "heading": "A sua proposta está no portal",
+        "body": "Olá {firstName}, a proposta com as opções que apresentámos está no portal. Escolha a opção com que quer avançar ou peça-nos alterações.",
+        "action": "Ver a proposta"
+      },
+      "contract_ready": {
+        "subject": "O contrato está pronto a assinar",
+        "heading": "O contrato está pronto a assinar",
+        "body": "Olá {firstName}, obrigado por aceitar a proposta. O contrato está no portal para ler e assinar.",
+        "action": "Ler e assinar o contrato"
+      },
+      "contract_signed": {
+        "subject": "Contrato assinado",
+        "heading": "Contrato assinado",
+        "body": "Olá {firstName}, o contrato está assinado pelas duas partes. O PDF assinado está no portal.",
+        "action": "Ver o contrato"
       }
     },
     "founder": {
@@ -627,6 +706,30 @@
         "heading": "Uma automação falhou",
         "body": "A automação {automation} falhou depois de 5 tentativas, em {occurredAt}. O erro está no Sentry.",
         "action": "Abrir o estúdio"
+      },
+      "proposal_accepted": {
+        "subject": "{companyName} aceitou a proposta",
+        "heading": "{companyName} aceitou a proposta",
+        "body": "A opção escolhida foi \"{optionName}\". O contrato foi gerado e espera as assinaturas do cliente e da Aurion.",
+        "action": "Abrir o negócio"
+      },
+      "proposal_changes": {
+        "subject": "{companyName} pediu alterações à proposta",
+        "heading": "{companyName} pediu alterações à proposta",
+        "body": "O decisor deixou um pedido de alteração. Leia-o na secção Proposta do separador Core.",
+        "action": "Abrir o negócio"
+      },
+      "contract_client_signed": {
+        "subject": "{companyName} assinou o contrato",
+        "heading": "{companyName} assinou o contrato",
+        "body": "Falta a assinatura pela Aurion. Depois de assinar, o negócio passa a 2.1.",
+        "action": "Assinar o contrato"
+      },
+      "contract_signed": {
+        "subject": "Contrato assinado com {companyName}",
+        "heading": "Contrato assinado com {companyName}",
+        "body": "O contrato está assinado pelas duas partes e o negócio passou a 2.1. O PDF assinado está no separador Core.",
+        "action": "Abrir o negócio"
       }
     }
   },
@@ -734,7 +837,8 @@
       "integrations": "Integrações",
       "application": "Candidatura",
       "booking": "Agenda",
-      "templates": "Modelos"
+      "templates": "Modelos",
+      "organization": "Organização"
     },
     "application": {
       "title": "Candidatura",
@@ -858,6 +962,57 @@
         "addCriterion": "Acrescentar critério",
         "removeCriterion": "Remover critério",
         "mustSum": "Cada frente tem de somar 25 pontos."
+      }
+    },
+    "organization": {
+      "title": "Organização",
+      "description": "As empresas que assinam os contratos e emitem as faturas.",
+      "entities": "Entidades emissoras",
+      "entitiesHint": "A entidade por defeito aparece primeiro nas propostas. Uma proposta só pode ser enviada com uma entidade escolhida.",
+      "empty": "Ainda não há entidades. Registe a empresa em Portugal antes da primeira proposta.",
+      "add": "Nova entidade",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "default": "Por defeito",
+      "fields": {
+        "legalName": "Denominação",
+        "taxId": "NIF",
+        "address": "Morada da sede",
+        "country": "País",
+        "email": "Email",
+        "representativeName": "Representante",
+        "representativeRole": "Cargo do representante",
+        "isDefault": "Usar por defeito nas propostas"
+      },
+      "countries": {
+        "PT": "Portugal",
+        "AO": "Angola"
+      },
+      "save": "Guardar entidade",
+      "cancel": "Cancelar",
+      "saved": "Entidade guardada.",
+      "error": "Não foi possível guardar. Confirme os campos.",
+      "summary": "{taxId} · {address} · {representative} ({role})"
+    },
+    "contractTemplates": {
+      "title": "Contratos",
+      "description": "O texto de que nasce cada contrato. Os campos entre chavetas são preenchidos com os dados da proposta aceite.",
+      "legalReview": "Texto base: reveja-o com o seu advogado antes do primeiro cliente real.",
+      "languages": {
+        "pt-PT": "Contrato em português",
+        "en": "Contrato em inglês"
+      },
+      "current": "Versão {version}",
+      "body": "Texto do contrato",
+      "fields": "Campos disponíveis",
+      "preview": "Pré-visualizar",
+      "hidePreview": "Esconder pré-visualização",
+      "previewLabel": "Pré-visualização com dados de exemplo",
+      "publish": "Publicar versão",
+      "published": "Versão {version} publicada.",
+      "errors": {
+        "unknown": "Campos desconhecidos: {fields}",
+        "invalid": "Escreva o texto e feche todas as chavetas."
       }
     }
   },
@@ -1099,6 +1254,120 @@
         "upload_missing": "O envio não chegou completo. Tente de novo.",
         "invalid_state": "Esta gravação já não pode ser repetida.",
         "not_found": "Não foi possível guardar a gravação."
+      }
+    }
+  },
+  "contracts": {
+    "proposal": {
+      "title": "Proposta",
+      "description": "As opções Orbit que o decisor escolhe no portal. Depois de enviada, a proposta deixa de ser editável.",
+      "entity": "Entidade que contrata",
+      "currency": "Moeda",
+      "locale": "Idioma do contrato",
+      "languages": {
+        "pt-PT": "Português",
+        "en": "Inglês"
+      },
+      "validUntil": "Válida até",
+      "guarantee": "Garantia",
+      "option": "Opção {position}",
+      "defaultNames": {
+        "first": "Orbit essencial",
+        "second": "Orbit com Gravity",
+        "third": "Sistema completo com Constellation"
+      },
+      "defaultPayments": {
+        "signature": "Assinatura",
+        "delivery": "Entrega"
+      },
+      "name": "Nome da opção",
+      "summary": "Resumo",
+      "scope": "Âmbito",
+      "scopeLine": "Linha do âmbito {position}",
+      "addLine": "Acrescentar linha",
+      "removeLine": "Remover linha {position}",
+      "addFinding": "Acrescentar achado",
+      "addFindingPlaceholder": "Achados da Aurion a 90 dias",
+      "amount": "Valor único",
+      "payments": "Pagamentos",
+      "paymentLabel": "Designação do pagamento {position}",
+      "paymentPercent": "Percentagem do pagamento {position}",
+      "addPayment": "Acrescentar pagamento",
+      "removePayment": "Remover pagamento {position}",
+      "paymentsTotal": "Total: {total}%",
+      "retainerToggle": "Inclui acompanhamento mensal",
+      "retainerMonthly": "Valor mensal",
+      "retainerMonths": "Meses",
+      "retainerSummary": "{amount} por mês, durante {months} meses",
+      "addOption": "Acrescentar opção",
+      "removeOption": "Remover opção {position}",
+      "save": "Guardar rascunho",
+      "saved": "Rascunho guardado.",
+      "send": "Enviar ao cliente",
+      "withdraw": "Retirar proposta",
+      "status": {
+        "draft": "Rascunho",
+        "sent": "Enviada ao cliente",
+        "accepted": "Aceite pelo cliente",
+        "withdrawn": "Retirada",
+        "expired": "Expirada"
+      },
+      "sentOn": "Enviada a {date}",
+      "acceptedOn": "Aceite a {date}",
+      "validUntilOn": "Válida até {date}",
+      "chosen": "Opção escolhida",
+      "requests": "Pedidos de alteração do cliente",
+      "hints": {
+        "stage": "Para enviar, o negócio tem de estar em 1.6 (apresentação partilhada com o cliente).",
+        "portal": "Para enviar, dê acesso ao portal ao decisor.",
+        "founder": "Só o fundador envia a proposta.",
+        "entity": "Registe uma entidade emissora em Definições › Organização."
+      },
+      "errors": {
+        "payments": "Os pagamentos de cada opção têm de somar 100%.",
+        "invalid_input": "Confirme os campos de cada opção e a validade.",
+        "locked": "A proposta já foi enviada.",
+        "stage": "O negócio tem de estar em 1.6.",
+        "portal_access": "O decisor ainda não tem acesso ao portal.",
+        "invalid_state": "A proposta não pode mudar neste estado.",
+        "not_found": "Não foi possível guardar a proposta."
+      },
+      "expiredHint": "A validade terminou. Retire a proposta, mude a data e envie-a de novo."
+    },
+    "signature": {
+      "nameLabel": "Escreva o seu nome completo: {name}",
+      "confirm": "Li e aceito este contrato",
+      "legal": "A assinatura fica registada com o seu nome, a data, o endereço IP e a impressão digital do texto.",
+      "errors": {
+        "confirm": "Confirme que leu e aceita o contrato.",
+        "name_mismatch": "O nome tem de ser exatamente {name}.",
+        "changed": "O contrato mudou. Recarregue a página e leia a versão atual.",
+        "not_found": "Não foi possível assinar o contrato."
+      }
+    },
+    "contract": {
+      "title": "Contrato",
+      "status": {
+        "awaiting_signatures": "À espera de assinaturas",
+        "signed": "Assinado",
+        "void": "Anulado"
+      },
+      "client": "Cliente: {name} · {state}",
+      "studio": "Aurion: {name} · {state}",
+      "signedOn": "assinou a {date}",
+      "pending": "por assinar",
+      "read": "Ler o contrato",
+      "signForStudio": "Assinar pela Aurion",
+      "download": "Descarregar o contrato assinado (PDF)",
+      "fingerprint": "Impressão digital: {hash}",
+      "voidTitle": "Anular contrato",
+      "voidHint": "Anule se o contrato tem um erro. A proposta volta a ficar disponível para o cliente aceitar de novo.",
+      "voidReason": "Motivo",
+      "voidSubmit": "Anular contrato",
+      "errors": {
+        "invalid_input": "Escreva o motivo.",
+        "invalid_state": "O contrato já não pode ser anulado.",
+        "not_found": "Não foi possível concluir a ação."
       }
     }
   }

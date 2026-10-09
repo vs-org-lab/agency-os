@@ -141,6 +141,27 @@
       "when": 1791533245843,
       "tag": "20261009080725_currency_aoa",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791536463743,
+      "tag": "20261009090103_contracts",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791536465144,
+      "tag": "20261009090105_contracts_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791549733974,
+      "tag": "20261009124213_contract_studio_details",
+      "breakpoints": true
     }
   ]
 }

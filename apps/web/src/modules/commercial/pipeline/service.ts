@@ -1,4 +1,4 @@
-import { and, desc, eq, notInArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { currencies } from '@agency-os/i18n';
 import { schema, type DbTransaction } from '@agency-os/db';
@@ -17,7 +17,7 @@ import {
   type TransitionRefusal,
 } from './transitions';
 
-const { calls, dealStageChanges, deals } = schema;
+const { calls, contracts, dealStageChanges, deals } = schema;
 
 export type StageActor = 'system' | { userId: string; isFounder: boolean };
 
@@ -67,6 +67,30 @@ async function previousOpenCode(tx: DbTransaction, dealId: string): Promise<Pipe
     .orderBy(desc(dealStageChanges.sequence))
     .limit(1);
   return row?.code ?? null;
+}
+
+const CORE_DELIVERED_CODE = '1.6';
+const CORE_VALIDITY_DAYS = 365;
+
+async function contractFacts(tx: DbTransaction, deal: { id: string; clientId: string }) {
+  const [signed] = await tx
+    .select({ id: contracts.id })
+    .from(contracts)
+    .where(and(eq(contracts.dealId, deal.id), eq(contracts.status, 'signed')))
+    .limit(1);
+  const since = new Date(Date.now() - CORE_VALIDITY_DAYS * 24 * 60 * 60 * 1000);
+  const [delivered] = await tx
+    .select({ id: dealStageChanges.id })
+    .from(dealStageChanges)
+    .where(
+      and(
+        eq(dealStageChanges.clientId, deal.clientId),
+        eq(dealStageChanges.toCode, CORE_DELIVERED_CODE),
+        gte(dealStageChanges.createdAt, since),
+      ),
+    )
+    .limit(1);
+  return { contractSigned: signed !== undefined, coreDeliveredWithinYear: delivered !== undefined };
 }
 
 async function callFacts(tx: DbTransaction, dealId: string) {
@@ -155,6 +179,9 @@ export async function applyStageChange(
     reason,
     facts: {
       ...(await callFacts(tx, deal.id)),
+      ...(stageOf(input.to) === 'orbit'
+        ? await contractFacts(tx, deal)
+        : { contractSigned: false, coreDeliveredWithinYear: false }),
       coreReadiness: stageOf(input.to) === 'core' ? await loadCoreReadiness(tx, deal.id) : null,
     },
   });

@@ -12,11 +12,18 @@ export const EMAIL_TEMPLATE_KEYS = [
   'lead.session_reminder',
   'lead.briefing_shared',
   'lead.presentation_shared',
+  'lead.proposal_shared',
+  'lead.contract_ready',
+  'lead.contract_signed',
   'founder.application_received',
   'founder.queue_b_pending',
   'founder.call_outcome_missing',
   'founder.integration_unavailable',
   'founder.automation_failed',
+  'founder.proposal_accepted',
+  'founder.proposal_changes',
+  'founder.contract_client_signed',
+  'founder.contract_signed',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -35,6 +42,9 @@ export type EmailParams = {
   'lead.session_reminder': SessionDetails;
   'lead.briefing_shared': PortalNotice;
   'lead.presentation_shared': PortalNotice;
+  'lead.proposal_shared': PortalNotice;
+  'lead.contract_ready': PortalNotice;
+  'lead.contract_signed': PortalNotice;
   'founder.application_received': {
     companyName: string;
     contactName: string;
@@ -47,6 +57,10 @@ export type EmailParams = {
   'founder.call_outcome_missing': { companyName: string; dealUrl: string };
   'founder.integration_unavailable': { integration: string; settingsUrl: string };
   'founder.automation_failed': { automation: string; occurredAt: string; appUrl: string };
+  'founder.proposal_accepted': { companyName: string; optionName: string; dealUrl: string };
+  'founder.proposal_changes': { companyName: string; dealUrl: string };
+  'founder.contract_client_signed': { companyName: string; dealUrl: string };
+  'founder.contract_signed': { companyName: string; dealUrl: string };
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -60,11 +74,18 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'lead.session_reminder': 'joinUrl',
   'lead.briefing_shared': 'portalUrl',
   'lead.presentation_shared': 'portalUrl',
+  'lead.proposal_shared': 'portalUrl',
+  'lead.contract_ready': 'portalUrl',
+  'lead.contract_signed': 'portalUrl',
   'founder.application_received': 'dealUrl',
   'founder.queue_b_pending': 'queueUrl',
   'founder.call_outcome_missing': 'dealUrl',
   'founder.integration_unavailable': 'settingsUrl',
   'founder.automation_failed': 'appUrl',
+  'founder.proposal_accepted': 'dealUrl',
+  'founder.proposal_changes': 'dealUrl',
+  'founder.contract_client_signed': 'dealUrl',
+  'founder.contract_signed': 'dealUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

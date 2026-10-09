@@ -12,6 +12,7 @@ export default async function SettingsLayout({ children }: { children: ReactNode
     { href: '/settings/sessions', label: t('sessions') },
     ...(founder
       ? [
+          { href: '/settings/organization', label: t('organization') },
           { href: '/settings/integrations', label: t('integrations') },
           { href: '/settings/application', label: t('application') },
           { href: '/settings/booking', label: t('booking') },

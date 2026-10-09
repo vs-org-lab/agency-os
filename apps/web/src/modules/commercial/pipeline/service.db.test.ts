@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createCommercialFixture,
+  createContractFixture,
   createCoreFixture,
   createFixtureWorld,
   testDatabase,
@@ -364,6 +365,29 @@ describe('pipeline stage service', () => {
         from public.deals where id = ${fixture.a.dealId}
       `;
       expect(deal).toEqual({ currency: 'AOA', value: '45000000.00' });
+    });
+  });
+
+  it('moves to 2.1 only with a signed contract', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contracts = await createContractFixture(sql, world);
+      await sql`update public.deals set pipeline_code = '1.6' where id = ${contracts.a.dealId}`;
+      const deps = { contexts: createDbContexts(testDatabase(sql)), flush: async () => {} };
+      const move = () =>
+        changeDealStage(
+          claimsFor(world.users.founder),
+          { dealId: contracts.a.dealId, to: '2.1', reason: null },
+          deps,
+        );
+
+      expect(await move()).toEqual({ ok: false, rule: 'contract_required' });
+      await sql`reset role`;
+      await sql`
+        update public.contracts set status = 'signed', signed_at = now()
+        where id = ${contracts.a.contractId}
+      `;
+      expect(await move()).toMatchObject({ ok: true, to: '2.1' });
     });
   });
 });

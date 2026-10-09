@@ -168,7 +168,12 @@
   "portal": {
     "home": {
       "title": "Welcome",
-      "description": "Your project progress appears here."
+      "description": "Your project progress appears here.",
+      "proposalTitle": "Your proposal",
+      "proposalBody": "Choose the Orbit option you want to go ahead with.",
+      "proposalOpen": "View the proposal",
+      "proposalExpiredTitle": "The proposal has expired",
+      "proposalExpiredBody": "Get in touch to receive a new proposal."
     },
     "core": {
       "briefingTitle": "The summary of our conversation",
@@ -178,6 +183,60 @@
       "open": "View presentation",
       "back": "Back to home",
       "openInFigma": "Open in Figma"
+    },
+    "proposal": {
+      "title": "Proposal",
+      "intro": "Choose the option you want to go ahead with. Once accepted, the contract is ready to sign.",
+      "from": "Proposal from {entity}",
+      "validUntil": "Valid until {date}",
+      "expired": "This proposal expired on {date}. Get in touch to receive a new one.",
+      "choose": "Choose an option",
+      "oneOff": "Amount",
+      "retainer": "{amount} per month, for {months} months",
+      "payments": "Payments",
+      "payment": "{label}: {percent}%",
+      "scope": "Includes",
+      "guarantee": "Guarantee",
+      "details": "Contract details",
+      "detailsHint": "The contract is signed on behalf of the company by whoever accepts the proposal.",
+      "fields": {
+        "legalName": "Company legal name",
+        "taxId": "Tax number",
+        "address": "Registered address",
+        "signerName": "Your full name",
+        "signerRole": "Your role"
+      },
+      "accept": "Accept the proposal and prepare the contract",
+      "acceptedTitle": "Proposal accepted",
+      "acceptedBody": "You chose \"{option}\". The contract is ready to sign.",
+      "openContract": "Open the contract",
+      "changes": "Request changes",
+      "changesHint": "Tell us what you want to change. The proposal stays open until we reply.",
+      "changesMessage": "What you want to change",
+      "sendChanges": "Send request",
+      "changesSent": "Request sent. We will reply shortly.",
+      "empty": "There is no proposal yet.",
+      "errors": {
+        "choose": "Choose an option.",
+        "invalid_input": "Fill in the company and signer details.",
+        "expired": "The proposal has expired.",
+        "invalid_state": "The proposal can no longer be accepted.",
+        "not_found": "The request could not be completed."
+      }
+    },
+    "contract": {
+      "title": "Agreement",
+      "intro": "Read the agreement to the end. Once both parties sign, you receive the signed PDF.",
+      "waitingStudio": "You have signed. Aurion still has to sign.",
+      "waitingClient": "Aurion has signed. Your signature is still missing.",
+      "signedTitle": "Agreement signed by both parties",
+      "notSigner": "This agreement is signed by whoever accepted the proposal.",
+      "sign": "Sign the agreement",
+      "download": "Download the signed agreement (PDF)",
+      "homeTitle": "Your agreement",
+      "homeSign": "The agreement is ready to sign.",
+      "homeSigned": "The agreement is signed.",
+      "homeOpen": "Open the agreement"
     }
   },
   "commercial": {
@@ -242,7 +301,9 @@
         "call_outcome_required": "Record the call outcome before moving to 0.4.",
         "module_pending": "Available once the {module} module exists.",
         "not_found": "This deal does not exist or you do not have access to it.",
-        "core_criteria": "Still missing: {gaps}."
+        "core_criteria": "Still missing: {gaps}.",
+        "contract_required": "Without a signed contract, the deal cannot enter 2.1.",
+        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -595,6 +656,24 @@
         "heading": "The presentation is in the portal",
         "body": "Hello {firstName}, the presentation from our session is now in the portal, to review at your own pace or share with whoever decides with you.",
         "action": "View the presentation"
+      },
+      "proposal_shared": {
+        "subject": "Your proposal is in the portal",
+        "heading": "Your proposal is in the portal",
+        "body": "Hello {firstName}, the proposal with the options we presented is in the portal. Choose the option you want to go ahead with, or ask us for changes.",
+        "action": "View the proposal"
+      },
+      "contract_ready": {
+        "subject": "The agreement is ready to sign",
+        "heading": "The agreement is ready to sign",
+        "body": "Hello {firstName}, thank you for accepting the proposal. The agreement is in the portal to read and sign.",
+        "action": "Read and sign the agreement"
+      },
+      "contract_signed": {
+        "subject": "Agreement signed",
+        "heading": "Agreement signed",
+        "body": "Hello {firstName}, the agreement is signed by both parties. The signed PDF is in the portal.",
+        "action": "View the agreement"
       }
     },
     "founder": {
@@ -627,6 +706,30 @@
         "heading": "An automation failed",
         "body": "The {automation} automation failed after 5 attempts, at {occurredAt}. The error is in Sentry.",
         "action": "Open the studio"
+      },
+      "proposal_accepted": {
+        "subject": "{companyName} accepted the proposal",
+        "heading": "{companyName} accepted the proposal",
+        "body": "The chosen option is \"{optionName}\". The agreement was generated and awaits the client and Aurion signatures.",
+        "action": "Open the deal"
+      },
+      "proposal_changes": {
+        "subject": "{companyName} asked for changes to the proposal",
+        "heading": "{companyName} asked for changes to the proposal",
+        "body": "The decision maker left a change request. Read it in the Proposal section of the Core tab.",
+        "action": "Open the deal"
+      },
+      "contract_client_signed": {
+        "subject": "{companyName} signed the agreement",
+        "heading": "{companyName} signed the agreement",
+        "body": "The Aurion signature is still missing. Once you sign, the deal moves to 2.1.",
+        "action": "Sign the agreement"
+      },
+      "contract_signed": {
+        "subject": "Agreement signed with {companyName}",
+        "heading": "Agreement signed with {companyName}",
+        "body": "The agreement is signed by both parties and the deal moved to 2.1. The signed PDF is in the Core tab.",
+        "action": "Open the deal"
       }
     }
   },
@@ -734,7 +837,8 @@
       "integrations": "Integrations",
       "application": "Application",
       "booking": "Booking",
-      "templates": "Templates"
+      "templates": "Templates",
+      "organization": "Organisation"
     },
     "application": {
       "title": "Application",
@@ -858,6 +962,57 @@
         "addCriterion": "Add criterion",
         "removeCriterion": "Remove criterion",
         "mustSum": "Each front must sum to 25 points."
+      }
+    },
+    "organization": {
+      "title": "Organisation",
+      "description": "The companies that sign contracts and issue invoices.",
+      "entities": "Issuing entities",
+      "entitiesHint": "The default entity comes first in proposals. A proposal can only be sent with an entity chosen.",
+      "empty": "No entities yet. Register the company in Portugal before the first proposal.",
+      "add": "New entity",
+      "edit": "Edit",
+      "archive": "Archive",
+      "default": "Default",
+      "fields": {
+        "legalName": "Legal name",
+        "taxId": "Tax number",
+        "address": "Registered address",
+        "country": "Country",
+        "email": "Email",
+        "representativeName": "Representative",
+        "representativeRole": "Representative role",
+        "isDefault": "Use by default in proposals"
+      },
+      "countries": {
+        "PT": "Portugal",
+        "AO": "Angola"
+      },
+      "save": "Save entity",
+      "cancel": "Cancel",
+      "saved": "Entity saved.",
+      "error": "The entity could not be saved. Check the fields.",
+      "summary": "{taxId} · {address} · {representative} ({role})"
+    },
+    "contractTemplates": {
+      "title": "Contracts",
+      "description": "The text every contract is generated from. Fields in braces are filled in from the accepted proposal.",
+      "legalReview": "Base text: review it with your lawyer before the first real client.",
+      "languages": {
+        "pt-PT": "Contract in Portuguese",
+        "en": "Contract in English"
+      },
+      "current": "Version {version}",
+      "body": "Contract text",
+      "fields": "Available fields",
+      "preview": "Preview",
+      "hidePreview": "Hide preview",
+      "previewLabel": "Preview with sample data",
+      "publish": "Publish version",
+      "published": "Version {version} published.",
+      "errors": {
+        "unknown": "Unknown fields: {fields}",
+        "invalid": "Write the text and close every brace."
       }
     }
   },
@@ -1099,6 +1254,120 @@
         "upload_missing": "The upload did not arrive complete. Try again.",
         "invalid_state": "This recording can no longer be retried.",
         "not_found": "The recording could not be saved."
+      }
+    }
+  },
+  "contracts": {
+    "proposal": {
+      "title": "Proposal",
+      "description": "The Orbit options the decision maker chooses from in the portal. Once sent, the proposal can no longer be edited.",
+      "entity": "Contracting entity",
+      "currency": "Currency",
+      "locale": "Contract language",
+      "languages": {
+        "pt-PT": "Portuguese",
+        "en": "English"
+      },
+      "validUntil": "Valid until",
+      "guarantee": "Guarantee",
+      "option": "Option {position}",
+      "defaultNames": {
+        "first": "Essential Orbit",
+        "second": "Orbit with Gravity",
+        "third": "Complete system with Constellation"
+      },
+      "defaultPayments": {
+        "signature": "Signature",
+        "delivery": "Delivery"
+      },
+      "name": "Option name",
+      "summary": "Summary",
+      "scope": "Scope",
+      "scopeLine": "Scope line {position}",
+      "addLine": "Add line",
+      "removeLine": "Remove line {position}",
+      "addFinding": "Add finding",
+      "addFindingPlaceholder": "Aurion findings for 90 days",
+      "amount": "One-off amount",
+      "payments": "Payments",
+      "paymentLabel": "Payment {position} label",
+      "paymentPercent": "Payment {position} percentage",
+      "addPayment": "Add payment",
+      "removePayment": "Remove payment {position}",
+      "paymentsTotal": "Total: {total}%",
+      "retainerToggle": "Includes monthly support",
+      "retainerMonthly": "Monthly amount",
+      "retainerMonths": "Months",
+      "retainerSummary": "{amount} per month, for {months} months",
+      "addOption": "Add option",
+      "removeOption": "Remove option {position}",
+      "save": "Save draft",
+      "saved": "Draft saved.",
+      "send": "Send to the client",
+      "withdraw": "Withdraw proposal",
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent to the client",
+        "accepted": "Accepted by the client",
+        "withdrawn": "Withdrawn",
+        "expired": "Expired"
+      },
+      "sentOn": "Sent on {date}",
+      "acceptedOn": "Accepted on {date}",
+      "validUntilOn": "Valid until {date}",
+      "chosen": "Chosen option",
+      "requests": "Change requests from the client",
+      "hints": {
+        "stage": "To send it, the deal must be at 1.6 (presentation shared with the client).",
+        "portal": "To send it, give the decision maker portal access.",
+        "founder": "Only the founder sends the proposal.",
+        "entity": "Register an issuing entity in Settings › Organisation."
+      },
+      "errors": {
+        "payments": "The payments of each option must add up to 100%.",
+        "invalid_input": "Check the fields of each option and the validity date.",
+        "locked": "The proposal has already been sent.",
+        "stage": "The deal must be at 1.6.",
+        "portal_access": "The decision maker has no portal access yet.",
+        "invalid_state": "The proposal cannot change in this state.",
+        "not_found": "The proposal could not be saved."
+      },
+      "expiredHint": "The validity has ended. Withdraw the proposal, change the date and send it again."
+    },
+    "signature": {
+      "nameLabel": "Type your full name: {name}",
+      "confirm": "I have read and accept this agreement",
+      "legal": "The signature is recorded with your name, the date, the IP address and the fingerprint of the text.",
+      "errors": {
+        "confirm": "Confirm that you have read and accept the agreement.",
+        "name_mismatch": "The name must be exactly {name}.",
+        "changed": "The agreement changed. Reload the page and read the current version.",
+        "not_found": "The agreement could not be signed."
+      }
+    },
+    "contract": {
+      "title": "Agreement",
+      "status": {
+        "awaiting_signatures": "Awaiting signatures",
+        "signed": "Signed",
+        "void": "Void"
+      },
+      "client": "Client: {name} · {state}",
+      "studio": "Aurion: {name} · {state}",
+      "signedOn": "signed on {date}",
+      "pending": "not signed yet",
+      "read": "Read the agreement",
+      "signForStudio": "Sign for Aurion",
+      "download": "Download the signed agreement (PDF)",
+      "fingerprint": "Fingerprint: {hash}",
+      "voidTitle": "Void agreement",
+      "voidHint": "Void it if the agreement has a mistake. The proposal becomes available again for the client to accept.",
+      "voidReason": "Reason",
+      "voidSubmit": "Void agreement",
+      "errors": {
+        "invalid_input": "Write the reason.",
+        "invalid_state": "The agreement can no longer be voided.",
+        "not_found": "The action could not be completed."
       }
     }
   }

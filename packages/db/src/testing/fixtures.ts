@@ -330,3 +330,116 @@ export async function createCoreFixture(sql: TransactionSql, world: World): Prom
     b: await seed(world.clients.b, commercial.b),
   };
 }
+
+export type ContractRecords = {
+  dealId: string;
+  proposalId: string;
+  draftProposalId: string;
+  optionId: string;
+  requestId: string;
+  contractId: string;
+};
+
+export type ContractFixture = {
+  core: CoreFixture;
+  entityId: string;
+  templateId: string;
+  a: ContractRecords;
+  b: ContractRecords;
+};
+
+const FIXTURE_STUDIO = {
+  legalName: 'Aurion Creative Lda',
+  taxId: '516000000',
+  address: 'Av. da Liberdade, Lisboa',
+  country: 'PT',
+  email: 'geral@aurion.test',
+  representativeName: 'Vladimir Silva',
+  representativeRole: 'Gerente',
+};
+
+const FIXTURE_PAYMENT_PLAN = [
+  { label: 'Assinatura', percent: 50 },
+  { label: 'Entrega', percent: 50 },
+];
+
+export async function createContractFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<ContractFixture> {
+  const core = await createCoreFixture(sql, world);
+  const [entity] = await sql<{ id: string }[]>`
+    insert into public.legal_entities (organization_id, legal_name, tax_id, address, country, email,
+                                       representative_name, representative_role, is_default)
+    values (${world.organizationId}, 'Aurion Creative Lda', '516000000', 'Av. da Liberdade, Lisboa',
+            'PT', 'geral@aurion.test', 'Vladimir Silva', 'Gerente', true)
+    returning id
+  `;
+  const [template] = await sql<{ id: string }[]>`
+    insert into public.contract_templates (organization_id, locale, version, body, is_active)
+    values (${world.organizationId}, 'pt-PT', 1, 'Contrato com {{cliente.denominacao}}', true)
+    returning id
+  `;
+  if (!entity || !template) throw new Error('Contract fixture setup was not created');
+
+  const seed = async (
+    clientId: string,
+    records: CoreRecords,
+    requestAuthor: string,
+  ): Promise<ContractRecords> => {
+    const proposal = async (status: 'draft' | 'sent') => {
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.proposals (organization_id, client_id, deal_id, legal_entity_id, currency,
+                                      locale, valid_until, guarantee, status, sent_at)
+        values (${world.organizationId}, ${clientId}, ${records.dealId}, ${entity.id}, 'EUR', 'pt-PT',
+                current_date + 30, 'Garantia de resultado', ${status},
+                ${status === 'sent' ? sql`now()` : null})
+        returning id
+      `;
+      if (!row) throw new Error('Contract fixture proposal was not created');
+      return row.id;
+    };
+    const proposalId = await proposal('sent');
+    const draftProposalId = await proposal('draft');
+    const [option] = await sql<{ id: string }[]>`
+      insert into public.proposal_options (organization_id, client_id, proposal_id, position, name,
+                                           summary, scope, one_off_amount, payment_plan)
+      values (${world.organizationId}, ${clientId}, ${proposalId}, 1, 'Orbit essencial', 'Resumo',
+              ${JSON.stringify([{ text: 'Novo site', findingId: null }])}::jsonb, 12000,
+              ${JSON.stringify(FIXTURE_PAYMENT_PLAN)}::jsonb)
+      returning id
+    `;
+    const [request] = await sql<{ id: string }[]>`
+      insert into public.proposal_requests (organization_id, client_id, proposal_id, author_id, message)
+      values (${world.organizationId}, ${clientId}, ${proposalId}, ${requestAuthor}, 'Mudar prazo')
+      returning id
+    `;
+    if (!option || !request) throw new Error('Contract fixture option was not created');
+    const [contract] = await sql<{ id: string }[]>`
+      insert into public.contracts (organization_id, client_id, deal_id, proposal_id, option_id,
+                                    template_id, legal_entity_id, locale, body, body_hash,
+                                    studio_details)
+      values (${world.organizationId}, ${clientId}, ${records.dealId}, ${proposalId}, ${option.id},
+              ${template.id}, ${entity.id}, 'pt-PT', 'Contrato com Empresa', ${'0'.repeat(64)},
+              ${JSON.stringify(FIXTURE_STUDIO)}::jsonb)
+      returning id
+    `;
+    if (!contract) throw new Error('Contract fixture contract was not created');
+    return {
+      dealId: records.dealId,
+      proposalId,
+      draftProposalId,
+      optionId: option.id,
+      requestId: request.id,
+      contractId: contract.id,
+    };
+  };
+
+  return {
+    core,
+    entityId: entity.id,
+    templateId: template.id,
+    a: await seed(world.clients.a, core.a, world.users.decisionMakerA),
+    b: await seed(world.clients.b, core.b, world.users.clientFinanceB),
+  };
+}

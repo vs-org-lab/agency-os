@@ -12,3 +12,4 @@ export * from './commercial';
 export * from './seen-markers';
 export * from './diagnosis';
 export * from './documents';
+export * from './contracts';

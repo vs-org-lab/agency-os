@@ -172,6 +172,23 @@ export const recordingStatusEnum = appSchema.enum('recording_status', [
   'failed',
 ]);
 
+export const countryCodeEnum = appSchema.enum('country_code', ['PT', 'AO']);
+
+export const proposalStatusEnum = appSchema.enum('proposal_status', [
+  'draft',
+  'sent',
+  'accepted',
+  'withdrawn',
+]);
+
+export const contractStatusEnum = appSchema.enum('contract_status', [
+  'awaiting_signatures',
+  'signed',
+  'void',
+]);
+
+export const signaturePartyEnum = appSchema.enum('signature_party', ['client', 'studio']);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -202,6 +219,10 @@ export type DocumentKind = (typeof documentKindEnum.enumValues)[number];
 export type DocumentStatus = (typeof documentStatusEnum.enumValues)[number];
 export type RecordingSource = (typeof recordingSourceEnum.enumValues)[number];
 export type RecordingStatus = (typeof recordingStatusEnum.enumValues)[number];
+export type CountryCode = (typeof countryCodeEnum.enumValues)[number];
+export type ProposalStatus = (typeof proposalStatusEnum.enumValues)[number];
+export type ContractStatus = (typeof contractStatusEnum.enumValues)[number];
+export type SignatureParty = (typeof signaturePartyEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

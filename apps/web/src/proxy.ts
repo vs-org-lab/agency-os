@@ -12,6 +12,7 @@ import {
 } from './platform/activity-cookie';
 import { isSecureRequest } from './platform/request';
 import {
+  allowsMediaCapture,
   buildSecurityHeaders,
   embedOriginsForPath,
   generateNonce,
@@ -36,6 +37,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
     isDevelopment: process.env.NODE_ENV === 'development',
     connectSources: supabaseUrl ? [supabaseUrl] : [],
     frameAncestors: embedOriginsForPath(request.nextUrl.pathname, process.env.APPLY_EMBED_ORIGINS),
+    mediaCapture: allowsMediaCapture(request.nextUrl.pathname),
   });
 
   const requestHeaders = new Headers(request.headers);

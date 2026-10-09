@@ -5,11 +5,15 @@ export type SecurityHeaderOptions = {
   connectSources?: string[];
   frameSources?: string[];
   frameAncestors?: string[];
+  /** Allows the microphone and tab capture for this document (call mode recording). */
+  mediaCapture?: boolean;
 };
 
 const FIGMA_FRAME_SOURCES = ['https://www.figma.com', 'https://embed.figma.com'];
 
 const EMBEDDABLE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?apply(?:\/|$)/;
+
+const MEDIA_CAPTURE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?pipeline\/[^/]+\/core\/call\/?$/;
 
 function originOf(candidate: string): string | null {
   try {
@@ -24,6 +28,10 @@ export function embedOriginsForPath(pathname: string, configured: string | undef
   if (!configured || !EMBEDDABLE_PATH.test(pathname)) return [];
   const origins = configured.split(',').map(originOf);
   return [...new Set(origins.filter((origin): origin is string => origin !== null))];
+}
+
+export function allowsMediaCapture(pathname: string): boolean {
+  return MEDIA_CAPTURE_PATH.test(pathname);
 }
 
 export function generateNonce(): string {
@@ -62,8 +70,15 @@ export function buildSecurityHeaders(nonce: string, options: SecurityHeaderOptio
     'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy':
-      'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()',
+    'Permissions-Policy': [
+      'camera=()',
+      options.mediaCapture ? 'microphone=(self)' : 'microphone=()',
+      options.mediaCapture ? 'display-capture=(self)' : 'display-capture=()',
+      'geolocation=()',
+      'payment=()',
+      'usb=()',
+      'browsing-topics=()',
+    ].join(', '),
     'Cross-Origin-Opener-Policy': 'same-origin',
   });
   if (!options.frameAncestors?.length) headers.set('X-Frame-Options', 'DENY');

@@ -16,7 +16,9 @@ import { sameSigner } from './domain/signature';
 import { buildContractPdf, type ContractPdfInput } from './pdf';
 import { CONTRACT_URL_TTL_SECONDS, type ContractStorage } from './storage';
 
-const { contractSignatures, contracts, legalEntities, proposals } = schema;
+const { contractSignatures, contracts, deals, proposals } = schema;
+
+const SIGNING_STAGE = '1.6';
 
 export type SigningDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
@@ -38,7 +40,7 @@ export type SignContractInput = {
 
 export type SignContractResult =
   | { ok: true; status: 'awaiting_signatures' | 'signed' }
-  | { ok: false; rule: 'not_found' | 'name_mismatch' | 'changed' };
+  | { ok: false; rule: 'not_found' | 'name_mismatch' | 'changed' | 'invalid_state' };
 
 export type ContractSignatureView = {
   party: SignatureParty;
@@ -222,12 +224,9 @@ export async function signContract(
         .select({ acceptedBy: proposals.acceptedBy, details: proposals.clientDetails })
         .from(proposals)
         .where(eq(proposals.id, contract.proposalId));
-      const [entity] = await tx
-        .select()
-        .from(legalEntities)
-        .where(eq(legalEntities.id, contract.legalEntityId));
-      if (!proposal?.details || !entity) return NOT_FOUND;
+      if (!proposal?.details) return NOT_FOUND;
       if (input.party === 'client' && proposal.acceptedBy !== claims.sub) return NOT_FOUND;
+      const studio = contract.studioDetails;
 
       const [existing] = await tx
         .select({ id: contractSignatures.id })
@@ -244,6 +243,11 @@ export async function signContract(
           status: contract.status === 'signed' ? 'signed' : 'awaiting_signatures',
         };
       }
+      const [deal] = await tx
+        .select({ code: deals.pipelineCode })
+        .from(deals)
+        .where(eq(deals.id, contract.dealId));
+      if (deal?.code !== SIGNING_STAGE) return { ok: false, rule: 'invalid_state' };
       if (input.bodyHash !== contract.bodyHash) return { ok: false, rule: 'changed' };
 
       const signer =
@@ -254,9 +258,9 @@ export async function signContract(
               email: proposal.details.signerEmail,
             }
           : {
-              name: entity.representativeName,
-              role: entity.representativeRole,
-              email: entity.email,
+              name: studio.representativeName,
+              role: studio.representativeRole,
+              email: studio.email,
             };
       if (!sameSigner(input.typedName, signer.name)) return { ok: false, rule: 'name_mismatch' };
 
@@ -303,7 +307,7 @@ export async function signContract(
         contract,
         {
           client: { legalName: proposal.details.legalName },
-          studio: { legalName: entity.legalName },
+          studio: { legalName: studio.legalName },
         },
         deps,
         now,
@@ -378,7 +382,7 @@ export async function getDealContract(
       signedAt: contracts.signedAt,
       pdfPath: contracts.pdfPath,
       proposalId: contracts.proposalId,
-      legalEntityId: contracts.legalEntityId,
+      studioDetails: contracts.studioDetails,
     })
     .from(contracts)
     .where(and(eq(contracts.dealId, dealId), ne(contracts.status, 'void')))
@@ -389,10 +393,6 @@ export async function getDealContract(
     .select({ details: proposals.clientDetails })
     .from(proposals)
     .where(eq(proposals.id, contract.proposalId));
-  const [entity] = await tx
-    .select({ name: legalEntities.representativeName })
-    .from(legalEntities)
-    .where(eq(legalEntities.id, contract.legalEntityId));
   const signatures = await tx
     .select({
       party: contractSignatures.party,
@@ -412,7 +412,7 @@ export async function getDealContract(
     signedAt: contract.signedAt,
     pdfAvailable: contract.pdfPath !== null,
     clientSigner: proposal?.details?.signerName ?? '',
-    studioSigner: entity?.name ?? '',
+    studioSigner: contract.studioDetails.representativeName,
     signatures,
   };
 }

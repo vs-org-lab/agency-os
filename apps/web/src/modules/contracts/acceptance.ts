@@ -15,7 +15,13 @@ import { renderContract } from './domain/render';
 import { contractHash } from './domain/signature';
 import { activeContractTemplate } from './templates/service';
 
-const { contacts, contracts, legalEntities, proposalOptions, proposalRequests, proposals } = schema;
+const { contacts, contracts, deals, legalEntities, proposalOptions, proposalRequests, proposals } =
+  schema;
+
+/** The only stage at which a proposal can be accepted and its contract signed. */
+export const PROPOSAL_DECISION_STAGE = '1.6';
+
+const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
 
 export type AcceptanceDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
@@ -63,7 +69,12 @@ export type AcceptProposalResult =
 
 const NOT_FOUND = { ok: false, rule: 'not_found' } as const;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
+/** Client typed values stay on one line, so they can never add headings or clauses. */
+const text = (max: number) =>
+  z
+    .string()
+    .transform((value) => value.replace(CONTROL_CHARACTERS, ' ').replace(/\s+/g, ' ').trim())
+    .pipe(z.string().min(1).max(max));
 
 const acceptSchema = z.object({
   proposalId: z.uuid(),
@@ -226,6 +237,11 @@ export async function acceptProposal(
         return existing ? { ok: true, contractId: existing } : { ok: false, rule: 'invalid_state' };
       }
       if (proposal.status !== 'sent') return { ok: false, rule: 'invalid_state' };
+      const [deal] = await tx
+        .select({ code: deals.pipelineCode })
+        .from(deals)
+        .where(eq(deals.id, proposal.dealId));
+      if (deal?.code !== PROPOSAL_DECISION_STAGE) return { ok: false, rule: 'invalid_state' };
 
       const [option] = await tx
         .select()
@@ -315,6 +331,15 @@ export async function acceptProposal(
           locale: proposal.locale,
           body,
           bodyHash: contractHash(body),
+          studioDetails: {
+            legalName: entity.legalName,
+            taxId: entity.taxId,
+            address: entity.address,
+            country: entity.country,
+            email: entity.email,
+            representativeName: entity.representativeName,
+            representativeRole: entity.representativeRole,
+          },
         })
         .returning({ id: contracts.id });
       if (!contract) throw new Error('Contract was not generated');

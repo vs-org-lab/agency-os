@@ -43,6 +43,17 @@ export type ProposalClientDetails = {
   signerEmail: string;
 };
 
+/** The studio party as it stood when the contract was generated. */
+export type ContractStudioDetails = {
+  legalName: string;
+  taxId: string;
+  address: string;
+  country: 'PT' | 'AO';
+  email: string;
+  representativeName: string;
+  representativeRole: string;
+};
+
 export const legalEntities = pgTable(
   'legal_entities',
   {
@@ -215,6 +226,7 @@ export const contracts = pgTable(
     locale: localeEnum('locale').notNull(),
     body: text('body').notNull(),
     bodyHash: text('body_hash').notNull(),
+    studioDetails: jsonb('studio_details').$type<ContractStudioDetails>().notNull(),
     status: contractStatusEnum('status').notNull().default('awaiting_signatures'),
     pdfPath: text('pdf_path'),
     signedAt: timestamp('signed_at', { withTimezone: true }),

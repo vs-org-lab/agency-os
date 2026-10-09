@@ -9,6 +9,7 @@ import {
   withTestTransaction,
   type World,
 } from '@agency-os/db/testing';
+import { applyStageChange } from '@/modules/commercial/server';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
 import { acceptProposal } from './acceptance';
 import {
@@ -57,6 +58,7 @@ async function generatedContract(sql: TransactionSql, world: World): Promise<Gen
     update public.contacts set portal_user_id = ${world.users.decisionMakerA}, email = 'ana@cliente.test'
     where id = ${core.a.contactId}
   `;
+  await sql`update public.deals set pipeline_code = '1.6' where id = ${core.a.dealId}`;
   const [entity] = await sql<{ id: string }[]>`
     insert into public.legal_entities (organization_id, legal_name, tax_id, address, country, email,
                                        representative_name, representative_role, is_default)
@@ -383,6 +385,85 @@ describe('contract signing', () => {
       expect(
         await getPortalContract(claimsFor(world.users.operationalA, 'client'), input, deps),
       ).toBeNull();
+    });
+  });
+
+  it('a closed deal refuses the signature', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await generatedContract(sql, world);
+      const { deps } = depsFor(sql);
+      await sql`update public.deals set pipeline_code = 'X.4' where id = ${contract.dealId}`;
+
+      expect(
+        await signContract(
+          claimsFor(world.users.decisionMakerA, 'client'),
+          clientSignature(contract),
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'invalid_state' });
+    });
+  });
+
+  it('keeps the studio party of the contract when the entity changes later', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await generatedContract(sql, world);
+      const { deps } = depsFor(sql);
+      await sql`
+        update public.legal_entities set representative_name = 'João Costa', legal_name = 'Outra Lda'
+        where organization_id = ${world.organizationId}
+      `;
+
+      expect(
+        await signContract(
+          claimsFor(world.users.founder, 'internal'),
+          studioSignature(contract),
+          deps,
+        ),
+      ).toEqual({ ok: true, status: 'awaiting_signatures' });
+      const view = await deps.contexts.withUserContext(
+        claimsFor(world.users.founder, 'internal'),
+        (tx) => getDealContract(tx, contract.dealId),
+      );
+      expect(view?.studioSigner).toBe('Vladimir Silva');
+    });
+  });
+
+  it('completion moves the deal to 2.1 through the pipeline rules', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await generatedContract(sql, world);
+      const { deps } = depsFor(sql);
+      const realDeps: SigningDeps = {
+        ...deps,
+        moveDeal: async (tx, dealId) => {
+          const change = await applyStageChange(tx, {
+            dealId,
+            to: '2.1',
+            reason: null,
+            actor: 'system',
+          });
+          if (!change.ok) throw new Error(`Move refused: ${change.rule}`);
+        },
+      };
+
+      await signContract(
+        claimsFor(world.users.decisionMakerA, 'client'),
+        clientSignature(contract),
+        realDeps,
+      );
+      await signContract(
+        claimsFor(world.users.founder, 'internal'),
+        studioSignature(contract),
+        realDeps,
+      );
+
+      await sql`reset role`;
+      const [deal] = await sql<{ code: string }[]>`
+        select pipeline_code::text as code from public.deals where id = ${contract.dealId}
+      `;
+      expect(deal?.code).toBe('2.1');
     });
   });
 });

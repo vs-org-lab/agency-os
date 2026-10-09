@@ -44,4 +44,9 @@ export type {
   TimelineKind,
 } from './schema/enums';
 export type { WeeklyHours } from './schema/commercial';
-export type { PaymentStep, ProposalClientDetails, ProposalScopeLine } from './schema/contracts';
+export type {
+  ContractStudioDetails,
+  PaymentStep,
+  ProposalClientDetails,
+  ProposalScopeLine,
+} from './schema/contracts';

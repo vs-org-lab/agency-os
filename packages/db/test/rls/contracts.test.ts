@@ -120,4 +120,19 @@ describe('contracts access', () => {
       expect(await visibleIds(sql, 'portal_contracts')).toEqual([]);
     });
   });
+
+  it('client finance and staff see nothing in the portal views', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await createContractFixture(sql, world);
+
+      for (const user of [world.users.clientFinanceB, world.users.founder, world.users.finance]) {
+        await asUser(sql, user);
+        for (const view of ['portal_proposals', 'portal_proposal_options', 'portal_contracts']) {
+          expect(await visibleIds(sql, view), view).toEqual([]);
+        }
+        await asSystem(sql);
+      }
+    });
+  });
 });

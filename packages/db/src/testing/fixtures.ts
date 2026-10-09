@@ -348,6 +348,16 @@ export type ContractFixture = {
   b: ContractRecords;
 };
 
+const FIXTURE_STUDIO = {
+  legalName: 'Aurion Creative Lda',
+  taxId: '516000000',
+  address: 'Av. da Liberdade, Lisboa',
+  country: 'PT',
+  email: 'geral@aurion.test',
+  representativeName: 'Vladimir Silva',
+  representativeRole: 'Gerente',
+};
+
 const FIXTURE_PAYMENT_PLAN = [
   { label: 'Assinatura', percent: 50 },
   { label: 'Entrega', percent: 50 },
@@ -407,9 +417,11 @@ export async function createContractFixture(
     if (!option || !request) throw new Error('Contract fixture option was not created');
     const [contract] = await sql<{ id: string }[]>`
       insert into public.contracts (organization_id, client_id, deal_id, proposal_id, option_id,
-                                    template_id, legal_entity_id, locale, body, body_hash)
+                                    template_id, legal_entity_id, locale, body, body_hash,
+                                    studio_details)
       values (${world.organizationId}, ${clientId}, ${records.dealId}, ${proposalId}, ${option.id},
-              ${template.id}, ${entity.id}, 'pt-PT', 'Contrato com Empresa', ${'0'.repeat(64)})
+              ${template.id}, ${entity.id}, 'pt-PT', 'Contrato com Empresa', ${'0'.repeat(64)},
+              ${JSON.stringify(FIXTURE_STUDIO)}::jsonb)
       returning id
     `;
     if (!contract) throw new Error('Contract fixture contract was not created');

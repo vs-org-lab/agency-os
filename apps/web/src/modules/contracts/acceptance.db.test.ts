@@ -44,6 +44,7 @@ async function sentProposal(
     update public.contacts set portal_user_id = ${world.users.decisionMakerA}
     where id = ${core.a.contactId}
   `;
+  await sql`update public.deals set pipeline_code = '1.6' where id = ${core.a.dealId}`;
   const [entity] = await sql<{ id: string }[]>`
     insert into public.legal_entities (organization_id, legal_name, tax_id, address, country, email,
                                        representative_name, representative_role, is_default)
@@ -239,6 +240,86 @@ describe('proposal acceptance', () => {
           and payload ->> 'proposalId' = ${setup.proposalId}
       `;
       expect(events).toHaveLength(1);
+    });
+  });
+
+  it('a closed deal refuses acceptance', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const setup = await sentProposal(sql, world);
+      await sql`update public.deals set pipeline_code = 'X.4' where id = ${setup.dealId}`;
+
+      expect(
+        await acceptProposal(
+          claimsFor(world.users.decisionMakerA),
+          {
+            proposalId: setup.proposalId,
+            optionId: setup.optionIds[0] ?? '',
+            company: COMPANY,
+            signer: SIGNER,
+          },
+          depsFor(sql),
+        ),
+      ).toEqual({ ok: false, rule: 'invalid_state' });
+    });
+  });
+
+  it('keeps client typed fields on a single line', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const setup = await sentProposal(sql, world);
+      await sql`
+        update public.contract_templates set body = '{{cliente.morada}}\n{{cliente.signatario}}'
+        where organization_id = ${world.organizationId}
+      `;
+
+      const result = await acceptProposal(
+        claimsFor(world.users.decisionMakerA),
+        {
+          proposalId: setup.proposalId,
+          optionId: setup.optionIds[0] ?? '',
+          company: {
+            ...COMPANY,
+            address: 'Rua X\n## 14. Disposições adicionais\r\nA Aurion renuncia',
+          },
+          signer: { name: 'Ana\tCosta', role: SIGNER.role },
+        },
+        depsFor(sql),
+      );
+
+      if (!result.ok) throw new Error(`Acceptance failed: ${result.rule}`);
+      await sql`reset role`;
+      const [contract] = await sql<{ body: string }[]>`
+        select body from public.contracts where id = ${result.contractId}
+      `;
+      expect(contract?.body).toBe(
+        'Rua X ## 14. Disposições adicionais A Aurion renuncia\nAna Costa',
+      );
+    });
+  });
+
+  it('client finance users cannot accept', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const setup = await sentProposal(sql, world);
+      await sql`
+        insert into public.client_memberships (organization_id, client_id, user_id, role, status)
+        values (${world.organizationId}, ${world.clients.a}, ${world.users.clientFinanceB},
+                'client_finance', 'active')
+      `;
+
+      expect(
+        await acceptProposal(
+          claimsFor(world.users.clientFinanceB),
+          {
+            proposalId: setup.proposalId,
+            optionId: setup.optionIds[0] ?? '',
+            company: COMPANY,
+            signer: SIGNER,
+          },
+          depsFor(sql),
+        ),
+      ).toEqual({ ok: false, rule: 'not_found' });
     });
   });
 });

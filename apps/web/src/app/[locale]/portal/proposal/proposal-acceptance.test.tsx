@@ -25,6 +25,8 @@ const PROPOSAL: PortalProposal = {
   sentAt: new Date('2026-10-09T10:00:00Z'),
   acceptedOptionId: null,
   contractId: null,
+  contractStatus: null,
+  contractClientSigned: false,
   expired: false,
   options: [
     {

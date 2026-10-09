@@ -98,6 +98,8 @@ export function ProposalSection({
   const t = useTranslations('contracts.proposal');
   const { proposal } = workspace;
   const locked = proposal !== null && proposal.status !== 'draft';
+  const expired =
+    proposal?.status === 'sent' && proposal.validUntil < new Date().toISOString().slice(0, 10);
 
   return (
     <section
@@ -111,12 +113,16 @@ export function ProposalSection({
           </h2>
           {proposal ? (
             <Badge variant={proposal.status === 'accepted' ? 'default' : 'secondary'}>
-              {t(`status.${proposal.status}`)}
+              {expired ? t('status.expired') : t(`status.${proposal.status}`)}
             </Badge>
           ) : null}
         </div>
         <p className="text-body-sm text-text-secondary">{t('description')}</p>
+        {expired ? <p className="text-body-sm text-warning">{t('expiredHint')}</p> : null}
       </header>
+      {proposal && proposal.requests.length > 0 ? (
+        <ChangeRequests requests={proposal.requests} />
+      ) : null}
       {locked && proposal ? (
         <ProposalSummary
           proposal={proposal}
@@ -710,24 +716,6 @@ function ProposalSummary({
           </li>
         ))}
       </ul>
-      {proposal.requests.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <span className="text-label text-text">{t('requests')}</span>
-          <ul className="flex flex-col gap-2">
-            {proposal.requests.map((request) => (
-              <li
-                key={request.id}
-                className="rounded-md bg-surface-muted p-3 text-body-sm text-text"
-              >
-                <span className="block text-caption text-text-tertiary">
-                  {format.dateTime(request.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
-                </span>
-                {request.message}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
       {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
       {founder && proposal.status === 'sent' ? (
         <div>
@@ -749,6 +737,26 @@ function ProposalSummary({
           </Button>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function ChangeRequests({ requests }: { requests: ProposalView['requests'] }) {
+  const t = useTranslations('contracts.proposal');
+  const format = useFormatter();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-label text-text">{t('requests')}</span>
+      <ul className="flex flex-col gap-2">
+        {requests.map((request) => (
+          <li key={request.id} className="flex flex-col gap-1 rounded-md bg-surface-muted p-3">
+            <span className="text-caption text-text-tertiary">
+              {format.dateTime(request.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
+            </span>
+            <p className="text-body-sm text-text">{request.message}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

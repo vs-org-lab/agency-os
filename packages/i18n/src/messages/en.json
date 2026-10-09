@@ -171,7 +171,9 @@
       "description": "Your project progress appears here.",
       "proposalTitle": "Your proposal",
       "proposalBody": "Choose the Orbit option you want to go ahead with.",
-      "proposalOpen": "View the proposal"
+      "proposalOpen": "View the proposal",
+      "proposalExpiredTitle": "The proposal has expired",
+      "proposalExpiredBody": "Get in touch to receive a new proposal."
     },
     "core": {
       "briefingTitle": "The summary of our conversation",
@@ -1307,7 +1309,8 @@
         "draft": "Draft",
         "sent": "Sent to the client",
         "accepted": "Accepted by the client",
-        "withdrawn": "Withdrawn"
+        "withdrawn": "Withdrawn",
+        "expired": "Expired"
       },
       "sentOn": "Sent on {date}",
       "acceptedOn": "Accepted on {date}",
@@ -1328,7 +1331,8 @@
         "portal_access": "The decision maker has no portal access yet.",
         "invalid_state": "The proposal cannot change in this state.",
         "not_found": "The proposal could not be saved."
-      }
+      },
+      "expiredHint": "The validity has ended. Withdraw the proposal, change the date and send it again."
     },
     "signature": {
       "nameLabel": "Type your full name: {name}",

@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
+import { ProposalHomeCard, proposalCardState } from './portal-cards';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -22,7 +23,8 @@ export default async function PortalHomePage({ params }: PageProps) {
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
-  if (!proposal && (!core || (!core.briefing && core.documents.length === 0))) {
+  const card = proposalCardState(proposal);
+  if (!card && (!core || (!core.briefing && core.documents.length === 0))) {
     return <EmptyState title={t('home.title')} description={t('home.description')} />;
   }
 
@@ -31,36 +33,7 @@ export default async function PortalHomePage({ params }: PageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
-      {proposal && proposal.status === 'accepted' && proposal.contractId ? (
-        <section
-          aria-labelledby="portal-contract"
-          className="flex flex-col gap-2 rounded-lg border-2 border-text bg-surface p-4"
-        >
-          <h2 id="portal-contract" className="text-title-sm text-text">
-            {t('contract.homeTitle')}
-          </h2>
-          <Link
-            href={`/portal/contracts/${proposal.contractId}`}
-            className="text-body-sm text-link hover:underline"
-          >
-            {t('contract.homeOpen')}
-          </Link>
-        </section>
-      ) : null}
-      {proposal && proposal.status === 'sent' && !proposal.expired ? (
-        <section
-          aria-labelledby="portal-proposal"
-          className="flex flex-col gap-2 rounded-lg border-2 border-text bg-surface p-4"
-        >
-          <h2 id="portal-proposal" className="text-title-sm text-text">
-            {t('home.proposalTitle')}
-          </h2>
-          <p className="text-body-sm text-text-secondary">{t('home.proposalBody')}</p>
-          <Link href="/portal/proposal" className="text-body-sm text-link hover:underline">
-            {t('home.proposalOpen')}
-          </Link>
-        </section>
-      ) : null}
+      {card ? <ProposalHomeCard state={card} /> : null}
       {documents.length > 0 ? (
         <section aria-labelledby="portal-presentations" className="flex flex-col gap-3">
           <h1 id="portal-presentations" className="text-title text-text">

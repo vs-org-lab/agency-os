@@ -23,7 +23,16 @@ const TEXT_FIELDS = [
 
 type TextField = (typeof TEXT_FIELDS)[number]['name'];
 
-/** Keeps every typed value when the save is refused. */
+const EMPTY_VALUES: Record<TextField, string> = {
+  legalName: '',
+  taxId: '',
+  address: '',
+  email: '',
+  representativeName: '',
+  representativeRole: '',
+};
+
+/** Keeps every typed value when the save is refused; a saved new entity clears the form. */
 export function EntityForm({
   entity,
   idPrefix,
@@ -53,14 +62,18 @@ export function EntityForm({
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
-          setResult(
-            await save({
-              ...values,
-              country,
-              isDefault,
-              ...(entity ? { entityId: entity.id } : {}),
-            }).catch(() => ({ ok: false }) as const),
-          );
+          const result = await save({
+            ...values,
+            country,
+            isDefault,
+            ...(entity ? { entityId: entity.id } : {}),
+          }).catch(() => ({ ok: false }) as const);
+          if (result.ok && !entity) {
+            setValues(EMPTY_VALUES);
+            setCountry('PT');
+            setIsDefault(false);
+          }
+          setResult(result);
         });
       }}
     >

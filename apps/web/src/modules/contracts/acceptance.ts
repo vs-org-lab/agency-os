@@ -21,7 +21,7 @@ const { contacts, contracts, deals, legalEntities, proposalOptions, proposalRequ
 /** The only stage at which a proposal can be accepted and its contract signed. */
 export const PROPOSAL_DECISION_STAGE = '1.6';
 
-const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
+const CONTROL_CHARACTERS = /\p{Cc}+/gu;
 
 export type AcceptanceDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
@@ -52,6 +52,8 @@ export type PortalProposal = {
   sentAt: Date | null;
   acceptedOptionId: string | null;
   contractId: string | null;
+  contractStatus: 'awaiting_signatures' | 'signed' | null;
+  contractClientSigned: boolean;
   expired: boolean;
   options: PortalProposalOption[];
 };
@@ -150,8 +152,13 @@ export async function getPortalProposal(
     order by position
   `);
 
-  const contractRows = await tx.execute<{ id: string }>(sql`
-    select id from public.portal_contracts
+  const contractRows = await tx.execute<{
+    id: string;
+    status: 'awaiting_signatures' | 'signed';
+    client_signed: boolean;
+  }>(sql`
+    select id, status::text as status, client_signed_at is not null as client_signed
+    from public.portal_contracts
     where proposal_id = ${proposal.id}::uuid
     order by created_at desc
     limit 1
@@ -168,6 +175,8 @@ export async function getPortalProposal(
     sentAt: proposal.sent_at ? new Date(proposal.sent_at) : null,
     acceptedOptionId: proposal.accepted_option_id,
     contractId: contractRows[0]?.id ?? null,
+    contractStatus: contractRows[0]?.status ?? null,
+    contractClientSigned: contractRows[0]?.client_signed ?? false,
     expired: proposal.status === 'sent' && proposal.valid_until < today(now),
     options: options.map((option) => ({
       id: option.id,

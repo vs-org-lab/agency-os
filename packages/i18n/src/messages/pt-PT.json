@@ -171,7 +171,9 @@
       "description": "O acompanhamento do seu projeto aparece aqui.",
       "proposalTitle": "A sua proposta",
       "proposalBody": "Escolha a opção Orbit com que quer avançar.",
-      "proposalOpen": "Ver a proposta"
+      "proposalOpen": "Ver a proposta",
+      "proposalExpiredTitle": "A proposta expirou",
+      "proposalExpiredBody": "Fale connosco para receber uma nova proposta."
     },
     "core": {
       "briefingTitle": "O resumo da nossa conversa",
@@ -1307,7 +1309,8 @@
         "draft": "Rascunho",
         "sent": "Enviada ao cliente",
         "accepted": "Aceite pelo cliente",
-        "withdrawn": "Retirada"
+        "withdrawn": "Retirada",
+        "expired": "Expirada"
       },
       "sentOn": "Enviada a {date}",
       "acceptedOn": "Aceite a {date}",
@@ -1328,7 +1331,8 @@
         "portal_access": "O decisor ainda não tem acesso ao portal.",
         "invalid_state": "A proposta não pode mudar neste estado.",
         "not_found": "Não foi possível guardar a proposta."
-      }
+      },
+      "expiredHint": "A validade terminou. Retire a proposta, mude a data e envie-a de novo."
     },
     "signature": {
       "nameLabel": "Escreva o seu nome completo: {name}",

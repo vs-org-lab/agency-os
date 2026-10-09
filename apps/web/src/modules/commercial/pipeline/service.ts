@@ -17,7 +17,7 @@ import {
   type TransitionRefusal,
 } from './transitions';
 
-const { calls, contracts, dealStageChanges, deals } = schema;
+const { calls, contracts, dealStageChanges, deals, paymentRequests, payments } = schema;
 
 export type StageActor = 'system' | { userId: string; isFounder: boolean };
 
@@ -90,7 +90,17 @@ async function contractFacts(tx: DbTransaction, deal: { id: string; clientId: st
       ),
     )
     .limit(1);
-  return { contractSigned: signed !== undefined, coreDeliveredWithinYear: delivered !== undefined };
+  const [paid] = await tx
+    .select({ id: payments.id })
+    .from(payments)
+    .innerJoin(paymentRequests, eq(paymentRequests.id, payments.requestId))
+    .where(and(eq(paymentRequests.dealId, deal.id), eq(payments.status, 'reconciled')))
+    .limit(1);
+  return {
+    contractSigned: signed !== undefined,
+    coreDeliveredWithinYear: delivered !== undefined,
+    firstPaymentReceived: paid !== undefined,
+  };
 }
 
 async function callFacts(tx: DbTransaction, dealId: string) {
@@ -181,7 +191,7 @@ export async function applyStageChange(
       ...(await callFacts(tx, deal.id)),
       ...(stageOf(input.to) === 'orbit'
         ? await contractFacts(tx, deal)
-        : { contractSigned: false, coreDeliveredWithinYear: false }),
+        : { contractSigned: false, coreDeliveredWithinYear: false, firstPaymentReceived: false }),
       coreReadiness: stageOf(input.to) === 'core' ? await loadCoreReadiness(tx, deal.id) : null,
     },
   });

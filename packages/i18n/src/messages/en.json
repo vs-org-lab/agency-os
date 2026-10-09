@@ -92,7 +92,10 @@
     "room": {
       "dashboard": "Dashboard"
     },
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "portalNav": {
+      "invoices": "Invoices"
+    }
   },
   "states": {
     "empty": {
@@ -173,7 +176,11 @@
       "proposalBody": "Choose the Orbit option you want to go ahead with.",
       "proposalOpen": "View the proposal",
       "proposalExpiredTitle": "The proposal has expired",
-      "proposalExpiredBody": "Get in touch to receive a new proposal."
+      "proposalExpiredBody": "Get in touch to receive a new proposal.",
+      "paymentTitle": "Payment due",
+      "paymentBody": "{count, plural, one {You have # payment request to pay.} other {You have # payment requests to pay.}}",
+      "paymentOverdue": "One of the requests is past its due date.",
+      "paymentOpen": "View payments"
     },
     "core": {
       "briefingTitle": "The summary of our conversation",
@@ -237,6 +244,35 @@
       "homeSign": "The agreement is ready to sign.",
       "homeSigned": "The agreement is signed.",
       "homeOpen": "Open the agreement"
+    },
+    "invoices": {
+      "heading": "{label} · {number}",
+      "title": "Invoices and payments",
+      "intro": "Payment requests are not tax invoices. The invoice is issued after payment and becomes available here.",
+      "empty": "There are no payment requests yet.",
+      "status": {
+        "sent": "To pay",
+        "paid": "Paid"
+      },
+      "due": "Due {date}",
+      "paidOn": "Paid on {date}",
+      "overdue": "Overdue by {days, plural, one {# day} other {# days}}",
+      "issuedBy": "Issued by {name}",
+      "payCard": "Pay by card",
+      "bankTitle": "Pay by bank transfer",
+      "bankName": "Bank",
+      "iban": "IBAN",
+      "bic": "BIC/SWIFT",
+      "reference": "Quote the reference {number} with your payment.",
+      "requestPdf": "Download request {number} (PDF)",
+      "invoice": "Invoice {number}, issued on {date}",
+      "invoicePdf": "Download invoice {number} (PDF)",
+      "invoicePending": "The invoice is issued once the payment is confirmed.",
+      "confirming": "Thank you. We are confirming the payment; the status updates within minutes.",
+      "errors": {
+        "unavailable": "Card payment is not available for this request.",
+        "not_found": "This request is no longer available. Refresh the page."
+      }
     }
   },
   "commercial": {
@@ -289,6 +325,7 @@
         "diagnosis": "Diagnosis",
         "documents": "Documents and contracts",
         "billing": "Billing",
+        "rooms": "Rooms and process",
         "retainers": "Retainers"
       },
       "rules": {
@@ -303,7 +340,8 @@
         "not_found": "This deal does not exist or you do not have access to it.",
         "core_criteria": "Still missing: {gaps}.",
         "contract_required": "Without a signed contract, the deal cannot enter 2.1.",
-        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core."
+        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core.",
+        "payment_required": "Without the first reconciled payment, the deal cannot move to 2.2."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -383,7 +421,8 @@
         "application": "Application",
         "calls": "Calls",
         "timeline": "Timeline",
-        "core": "Core"
+        "core": "Core",
+        "billing": "Billing"
       },
       "tracking": {
         "title": "Tracking",
@@ -675,6 +714,30 @@
         "heading": "Agreement signed",
         "body": "Hello {firstName}, the agreement is signed by both parties. The signed PDF is in the portal.",
         "action": "View the agreement"
+      },
+      "payment_requested": {
+        "subject": "Payment request available",
+        "heading": "Payment request available",
+        "body": "Hi {firstName}, the payment request is in the portal, with the amount, the due date and the ways to pay.\n\nThe invoice is issued once the payment is received.",
+        "action": "View the request"
+      },
+      "payment_reminder": {
+        "subject": "Payment due soon",
+        "heading": "Payment due soon",
+        "body": "Hi {firstName}, a payment request is due in the next few days. The payment details are in the portal.\n\nIf you have already paid, please ignore this message.",
+        "action": "View the request"
+      },
+      "payment_overdue": {
+        "subject": "Payment overdue",
+        "heading": "Payment overdue",
+        "body": "Hi {firstName}, a payment request is past its due date. The payment details are in the portal.\n\nIf you have already paid, please ignore this message: the confirmation follows once the payment is reconciled.",
+        "action": "View the request"
+      },
+      "payment_received": {
+        "subject": "Payment received",
+        "heading": "Payment received",
+        "body": "Hi {firstName}, we have received your payment. Thank you.\n\nThe invoice will be available in the portal once it is issued.",
+        "action": "Open the portal"
       }
     },
     "founder": {
@@ -730,6 +793,24 @@
         "subject": "Agreement signed with {companyName}",
         "heading": "Agreement signed with {companyName}",
         "body": "The agreement is signed by both parties and the deal moved to 2.1. The signed PDF is in the Core tab.",
+        "action": "Open the deal"
+      },
+      "payment_received": {
+        "subject": "Payment received from {companyName}",
+        "heading": "Payment received from {companyName}",
+        "body": "A payment request from {companyName} has been paid and reconciled. Issue the invoice in the certified software and record it in the Billing tab.",
+        "action": "Open the deal"
+      },
+      "payment_review": {
+        "subject": "Payment to review from {companyName}",
+        "heading": "Payment to review from {companyName}",
+        "body": "A payment from {companyName} does not match its request (amount, currency or reference). Confirm it in the Billing tab.",
+        "action": "Review the payment"
+      },
+      "payment_overdue": {
+        "subject": "{companyName} payment overdue for {days} days",
+        "heading": "{companyName} payment overdue for {days} days",
+        "body": "The client has received a new reminder. From 30 days you may pause the project (X.1).",
         "action": "Open the deal"
       }
     }
@@ -983,6 +1064,11 @@
         "email": "Email",
         "representativeName": "Representative",
         "representativeRole": "Representative role",
+        "bankName": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC/SWIFT",
+        "paymentInstructions": "Payment instructions",
+        "paymentInstructionsHint": "Shown on every payment request from this entity, for example the Multicaixa Express number.",
         "isDefault": "Use by default in proposals"
       },
       "countries": {
@@ -1369,6 +1455,88 @@
         "invalid_input": "Write the reason.",
         "invalid_state": "The agreement can no longer be voided.",
         "not_found": "The action could not be completed."
+      }
+    }
+  },
+  "billing": {
+    "deal": {
+      "title": "Billing",
+      "nonFiscal": "The OS issues non-fiscal payment requests. The legal invoice is issued in certified software (AT) or the AGT taxpayer portal and recorded here.",
+      "empty": "The payment plan is created when both parties have signed the contract.",
+      "milestone": "{position}. {label} · {percent}%",
+      "milestoneStatus": {
+        "pending": "Not requested",
+        "requested": "Request sent",
+        "paid": "Paid"
+      },
+      "request": "{number} · due {date}",
+      "paidOn": "Paid on {date}",
+      "overdue": "Overdue by {days, plural, one {# day} other {# days}}",
+      "requestPdf": "Request {number} PDF",
+      "invoicePdf": "Invoice {number} PDF",
+      "payments": "Payments",
+      "paymentLine": "{amount} · {method} · {date}",
+      "methods": {
+        "stripe": "Card (Stripe)",
+        "bank_transfer": "Bank transfer",
+        "multicaixa": "Multicaixa Express",
+        "other": "Other"
+      },
+      "paymentStatus": {
+        "reconciled": "Reconciled",
+        "review": "To review"
+      },
+      "missingInvoice": "The legal invoice is still to be recorded.",
+      "invoice": "Invoice {number} · {issuer} · {date}",
+      "issuers": {
+        "at_certified": "Certified software (AT)",
+        "agt_portal": "AGT taxpayer portal"
+      },
+      "actions": {
+        "createPlan": "Create payment plan",
+        "request": "Request payment",
+        "chase": "Chase",
+        "void": "Void request",
+        "confirmVoid": "Confirm void",
+        "record": "Record payment",
+        "saveRecord": "Save payment",
+        "settle": "Reconcile",
+        "registerInvoice": "Record legal invoice",
+        "saveInvoice": "Save invoice",
+        "cancel": "Cancel"
+      },
+      "forms": {
+        "record": "Record payment {number}",
+        "void": "Void {number}",
+        "invoice": "Record legal invoice for {number}"
+      },
+      "fields": {
+        "method": "Method",
+        "amount": "Amount",
+        "receivedOn": "Received on",
+        "reference": "Reference",
+        "voidReason": "Reason for voiding",
+        "issuer": "Issued in",
+        "number": "Invoice number",
+        "issuedOn": "Invoice date",
+        "file": "Invoice PDF (up to 10 MB)"
+      },
+      "done": {
+        "createPlan": "Plan created and first request sent.",
+        "request": "Request sent to the client.",
+        "chase": "Reminder sent to the client.",
+        "void": "Request voided.",
+        "record": "Payment recorded.",
+        "settle": "Payment reconciled.",
+        "registerInvoice": "Legal invoice recorded."
+      },
+      "errors": {
+        "not_found": "Not found or not allowed.",
+        "invalid_input": "Check the fields.",
+        "invalid_state": "The status has changed. Refresh the page.",
+        "too_soon": "The client was already reminded in the last 24 hours.",
+        "missing_file": "Upload the invoice PDF (up to 10 MB).",
+        "upload_failed": "The file could not be uploaded. Try again."
       }
     }
   }

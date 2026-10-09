@@ -443,3 +443,107 @@ export async function createContractFixture(
     b: await seed(world.clients.b, core.b, world.users.clientFinanceB),
   };
 }
+
+export type BillingRecords = {
+  milestoneIds: [string, string, string];
+  sentRequestId: string;
+  voidRequestId: string;
+  paidRequestId: string;
+  paymentId: string;
+  legalInvoiceId: string;
+};
+
+export type BillingFixture = { contracts: ContractFixture; a: BillingRecords; b: BillingRecords };
+
+const FIXTURE_ISSUER = {
+  ...FIXTURE_STUDIO,
+  bankName: 'Banco Exemplo',
+  iban: 'PT50000201231234567890154',
+  bic: 'BEXAPTPL',
+  paymentInstructions: '',
+};
+
+const FIXTURE_BILLED_CLIENT = {
+  legalName: 'Empresa Cliente Lda',
+  taxId: '509000000',
+  address: 'Rua do Cliente, Porto',
+};
+
+/** Three milestones per client: one with a sent request, one with a voided request and one paid. */
+export async function createBillingFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<BillingFixture> {
+  const contracts = await createContractFixture(sql, world);
+  let sequence = 0;
+
+  const seed = async (clientId: string, records: ContractRecords): Promise<BillingRecords> => {
+    const milestone = async (position: number, status: 'pending' | 'requested' | 'paid') => {
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.billing_milestones (organization_id, client_id, deal_id, contract_id,
+                                               position, label, percent, amount, currency, status)
+        values (${world.organizationId}, ${clientId}, ${records.dealId}, ${records.contractId},
+                ${position}, ${`Prestação ${position}`}, ${position === 1 ? 50 : 25}, 3000, 'EUR',
+                ${status})
+        returning id
+      `;
+      if (!row) throw new Error('Billing fixture milestone was not created');
+      return row.id;
+    };
+    const request = async (milestoneId: string, status: 'sent' | 'paid' | 'void') => {
+      sequence += 1;
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.payment_requests (organization_id, client_id, deal_id, milestone_id, number,
+                                             label, amount, currency, locale, due_date, status,
+                                             issuer_details, client_details, paid_at, voided_at,
+                                             void_reason)
+        values (${world.organizationId}, ${clientId}, ${records.dealId}, ${milestoneId},
+                ${`PP-2026-${String(sequence).padStart(4, '0')}`}, 'Prestação', 3000, 'EUR', 'pt-PT',
+                current_date + 7, ${status}, ${JSON.stringify(FIXTURE_ISSUER)}::jsonb,
+                ${JSON.stringify(FIXTURE_BILLED_CLIENT)}::jsonb,
+                ${status === 'paid' ? sql`now()` : null}, ${status === 'void' ? sql`now()` : null},
+                ${status === 'void' ? 'Valor errado' : null})
+        returning id
+      `;
+      if (!row) throw new Error('Billing fixture request was not created');
+      return row.id;
+    };
+
+    const first = await milestone(1, 'requested');
+    const second = await milestone(2, 'pending');
+    const third = await milestone(3, 'paid');
+    const sentRequestId = await request(first, 'sent');
+    const voidRequestId = await request(second, 'void');
+    const paidRequestId = await request(third, 'paid');
+    const [payment] = await sql<{ id: string }[]>`
+      insert into public.payments (organization_id, client_id, request_id, amount, currency, method,
+                                   reference, received_on, status, recorded_by, reconciled_at)
+      values (${world.organizationId}, ${clientId}, ${paidRequestId}, 3000, 'EUR', 'bank_transfer',
+              'TRF-1', current_date, 'reconciled', ${world.users.founder}, now())
+      returning id
+    `;
+    const [invoice] = await sql<{ id: string }[]>`
+      insert into public.legal_invoices (organization_id, client_id, request_id, issuer, number,
+                                         issued_on, pdf_path, recorded_by)
+      values (${world.organizationId}, ${clientId}, ${paidRequestId}, 'at_certified',
+              ${`FR 2026/${sequence}`}, current_date, ${`${world.organizationId}/${clientId}/invoice.pdf`},
+              ${world.users.founder})
+      returning id
+    `;
+    if (!payment || !invoice) throw new Error('Billing fixture payment was not created');
+    return {
+      milestoneIds: [first, second, third],
+      sentRequestId,
+      voidRequestId,
+      paidRequestId,
+      paymentId: payment.id,
+      legalInvoiceId: invoice.id,
+    };
+  };
+
+  return {
+    contracts,
+    a: await seed(world.clients.a, contracts.a),
+    b: await seed(world.clients.b, contracts.b),
+  };
+}

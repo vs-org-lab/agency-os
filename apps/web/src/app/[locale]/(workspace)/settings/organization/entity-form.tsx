@@ -6,6 +6,7 @@ import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
 import type { LegalEntity, LegalEntityInput } from '@/modules/contracts/server';
 import type { EntityActionResult } from './actions';
@@ -21,7 +22,10 @@ const TEXT_FIELDS = [
   { name: 'representativeRole', type: 'text', autoComplete: 'organization-title' },
 ] as const;
 
-type TextField = (typeof TEXT_FIELDS)[number]['name'];
+const BANK_FIELDS = ['bankName', 'iban', 'bic'] as const;
+
+type TextField =
+  (typeof TEXT_FIELDS)[number]['name'] | (typeof BANK_FIELDS)[number] | 'paymentInstructions';
 
 const EMPTY_VALUES: Record<TextField, string> = {
   legalName: '',
@@ -30,6 +34,10 @@ const EMPTY_VALUES: Record<TextField, string> = {
   email: '',
   representativeName: '',
   representativeRole: '',
+  bankName: '',
+  iban: '',
+  bic: '',
+  paymentInstructions: '',
 };
 
 /** Keeps every typed value when the save is refused; a saved new entity clears the form. */
@@ -50,11 +58,20 @@ export function EntityForm({
     email: entity?.email ?? '',
     representativeName: entity?.representativeName ?? '',
     representativeRole: entity?.representativeRole ?? '',
+    bankName: entity?.bankName ?? '',
+    iban: entity?.iban ?? '',
+    bic: entity?.bic ?? '',
+    paymentInstructions: entity?.paymentInstructions ?? '',
   });
   const [country, setCountry] = useState<'PT' | 'AO'>(entity?.country ?? 'PT');
   const [isDefault, setIsDefault] = useState(entity?.isDefault ?? false);
   const [result, setResult] = useState<EntityActionResult | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const update = (name: TextField, value: string) => {
+    setValues((current) => ({ ...current, [name]: value }));
+    setResult(null);
+  };
 
   return (
     <form
@@ -91,14 +108,36 @@ export function EntityForm({
             autoComplete={field.autoComplete}
             required
             value={values[field.name]}
-            onChange={(event) => {
-              const value = event.target.value;
-              setValues((current) => ({ ...current, [field.name]: value }));
-              setResult(null);
-            }}
+            onChange={(event) => update(field.name, event.target.value)}
           />
         </div>
       ))}
+      {BANK_FIELDS.map((name) => (
+        <div key={name} className="flex flex-col gap-1">
+          <Label htmlFor={`${idPrefix}-${name}`}>{t(`fields.${name}`)}</Label>
+          <Input
+            id={`${idPrefix}-${name}`}
+            type="text"
+            autoComplete="off"
+            value={values[name]}
+            onChange={(event) => update(name, event.target.value)}
+          />
+        </div>
+      ))}
+      <div className="flex flex-col gap-1 md:col-span-2">
+        <Label htmlFor={`${idPrefix}-paymentInstructions`}>{t('fields.paymentInstructions')}</Label>
+        <Textarea
+          id={`${idPrefix}-paymentInstructions`}
+          aria-describedby={`${idPrefix}-paymentInstructions-hint`}
+          maxLength={1000}
+          rows={3}
+          value={values.paymentInstructions}
+          onChange={(event) => update('paymentInstructions', event.target.value)}
+        />
+        <p id={`${idPrefix}-paymentInstructions-hint`} className="text-body-sm text-text-secondary">
+          {t('fields.paymentInstructionsHint')}
+        </p>
+      </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor={`${idPrefix}-country`}>{t('fields.country')}</Label>
         <select

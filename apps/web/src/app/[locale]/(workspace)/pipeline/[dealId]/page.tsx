@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/componen
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
+import { canReadBilling, canWriteBilling } from '@/modules/billing';
+import { loadDealBilling } from '@/modules/billing/server';
 import { canWritePipeline, pipelineCodeMessageKey } from '@/modules/commercial';
 import { commercialSession, loadDealDetail } from '@/modules/commercial/server';
 import { loadCoreWorkspace } from '@/modules/diagnosis/server';
@@ -27,6 +29,17 @@ import {
   TrackingForm,
 } from './deal-forms';
 import { CoreTab } from './core/core-tab';
+import {
+  chaseRequestAction,
+  createPlanAction,
+  invoiceUploadAction,
+  recordPaymentAction,
+  registerInvoiceAction,
+  requestPaymentAction,
+  settlePaymentAction,
+  voidRequestAction,
+} from './billing/actions';
+import { BillingSection } from './billing/billing-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,9 +52,13 @@ export default async function DealPage({ params }: PageProps) {
   if (!z.uuid().safeParse(dealId).success) notFound();
   const session = await commercialSession(await getVerifiedClaims());
   if (!session) notFound();
-  const [detail, core] = await Promise.all([
+  const billingVisible = canReadBilling(session.actor);
+  const [detail, core, billing] = await Promise.all([
     loadDealDetail(session, dealId, locale),
     loadCoreWorkspace(session, dealId),
+    billingVisible
+      ? loadDealBilling(session, dealId)
+      : Promise.resolve({ billing: null, canCreatePlan: false }),
   ]);
   if (!detail) notFound();
 
@@ -82,6 +99,9 @@ export default async function DealPage({ params }: PageProps) {
           <TabsList aria-label={t('deal.tabs.label')}>
             <TabsTrigger value="summary">{t('deal.tabs.summary')}</TabsTrigger>
             {core ? <TabsTrigger value="core">{t('deal.tabs.core')}</TabsTrigger> : null}
+            {billingVisible ? (
+              <TabsTrigger value="billing">{t('deal.tabs.billing')}</TabsTrigger>
+            ) : null}
             <TabsTrigger value="application">{t('deal.tabs.application')}</TabsTrigger>
             <TabsTrigger value="calls">{t('deal.tabs.calls')}</TabsTrigger>
             <TabsTrigger value="timeline">{t('deal.tabs.timeline')}</TabsTrigger>
@@ -186,6 +206,27 @@ export default async function DealPage({ params }: PageProps) {
           {core ? (
             <TabsContent value="core" className="pt-4">
               <CoreTab session={session} workspace={core} writable={writable} locale={locale} />
+            </TabsContent>
+          ) : null}
+
+          {billingVisible ? (
+            <TabsContent value="billing" className="pt-4">
+              <BillingSection
+                dealId={dealId}
+                billing={billing.billing}
+                writable={canWriteBilling(session.actor)}
+                canCreatePlan={billing.canCreatePlan}
+                actions={{
+                  createPlan: createPlanAction,
+                  request: requestPaymentAction,
+                  chase: chaseRequestAction,
+                  void: voidRequestAction,
+                  record: recordPaymentAction,
+                  settle: settlePaymentAction,
+                  invoiceUpload: invoiceUploadAction,
+                  registerInvoice: registerInvoiceAction,
+                }}
+              />
             </TabsContent>
           ) : null}
 

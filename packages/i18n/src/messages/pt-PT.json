@@ -92,7 +92,10 @@
     "room": {
       "dashboard": "Dashboard"
     },
-    "breadcrumb": "Caminho"
+    "breadcrumb": "Caminho",
+    "portalNav": {
+      "invoices": "Faturas"
+    }
   },
   "states": {
     "empty": {
@@ -173,7 +176,11 @@
       "proposalBody": "Escolha a opção Orbit com que quer avançar.",
       "proposalOpen": "Ver a proposta",
       "proposalExpiredTitle": "A proposta expirou",
-      "proposalExpiredBody": "Fale connosco para receber uma nova proposta."
+      "proposalExpiredBody": "Fale connosco para receber uma nova proposta.",
+      "paymentTitle": "Pagamento pendente",
+      "paymentBody": "{count, plural, one {Tem # pedido de pagamento por pagar.} other {Tem # pedidos de pagamento por pagar.}}",
+      "paymentOverdue": "Um dos pedidos passou o vencimento.",
+      "paymentOpen": "Ver pagamentos"
     },
     "core": {
       "briefingTitle": "O resumo da nossa conversa",
@@ -237,6 +244,35 @@
       "homeSign": "O contrato está pronto a assinar.",
       "homeSigned": "O contrato está assinado.",
       "homeOpen": "Abrir o contrato"
+    },
+    "invoices": {
+      "heading": "{label} · {number}",
+      "title": "Faturas e pagamentos",
+      "intro": "Os pedidos de pagamento são documentos não fiscais. A fatura é emitida depois do pagamento e fica disponível aqui.",
+      "empty": "Ainda não há pedidos de pagamento.",
+      "status": {
+        "sent": "Por pagar",
+        "paid": "Pago"
+      },
+      "due": "Vence a {date}",
+      "paidOn": "Pago a {date}",
+      "overdue": "Em atraso há {days, plural, one {# dia} other {# dias}}",
+      "issuedBy": "Emitido por {name}",
+      "payCard": "Pagar com cartão",
+      "bankTitle": "Pagar por transferência",
+      "bankName": "Banco",
+      "iban": "IBAN",
+      "bic": "BIC/SWIFT",
+      "reference": "Indique a referência {number} no pagamento.",
+      "requestPdf": "Descarregar o pedido {number} (PDF)",
+      "invoice": "Fatura {number}, emitida a {date}",
+      "invoicePdf": "Descarregar a fatura {number} (PDF)",
+      "invoicePending": "A fatura é emitida depois de o pagamento ser confirmado.",
+      "confirming": "Obrigado. Estamos a confirmar o pagamento; o estado atualiza-se em poucos minutos.",
+      "errors": {
+        "unavailable": "O pagamento com cartão não está disponível para este pedido.",
+        "not_found": "Este pedido já não está disponível. Atualize a página."
+      }
     }
   },
   "commercial": {
@@ -289,6 +325,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
+        "rooms": "Salas e processo",
         "retainers": "Retainers"
       },
       "rules": {
@@ -303,7 +340,8 @@
         "not_found": "Este negócio não existe ou não tem acesso a ele.",
         "core_criteria": "Falta cumprir: {gaps}.",
         "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
-        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses."
+        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses.",
+        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -383,7 +421,8 @@
         "application": "Candidatura",
         "calls": "Chamadas",
         "timeline": "Linha temporal",
-        "core": "Core"
+        "core": "Core",
+        "billing": "Faturação"
       },
       "tracking": {
         "title": "Rastreio",
@@ -675,6 +714,30 @@
         "heading": "Contrato assinado",
         "body": "Olá {firstName}, o contrato está assinado pelas duas partes. O PDF assinado está no portal.",
         "action": "Ver o contrato"
+      },
+      "payment_requested": {
+        "subject": "Pedido de pagamento disponível",
+        "heading": "Pedido de pagamento disponível",
+        "body": "Olá {firstName}, o pedido de pagamento está no portal, com o valor, o vencimento e as formas de pagamento.\n\nA fatura é emitida depois do pagamento.",
+        "action": "Ver o pedido"
+      },
+      "payment_reminder": {
+        "subject": "Pagamento a vencer em breve",
+        "heading": "Pagamento a vencer em breve",
+        "body": "Olá {firstName}, um pedido de pagamento vence nos próximos dias. Os dados para pagar estão no portal.\n\nSe já pagou, ignore esta mensagem.",
+        "action": "Ver o pedido"
+      },
+      "payment_overdue": {
+        "subject": "Pagamento em atraso",
+        "heading": "Pagamento em atraso",
+        "body": "Olá {firstName}, um pedido de pagamento passou o vencimento. Os dados para pagar estão no portal.\n\nSe já pagou, ignore esta mensagem: a confirmação chega assim que o pagamento for conciliado.",
+        "action": "Ver o pedido"
+      },
+      "payment_received": {
+        "subject": "Pagamento recebido",
+        "heading": "Pagamento recebido",
+        "body": "Olá {firstName}, recebemos o seu pagamento. Obrigado.\n\nA fatura fica disponível no portal assim que for emitida.",
+        "action": "Abrir o portal"
       }
     },
     "founder": {
@@ -730,6 +793,24 @@
         "subject": "Contrato assinado com {companyName}",
         "heading": "Contrato assinado com {companyName}",
         "body": "O contrato está assinado pelas duas partes e o negócio passou a 2.1. O PDF assinado está no separador Core.",
+        "action": "Abrir o negócio"
+      },
+      "payment_received": {
+        "subject": "Pagamento recebido de {companyName}",
+        "heading": "Pagamento recebido de {companyName}",
+        "body": "Um pedido de pagamento de {companyName} foi pago e conciliado. Emita a fatura no software certificado e registe-a no separador Faturação.",
+        "action": "Abrir o negócio"
+      },
+      "payment_review": {
+        "subject": "Pagamento por rever de {companyName}",
+        "heading": "Pagamento por rever de {companyName}",
+        "body": "Chegou um pagamento de {companyName} que não coincide com o pedido (valor, moeda ou referência). Confirme-o no separador Faturação.",
+        "action": "Rever o pagamento"
+      },
+      "payment_overdue": {
+        "subject": "Pagamento de {companyName} em atraso há {days} dias",
+        "heading": "Pagamento de {companyName} em atraso há {days} dias",
+        "body": "O cliente recebeu um novo lembrete. A partir dos 30 dias pode pausar o projeto (X.1).",
         "action": "Abrir o negócio"
       }
     }
@@ -983,6 +1064,11 @@
         "email": "Email",
         "representativeName": "Representante",
         "representativeRole": "Cargo do representante",
+        "bankName": "Banco",
+        "iban": "IBAN",
+        "bic": "BIC/SWIFT",
+        "paymentInstructions": "Instruções de pagamento",
+        "paymentInstructionsHint": "Aparecem em todos os pedidos de pagamento desta entidade, por exemplo o número Multicaixa Express.",
         "isDefault": "Usar por defeito nas propostas"
       },
       "countries": {
@@ -1369,6 +1455,88 @@
         "invalid_input": "Escreva o motivo.",
         "invalid_state": "O contrato já não pode ser anulado.",
         "not_found": "Não foi possível concluir a ação."
+      }
+    }
+  },
+  "billing": {
+    "deal": {
+      "title": "Faturação",
+      "nonFiscal": "O OS emite pedidos de pagamento não fiscais. A fatura legal é emitida no software certificado (AT) ou no Portal do Contribuinte (AGT) e registada aqui.",
+      "empty": "O plano de pagamentos é criado quando o contrato fica assinado pelas duas partes.",
+      "milestone": "{position}. {label} · {percent}%",
+      "milestoneStatus": {
+        "pending": "Por pedir",
+        "requested": "Pedido enviado",
+        "paid": "Pago"
+      },
+      "request": "{number} · vence a {date}",
+      "paidOn": "Pago a {date}",
+      "overdue": "Em atraso há {days, plural, one {# dia} other {# dias}}",
+      "requestPdf": "PDF do pedido {number}",
+      "invoicePdf": "PDF da fatura {number}",
+      "payments": "Pagamentos",
+      "paymentLine": "{amount} · {method} · {date}",
+      "methods": {
+        "stripe": "Cartão (Stripe)",
+        "bank_transfer": "Transferência bancária",
+        "multicaixa": "Multicaixa Express",
+        "other": "Outro"
+      },
+      "paymentStatus": {
+        "reconciled": "Conciliado",
+        "review": "Por rever"
+      },
+      "missingInvoice": "Falta registar a fatura legal.",
+      "invoice": "Fatura {number} · {issuer} · {date}",
+      "issuers": {
+        "at_certified": "Software certificado (AT)",
+        "agt_portal": "Portal do Contribuinte (AGT)"
+      },
+      "actions": {
+        "createPlan": "Criar plano de pagamentos",
+        "request": "Pedir pagamento",
+        "chase": "Cobrar",
+        "void": "Anular pedido",
+        "confirmVoid": "Confirmar anulação",
+        "record": "Registar pagamento",
+        "saveRecord": "Guardar pagamento",
+        "settle": "Conciliar",
+        "registerInvoice": "Registar fatura legal",
+        "saveInvoice": "Guardar fatura",
+        "cancel": "Cancelar"
+      },
+      "forms": {
+        "record": "Registar pagamento {number}",
+        "void": "Anular {number}",
+        "invoice": "Registar fatura legal de {number}"
+      },
+      "fields": {
+        "method": "Meio",
+        "amount": "Valor",
+        "receivedOn": "Recebido em",
+        "reference": "Referência",
+        "voidReason": "Motivo da anulação",
+        "issuer": "Emitida em",
+        "number": "Número da fatura",
+        "issuedOn": "Data da fatura",
+        "file": "PDF da fatura (até 10 MB)"
+      },
+      "done": {
+        "createPlan": "Plano criado e primeiro pedido enviado.",
+        "request": "Pedido enviado ao cliente.",
+        "chase": "Lembrete enviado ao cliente.",
+        "void": "Pedido anulado.",
+        "record": "Pagamento registado.",
+        "settle": "Pagamento conciliado.",
+        "registerInvoice": "Fatura legal registada."
+      },
+      "errors": {
+        "not_found": "Não encontrado ou sem permissão.",
+        "invalid_input": "Confirme os campos.",
+        "invalid_state": "O estado mudou entretanto. Atualize a página.",
+        "too_soon": "O cliente já foi lembrado nas últimas 24 horas.",
+        "missing_file": "Carregue o PDF da fatura (até 10 MB).",
+        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
       }
     }
   }

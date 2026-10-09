@@ -19,6 +19,12 @@ export const DOMAIN_EVENTS = [
   'contracts.proposal.change_requested',
   'contracts.contract.client_signed',
   'contracts.contract.signed',
+  'billing.request.sent',
+  'billing.request.reminded',
+  'billing.request.overdue',
+  'billing.request.overdue_alert',
+  'billing.payment.received',
+  'billing.payment.review',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

@@ -17,14 +17,33 @@ export type LegalEntity = {
   email: string;
   representativeName: string;
   representativeRole: string;
+  bankName: string;
+  iban: string;
+  bic: string;
+  paymentInstructions: string;
   isDefault: boolean;
 };
 
-export type LegalEntityInput = Omit<LegalEntity, 'id'> & { entityId?: string };
+type BankField = 'bankName' | 'iban' | 'bic' | 'paymentInstructions';
+
+export type LegalEntityInput = Omit<LegalEntity, 'id' | BankField> &
+  Partial<Pick<LegalEntity, BankField>> & { entityId?: string };
 
 export type SettingsDeps = { contexts: Pick<DbContexts, 'withUserContext'> };
 
 const text = (max: number) => z.string().trim().min(1).max(max);
+
+const compact = (value: string) => value.replace(/\s+/g, '').toUpperCase();
+
+const IBAN_SHAPE = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/;
+const BIC_SHAPE = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
+
+const singleLine = (max: number) =>
+  z
+    .string()
+    .max(max)
+    .transform((value) => value.replace(/\p{Cc}+/gu, ' ').trim())
+    .default('');
 
 const entitySchema = z.object({
   entityId: z.uuid().optional(),
@@ -35,6 +54,20 @@ const entitySchema = z.object({
   email: z.email().max(320),
   representativeName: text(200),
   representativeRole: text(120),
+  bankName: singleLine(120),
+  iban: z
+    .string()
+    .max(64)
+    .transform(compact)
+    .refine((value) => value === '' || IBAN_SHAPE.test(value))
+    .default(''),
+  bic: z
+    .string()
+    .max(20)
+    .transform(compact)
+    .refine((value) => value === '' || BIC_SHAPE.test(value))
+    .default(''),
+  paymentInstructions: z.string().trim().max(1000).default(''),
   isDefault: z.boolean(),
 });
 
@@ -49,6 +82,10 @@ export async function listLegalEntities(tx: DbTransaction): Promise<LegalEntity[
       email: legalEntities.email,
       representativeName: legalEntities.representativeName,
       representativeRole: legalEntities.representativeRole,
+      bankName: legalEntities.bankName,
+      iban: legalEntities.iban,
+      bic: legalEntities.bic,
+      paymentInstructions: legalEntities.paymentInstructions,
       isDefault: legalEntities.isDefault,
     })
     .from(legalEntities)

@@ -61,6 +61,33 @@ describe('EntityForm', () => {
     expect(screen.getByRole('status').textContent).toBe('Entidade guardada.');
   });
 
+  it('sends the bank details and payment instructions', async () => {
+    const save = vi.fn<Save>(async () => ({ ok: true }));
+    renderForm(save);
+    fill();
+    fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'Banco Exemplo' } });
+    fireEvent.change(screen.getByLabelText('IBAN'), {
+      target: { value: 'PT50000201231234567890154' },
+    });
+    fireEvent.change(screen.getByLabelText('BIC/SWIFT'), { target: { value: 'BEXAPTPL' } });
+    fireEvent.change(screen.getByLabelText('Instruções de pagamento'), {
+      target: { value: 'Multicaixa Express: 923 000 000' },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar entidade' }));
+    });
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bankName: 'Banco Exemplo',
+        iban: 'PT50000201231234567890154',
+        bic: 'BEXAPTPL',
+        paymentInstructions: 'Multicaixa Express: 923 000 000',
+      }),
+    );
+  });
+
   it('keeps the typed values when the save is refused', async () => {
     renderForm(vi.fn<Save>(async () => ({ ok: false })));
     fill();

@@ -3,6 +3,7 @@ import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
+  createBillingFixture,
   createCommercialFixture,
   createContractFixture,
   createCoreFixture,
@@ -388,6 +389,24 @@ describe('pipeline stage service', () => {
         where id = ${contracts.a.contractId}
       `;
       expect(await move()).toMatchObject({ ok: true, to: '2.1' });
+    });
+  });
+
+  it('moves to 2.2 only with a reconciled payment', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const billing = await createBillingFixture(sql, world);
+      const dealId = billing.contracts.a.dealId;
+      await sql`update public.deals set pipeline_code = '2.1' where id = ${dealId}`;
+      await sql`update public.payments set status = 'review' where id = ${billing.a.paymentId}`;
+      const deps = { contexts: createDbContexts(testDatabase(sql)), flush: async () => {} };
+      const move = () =>
+        changeDealStage(claimsFor(world.users.founder), { dealId, to: '2.2', reason: null }, deps);
+
+      expect(await move()).toEqual({ ok: false, rule: 'payment_required' });
+      await sql`reset role`;
+      await sql`update public.payments set status = 'reconciled' where id = ${billing.a.paymentId}`;
+      expect(await move()).toMatchObject({ ok: true, to: '2.2' });
     });
   });
 });

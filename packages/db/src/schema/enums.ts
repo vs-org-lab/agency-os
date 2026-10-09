@@ -189,6 +189,29 @@ export const contractStatusEnum = appSchema.enum('contract_status', [
 
 export const signaturePartyEnum = appSchema.enum('signature_party', ['client', 'studio']);
 
+export const billingMilestoneStatusEnum = appSchema.enum('billing_milestone_status', [
+  'pending',
+  'requested',
+  'paid',
+]);
+
+export const paymentRequestStatusEnum = appSchema.enum('payment_request_status', [
+  'sent',
+  'paid',
+  'void',
+]);
+
+export const paymentMethodEnum = appSchema.enum('payment_method', [
+  'stripe',
+  'bank_transfer',
+  'multicaixa',
+  'other',
+]);
+
+export const paymentStatusEnum = appSchema.enum('payment_status', ['reconciled', 'review']);
+
+export const invoiceIssuerEnum = appSchema.enum('invoice_issuer', ['at_certified', 'agt_portal']);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -223,6 +246,11 @@ export type CountryCode = (typeof countryCodeEnum.enumValues)[number];
 export type ProposalStatus = (typeof proposalStatusEnum.enumValues)[number];
 export type ContractStatus = (typeof contractStatusEnum.enumValues)[number];
 export type SignatureParty = (typeof signaturePartyEnum.enumValues)[number];
+export type BillingMilestoneStatus = (typeof billingMilestoneStatusEnum.enumValues)[number];
+export type PaymentRequestStatus = (typeof paymentRequestStatusEnum.enumValues)[number];
+export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
+export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
+export type InvoiceIssuer = (typeof invoiceIssuerEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

@@ -40,6 +40,11 @@ export type {
   RoadmapLane,
   SeenArea,
   SignatureParty,
+  BillingMilestoneStatus,
+  InvoiceIssuer,
+  PaymentMethod,
+  PaymentRequestStatus,
+  PaymentStatus,
   ThrottleKind,
   TimelineKind,
 } from './schema/enums';
@@ -50,3 +55,4 @@ export type {
   ProposalClientDetails,
   ProposalScopeLine,
 } from './schema/contracts';
+export type { PaymentRequestClientDetails, PaymentRequestIssuerDetails } from './schema/billing';

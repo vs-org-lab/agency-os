@@ -6,10 +6,17 @@ import { isFounderActor } from '@/modules/commercial';
 import { commercialSession, loadSettingsData } from '@/modules/commercial/server';
 import { loadContractTemplates } from '@/modules/contracts/server';
 import { loadCoreTemplates } from '@/modules/diagnosis/server';
+import { ORBIT_PROCESS } from '@/modules/rooms';
+import { loadProcessTemplates } from '@/modules/rooms/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { saveTemplateAction } from '../commercial-actions';
 import { TemplateForm } from '../settings-forms';
-import { publishContractTemplateAction, publishCoreTemplateAction } from './actions';
+import {
+  publishContractTemplateAction,
+  publishCoreTemplateAction,
+  publishProcessTemplateAction,
+} from './actions';
+import { ProcessTemplateEditor } from './process-template-editor';
 import { ContractTemplateEditor } from './contract-template-editor';
 import { BriefingGuideEditor } from './briefing-guide-editor';
 import { OrbitGridEditor } from './orbit-grid-editor';
@@ -30,11 +37,13 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
     claims: session.claims,
     organizationId: session.actor.organizationId,
   };
-  const [{ templates }, core, contracts] = await Promise.all([
+  const [{ templates }, core, contracts, processes] = await Promise.all([
     loadSettingsData(session),
     loadCoreTemplates(sessionWithOrganization),
     loadContractTemplates(sessionWithOrganization),
+    loadProcessTemplates(sessionWithOrganization),
   ]);
+  const tp = await getTranslations('settings.processTemplates');
   const tk = await getTranslations('settings.contractTemplates');
   const tc = await getTranslations('settings.coreTemplates');
 
@@ -97,6 +106,45 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
             </div>
           </details>
         ))}
+      </section>
+
+      <section aria-labelledby="process-templates-title" className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 id="process-templates-title" className="text-title-sm text-text">
+            {tp('title')}
+          </h2>
+          <p className="text-body-sm text-text-secondary">{tp('description')}</p>
+        </div>
+        {processes.map((process) => (
+          <details key={process.key} className="rounded-lg border border-border bg-surface p-4">
+            <summary className="cursor-pointer text-label text-text">
+              {process.name}
+              {process.isDefault ? (
+                <Badge variant="secondary" className="ml-2">
+                  {tp('isDefault')}
+                </Badge>
+              ) : null}
+            </summary>
+            <div className="pt-4">
+              <ProcessTemplateEditor template={process} publish={publishProcessTemplateAction} />
+            </div>
+          </details>
+        ))}
+        <details className="rounded-lg border border-border bg-surface p-4">
+          <summary className="cursor-pointer text-label text-text">{tp('newTemplate')}</summary>
+          <div className="pt-4">
+            <ProcessTemplateEditor
+              template={{
+                key: null,
+                name: '',
+                version: 0,
+                isDefault: false,
+                definition: ORBIT_PROCESS,
+              }}
+              publish={publishProcessTemplateAction}
+            />
+          </div>
+        </details>
       </section>
 
       <details className="rounded-lg border border-border bg-surface p-4">

@@ -1101,6 +1101,31 @@
         "unknown": "Campos desconhecidos: {fields}",
         "invalid": "Escreva o texto e feche todas as chavetas."
       }
+    },
+    "processTemplates": {
+      "title": "Processos",
+      "description": "Fases e passos que cada projeto copia ao começar. Uma nova versão não altera projetos em curso.",
+      "templateName": "Nome do modelo",
+      "version": "Versão {version}",
+      "isDefault": "Usar por defeito nos projetos novos",
+      "phase": "Fase {number}",
+      "phaseName": "Nome da fase",
+      "requiresApproval": "Exige aprovação do cliente",
+      "codeOnStart": "Etapa do pipeline ao começar",
+      "codeOnDone": "Etapa do pipeline ao concluir",
+      "noCode": "Nenhuma",
+      "stepName": "Nome do passo",
+      "visibleToClient": "Visível ao cliente",
+      "chained": "Enviado quando o anterior termina",
+      "addStep": "Adicionar passo",
+      "removeStep": "Remover passo",
+      "addPhase": "Adicionar fase",
+      "removePhase": "Remover fase",
+      "newTemplate": "Novo modelo",
+      "publish": "Publicar nova versão",
+      "published": "Versão {version} publicada.",
+      "invalid": "Confirme os nomes: cada fase precisa de pelo menos um passo.",
+      "codeOption": "{code} · {name}"
     }
   },
   "diagnosis": {

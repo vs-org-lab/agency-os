@@ -1101,6 +1101,31 @@
         "unknown": "Unknown fields: {fields}",
         "invalid": "Write the text and close every brace."
       }
+    },
+    "processTemplates": {
+      "title": "Processes",
+      "description": "Phases and steps each project copies when it starts. A new version does not change projects under way.",
+      "templateName": "Template name",
+      "version": "Version {version}",
+      "isDefault": "Use by default for new projects",
+      "phase": "Phase {number}",
+      "phaseName": "Phase name",
+      "requiresApproval": "Requires client approval",
+      "codeOnStart": "Pipeline stage when it starts",
+      "codeOnDone": "Pipeline stage when it ends",
+      "noCode": "None",
+      "stepName": "Step name",
+      "visibleToClient": "Visible to the client",
+      "chained": "Sent when the previous one ends",
+      "addStep": "Add step",
+      "removeStep": "Remove step",
+      "addPhase": "Add phase",
+      "removePhase": "Remove phase",
+      "newTemplate": "New template",
+      "publish": "Publish new version",
+      "published": "Version {version} published.",
+      "invalid": "Check the names: each phase needs at least one step.",
+      "codeOption": "{code} · {name}"
     }
   },
   "diagnosis": {

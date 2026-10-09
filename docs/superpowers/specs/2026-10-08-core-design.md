@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | Data                    | 2026-10-08                                                                                                                                 |
-| Estado                  | Aprovado                                                                                                                                   |
+| Estado                  | Implementado                                                                                                                               |
 | Vaga                    | 1 (sub-projetos 1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → 1D Faturação)                                                  |
 | Módulos                 | M03 Diagnóstico e estratégia (redefinido pelo Aurion Core), primeira parte do M04 Documentos (apresentação Figma), parte do M21 (modelos)  |
 | Documentação de produto | `docs/product/01` (M03, RF-030 a RF-033), `02` (C-07, P-07, F2), `04` (RN-03, RN-04, RN-22), `07` (AUT-08 a AUT-10), `08` (SEC-02, SEC-73) |

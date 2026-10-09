@@ -55,6 +55,69 @@ describe('groq transcription', () => {
     expect(file.size).toBe(3);
   });
 
+  it('drops segments Whisper marks as probable silence', async () => {
+    const transcription = createGroqTranscription({
+      apiKey: 'test-key',
+      fetch: fakeFetch(
+        Response.json({
+          segments: [
+            { start: 0, end: 2, text: ' Obrigado.', no_speech_prob: 0.92, avg_logprob: -1.3 },
+            {
+              start: 2,
+              end: 5,
+              text: ' Vendemos online.',
+              no_speech_prob: 0.92,
+              avg_logprob: -0.2,
+            },
+            { start: 5, end: 8, text: ' Sim sim sim sim sim', compression_ratio: 3.1 },
+          ],
+        }),
+      ),
+    });
+
+    expect(await transcription.transcribe(request)).toEqual([
+      { start: 2, end: 5, text: ' Vendemos online.' },
+    ]);
+  });
+
+  it('drops caption credits Whisper invents over silence', async () => {
+    const transcription = createGroqTranscription({
+      apiKey: 'test-key',
+      fetch: fakeFetch(
+        Response.json({
+          segments: [
+            { start: 0, end: 1, text: ' Legenda Adriana Zanotto' },
+            { start: 1, end: 2, text: ' Legendas pela comunidade Amara.org' },
+            { start: 2, end: 3, text: ' Obrigado por assistir!' },
+            { start: 3, end: 4, text: ' A legenda do site está errada.' },
+          ],
+        }),
+      ),
+    });
+
+    expect(await transcription.transcribe(request)).toEqual([
+      { start: 3, end: 4, text: ' A legenda do site está errada.' },
+    ]);
+  });
+
+  it('gives the model the call context in the call language', async () => {
+    const captured: CapturedRequest[] = [];
+    const transcription = createGroqTranscription({
+      apiKey: 'test-key',
+      fetch: async (input, init) => {
+        captured.push({ url: String(input), init: init ?? {} });
+        return Response.json({ segments: [] });
+      },
+    });
+
+    await transcription.transcribe(request);
+    await transcription.transcribe({ ...request, language: 'en' });
+
+    const prompts = captured.map((call) => (call.init.body as FormData).get('prompt'));
+    expect(prompts[0]).toMatch(/português de Portugal/);
+    expect(prompts[1]).toMatch(/diagnosis call/i);
+  });
+
   it('returns no segments for silent audio', async () => {
     const transcription = createGroqTranscription({
       apiKey: 'test-key',

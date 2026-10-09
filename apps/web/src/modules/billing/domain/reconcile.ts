@@ -1,5 +1,5 @@
 import type { Currency } from '@agency-os/i18n';
-import { toMinorUnits } from '@/modules/contracts/domain/payments';
+import { toMinorUnits } from '@/modules/contracts';
 
 export type ReconcilableRequest = {
   id: string;

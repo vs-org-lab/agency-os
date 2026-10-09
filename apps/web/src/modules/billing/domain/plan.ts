@@ -1,5 +1,5 @@
 import type { PaymentStep } from '@agency-os/db';
-import { splitAmount, toMinorUnits } from '@/modules/contracts/domain/payments';
+import { splitAmount, toMinorUnits } from '@/modules/contracts';
 
 export type MilestoneDraft = { position: number; label: string; percent: number; amount: string };
 

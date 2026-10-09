@@ -90,7 +90,8 @@
       "acquisition": "Angariação"
     },
     "room": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "updates": "Atualizações"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -160,12 +161,6 @@
       },
       "overdue": "Atrasado",
       "open": "Abrir"
-    }
-  },
-  "room": {
-    "home": {
-      "title": "Sala sem conteúdo",
-      "description": "O processo, os documentos e a biblioteca desta sala aparecem aqui."
     }
   },
   "portal": {
@@ -1565,5 +1560,119 @@
         "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
       }
     }
+  },
+  "rooms": {
+    "noProject": "Ainda não há projetos nesta sala.",
+    "noProjectHint": "O projeto é criado sozinho quando o primeiro pagamento leva o negócio a 2.2, ou pode criá-lo aqui.",
+    "projectSelector": "Projeto",
+    "previewAsClient": "Ver como cliente",
+    "previewNotice": "Pré-visualização: é isto que o cliente vê. Nada interno aparece aqui.",
+    "backToRoom": "Voltar à sala",
+    "newProject": "Novo projeto",
+    "projectName": "Nome do projeto",
+    "template": "Modelo de processo",
+    "createProject": "Criar projeto",
+    "tabs": {
+      "steps": "Passos",
+      "plan": "Plano"
+    },
+    "projectStatus": {
+      "active": "Em curso",
+      "paused": "Em pausa",
+      "completed": "Concluído",
+      "cancelled": "Cancelado"
+    },
+    "phaseStatus": {
+      "pending": "Por começar",
+      "in_progress": "Em curso",
+      "awaiting_approval": "À espera do cliente",
+      "done": "Concluída"
+    },
+    "stepStatus": {
+      "todo": "Por fazer",
+      "in_progress": "Em curso",
+      "done": "Feito"
+    },
+    "card": {
+      "title": "Projeto",
+      "status": "Estado",
+      "currentPhase": "Fase atual",
+      "noCurrentPhase": "Nenhuma fase em curso",
+      "startsOn": "Início",
+      "endsOn": "Fim previsto",
+      "noEnd": "Por definir",
+      "people": "Pessoas",
+      "nobody": "Ninguém atribuído"
+    },
+    "phases": "Fases",
+    "phaseDue": "Data prevista da fase",
+    "requiresApproval": "Exige aprovação do cliente",
+    "actions": {
+      "startPhase": "Começar fase",
+      "completePhase": "Concluir fase",
+      "requestApproval": "Pedir aprovação",
+      "withdrawApproval": "Retirar pedido",
+      "saveDue": "Guardar data"
+    },
+    "step": {
+      "status": "Estado do passo {name}",
+      "assignee": "Responsável por {name}",
+      "due": "Data de {name}",
+      "visible": "Visível ao cliente",
+      "unassigned": "Sem responsável",
+      "shared": "Enviado ao cliente",
+      "reopened": "Reaberto depois de enviado",
+      "chained": "Começa quando o anterior termina"
+    },
+    "plan": {
+      "title": "Plano",
+      "week": "Semana {start}",
+      "weeks": "Semanas {start} a {end}"
+    },
+    "updates": {
+      "title": "Atualizações",
+      "composer": "Nova atualização",
+      "body": "Texto",
+      "milestone": "Marco (opcional)",
+      "visibility": "Visibilidade",
+      "internal": "Interna",
+      "client": "Visível ao cliente",
+      "publish": "Publicar",
+      "published": "Atualização publicada.",
+      "empty": "Ainda não há atualizações.",
+      "internalBadge": "Interna",
+      "system": "Agency OS",
+      "kinds": {
+        "project_started": "Projeto iniciado: {name}",
+        "step_shared": "Novo passo: {name}",
+        "phase_done": "Fase concluída: {name}",
+        "approval_decided": "Pedido de alterações na fase {name}"
+      }
+    },
+    "approval": {
+      "pending": "À espera da decisão do cliente desde {date}",
+      "approved": "Aprovada pelo cliente a {date}",
+      "changes_requested": "Alterações pedidas a {date}"
+    },
+    "done": {
+      "startPhase": "Fase começada.",
+      "completePhase": "Fase concluída.",
+      "requestApproval": "Pedido de aprovação enviado ao cliente.",
+      "withdrawApproval": "Pedido retirado.",
+      "saved": "Guardado.",
+      "created": "Projeto criado."
+    },
+    "errors": {
+      "not_found": "Não encontrado ou sem permissão.",
+      "invalid_state": "O estado mudou entretanto. Atualize a página.",
+      "invalid_input": "Confirme os campos.",
+      "previous_phase_open": "A fase anterior ainda não está concluída (ou aprovada).",
+      "steps_open": "Ainda há passos por fazer nesta fase.",
+      "approval_required": "Esta fase só termina com a aprovação do cliente.",
+      "deal_has_project": "Este negócio já tem um projeto."
+    },
+    "stepsOf": "Passos de {name}",
+    "phaseLabel": "{position}. {name}",
+    "approvals": "Aprovações"
   }
 }

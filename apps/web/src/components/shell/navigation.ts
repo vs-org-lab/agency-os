@@ -1,5 +1,5 @@
 export type NavigationIcon =
-  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt';
+  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt' | 'feed';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -8,6 +8,7 @@ export type NavigationLabelKey =
   | 'shell.studioNav.acquisition'
   | 'shell.settings'
   | 'shell.room.dashboard'
+  | 'shell.room.updates'
   | 'shell.allClients'
   | 'shell.portalNav.invoices';
 
@@ -61,6 +62,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             href: `/c/${input.clientId}`,
             labelKey: 'shell.room.dashboard',
             icon: 'dashboard',
+          },
+          {
+            href: `/c/${input.clientId}/updates`,
+            labelKey: 'shell.room.updates',
+            icon: 'feed',
           },
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],

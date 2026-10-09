@@ -10,6 +10,10 @@ describe('buildNavigation', () => {
       href: '/c/client-1',
       labelKey: 'shell.room.dashboard',
     });
+    expect(navigation.items.map((item) => item.href)).toEqual([
+      '/c/client-1',
+      '/c/client-1/updates',
+    ]);
   });
 
   it('studio level has no back link and links home and settings', () => {

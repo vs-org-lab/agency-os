@@ -10,7 +10,7 @@ test('founder signs in with password and totp', async ({ page }) => {
 
   await expect(page.getByRole('link', { name: 'E2E Client' })).toBeVisible();
   await page.getByRole('link', { name: 'E2E Client' }).click();
-  await expect(page.getByRole('heading', { name: 'Sala sem conteúdo' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'E2E Client', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Todos os clientes' })).toBeVisible();
 });
 

@@ -90,7 +90,8 @@
       "acquisition": "Acquisition"
     },
     "room": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "updates": "Updates"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -160,12 +161,6 @@
       },
       "overdue": "Overdue",
       "open": "Open"
-    }
-  },
-  "room": {
-    "home": {
-      "title": "This room is empty",
-      "description": "The process, documents and library of this room appear here."
     }
   },
   "portal": {
@@ -1565,5 +1560,119 @@
         "upload_failed": "The file could not be uploaded. Try again."
       }
     }
+  },
+  "rooms": {
+    "noProject": "There are no projects in this room yet.",
+    "noProjectHint": "The project is created on its own when the first payment takes the deal to 2.2, or you can create it here.",
+    "projectSelector": "Project",
+    "previewAsClient": "View as client",
+    "previewNotice": "Preview: this is what the client sees. Nothing internal appears here.",
+    "backToRoom": "Back to the room",
+    "newProject": "New project",
+    "projectName": "Project name",
+    "template": "Process template",
+    "createProject": "Create project",
+    "tabs": {
+      "steps": "Steps",
+      "plan": "Plan"
+    },
+    "projectStatus": {
+      "active": "In progress",
+      "paused": "Paused",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "phaseStatus": {
+      "pending": "Not started",
+      "in_progress": "In progress",
+      "awaiting_approval": "Waiting for the client",
+      "done": "Done"
+    },
+    "stepStatus": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "done": "Done"
+    },
+    "card": {
+      "title": "Project",
+      "status": "Status",
+      "currentPhase": "Current phase",
+      "noCurrentPhase": "No phase in progress",
+      "startsOn": "Start",
+      "endsOn": "Expected end",
+      "noEnd": "To be set",
+      "people": "People",
+      "nobody": "Nobody assigned"
+    },
+    "phases": "Phases",
+    "phaseDue": "Phase due date",
+    "requiresApproval": "Requires client approval",
+    "actions": {
+      "startPhase": "Start phase",
+      "completePhase": "Complete phase",
+      "requestApproval": "Request approval",
+      "withdrawApproval": "Withdraw request",
+      "saveDue": "Save date"
+    },
+    "step": {
+      "status": "Status of step {name}",
+      "assignee": "Owner of {name}",
+      "due": "Date of {name}",
+      "visible": "Visible to the client",
+      "unassigned": "No owner",
+      "shared": "Sent to the client",
+      "reopened": "Reopened after it was sent",
+      "chained": "Starts when the previous one ends"
+    },
+    "plan": {
+      "title": "Plan",
+      "week": "Week {start}",
+      "weeks": "Weeks {start} to {end}"
+    },
+    "updates": {
+      "title": "Updates",
+      "composer": "New update",
+      "body": "Text",
+      "milestone": "Milestone (optional)",
+      "visibility": "Visibility",
+      "internal": "Internal",
+      "client": "Visible to the client",
+      "publish": "Publish",
+      "published": "Update published.",
+      "empty": "There are no updates yet.",
+      "internalBadge": "Internal",
+      "system": "Agency OS",
+      "kinds": {
+        "project_started": "Project started: {name}",
+        "step_shared": "New step: {name}",
+        "phase_done": "Phase completed: {name}",
+        "approval_decided": "Changes requested on phase {name}"
+      }
+    },
+    "approval": {
+      "pending": "Waiting for the client since {date}",
+      "approved": "Approved by the client on {date}",
+      "changes_requested": "Changes requested on {date}"
+    },
+    "done": {
+      "startPhase": "Phase started.",
+      "completePhase": "Phase completed.",
+      "requestApproval": "Approval request sent to the client.",
+      "withdrawApproval": "Request withdrawn.",
+      "saved": "Saved.",
+      "created": "Project created."
+    },
+    "errors": {
+      "not_found": "Not found or not allowed.",
+      "invalid_state": "The status has changed. Refresh the page.",
+      "invalid_input": "Check the fields.",
+      "previous_phase_open": "The previous phase is not done (or approved) yet.",
+      "steps_open": "There are still steps to do in this phase.",
+      "approval_required": "This phase only ends with the client approval.",
+      "deal_has_project": "This deal already has a project."
+    },
+    "stepsOf": "Steps of {name}",
+    "phaseLabel": "{position}. {name}",
+    "approvals": "Approvals"
   }
 }

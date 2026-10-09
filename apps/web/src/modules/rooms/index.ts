@@ -15,3 +15,18 @@ export {
 export { nextChainedStep, type StepState, type StepStatus } from './domain/steps';
 export { planWeeks } from './domain/plan';
 export { ORBIT_PROCESS, ORBIT_TEMPLATE_KEY } from './templates/defaults';
+export type {
+  ClientApprovalView,
+  ClientPhaseView,
+  ClientProjectView,
+  ClientRoomView,
+  ClientStepView,
+  ClientUpdateView,
+  Person,
+  PhaseView,
+  ProjectSummary,
+  ProjectView,
+  RoomView,
+  StepView,
+  UpdateView,
+} from './views';

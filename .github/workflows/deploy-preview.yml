@@ -82,6 +82,10 @@ jobs:
     name: End-to-end and accessibility
     needs: deploy
     runs-on: ubuntu-latest
+    # Every preview seeds and signs in against the same dev database, so runs must not overlap.
+    concurrency:
+      group: e2e-preview-database
+      cancel-in-progress: false
     timeout-minutes: 30
     env:
       CI: true

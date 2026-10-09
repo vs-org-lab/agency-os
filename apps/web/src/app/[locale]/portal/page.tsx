@@ -3,6 +3,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
 
 type PageProps = { params: Promise<{ locale: string }> };
@@ -12,25 +13,45 @@ export default async function PortalHomePage({ params }: PageProps) {
   setRequestLocale(locale);
   const session = await requireArea('/portal', locale);
   const clientId = [...session.ctx.clientRoles.keys()][0];
-  const core = clientId ? await loadPortalCore(session.claims, clientId) : null;
+  const [core, proposal] = clientId
+    ? await Promise.all([
+        loadPortalCore(session.claims, clientId),
+        loadPortalProposal(session.claims, clientId),
+      ])
+    : [null, null];
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
-  if (!core || (!core.briefing && core.documents.length === 0)) {
+  if (!proposal && (!core || (!core.briefing && core.documents.length === 0))) {
     return <EmptyState title={t('home.title')} description={t('home.description')} />;
   }
 
-  const briefing = core.briefing;
+  const briefing = core?.briefing ?? null;
+  const documents = core?.documents ?? [];
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
-      {core.documents.length > 0 ? (
+      {proposal && proposal.status === 'sent' && !proposal.expired ? (
+        <section
+          aria-labelledby="portal-proposal"
+          className="flex flex-col gap-2 rounded-lg border-2 border-text bg-surface p-4"
+        >
+          <h2 id="portal-proposal" className="text-title-sm text-text">
+            {t('home.proposalTitle')}
+          </h2>
+          <p className="text-body-sm text-text-secondary">{t('home.proposalBody')}</p>
+          <Link href="/portal/proposal" className="text-body-sm text-link hover:underline">
+            {t('home.proposalOpen')}
+          </Link>
+        </section>
+      ) : null}
+      {documents.length > 0 ? (
         <section aria-labelledby="portal-presentations" className="flex flex-col gap-3">
           <h1 id="portal-presentations" className="text-title text-text">
             {t('core.presentations')}
           </h1>
           <ul className="flex flex-col gap-2">
-            {core.documents.map((document) => (
+            {documents.map((document) => (
               <li
                 key={document.id}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface p-4"

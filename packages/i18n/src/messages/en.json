@@ -168,7 +168,10 @@
   "portal": {
     "home": {
       "title": "Welcome",
-      "description": "Your project progress appears here."
+      "description": "Your project progress appears here.",
+      "proposalTitle": "Your proposal",
+      "proposalBody": "Choose the Orbit option you want to go ahead with.",
+      "proposalOpen": "View the proposal"
     },
     "core": {
       "briefingTitle": "The summary of our conversation",
@@ -178,6 +181,46 @@
       "open": "View presentation",
       "back": "Back to home",
       "openInFigma": "Open in Figma"
+    },
+    "proposal": {
+      "title": "Proposal",
+      "intro": "Choose the option you want to go ahead with. Once accepted, the contract is ready to sign.",
+      "from": "Proposal from {entity}",
+      "validUntil": "Valid until {date}",
+      "expired": "This proposal expired on {date}. Get in touch to receive a new one.",
+      "choose": "Choose an option",
+      "oneOff": "Amount",
+      "retainer": "{amount} per month, for {months} months",
+      "payments": "Payments",
+      "payment": "{label}: {percent}%",
+      "scope": "Includes",
+      "guarantee": "Guarantee",
+      "details": "Contract details",
+      "detailsHint": "The contract is signed on behalf of the company by whoever accepts the proposal.",
+      "fields": {
+        "legalName": "Company legal name",
+        "taxId": "Tax number",
+        "address": "Registered address",
+        "signerName": "Your full name",
+        "signerRole": "Your role"
+      },
+      "accept": "Accept the proposal and prepare the contract",
+      "acceptedTitle": "Proposal accepted",
+      "acceptedBody": "You chose \"{option}\". The contract is ready to sign.",
+      "openContract": "Open the contract",
+      "changes": "Request changes",
+      "changesHint": "Tell us what you want to change. The proposal stays open until we reply.",
+      "changesMessage": "What you want to change",
+      "sendChanges": "Send request",
+      "changesSent": "Request sent. We will reply shortly.",
+      "empty": "There is no proposal yet.",
+      "errors": {
+        "choose": "Choose an option.",
+        "invalid_input": "Fill in the company and signer details.",
+        "expired": "The proposal has expired.",
+        "invalid_state": "The proposal can no longer be accepted.",
+        "not_found": "The request could not be completed."
+      }
     }
   },
   "commercial": {

@@ -1,6 +1,13 @@
 import 'server-only';
 import type { Locale } from '@agency-os/i18n';
-import { withUserContext, type VerifiedClaims } from '@/platform/db';
+import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import {
+  acceptProposal,
+  getPortalProposal,
+  requestProposalChanges,
+  type AcceptProposalInput,
+  type PortalProposal,
+} from './acceptance';
 import {
   archiveLegalEntity,
   listLegalEntities,
@@ -69,4 +76,24 @@ export function sendDealProposal(session: ContractSession, input: { proposalId: 
 
 export function withdrawDealProposal(session: ContractSession, input: { proposalId: string }) {
   return withdrawProposal(session.claims, input, { contexts });
+}
+
+const portalContexts = { withUserContext, withSystemContext };
+
+export function loadPortalProposal(
+  claims: VerifiedClaims,
+  clientId: string,
+): Promise<PortalProposal | null> {
+  return withUserContext(claims, (tx) => getPortalProposal(tx, clientId));
+}
+
+export function acceptPortalProposal(claims: VerifiedClaims, input: AcceptProposalInput) {
+  return acceptProposal(claims, input, { contexts: portalContexts });
+}
+
+export function requestPortalProposalChanges(
+  claims: VerifiedClaims,
+  input: { proposalId: string; message: string },
+) {
+  return requestProposalChanges(claims, input, { contexts: portalContexts });
 }

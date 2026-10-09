@@ -168,7 +168,10 @@
   "portal": {
     "home": {
       "title": "Bem-vindo",
-      "description": "O acompanhamento do seu projeto aparece aqui."
+      "description": "O acompanhamento do seu projeto aparece aqui.",
+      "proposalTitle": "A sua proposta",
+      "proposalBody": "Escolha a opção Orbit com que quer avançar.",
+      "proposalOpen": "Ver a proposta"
     },
     "core": {
       "briefingTitle": "O resumo da nossa conversa",
@@ -178,6 +181,46 @@
       "open": "Ver apresentação",
       "back": "Voltar ao início",
       "openInFigma": "Abrir no Figma"
+    },
+    "proposal": {
+      "title": "Proposta",
+      "intro": "Escolha a opção com que quer avançar. Ao aceitar, o contrato fica pronto para assinar.",
+      "from": "Proposta de {entity}",
+      "validUntil": "Válida até {date}",
+      "expired": "Esta proposta expirou a {date}. Fale connosco para receber uma nova.",
+      "choose": "Escolha uma opção",
+      "oneOff": "Valor",
+      "retainer": "{amount} por mês, durante {months} meses",
+      "payments": "Pagamentos",
+      "payment": "{label}: {percent}%",
+      "scope": "Inclui",
+      "guarantee": "Garantia",
+      "details": "Dados para o contrato",
+      "detailsHint": "O contrato é assinado em nome da empresa por quem aceita a proposta.",
+      "fields": {
+        "legalName": "Denominação da empresa",
+        "taxId": "NIF",
+        "address": "Morada da sede",
+        "signerName": "O seu nome completo",
+        "signerRole": "O seu cargo"
+      },
+      "accept": "Aceitar proposta e preparar contrato",
+      "acceptedTitle": "Proposta aceite",
+      "acceptedBody": "Escolheu \"{option}\". O contrato está pronto para assinar.",
+      "openContract": "Abrir o contrato",
+      "changes": "Pedir alterações",
+      "changesHint": "Diga-nos o que quer mudar. A proposta mantém-se até respondermos.",
+      "changesMessage": "O que quer mudar",
+      "sendChanges": "Enviar pedido",
+      "changesSent": "Pedido enviado. Respondemos em breve.",
+      "empty": "Ainda não há proposta.",
+      "errors": {
+        "choose": "Escolha uma opção.",
+        "invalid_input": "Preencha os dados da empresa e do signatário.",
+        "expired": "A proposta expirou.",
+        "invalid_state": "A proposta já não pode ser aceite.",
+        "not_found": "Não foi possível concluir o pedido."
+      }
     }
   },
   "commercial": {

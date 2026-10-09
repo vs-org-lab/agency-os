@@ -1,7 +1,10 @@
 import 'server-only';
 
 export {
+  acceptPortalProposal,
   archiveEntity,
+  loadPortalProposal,
+  requestPortalProposalChanges,
   loadContractTemplates,
   loadLegalEntities,
   loadProposalWorkspace,
@@ -23,3 +26,9 @@ export type {
   ProposalView,
 } from './proposals';
 export type { ProposalWorkspace } from './workspace';
+export type {
+  AcceptProposalInput,
+  AcceptProposalResult,
+  PortalProposal,
+  PortalProposalOption,
+} from './acceptance';

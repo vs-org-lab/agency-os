@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { currencies } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
@@ -15,8 +16,6 @@ import { MoveDialog } from '../move-dialog';
 import type { FormState } from './actions';
 
 type BoundAction = (state: FormState, formData: FormData) => Promise<FormState>;
-
-const CURRENCIES = ['EUR', 'GBP', 'USD'] as const;
 
 const FIELD = 'h-11 rounded-md border border-border bg-surface px-3 text-body text-text md:h-9';
 
@@ -118,7 +117,7 @@ export function TrackingForm({
           defaultValue={defaults.currency}
           className={FIELD}
         >
-          {CURRENCIES.map((currency) => (
+          {currencies.map((currency) => (
             <option key={currency} value={currency}>
               {currency}
             </option>

@@ -4,7 +4,7 @@ export const appSchema = pgSchema('app');
 
 export const localeEnum = appSchema.enum('locale', ['pt-PT', 'en']);
 
-export const currencyEnum = appSchema.enum('currency', ['EUR', 'GBP', 'USD']);
+export const currencyEnum = appSchema.enum('currency', ['EUR', 'GBP', 'USD', 'AOA']);
 
 export const profileKindEnum = appSchema.enum('profile_kind', ['internal', 'client']);
 

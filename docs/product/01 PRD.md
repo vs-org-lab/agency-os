@@ -109,7 +109,7 @@ Cada requisito é uma capacidade obrigatória da versão final. O código do mó
 - **RF-043** Link de pagamento por fatura (cartão, SEPA) e débito direto para retainers.
 - **RF-044** Conciliação automática pelo aviso do serviço de pagamentos; manual quando o pagamento é por transferência.
 - **RF-045** Lembretes de cobrança antes e depois do vencimento, e um botão "Cobrar" na própria fatura.
-- **RF-046** Faturação em EUR, GBP e USD, com as regras de IVA configuradas com o contabilista.
+- **RF-046** Faturação em EUR, GBP, USD e AOA (kwanza), com as regras de IVA configuradas com o contabilista. Os clientes angolanos são faturados no Portal do Contribuinte da AGT; o OS regista essas faturas, não as emite.
 
 ### M06 · Salas e portal
 
@@ -235,7 +235,7 @@ Estes requisitos aplicam-se a todos os módulos; um módulo que falhe um deles n
 | RNF-03 | Dados | Dados guardados na União Europeia |
 | RNF-04 | Cópias | Cópias diárias encriptadas; perda máxima de 24 horas (RPO) e reposição em menos de 4 horas (RTO) |
 | RNF-05 | Idiomas | Português de Portugal e inglês em toda a interface, emails e documentos gerados |
-| RNF-06 | Moedas e formatos | EUR, GBP e USD; datas, números e moeda no formato do idioma escolhido |
+| RNF-06 | Moedas e formatos | EUR, GBP, USD e AOA (apresentado como "Kz"); datas, números e moeda no formato do idioma escolhido |
 | RNF-07 | Acessibilidade | WCAG 2.2 nível AA em todos os ecrãs, incluindo o portal e o Brand Hub |
 | RNF-08 | Temas | Modo claro e escuro em todos os ecrãs, a partir dos mesmos tokens |
 | RNF-09 | Dispositivos | Ecrãs da equipa otimizados para computador; portal e aprovações usáveis num telemóvel |

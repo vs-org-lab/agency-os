@@ -336,4 +336,34 @@ describe('pipeline stage service', () => {
       expect(await countRows(sql, 'audit_log', fixture.a.dealId)).toBe(1);
     });
   });
+
+  it('accepts a deal value in kwanzas', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const result = await updateDealTracking(
+        claimsFor(world.users.manager),
+        {
+          dealId: fixture.a.dealId,
+          nextStep: null,
+          nextStepOwnerKind: null,
+          nextStepOwnerUserId: null,
+          nextStepDueOn: null,
+          estimatedValue: '45000000.00',
+          currency: 'AOA',
+        },
+        { contexts },
+      );
+
+      expect(result).toEqual({ ok: true });
+      await sql`reset role`;
+      const [deal] = await sql<{ currency: string; value: string }[]>`
+        select currency::text, estimated_value::text as value
+        from public.deals where id = ${fixture.a.dealId}
+      `;
+      expect(deal).toEqual({ currency: 'AOA', value: '45000000.00' });
+    });
+  });
 });

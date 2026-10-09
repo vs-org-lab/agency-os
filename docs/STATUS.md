@@ -140,6 +140,9 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 ## Requisitos a garantir na Vaga 1
 
 - Modelos de contrato em Definições › Modelos, com geração automática do contrato a partir da proposta aceite no portal e envio para assinatura (RF-035, RF-036, RF-200, S-13).
+- Kwanza (AOA) disponível no valor estimado dos negócios desde 2026-10-09 (apresentado como "Kz"); a faturação (1D) inclui AOA desde o início.
+- Clientes angolanos faturados no Portal do Contribuinte da AGT: o OS regista a fatura emitida no portal (número, valor em Kz, PDF), como faz com o software certificado pela AT, e nunca numera faturas.
+- Duas entidades emissoras (empresa em Portugal e futura empresa em Angola): cada cliente fica associado à entidade que o fatura; o 1D modela a entidade emissora.
 - Faturas emitidas pelo software certificado pela AT, com o PDF oficial e o modelo visual configurados nesse software; o OS gera com a marca apenas documentos não fiscais (pedidos de pagamento, pró-formas) (RF-041).
 
 ## Questões em aberto

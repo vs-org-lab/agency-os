@@ -1,5 +1,6 @@
 import { and, desc, eq, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { currencies } from '@agency-os/i18n';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { authorize, loadAccessContext, resolveActor, type Actor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
@@ -248,7 +249,7 @@ const trackingSchema = z.object({
     .string()
     .regex(/^\d{1,10}(\.\d{1,2})?$/)
     .nullable(),
-  currency: z.enum(['EUR', 'GBP', 'USD']),
+  currency: z.enum(currencies),
 });
 
 export type DealTrackingInput = z.input<typeof trackingSchema>;

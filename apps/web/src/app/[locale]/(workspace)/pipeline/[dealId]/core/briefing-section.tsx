@@ -8,7 +8,7 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
-import { Link } from '@/i18n/navigation';
+import { getPathname } from '@/i18n/navigation';
 import type { RecordingView } from '@/modules/diagnosis/server';
 import type { BriefingGuide } from '@/modules/diagnosis';
 import {
@@ -109,7 +109,10 @@ export function BriefingSection({
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
-            <Link href={`/pipeline/${dealId}/core/call`}>{t('openCall')}</Link>
+            {/* A full document load: call mode carries its own permissions policy for recording. */}
+            <a href={getPathname({ href: `/pipeline/${dealId}/core/call`, locale })}>
+              {t('openCall')}
+            </a>
           </Button>
           {writable && !sharedAt ? (
             <Button

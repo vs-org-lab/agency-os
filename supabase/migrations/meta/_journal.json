@@ -134,6 +134,13 @@
       "when": 1791464607074,
       "tag": "20261008130327_core_recordings_access",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791533245843,
+      "tag": "20261009080725_currency_aoa",
+      "breakpoints": true
     }
   ]
 }

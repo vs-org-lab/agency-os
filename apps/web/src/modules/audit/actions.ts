@@ -57,6 +57,7 @@ export const AUDIT_ACTIONS = [
   'project.phase_started',
   'project.phase_completed',
   'project.step_changed',
+  'project.step_updated',
   'project.update_published',
   'approval.requested',
   'approval.decided',

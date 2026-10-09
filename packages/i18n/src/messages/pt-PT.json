@@ -290,7 +290,8 @@
         "not_found": "Este pedido já não está disponível. Atualize a página.",
         "comment_required": "Escreva o que deve mudar.",
         "invalid_input": "Confirme o comentário."
-      }
+      },
+      "projectSelector": "Projeto"
     }
   },
   "commercial": {
@@ -1674,14 +1675,23 @@
       "saveDue": "Guardar data"
     },
     "step": {
-      "status": "Estado do passo {name}",
       "assignee": "Responsável por {name}",
       "due": "Data de {name}",
       "visible": "Visível ao cliente",
       "unassigned": "Sem responsável",
       "shared": "Enviado ao cliente",
       "reopened": "Reaberto depois de enviado",
-      "chained": "Começa quando o anterior termina"
+      "chained": "Começa quando o anterior termina",
+      "next": {
+        "todo": "Começar: {name}",
+        "in_progress": "Marcar como feito: {name}",
+        "done": "Reabrir: {name}"
+      },
+      "nextShort": {
+        "todo": "Começar",
+        "in_progress": "Marcar como feito",
+        "done": "Reabrir"
+      }
     },
     "plan": {
       "title": "Plano",
@@ -1732,6 +1742,11 @@
     },
     "stepsOf": "Passos de {name}",
     "phaseLabel": "{position}. {name}",
-    "approvals": "Aprovações"
+    "approvals": "Aprovações",
+    "clientApproval": {
+      "pending": "À espera da sua decisão desde {date}",
+      "approved": "Aprovou a {date}",
+      "changes_requested": "Pediu alterações a {date}"
+    }
   }
 }

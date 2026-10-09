@@ -6,7 +6,16 @@ import {
   withTestTransaction,
   type World,
 } from '@agency-os/db/testing';
-import { completePhase, setStepStatus, startPhase, updatePhase, updateStep } from './process';
+import { schema } from '@agency-os/db';
+import { eq } from 'drizzle-orm';
+import {
+  completePhase,
+  completePhaseInTx,
+  setStepStatus,
+  startPhase,
+  updatePhase,
+  updateStep,
+} from './process';
 import { createProjectForDeal } from './projects';
 import type { RoomsDeps } from './runtime-types';
 import { roomClaims, roomDeps } from './testing';
@@ -253,6 +262,81 @@ describe('process', () => {
         select ends_on::text from public.projects where id = ${started.projectId}
       `;
       expect(project?.ends_on).toBe('2026-12-18');
+    });
+  });
+
+  it('a phase completed twice with a stale read completes once', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const started = await kickoff(sql, world, deps);
+      const claims = roomClaims(world.users.founder);
+      await sql`update public.project_phases set status = 'done' where id = ${phaseOf(started, 1)}`;
+      const phaseId = phaseOf(started, 2);
+      await startPhase(claims, { phaseId }, deps);
+      await sql`update public.project_steps set status = 'done' where phase_id = ${phaseId}`;
+      const [stale] = await deps.contexts.withSystemContext((tx) =>
+        tx.select().from(schema.projectPhases).where(eq(schema.projectPhases.id, phaseId)),
+      );
+      if (!stale) throw new Error('Phase is missing');
+
+      expect(await completePhase(claims, { phaseId }, deps)).toEqual({ ok: true });
+      expect(
+        await deps.contexts.withSystemContext((tx) =>
+          completePhaseInTx(tx, stale, deps, new Date()),
+        ),
+      ).toEqual({ ok: false, rule: 'invalid_state' });
+      const entries = await sql`
+        select id from public.project_updates
+        where project_id = ${started.projectId} and kind = 'phase_done'
+      `;
+      expect(entries).toHaveLength(1);
+    });
+  });
+
+  it('reopening the previous step flags the chained step already sent', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const started = await kickoff(sql, world, deps);
+      const claims = roomClaims(world.users.founder);
+      await startPhase(claims, { phaseId: phaseOf(started, 1) }, deps);
+      await setStepStatus(claims, { stepId: stepOf(started, 1, 1), status: 'done' }, deps);
+      await setStepStatus(claims, { stepId: stepOf(started, 1, 2), status: 'done' }, deps);
+
+      await setStepStatus(claims, { stepId: stepOf(started, 1, 2), status: 'in_progress' }, deps);
+
+      expect(await stepRow(sql, stepOf(started, 1, 3))).toEqual({
+        status: 'in_progress',
+        shared: true,
+        reopened: true,
+      });
+    });
+  });
+
+  it('only founders and staff assigned to the client take steps, and changes are audited', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const started = await kickoff(sql, world, deps);
+      const founder = roomClaims(world.users.founder);
+      const stepId = stepOf(started, 1, 1);
+
+      expect(await updateStep(founder, { stepId, assigneeId: world.users.finance }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+      expect(await updateStep(founder, { stepId, assigneeId: world.users.manager }, deps)).toEqual({
+        ok: true,
+      });
+      expect(await updateStep(founder, { stepId, visibleToClient: false }, deps)).toEqual({
+        ok: true,
+      });
+      const audit = await sql<{ action: string }[]>`
+        select action from public.audit_log
+        where organization_id = ${world.organizationId} and action = 'project.step_updated'
+      `;
+      expect(audit).toHaveLength(2);
     });
   });
 });

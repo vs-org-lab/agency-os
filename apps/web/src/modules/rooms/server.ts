@@ -8,7 +8,7 @@ import {
   type ApprovalDecision,
 } from './approvals';
 import { roomActor } from './authorize';
-import { getClientRoom } from './portal';
+import { getClientApprovals, getClientRoom } from './portal';
 import { completePhase, setStepStatus, startPhase, updatePhase, updateStep } from './process';
 import { loadRoom, loadRoomPreview } from './room';
 import { publishUpdate } from './updates';
@@ -124,3 +124,7 @@ export function publishRoomUpdate(
   return publishUpdate(session.claims, input, roomsDeps());
 }
 export { ROOM_FUNCTIONS } from './automations';
+
+export function loadPortalApprovals(claims: VerifiedClaims, clientId: string) {
+  return withUserContext(claims, (tx) => getClientApprovals(tx, clientId));
+}

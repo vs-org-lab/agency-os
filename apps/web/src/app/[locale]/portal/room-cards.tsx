@@ -9,8 +9,11 @@ export type RoomCardState = {
   pendingApprovals: number;
 };
 
-/** P-01: the current phase, the next client-visible step and what waits for a decision. */
-export function roomCardState(project: ClientProjectView): RoomCardState {
+/**
+ * P-01: the current phase and next client-visible step of the project shown, and how many
+ * approvals wait for a decision across all of the client's projects.
+ */
+export function roomCardState(project: ClientProjectView, pendingApprovals: number): RoomCardState {
   const current =
     project.phases.find(
       (phase) => phase.status === 'in_progress' || phase.status === 'awaiting_approval',
@@ -20,7 +23,7 @@ export function roomCardState(project: ClientProjectView): RoomCardState {
     projectName: project.name,
     phaseName: current?.name ?? null,
     nextStep: next?.name ?? null,
-    pendingApprovals: project.approvals.filter((approval) => approval.status === 'pending').length,
+    pendingApprovals,
   };
 }
 

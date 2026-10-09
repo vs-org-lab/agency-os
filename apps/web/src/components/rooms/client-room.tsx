@@ -70,9 +70,12 @@ export function ClientRoom({
               >
                 <span className="text-body font-medium text-text">{approval.phaseName}</span>
                 <span className="text-body-sm text-text-secondary">
-                  {t(`approval.${approval.status === 'withdrawn' ? 'pending' : approval.status}`, {
-                    date: day(approval.decidedAt ?? approval.requestedAt),
-                  })}
+                  {t(
+                    `clientApproval.${approval.status === 'withdrawn' ? 'pending' : approval.status}`,
+                    {
+                      date: day(approval.decidedAt ?? approval.requestedAt),
+                    },
+                  )}
                 </span>
                 {approval.comment ? (
                   <p className="whitespace-pre-line text-body-sm text-text">{approval.comment}</p>

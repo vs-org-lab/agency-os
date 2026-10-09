@@ -3,7 +3,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { ApprovalDecision } from '@/components/rooms/approval-decision';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
-import { loadPortalRoom } from '@/modules/rooms/server';
+import { loadPortalApprovals } from '@/modules/rooms/server';
 import { portalRoomAccess } from '../room-session';
 import { decideApprovalAction } from './actions';
 
@@ -17,13 +17,11 @@ export default async function PortalApprovalsPage({ params }: PageProps) {
   setRequestLocale(locale);
   const session = await requireArea('/portal', locale);
   const access = portalRoomAccess(session.ctx.clientRoles);
-  const room =
-    access.clientId && access.readsRoom
-      ? await loadPortalRoom(session.claims, access.clientId)
-      : null;
-  const t = await getTranslations('portal.room');
   const pending =
-    room?.project?.approvals.filter((approval) => approval.status === 'pending') ?? [];
+    access.clientId && access.readsRoom
+      ? await loadPortalApprovals(session.claims, access.clientId)
+      : [];
+  const t = await getTranslations('portal.room');
 
   if (pending.length === 0) {
     return <EmptyState title={t('approvalsTitle')} description={t('approvalsEmpty')} />;
@@ -38,7 +36,10 @@ export default async function PortalApprovalsPage({ params }: PageProps) {
             key={approval.id}
             className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
           >
-            <h2 className="text-title-sm text-text">{approval.phaseName}</h2>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-title-sm text-text">{approval.phaseName}</h2>
+              <p className="text-body-sm text-text-secondary">{approval.projectName}</p>
+            </div>
             {access.decides ? (
               <ApprovalDecision approvalId={approval.id} decide={decideApprovalAction} />
             ) : null}

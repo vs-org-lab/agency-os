@@ -109,7 +109,7 @@ function withIntl(node: React.ReactNode) {
 
 describe('portal room', () => {
   it('home shows current phase and next step', () => {
-    const state = roomCardState(PROJECT);
+    const state = roomCardState(PROJECT, 1);
     expect(state).toEqual({
       projectName: 'Website',
       phaseName: 'Descoberta e arquitetura',
@@ -151,5 +151,6 @@ describe('portal room', () => {
     expect(screen.getByText('Mapa pronto para revisão')).toBeDefined();
     expect(screen.getAllByText('Descoberta e arquitetura').length).toBeGreaterThan(0);
     expect(screen.queryByRole('button', { name: 'Aprovar' })).toBeNull();
+    expect(screen.getByText(/^À espera da sua decisão desde/)).toBeDefined();
   });
 });

@@ -95,8 +95,10 @@ export type RoomView = {
   clientName: string;
   projects: ProjectSummary[];
   project: ProjectView | null;
-  /** Staff who can be assigned to steps. */
+  /** Founders and the staff assigned to the client: who can take a step. */
   people: Person[];
+  /** The staff assigned to the client, shown on the project card. */
+  team: Person[];
 };
 
 export function isoOrNull(value: string | Date | null): string | null {

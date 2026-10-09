@@ -83,7 +83,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
               <PlanView phases={room.project.phases} startsOn={room.project.startsOn} />
             </TabsContent>
           </Tabs>
-          <ProjectCard project={room.project} people={room.people} />
+          <ProjectCard project={room.project} team={room.team} />
         </div>
       ) : (
         <EmptyState title={t('noProject')} description={t('noProjectHint')} />

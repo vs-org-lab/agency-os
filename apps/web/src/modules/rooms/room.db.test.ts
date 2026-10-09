@@ -6,7 +6,7 @@ import {
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { createProjectAsStaff } from './projects';
-import { getClientRoom } from './portal';
+import { getClientApprovals, getClientRoom } from './portal';
 import { loadRoom, loadRoomPreview } from './room';
 import { roomClaims, roomDeps } from './testing';
 
@@ -74,9 +74,12 @@ describe('room reads', () => {
       expect(room?.project?.updates.map((update) => update.id)).toEqual(
         expect.arrayContaining([rooms.a.clientUpdateId, rooms.a.internalUpdateId]),
       );
-      expect(room?.people.map((person) => person.name)).toEqual(
-        expect.arrayContaining(['Founder', 'Manager', 'Freelancer']),
-      );
+      expect(room?.people.map((person) => person.name).sort()).toEqual([
+        'Founder',
+        'Freelancer',
+        'Manager',
+      ]);
+      expect(room?.team.map((person) => person.name).sort()).toEqual(['Freelancer', 'Manager']);
       expect(await loadRoom(claims, { clientId: world.clients.b }, deps)).toBeNull();
     });
   });
@@ -97,6 +100,48 @@ describe('room reads', () => {
         (tx) => getClientRoom(tx, world.clients.b),
       );
       expect(finance).toBeNull();
+    });
+  });
+
+  it('lists pending approvals across every project of the client', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const rooms = await createRoomFixture(sql, world);
+      const [project] = await sql<{ id: string }[]>`
+        insert into public.projects (organization_id, client_id, name, template_key, template_version,
+                                     starts_on)
+        values (${world.organizationId}, ${world.clients.a}, 'Campanha', 'orbit', 1, current_date)
+        returning id
+      `;
+      const projectId = project?.id ?? '';
+      const [phase] = await sql<{ id: string }[]>`
+        insert into public.project_phases (organization_id, client_id, project_id, position, name,
+                                           requires_approval, status)
+        values (${world.organizationId}, ${world.clients.a}, ${projectId}, 1, 'Conceito', true,
+                'awaiting_approval')
+        returning id
+      `;
+      const phaseId = phase?.id ?? '';
+      const [approval] = await sql<{ id: string }[]>`
+        insert into public.approvals (organization_id, client_id, project_id, subject_type, subject_id)
+        values (${world.organizationId}, ${world.clients.a}, ${projectId}, 'phase', ${phaseId})
+        returning id
+      `;
+      const { deps } = roomDeps(sql);
+
+      const approvals = await deps.contexts.withUserContext(
+        roomClaims(world.users.decisionMakerA, 'client'),
+        (tx) => getClientApprovals(tx, world.clients.a),
+      );
+
+      expect(
+        approvals.map((entry) => [entry.id, entry.projectName, entry.phaseName]).sort(),
+      ).toEqual(
+        [
+          [rooms.a.approvalId, 'Website', 'Fase 1'],
+          [approval?.id, 'Campanha', 'Conceito'],
+        ].sort(),
+      );
     });
   });
 });

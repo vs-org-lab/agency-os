@@ -17,6 +17,7 @@ import {
 
 const {
   approvals,
+  clientStaffAssignments,
   clients,
   organizationMemberships,
   profiles,
@@ -151,8 +152,16 @@ async function buildProject(
   return { summaries, project };
 }
 
-async function assignablePeople(tx: DbTransaction, organizationId: string): Promise<Person[]> {
-  const rows = await tx
+/**
+ * Who works in the room: the organisation's founders and the staff assigned to the client
+ * (spec decision 6). `team` is the assigned staff only, shown on the project card.
+ */
+async function roomPeople(
+  tx: DbTransaction,
+  organizationId: string,
+  clientId: string,
+): Promise<{ people: Person[]; team: Person[] }> {
+  const founders = await tx
     .selectDistinct({ id: profiles.id, name: profiles.fullName })
     .from(organizationMemberships)
     .innerJoin(profiles, eq(profiles.id, organizationMemberships.userId))
@@ -160,11 +169,33 @@ async function assignablePeople(tx: DbTransaction, organizationId: string): Prom
       and(
         eq(organizationMemberships.organizationId, organizationId),
         eq(organizationMemberships.status, 'active'),
-        inArray(organizationMemberships.role, ['founder', 'project_manager', 'freelancer']),
+        eq(organizationMemberships.role, 'founder'),
+      ),
+    );
+  const team = await tx
+    .selectDistinct({ id: profiles.id, name: profiles.fullName })
+    .from(clientStaffAssignments)
+    .innerJoin(profiles, eq(profiles.id, clientStaffAssignments.userId))
+    .innerJoin(
+      organizationMemberships,
+      and(
+        eq(organizationMemberships.userId, clientStaffAssignments.userId),
+        eq(organizationMemberships.organizationId, organizationId),
       ),
     )
-    .orderBy(asc(profiles.fullName));
-  return rows;
+    .where(
+      and(
+        eq(clientStaffAssignments.clientId, clientId),
+        eq(organizationMemberships.status, 'active'),
+        inArray(organizationMemberships.role, ['project_manager', 'freelancer']),
+      ),
+    );
+  const byName = (left: Person, right: Person) => left.name.localeCompare(right.name);
+  const people = [
+    ...founders,
+    ...team.filter((person) => !founders.some((founder) => founder.id === person.id)),
+  ];
+  return { people: people.sort(byName), team: [...team].sort(byName) };
 }
 
 /** C-01 and C-02: the client's room for the team, with internal items. */
@@ -190,7 +221,7 @@ export async function loadRoom(
       clientName: client.name,
       projects: summaries,
       project,
-      people: await assignablePeople(tx, actor.organizationId),
+      ...(await roomPeople(tx, actor.organizationId, input.clientId)),
     };
   });
 }

@@ -125,10 +125,10 @@ describe('ProcessBoard', () => {
 
     expect(screen.queryByRole('button', { name: 'Pedir aprovação' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Concluir fase' })).toBeNull();
-    const status = screen.getByLabelText(
-      'Estado do passo Questionário de descoberta',
-    ) as HTMLSelectElement;
-    expect(status.disabled).toBe(false);
+    const done = screen.getByRole('button', {
+      name: 'Marcar como feito: Questionário de descoberta',
+    }) as HTMLButtonElement;
+    expect(done.disabled).toBe(false);
     expect(screen.queryByLabelText('Responsável por Questionário de descoberta')).toBeNull();
   });
 
@@ -146,6 +146,57 @@ describe('ProcessBoard', () => {
     const steps = screen.getByRole('list', { name: 'Passos de Descoberta e arquitetura' });
     expect(within(steps).getByText('Questionário de descoberta')).toBeDefined();
     expect(screen.getByRole('button', { name: 'Pedir aprovação' })).toBeDefined();
+  });
+});
+
+describe('ProcessBoard approvals and steps', () => {
+  it('shows the client change request comment to the team', () => {
+    withIntl(
+      <ProcessBoard
+        project={{
+          ...PROJECT,
+          approvals: [
+            {
+              id: 'approval-1',
+              phaseId: 'phase-1',
+              phaseName: 'Descoberta e arquitetura',
+              status: 'changes_requested',
+              requestedAt: '2026-10-14T10:00:00.000Z',
+              decidedAt: '2026-10-15T10:00:00.000Z',
+              comment: 'Falta a página de serviços.',
+            },
+          ],
+        }}
+        people={[]}
+        writable
+        currentUserId="founder-1"
+        actions={actionsMock()}
+      />,
+    );
+
+    expect(screen.getByText('Falta a página de serviços.')).toBeDefined();
+    expect(screen.getByText(/^Alterações pedidas a/)).toBeDefined();
+  });
+
+  it('changes a step status only through an explicit button', async () => {
+    const setStepStatus = vi.fn(async () => ({ ok: true }) as const);
+    withIntl(
+      <ProcessBoard
+        project={PROJECT}
+        people={[]}
+        writable
+        currentUserId="founder-1"
+        actions={actionsMock({ setStepStatus })}
+      />,
+    );
+
+    expect(screen.queryByRole('combobox', { name: /Estado do passo/ })).toBeNull();
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Marcar como feito: Questionário de descoberta' }),
+      );
+    });
+    expect(setStepStatus).toHaveBeenCalledWith('step-1', 'done');
   });
 });
 

@@ -290,7 +290,8 @@
         "not_found": "This request is no longer available. Refresh the page.",
         "comment_required": "Describe what should change.",
         "invalid_input": "Check the comment."
-      }
+      },
+      "projectSelector": "Project"
     }
   },
   "commercial": {
@@ -1674,14 +1675,23 @@
       "saveDue": "Save date"
     },
     "step": {
-      "status": "Status of step {name}",
       "assignee": "Owner of {name}",
       "due": "Date of {name}",
       "visible": "Visible to the client",
       "unassigned": "No owner",
       "shared": "Sent to the client",
       "reopened": "Reopened after it was sent",
-      "chained": "Starts when the previous one ends"
+      "chained": "Starts when the previous one ends",
+      "next": {
+        "todo": "Start: {name}",
+        "in_progress": "Mark as done: {name}",
+        "done": "Reopen: {name}"
+      },
+      "nextShort": {
+        "todo": "Start",
+        "in_progress": "Mark as done",
+        "done": "Reopen"
+      }
     },
     "plan": {
       "title": "Plan",
@@ -1732,6 +1742,11 @@
     },
     "stepsOf": "Steps of {name}",
     "phaseLabel": "{position}. {name}",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "clientApproval": {
+      "pending": "Waiting for your decision since {date}",
+      "approved": "You approved on {date}",
+      "changes_requested": "You requested changes on {date}"
+    }
   }
 }

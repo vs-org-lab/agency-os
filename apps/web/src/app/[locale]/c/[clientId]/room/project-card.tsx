@@ -1,23 +1,13 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import type { Person, ProjectView } from '@/modules/rooms';
 
-/** The project card on C-01: status, current phase, dates and the people on its steps. */
-export function ProjectCard({
-  project,
-  people,
-}: {
-  project: ProjectView;
-  people: readonly Person[];
-}) {
+/** The project card on C-01: status, current phase, dates and the staff assigned to the client. */
+export function ProjectCard({ project, team }: { project: ProjectView; team: readonly Person[] }) {
   const t = useTranslations('rooms');
   const format = useFormatter();
   const current = project.phases.find(
     (phase) => phase.status === 'in_progress' || phase.status === 'awaiting_approval',
   );
-  const assigned = new Set(
-    project.phases.flatMap((phase) => phase.steps.map((step) => step.assigneeId)),
-  );
-  const team = people.filter((person) => assigned.has(person.id));
   const day = (value: string) =>
     format.dateTime(new Date(`${value}T12:00:00Z`), { dateStyle: 'medium' });
 

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, max } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, max } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type StepStatus } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
@@ -11,6 +11,7 @@ import type { RoomsDeps } from './runtime-types';
 
 const {
   approvals,
+  clientStaffAssignments,
   organizationMemberships,
   projectPhases,
   projectSteps,
@@ -119,10 +120,17 @@ export async function completePhaseInTx(
   const decision = canCompletePhase(phase, steps, await phaseApprovalState(tx, phase.id));
   if (!decision.ok) return decision;
 
-  await tx
+  const completed = await tx
     .update(projectPhases)
     .set({ status: 'done', completedAt: now })
-    .where(eq(projectPhases.id, phase.id));
+    .where(
+      and(
+        eq(projectPhases.id, phase.id),
+        inArray(projectPhases.status, ['in_progress', 'awaiting_approval']),
+      ),
+    )
+    .returning({ id: projectPhases.id });
+  if (completed.length === 0) return { ok: false, rule: 'invalid_state' };
   await tx.insert(projectUpdates).values({
     organizationId: phase.organizationId,
     clientId: phase.clientId,
@@ -269,6 +277,19 @@ export async function setStepStatus(
             step.reopenedAfterShared || (step.sharedAt !== null && step.status === 'done'),
         })
         .where(eq(projectSteps.id, step.id));
+      if (step.status === 'done') {
+        await tx
+          .update(projectSteps)
+          .set({ reopenedAfterShared: true })
+          .where(
+            and(
+              eq(projectSteps.phaseId, step.phaseId),
+              eq(projectSteps.position, step.position + 1),
+              eq(projectSteps.chained, true),
+              isNotNull(projectSteps.sharedAt),
+            ),
+          );
+      }
       await recordAudit(tx, {
         organizationId: step.organizationId,
         action: 'project.step_changed',
@@ -309,7 +330,45 @@ const stepPatchSchema = z.object({
   visibleToClient: z.boolean().optional(),
 });
 
-/** Assignee, due date and client visibility of a step; assignees are the organisation's staff. */
+/**
+ * The people who can take a step in a client's room: the organisation's founders and the staff
+ * assigned to the client (spec decision 6).
+ */
+export async function isRoomStaff(
+  tx: DbTransaction,
+  organizationId: string,
+  clientId: string,
+  userId: string,
+): Promise<boolean> {
+  const memberships = await tx
+    .select({ role: organizationMemberships.role })
+    .from(organizationMemberships)
+    .where(
+      and(
+        eq(organizationMemberships.userId, userId),
+        eq(organizationMemberships.organizationId, organizationId),
+        eq(organizationMemberships.status, 'active'),
+      ),
+    );
+  if (memberships.some((membership) => membership.role === 'founder')) return true;
+  if (
+    !memberships.some(
+      (membership) => membership.role === 'project_manager' || membership.role === 'freelancer',
+    )
+  ) {
+    return false;
+  }
+  const [assignment] = await tx
+    .select({ userId: clientStaffAssignments.userId })
+    .from(clientStaffAssignments)
+    .where(
+      and(eq(clientStaffAssignments.userId, userId), eq(clientStaffAssignments.clientId, clientId)),
+    )
+    .limit(1);
+  return assignment !== undefined;
+}
+
+/** Assignee, due date and client visibility of a step; making a step visible is audited (RN-50). */
 export async function updateStep(
   claims: VerifiedClaims,
   input: {
@@ -322,32 +381,33 @@ export async function updateStep(
 ): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' }> {
   const clientId = await visibleClient(deps.contexts, claims, { stepId: input.stepId });
   const actor = clientId ? await roomActor(deps.contexts, claims, clientId, 'write') : null;
-  if (!actor) return NOT_FOUND;
+  if (!actor || !clientId) return NOT_FOUND;
   const parsed = stepPatchSchema.safeParse(input);
   if (!parsed.success) return { ok: false, rule: 'invalid_input' };
   const { stepId, ...patch } = parsed.data;
 
   return deps.contexts.withSystemContext(async (tx) => {
-    if (patch.assigneeId) {
-      const [member] = await tx
-        .select({ userId: organizationMemberships.userId })
-        .from(organizationMemberships)
-        .where(
-          and(
-            eq(organizationMemberships.userId, patch.assigneeId),
-            eq(organizationMemberships.organizationId, actor.organizationId),
-            eq(organizationMemberships.status, 'active'),
-          ),
-        )
-        .limit(1);
-      if (!member) return { ok: false as const, rule: 'invalid_input' as const };
+    if (
+      patch.assigneeId &&
+      !(await isRoomStaff(tx, actor.organizationId, clientId, patch.assigneeId))
+    ) {
+      return { ok: false as const, rule: 'invalid_input' as const };
     }
     const changed = await tx
       .update(projectSteps)
       .set(patch)
       .where(eq(projectSteps.id, stepId))
       .returning({ id: projectSteps.id });
-    return changed.length > 0 ? { ok: true as const } : NOT_FOUND;
+    if (changed.length === 0) return NOT_FOUND;
+    await recordAudit(tx, {
+      organizationId: actor.organizationId,
+      action: 'project.step_updated',
+      resourceType: 'project_step',
+      resourceId: stepId,
+      clientId,
+      metadata: patch,
+    });
+    return { ok: true as const };
   });
 }
 

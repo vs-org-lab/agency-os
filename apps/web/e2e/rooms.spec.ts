@@ -14,8 +14,8 @@ async function expectAccessible(page: Page): Promise<void> {
   expect(results.violations.map((violation) => violation.id)).toEqual([]);
 }
 
-async function setStep(page: Page, name: string, status: 'Feito' | 'Em curso') {
-  await page.getByLabel(`Estado do passo ${name}`).selectOption({ label: status });
+async function finishStep(page: Page, name: string) {
+  await page.getByRole('button', { name: `Marcar como feito: ${name}` }).click();
   await expect(page.getByText('Guardado.')).toBeVisible({ timeout: 30_000 });
   await page.reload();
 }
@@ -33,13 +33,15 @@ test.describe('Rooms', () => {
     await expect(page.getByRole('heading', { name: seeded.company, level: 1 })).toBeVisible();
     await page.getByRole('button', { name: 'Começar fase' }).click();
     await expect(page.getByText('Fase começada.')).toBeVisible({ timeout: 30_000 });
-    await page.reload();
+    await page.goto(`/pipeline/${seeded.dealId}`);
+    await expect(page.getByText('2.3', { exact: true }).first()).toBeVisible();
+    await page.goto(`/c/${seeded.clientId}`);
     await expectAccessible(page);
 
-    await setStep(page, 'Questionário de descoberta', 'Feito');
-    await setStep(page, 'Análise técnica', 'Feito');
+    await finishStep(page, 'Questionário de descoberta');
+    await finishStep(page, 'Análise técnica');
     await expect(page.getByText('Enviado ao cliente')).toBeVisible();
-    await setStep(page, 'Arquitetura e mapa de conteúdos', 'Feito');
+    await finishStep(page, 'Arquitetura e mapa de conteúdos');
 
     await page.getByRole('button', { name: 'Pedir aprovação' }).click();
     await expect(page.getByText('Pedido de aprovação enviado ao cliente.')).toBeVisible({

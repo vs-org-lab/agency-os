@@ -33,7 +33,12 @@ type Feedback = { tone: 'success'; key: DoneKey } | { tone: 'danger'; error: Roo
 
 const FIELD = 'h-9 rounded-md border border-border bg-surface px-2 text-body-sm text-text';
 
-const STEP_STATUSES: readonly StepStatus[] = ['todo', 'in_progress', 'done'];
+/** The one change each step status offers: start it, finish it, or reopen it. */
+const NEXT_STATUS: Record<StepStatus, StepStatus> = {
+  todo: 'in_progress',
+  in_progress: 'done',
+  done: 'in_progress',
+};
 
 function defaultPhase(phases: readonly PhaseView[]): string | null {
   const active = phases.find(
@@ -68,6 +73,9 @@ export function ProcessBoard({
   const selected = project.phases.find((phase) => phase.id === selectedId) ?? null;
   const approval = selected
     ? project.approvals.find((entry) => entry.phaseId === selected.id && entry.status === 'pending')
+    : undefined;
+  const decided = selected
+    ? project.approvals.find((entry) => entry.phaseId === selected.id && entry.status !== 'pending')
     : undefined;
   const [dueOn, setDueOn] = useState(selected?.dueOn ?? '');
 
@@ -131,6 +139,21 @@ export function ProcessBoard({
                   date: format.dateTime(new Date(approval.requestedAt), { dateStyle: 'medium' }),
                 })}
               </p>
+            ) : null}
+            {!approval && decided?.decidedAt ? (
+              <div className="flex flex-col gap-1 rounded-md bg-surface-muted p-3">
+                <p className="text-body-sm text-text-secondary">
+                  {t(
+                    `approval.${decided.status === 'approved' ? 'approved' : 'changes_requested'}`,
+                    {
+                      date: format.dateTime(new Date(decided.decidedAt), { dateStyle: 'medium' }),
+                    },
+                  )}
+                </p>
+                {decided.comment ? (
+                  <p className="whitespace-pre-line text-body-sm text-text">{decided.comment}</p>
+                ) : null}
+              </div>
             ) : null}
             <div aria-live="polite">
               {feedback?.tone === 'success' ? (
@@ -230,23 +253,24 @@ export function ProcessBoard({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <select
-                      aria-label={t('step.status', { name: step.name })}
-                      className={FIELD}
-                      value={step.status}
-                      disabled={!canChangeStatus || pending}
-                      onChange={(event) =>
-                        run('saved', () =>
-                          actions.setStepStatus(step.id, event.target.value as StepStatus),
-                        )
-                      }
-                    >
-                      {STEP_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {t(`stepStatus.${status}`)}
-                        </option>
-                      ))}
-                    </select>
+                    <Badge variant={step.status === 'done' ? 'secondary' : 'outline'}>
+                      {t(`stepStatus.${step.status}`)}
+                    </Badge>
+                    {canChangeStatus ? (
+                      <Button
+                        size="sm"
+                        variant={step.status === 'in_progress' ? 'default' : 'outline'}
+                        disabled={pending}
+                        aria-label={t(`step.next.${step.status}`, { name: step.name })}
+                        onClick={() =>
+                          run('saved', () =>
+                            actions.setStepStatus(step.id, NEXT_STATUS[step.status]),
+                          )
+                        }
+                      >
+                        {t(`step.nextShort.${step.status}`)}
+                      </Button>
+                    ) : null}
                     {writable ? (
                       <>
                         <select

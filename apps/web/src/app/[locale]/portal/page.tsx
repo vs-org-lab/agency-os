@@ -6,7 +6,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalInvoices } from '@/modules/billing/server';
 import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
-import { loadPortalRoom } from '@/modules/rooms/server';
+import { loadPortalApprovals, loadPortalRoom } from '@/modules/rooms/server';
 import {
   PaymentHomeCard,
   paymentCardState,
@@ -27,20 +27,21 @@ export default async function PortalHomePage({ params }: PageProps) {
   const [clientId, roles = []] = [...session.ctx.clientRoles.entries()][0] ?? [];
   const pays = roles.some((role) => PAYING_ROLES.includes(role));
   const access = portalRoomAccess(session.ctx.clientRoles);
-  const [core, proposal, invoices, room] = clientId
+  const [core, proposal, invoices, room, approvals] = clientId
     ? await Promise.all([
         loadPortalCore(session.claims, clientId),
         loadPortalProposal(session.claims, clientId),
         pays ? loadPortalInvoices(session.claims, clientId) : Promise.resolve([]),
         access.readsRoom ? loadPortalRoom(session.claims, clientId) : Promise.resolve(null),
+        access.readsRoom ? loadPortalApprovals(session.claims, clientId) : Promise.resolve([]),
       ])
-    : [null, null, [], null];
+    : [null, null, [], null, []];
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
   const card = proposalCardState(proposal);
   const payment = paymentCardState(invoices);
-  const roomCard = room?.project ? roomCardState(room.project) : null;
+  const roomCard = room?.project ? roomCardState(room.project, approvals.length) : null;
   if (
     !card &&
     !payment &&

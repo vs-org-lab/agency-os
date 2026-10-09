@@ -734,7 +734,8 @@
       "integrations": "Integrations",
       "application": "Application",
       "booking": "Booking",
-      "templates": "Templates"
+      "templates": "Templates",
+      "organization": "Organisation"
     },
     "application": {
       "title": "Application",
@@ -858,6 +859,57 @@
         "addCriterion": "Add criterion",
         "removeCriterion": "Remove criterion",
         "mustSum": "Each front must sum to 25 points."
+      }
+    },
+    "organization": {
+      "title": "Organisation",
+      "description": "The companies that sign contracts and issue invoices.",
+      "entities": "Issuing entities",
+      "entitiesHint": "The default entity comes first in proposals. A proposal can only be sent with an entity chosen.",
+      "empty": "No entities yet. Register the company in Portugal before the first proposal.",
+      "add": "New entity",
+      "edit": "Edit",
+      "archive": "Archive",
+      "default": "Default",
+      "fields": {
+        "legalName": "Legal name",
+        "taxId": "Tax number",
+        "address": "Registered address",
+        "country": "Country",
+        "email": "Email",
+        "representativeName": "Representative",
+        "representativeRole": "Representative role",
+        "isDefault": "Use by default in proposals"
+      },
+      "countries": {
+        "PT": "Portugal",
+        "AO": "Angola"
+      },
+      "save": "Save entity",
+      "cancel": "Cancel",
+      "saved": "Entity saved.",
+      "error": "The entity could not be saved. Check the fields.",
+      "summary": "{taxId} · {address} · {representative} ({role})"
+    },
+    "contractTemplates": {
+      "title": "Contracts",
+      "description": "The text every contract is generated from. Fields in braces are filled in from the accepted proposal.",
+      "legalReview": "Base text: review it with your lawyer before the first real client.",
+      "languages": {
+        "pt-PT": "Contract in Portuguese",
+        "en": "Contract in English"
+      },
+      "current": "Version {version}",
+      "body": "Contract text",
+      "fields": "Available fields",
+      "preview": "Preview",
+      "hidePreview": "Hide preview",
+      "previewLabel": "Preview with sample data",
+      "publish": "Publish version",
+      "published": "Version {version} published.",
+      "errors": {
+        "unknown": "Unknown fields: {fields}",
+        "invalid": "Write the text and close every brace."
       }
     }
   },

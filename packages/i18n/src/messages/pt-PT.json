@@ -734,7 +734,8 @@
       "integrations": "Integrações",
       "application": "Candidatura",
       "booking": "Agenda",
-      "templates": "Modelos"
+      "templates": "Modelos",
+      "organization": "Organização"
     },
     "application": {
       "title": "Candidatura",
@@ -858,6 +859,57 @@
         "addCriterion": "Acrescentar critério",
         "removeCriterion": "Remover critério",
         "mustSum": "Cada frente tem de somar 25 pontos."
+      }
+    },
+    "organization": {
+      "title": "Organização",
+      "description": "As empresas que assinam os contratos e emitem as faturas.",
+      "entities": "Entidades emissoras",
+      "entitiesHint": "A entidade por defeito aparece primeiro nas propostas. Uma proposta só pode ser enviada com uma entidade escolhida.",
+      "empty": "Ainda não há entidades. Registe a empresa em Portugal antes da primeira proposta.",
+      "add": "Nova entidade",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "default": "Por defeito",
+      "fields": {
+        "legalName": "Denominação",
+        "taxId": "NIF",
+        "address": "Morada da sede",
+        "country": "País",
+        "email": "Email",
+        "representativeName": "Representante",
+        "representativeRole": "Cargo do representante",
+        "isDefault": "Usar por defeito nas propostas"
+      },
+      "countries": {
+        "PT": "Portugal",
+        "AO": "Angola"
+      },
+      "save": "Guardar entidade",
+      "cancel": "Cancelar",
+      "saved": "Entidade guardada.",
+      "error": "Não foi possível guardar. Confirme os campos.",
+      "summary": "{taxId} · {address} · {representative} ({role})"
+    },
+    "contractTemplates": {
+      "title": "Contratos",
+      "description": "O texto de que nasce cada contrato. Os campos entre chavetas são preenchidos com os dados da proposta aceite.",
+      "legalReview": "Texto base: reveja-o com o seu advogado antes do primeiro cliente real.",
+      "languages": {
+        "pt-PT": "Contrato em português",
+        "en": "Contrato em inglês"
+      },
+      "current": "Versão {version}",
+      "body": "Texto do contrato",
+      "fields": "Campos disponíveis",
+      "preview": "Pré-visualizar",
+      "hidePreview": "Esconder pré-visualização",
+      "previewLabel": "Pré-visualização com dados de exemplo",
+      "publish": "Publicar versão",
+      "published": "Versão {version} publicada.",
+      "errors": {
+        "unknown": "Campos desconhecidos: {fields}",
+        "invalid": "Escreva o texto e feche todas as chavetas."
       }
     }
   },

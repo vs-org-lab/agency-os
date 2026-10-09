@@ -1,0 +1,46 @@
+import 'server-only';
+import type { Locale } from '@agency-os/i18n';
+import { withUserContext, type VerifiedClaims } from '@/platform/db';
+import {
+  archiveLegalEntity,
+  listLegalEntities,
+  saveLegalEntity,
+  type LegalEntity,
+  type LegalEntityInput,
+} from './entities';
+import { activeContractTemplate, publishContractTemplate } from './templates/service';
+
+export type ContractSession = { claims: VerifiedClaims };
+
+export type ContractTemplates = Record<Locale, { version: number; body: string }>;
+
+const contexts = { withUserContext };
+
+export function loadLegalEntities(session: ContractSession): Promise<LegalEntity[]> {
+  return withUserContext(session.claims, (tx) => listLegalEntities(tx));
+}
+
+export function saveEntity(session: ContractSession, input: LegalEntityInput) {
+  return saveLegalEntity(session.claims, input, { contexts });
+}
+
+export function archiveEntity(session: ContractSession, input: { entityId: string }) {
+  return archiveLegalEntity(session.claims, input, { contexts });
+}
+
+export function loadContractTemplates(
+  session: ContractSession & { organizationId: string },
+): Promise<ContractTemplates> {
+  return withUserContext(session.claims, async (tx) => {
+    const pt = await activeContractTemplate(tx, session.organizationId, 'pt-PT');
+    const en = await activeContractTemplate(tx, session.organizationId, 'en');
+    return {
+      'pt-PT': { version: pt.version, body: pt.body },
+      en: { version: en.version, body: en.body },
+    };
+  });
+}
+
+export function publishTemplate(session: ContractSession, input: { locale: Locale; body: string }) {
+  return publishContractTemplate(session.claims, input, { contexts });
+}

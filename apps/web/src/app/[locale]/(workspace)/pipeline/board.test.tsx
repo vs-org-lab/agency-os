@@ -58,6 +58,15 @@ async function openMoveDialog() {
 }
 
 describe('Board', () => {
+  it('lets keyboard users reach every scrolling stage row, even without deals', () => {
+    renderBoard(vi.fn<MoveDeal>());
+
+    for (const stage of ['Pré-venda', 'Core', 'Orbit']) {
+      const row = screen.getByRole('region', { name: `Colunas de ${stage}` });
+      expect(row.getAttribute('tabindex'), stage).toBe('0');
+    }
+  });
+
   it('reverts the card and shows the rule when the move is refused', async () => {
     const move = vi.fn<MoveDeal>(async () => ({
       ok: false,

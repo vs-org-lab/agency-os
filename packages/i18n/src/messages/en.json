@@ -364,6 +364,7 @@
         "list": "List"
       },
       "stageCount": "{count, plural, =0 {No deals} one {# deal} other {# deals}}",
+      "stageColumns": "{stage} columns",
       "emptyColumn": "No deals",
       "moveTo": "Move {name} to…",
       "moveDialog": {

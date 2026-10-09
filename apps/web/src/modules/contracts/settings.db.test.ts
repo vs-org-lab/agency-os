@@ -82,6 +82,52 @@ describe('legal entities', () => {
     });
   });
 
+  it('saves bank details and normalises the iban', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = depsFor(sql);
+      const claims = claimsFor(world.users.founder);
+
+      const saved = await saveLegalEntity(
+        claims,
+        {
+          ...ENTITY,
+          bankName: 'Banco Exemplo',
+          iban: 'pt50 0002 0123 1234 5678 9015 4',
+          bic: 'bexaptpl',
+          paymentInstructions: 'Multicaixa Express: 923 000 000\nIndicar o número do pedido.',
+        },
+        deps,
+      );
+      if (!saved.ok) throw new Error('Entity was not saved');
+      const [entity] = await deps.contexts.withUserContext(claims, (tx) => listLegalEntities(tx));
+
+      expect(entity).toMatchObject({
+        bankName: 'Banco Exemplo',
+        iban: 'PT50000201231234567890154',
+        bic: 'BEXAPTPL',
+        paymentInstructions: 'Multicaixa Express: 923 000 000\nIndicar o número do pedido.',
+      });
+    });
+  });
+
+  it('rejects a malformed iban and keeps bank details optional', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = depsFor(sql);
+      const claims = claimsFor(world.users.founder);
+
+      expect(await saveLegalEntity(claims, { ...ENTITY, iban: 'PT50 12' }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+      const saved = await saveLegalEntity(claims, ENTITY, deps);
+      if (!saved.ok) throw new Error('Entity was not saved');
+      const [entity] = await deps.contexts.withUserContext(claims, (tx) => listLegalEntities(tx));
+      expect(entity).toMatchObject({ bankName: '', iban: '', bic: '', paymentInstructions: '' });
+    });
+  });
+
   it('makes the first entity the default and hides archived ones', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

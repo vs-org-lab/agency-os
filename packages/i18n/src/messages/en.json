@@ -982,6 +982,11 @@
         "email": "Email",
         "representativeName": "Representative",
         "representativeRole": "Representative role",
+        "bankName": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC/SWIFT",
+        "paymentInstructions": "Payment instructions",
+        "paymentInstructionsHint": "Shown on every payment request from this entity, for example the Multicaixa Express number.",
         "isDefault": "Use by default in proposals"
       },
       "countries": {

@@ -1072,7 +1072,7 @@
       "start": "Gravar a call",
       "stop": "Parar e enviar",
       "elapsed": "A gravar · {time}",
-      "shareHint": "Escolha o separador do Meet e marque «Partilhar áudio do separador». A gravação para sozinha às 2 horas.",
+      "shareHint": "Use auscultadores, para o microfone não captar a voz do cliente. Escolha o separador do Meet e marque «Partilhar áudio do separador». A gravação para sozinha às 2 horas.",
       "upload": "Carregar ficheiro de áudio",
       "uploadHint": "MP3, M4A, WAV, OGG ou WEBM até 25 MB, sem separação de vozes.",
       "recovered": "Há uma gravação interrompida guardada neste browser.",

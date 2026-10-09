@@ -13,6 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { ArrowRightLeft, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { currencyFormatOptions } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { cn } from '@agency-os/ui/lib/utils';
 import { FormMessage } from '@/components/forms/form-message';
@@ -83,10 +84,7 @@ function DealCard({ card, onMove }: { card: PipelineCard; onMove: (card: Pipelin
       </div>
       {card.estimatedValue ? (
         <p className="text-caption text-text-secondary tabular-nums">
-          {format.number(Number(card.estimatedValue), {
-            style: 'currency',
-            currency: card.currency,
-          })}
+          {format.number(Number(card.estimatedValue), currencyFormatOptions(card.currency))}
         </p>
       ) : null}
       <p className="line-clamp-2 text-caption text-text">{card.nextStep ?? t('card.noNextStep')}</p>

@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { currencyFormatOptions } from '@agency-os/i18n';
 import {
   Table,
   TableBody,
@@ -53,10 +54,7 @@ export async function DealList({ cards }: { cards: PipelineCard[] }) {
               </TableCell>
               <TableCell className="text-right tabular-nums">
                 {card.estimatedValue
-                  ? format.number(Number(card.estimatedValue), {
-                      style: 'currency',
-                      currency: card.currency,
-                    })
+                  ? format.number(Number(card.estimatedValue), currencyFormatOptions(card.currency))
                   : null}
               </TableCell>
             </TableRow>

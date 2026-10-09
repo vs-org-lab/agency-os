@@ -40,11 +40,11 @@ type Fonts = { regular: PDFFont; bold: PDFFont };
 /** Keeps only characters the standard WinAnsi fonts can encode. */
 function encodable(font: PDFFont, text: string): string {
   const supported = new Set(font.getCharacterSet());
-  return [...text.replace(/[   ]/g, ' ')]
+  return [...text.replace(/[\u00a0\u2009\u202f]/g, ' ')]
     .map((character) => {
       const code = character.codePointAt(0) ?? 0;
       if (supported.has(code)) return character;
-      if (character === '→') return '->';
+      if (character === '\u2192') return '->';
       return '?';
     })
     .join('');

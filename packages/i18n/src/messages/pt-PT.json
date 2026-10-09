@@ -654,6 +654,24 @@
         "heading": "A apresentação está no portal",
         "body": "Olá {firstName}, a apresentação da nossa sessão já está no portal, para a rever com calma ou partilhar com quem decide consigo.",
         "action": "Ver a apresentação"
+      },
+      "proposal_shared": {
+        "subject": "A sua proposta está no portal",
+        "heading": "A sua proposta está no portal",
+        "body": "Olá {firstName}, a proposta com as opções que apresentámos está no portal. Escolha a opção com que quer avançar ou peça-nos alterações.",
+        "action": "Ver a proposta"
+      },
+      "contract_ready": {
+        "subject": "O contrato está pronto a assinar",
+        "heading": "O contrato está pronto a assinar",
+        "body": "Olá {firstName}, obrigado por aceitar a proposta. O contrato está no portal para ler e assinar.",
+        "action": "Ler e assinar o contrato"
+      },
+      "contract_signed": {
+        "subject": "Contrato assinado",
+        "heading": "Contrato assinado",
+        "body": "Olá {firstName}, o contrato está assinado pelas duas partes. O PDF assinado está no portal.",
+        "action": "Ver o contrato"
       }
     },
     "founder": {
@@ -686,6 +704,30 @@
         "heading": "Uma automação falhou",
         "body": "A automação {automation} falhou depois de 5 tentativas, em {occurredAt}. O erro está no Sentry.",
         "action": "Abrir o estúdio"
+      },
+      "proposal_accepted": {
+        "subject": "{companyName} aceitou a proposta",
+        "heading": "{companyName} aceitou a proposta",
+        "body": "A opção escolhida foi \"{optionName}\". O contrato foi gerado e espera as assinaturas do cliente e da Aurion.",
+        "action": "Abrir o negócio"
+      },
+      "proposal_changes": {
+        "subject": "{companyName} pediu alterações à proposta",
+        "heading": "{companyName} pediu alterações à proposta",
+        "body": "O decisor deixou um pedido de alteração. Leia-o na secção Proposta do separador Core.",
+        "action": "Abrir o negócio"
+      },
+      "contract_client_signed": {
+        "subject": "{companyName} assinou o contrato",
+        "heading": "{companyName} assinou o contrato",
+        "body": "Falta a assinatura pela Aurion. Depois de assinar, o negócio passa a 2.1.",
+        "action": "Assinar o contrato"
+      },
+      "contract_signed": {
+        "subject": "Contrato assinado com {companyName}",
+        "heading": "Contrato assinado com {companyName}",
+        "body": "O contrato está assinado pelas duas partes e o negócio passou a 2.1. O PDF assinado está no separador Core.",
+        "action": "Abrir o negócio"
       }
     }
   },

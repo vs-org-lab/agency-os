@@ -39,3 +39,4 @@ export type {
   PortalProposalOption,
 } from './acceptance';
 export type { ContractView, PortalContractView } from './signing';
+export { CONTRACT_FUNCTIONS } from './automations';

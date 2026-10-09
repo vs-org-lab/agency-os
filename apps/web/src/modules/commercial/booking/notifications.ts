@@ -288,7 +288,12 @@ async function sendSessionEmail(
   });
 }
 
-export type PortalNoticeTemplate = 'lead.briefing_shared' | 'lead.presentation_shared';
+export type PortalNoticeTemplate =
+  | 'lead.briefing_shared'
+  | 'lead.presentation_shared'
+  | 'lead.proposal_shared'
+  | 'lead.contract_ready'
+  | 'lead.contract_signed';
 
 /** Tells the decision maker with portal access that something new was shared with them. */
 export async function sendPortalNotice(

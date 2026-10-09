@@ -654,6 +654,24 @@
         "heading": "The presentation is in the portal",
         "body": "Hello {firstName}, the presentation from our session is now in the portal, to review at your own pace or share with whoever decides with you.",
         "action": "View the presentation"
+      },
+      "proposal_shared": {
+        "subject": "Your proposal is in the portal",
+        "heading": "Your proposal is in the portal",
+        "body": "Hello {firstName}, the proposal with the options we presented is in the portal. Choose the option you want to go ahead with, or ask us for changes.",
+        "action": "View the proposal"
+      },
+      "contract_ready": {
+        "subject": "The agreement is ready to sign",
+        "heading": "The agreement is ready to sign",
+        "body": "Hello {firstName}, thank you for accepting the proposal. The agreement is in the portal to read and sign.",
+        "action": "Read and sign the agreement"
+      },
+      "contract_signed": {
+        "subject": "Agreement signed",
+        "heading": "Agreement signed",
+        "body": "Hello {firstName}, the agreement is signed by both parties. The signed PDF is in the portal.",
+        "action": "View the agreement"
       }
     },
     "founder": {
@@ -686,6 +704,30 @@
         "heading": "An automation failed",
         "body": "The {automation} automation failed after 5 attempts, at {occurredAt}. The error is in Sentry.",
         "action": "Open the studio"
+      },
+      "proposal_accepted": {
+        "subject": "{companyName} accepted the proposal",
+        "heading": "{companyName} accepted the proposal",
+        "body": "The chosen option is \"{optionName}\". The agreement was generated and awaits the client and Aurion signatures.",
+        "action": "Open the deal"
+      },
+      "proposal_changes": {
+        "subject": "{companyName} asked for changes to the proposal",
+        "heading": "{companyName} asked for changes to the proposal",
+        "body": "The decision maker left a change request. Read it in the Proposal section of the Core tab.",
+        "action": "Open the deal"
+      },
+      "contract_client_signed": {
+        "subject": "{companyName} signed the agreement",
+        "heading": "{companyName} signed the agreement",
+        "body": "The Aurion signature is still missing. Once you sign, the deal moves to 2.1.",
+        "action": "Sign the agreement"
+      },
+      "contract_signed": {
+        "subject": "Agreement signed with {companyName}",
+        "heading": "Agreement signed with {companyName}",
+        "body": "The agreement is signed by both parties and the deal moved to 2.1. The signed PDF is in the Core tab.",
+        "action": "Open the deal"
       }
     }
   },

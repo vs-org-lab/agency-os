@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Data                    | 2026-10-09                                                                                                                     |
-| Estado                  | Implementado (ramo `feat/billing`, 2026-10-09)                                                                                 |
+| Estado                  | Implementado e em staging (PR #25, 2026-10-09)                                                                                 |
 | Vaga                    | 1 (1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → **1D Faturação**)                                               |
 | Módulos                 | M05 Faturação e pagamentos (RF-040 a RF-046), M06 (P-06 Faturas)                                                               |
 | Documentação de produto | `docs/product/01` (M05), `02` (S-10, P-06), `04` (RN-04, RN-30 a RN-34), `07` (AUT-12, 13, 18 a 20), `08` (matriz, SEC-81, 82) |

@@ -1072,7 +1072,7 @@
       "start": "Record the call",
       "stop": "Stop and upload",
       "elapsed": "Recording · {time}",
-      "shareHint": "Pick the Meet tab and tick “Share tab audio”. Recording stops on its own after 2 hours.",
+      "shareHint": "Use headphones so the microphone does not pick up the client. Pick the Meet tab and tick “Share tab audio”. Recording stops on its own after 2 hours.",
       "upload": "Upload an audio file",
       "uploadHint": "MP3, M4A, WAV, OGG or WEBM up to 25 MB, without speaker separation.",
       "recovered": "An interrupted recording is stored in this browser.",

@@ -1,13 +1,13 @@
 # Sub-projeto 1D — Faturação e pagamentos
 
-| Campo                   | Valor                                                                                                                         |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Data                    | 2026-10-09                                                                                                                    |
-| Estado                  | Aprovado (luz verde permanente do fundador, 2026-10-09)                                                                       |
-| Vaga                    | 1 (1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → **1D Faturação**)                                              |
-| Módulos                 | M05 Faturação e pagamentos (RF-040 a RF-046), M06 (P-06 Faturas)                                                              |
+| Campo                   | Valor                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Data                    | 2026-10-09                                                                                                                     |
+| Estado                  | Implementado (ramo `feat/billing`, 2026-10-09)                                                                                 |
+| Vaga                    | 1 (1A Comercial → 1B Diagnóstico → 1C Documentos e contratos → **1D Faturação**)                                               |
+| Módulos                 | M05 Faturação e pagamentos (RF-040 a RF-046), M06 (P-06 Faturas)                                                               |
 | Documentação de produto | `docs/product/01` (M05), `02` (S-10, P-06), `04` (RN-04, RN-30 a RN-34), `07` (AUT-12, 13, 18 a 20), `08` (matriz, SEC-81, 82) |
-| Depende de              | [1C Proposta, contrato e assinatura](2026-10-09-contracts-design.md), decisão de pagamentos de 2026-10-09 em `docs/STATUS.md` |
+| Depende de              | [1C Proposta, contrato e assinatura](2026-10-09-contracts-design.md), decisão de pagamentos de 2026-10-09 em `docs/STATUS.md`  |
 
 ## 1. Objetivo
 
@@ -53,16 +53,16 @@ Cobrar o que o contrato diz. O OS cria o plano de pagamentos a partir da opção
 
 ### Excluído (registado em `docs/STATUS.md`)
 
-| Item                                                                            | Motivo                                                         | Volta quando                              |
-| ------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------- |
-| Emissão da fatura legal por API (InvoiceXpress ou Moloni)                       | Serviço pago                                                   | Critérios de lançamento                   |
-| Pedidos mensais do retainer e débito direto (RF-040 recorrente, RF-043)         | O acompanhamento mensal começa depois da entrega               | Retainers (M12)                           |
-| Ligação da prestação à aprovação da fase (RN-32, AUT-16)                        | As fases e as aprovações chegam com as salas                   | Salas e processo (Vaga 2)                 |
-| Convite ao portal, kickoff e kit de boas-vindas no primeiro pagamento (AUT-13)  | Dependem das salas e do processo                               | Salas e processo (Vaga 2)                 |
-| Emails ao contacto de finanças do cliente                                       | Os utilizadores de finanças do cliente chegam com os convites   | Convites de utilizadores do cliente (M06) |
-| Painel Dinheiro (S-09), despesas e subscrições                                  | Prioridade B3                                                  | Vaga 3                                    |
-| Referências Multicaixa geradas por gateway (ProxyPay)                           | Exige empresa e banco angolanos                                | Empresa angolana constituída              |
-| Notas de crédito                                                                | São emitidas no software certificado; o OS só anula pedidos    | Integração com o software certificado     |
+| Item                                                                           | Motivo                                                        | Volta quando                              |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------- | ----------------------------------------- |
+| Emissão da fatura legal por API (InvoiceXpress ou Moloni)                      | Serviço pago                                                  | Critérios de lançamento                   |
+| Pedidos mensais do retainer e débito direto (RF-040 recorrente, RF-043)        | O acompanhamento mensal começa depois da entrega              | Retainers (M12)                           |
+| Ligação da prestação à aprovação da fase (RN-32, AUT-16)                       | As fases e as aprovações chegam com as salas                  | Salas e processo (Vaga 2)                 |
+| Convite ao portal, kickoff e kit de boas-vindas no primeiro pagamento (AUT-13) | Dependem das salas e do processo                              | Salas e processo (Vaga 2)                 |
+| Emails ao contacto de finanças do cliente                                      | Os utilizadores de finanças do cliente chegam com os convites | Convites de utilizadores do cliente (M06) |
+| Painel Dinheiro (S-09), despesas e subscrições                                 | Prioridade B3                                                 | Vaga 3                                    |
+| Referências Multicaixa geradas por gateway (ProxyPay)                          | Exige empresa e banco angolanos                               | Empresa angolana constituída              |
+| Notas de crédito                                                               | São emitidas no software certificado; o OS só anula pedidos   | Integração com o software certificado     |
 
 ## 4. Fluxo
 
@@ -84,14 +84,14 @@ Cobrar o que o contrato diz. O OS cria o plano de pagamentos a partir da opção
 
 ## 5. Dados e acesso
 
-| Tabela               | Campos principais                                                                                                                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `legal_entities` (+) | banco, IBAN, BIC/SWIFT, instruções de pagamento locais                                                                                                                                                                                                                                    |
-| `billing_counters`   | organização, ano, último número (numeração `PP-AAAA-NNNN` sem colisões em pedidos simultâneos)                                                                                                                                                                                             |
-| `billing_milestones` | organização, cliente, negócio, contrato, posição (única por contrato), designação, percentagem, valor, moeda, estado (`pending`, `requested`, `paid`)                                                                                                                                      |
-| `payment_requests`   | organização, cliente, negócio, prestação, número (único por organização), valor, moeda, vencimento, estado (`sent`, `paid`, `void`), dados da entidade e do cliente fixados, idioma, caminho do PDF, enviado em, pago em, anulado em e motivo, último lembrete, última cobrança               |
-| `payments`           | organização, cliente, pedido, valor, moeda, meio (`stripe`, `bank_transfer`, `multicaixa`, `other`), referência, recebido em, estado (`reconciled`, `review`), registado por, evento do fornecedor (único)                                                                                 |
-| `legal_invoices`     | organização, cliente, pedido (único), emissor (`at_certified`, `agt_portal`), número, data, caminho do PDF, registado por                                                                                                                                                                  |
+| Tabela               | Campos principais                                                                                                                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `legal_entities` (+) | banco, IBAN, BIC/SWIFT, instruções de pagamento locais                                                                                                                                                                                                                          |
+| `billing_counters`   | organização, ano, último número (numeração `PP-AAAA-NNNN` sem colisões em pedidos simultâneos)                                                                                                                                                                                  |
+| `billing_milestones` | organização, cliente, negócio, contrato, posição (única por contrato), designação, percentagem, valor, moeda, estado (`pending`, `requested`, `paid`)                                                                                                                           |
+| `payment_requests`   | organização, cliente, negócio, prestação, número (único por organização), valor, moeda, vencimento, estado (`sent`, `paid`, `void`), dados da entidade e do cliente fixados, idioma, caminho do PDF, enviado em, pago em, anulado em e motivo, último lembrete, última cobrança |
+| `payments`           | organização, cliente, pedido, valor, moeda, meio (`stripe`, `bank_transfer`, `multicaixa`, `other`), referência, recebido em, estado (`reconciled`, `review`), registado por, evento do fornecedor (único)                                                                      |
+| `legal_invoices`     | organização, cliente, pedido (único), emissor (`at_certified`, `agt_portal`), número, data, caminho do PDF, registado por                                                                                                                                                       |
 
 **Acesso**
 
@@ -156,9 +156,9 @@ Cobrar o que o contrato diz. O OS cria o plano de pagamentos a partir da opção
 
 ## 9. Riscos
 
-| Risco                                          | Mitigação                                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Pedido de pagamento confundido com uma fatura  | "Documento não fiscal" no PDF e no portal; numeração própria `PP-`                                      |
-| Aviso do Stripe falsificado ou repetido        | Assinatura obrigatória; evento único; pedido, valor e moeda conferidos                                  |
-| Fatura legal esquecida                         | O pedido pago sem fatura legal fica destacado no separador Faturação                                    |
-| Conta Stripe sem transferência bancária ativa  | Os dados bancários estão sempre no pedido, e a transferência regista-se à mão                           |
+| Risco                                         | Mitigação                                                                     |
+| --------------------------------------------- | ----------------------------------------------------------------------------- |
+| Pedido de pagamento confundido com uma fatura | "Documento não fiscal" no PDF e no portal; numeração própria `PP-`            |
+| Aviso do Stripe falsificado ou repetido       | Assinatura obrigatória; evento único; pedido, valor e moeda conferidos        |
+| Fatura legal esquecida                        | O pedido pago sem fatura legal fica destacado no separador Faturação          |
+| Conta Stripe sem transferência bancária ativa | Os dados bancários estão sempre no pedido, e a transferência regista-se à mão |

@@ -230,7 +230,14 @@ export function Board({ cards: initialCards, move }: { cards: PipelineCard[]; mo
                 </span>
               </button>
               {isCollapsed ? null : (
-                <div className="flex gap-3 overflow-x-auto pb-2">
+                <div
+                  role="region"
+                  aria-label={t('board.stageColumns', {
+                    stage: t(`pipeline.stages.${entry.stage}`),
+                  })}
+                  tabIndex={0}
+                  className="flex gap-3 overflow-x-auto rounded-md pb-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
                   {entry.codes.map((code) => (
                     <Column
                       key={code}

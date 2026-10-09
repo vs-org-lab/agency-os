@@ -326,6 +326,7 @@
         "list": "Lista"
       },
       "stageCount": "{count, plural, =0 {Sem negócios} one {# negócio} other {# negócios}}",
+      "stageColumns": "Colunas de {stage}",
       "emptyColumn": "Sem negócios",
       "moveTo": "Mover {name} para…",
       "moveDialog": {

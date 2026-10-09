@@ -221,6 +221,20 @@
         "invalid_state": "A proposta já não pode ser aceite.",
         "not_found": "Não foi possível concluir o pedido."
       }
+    },
+    "contract": {
+      "title": "Contrato",
+      "intro": "Leia o contrato até ao fim. Depois de assinarem as duas partes, recebe o PDF assinado.",
+      "waitingStudio": "Já assinou. Falta a assinatura da Aurion.",
+      "waitingClient": "A Aurion já assinou. Falta a sua assinatura.",
+      "signedTitle": "Contrato assinado por ambas as partes",
+      "notSigner": "Este contrato é assinado por quem aceitou a proposta.",
+      "sign": "Assinar contrato",
+      "download": "Descarregar o contrato assinado (PDF)",
+      "homeTitle": "O seu contrato",
+      "homeSign": "O contrato está pronto a assinar.",
+      "homeSigned": "O contrato está assinado.",
+      "homeOpen": "Abrir o contrato"
     }
   },
   "commercial": {
@@ -1270,6 +1284,42 @@
         "portal_access": "O decisor ainda não tem acesso ao portal.",
         "invalid_state": "A proposta não pode mudar neste estado.",
         "not_found": "Não foi possível guardar a proposta."
+      }
+    },
+    "signature": {
+      "nameLabel": "Escreva o seu nome completo: {name}",
+      "confirm": "Li e aceito este contrato",
+      "legal": "A assinatura fica registada com o seu nome, a data, o endereço IP e a impressão digital do texto.",
+      "errors": {
+        "confirm": "Confirme que leu e aceita o contrato.",
+        "name_mismatch": "O nome tem de ser exatamente {name}.",
+        "changed": "O contrato mudou. Recarregue a página e leia a versão atual.",
+        "not_found": "Não foi possível assinar o contrato."
+      }
+    },
+    "contract": {
+      "title": "Contrato",
+      "status": {
+        "awaiting_signatures": "À espera de assinaturas",
+        "signed": "Assinado",
+        "void": "Anulado"
+      },
+      "client": "Cliente: {name} · {state}",
+      "studio": "Aurion: {name} · {state}",
+      "signedOn": "assinou a {date}",
+      "pending": "por assinar",
+      "read": "Ler o contrato",
+      "signForStudio": "Assinar pela Aurion",
+      "download": "Descarregar o contrato assinado (PDF)",
+      "fingerprint": "Impressão digital: {hash}",
+      "voidTitle": "Anular contrato",
+      "voidHint": "Anule se o contrato tem um erro. A proposta volta a ficar disponível para o cliente aceitar de novo.",
+      "voidReason": "Motivo",
+      "voidSubmit": "Anular contrato",
+      "errors": {
+        "invalid_input": "Escreva o motivo.",
+        "invalid_state": "O contrato já não pode ser anulado.",
+        "not_found": "Não foi possível concluir a ação."
       }
     }
   }

@@ -104,6 +104,7 @@ export function ContractTemplateEditor({
       {preview ? (
         <div
           aria-label={t('previewLabel')}
+          tabIndex={0}
           className="max-h-120 overflow-y-auto rounded-md border border-border bg-surface p-4 text-body-sm whitespace-pre-wrap text-text"
         >
           {renderContract(value, SAMPLE_CONTRACT_VALUES, locale)}

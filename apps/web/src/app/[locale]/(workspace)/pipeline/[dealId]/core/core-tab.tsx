@@ -4,13 +4,20 @@ import { stageOneGaps, type CoreReadiness, type ReadinessGap } from '@/modules/d
 import { loadCorePrompts, type CoreWorkspace } from '@/modules/diagnosis/server';
 import { isFounderActor } from '@/modules/commercial';
 import type { CommercialSession } from '@/modules/commercial/server';
-import { loadProposalWorkspace } from '@/modules/contracts/server';
+import { loadDealContract, loadProposalWorkspace } from '@/modules/contracts/server';
 import { AssistantSection } from './assistant-section';
 import { BriefingSection } from './briefing-section';
 import { FindingsSection } from './findings-section';
 import { OrbitSection } from './orbit-section';
 import { PortalAccess } from './portal-access';
-import { saveProposalAction, sendProposalAction, withdrawProposalAction } from './contract-actions';
+import {
+  saveProposalAction,
+  sendProposalAction,
+  signContractAction,
+  voidContractAction,
+  withdrawProposalAction,
+} from './contract-actions';
+import { ContractSection } from './contract-section';
 import { PresentationSection } from './presentation-section';
 import { ProposalSection } from './proposal-section';
 import { CrossReviewSection, RoadmapSection } from './review-section';
@@ -63,9 +70,10 @@ export async function CoreTab({
     .map((note) => note.body.trim())
     .filter((body) => body !== '')
     .join('\n');
-  const [prompts, proposal] = await Promise.all([
+  const [prompts, proposal, contract] = await Promise.all([
     loadCorePrompts(session, workspace, locale, clientNumbers),
     loadProposalWorkspace(session, workspace.dealId),
+    loadDealContract(session, workspace.dealId),
   ]);
   const blockTitles = Object.fromEntries(
     workspace.briefing.guide.blocks.map((block) => [block.id, block.title[locale]]),
@@ -125,6 +133,14 @@ export async function CoreTab({
             send: sendProposalAction,
             withdraw: withdrawProposalAction,
           }}
+        />
+      ) : null}
+      {contract ? (
+        <ContractSection
+          contract={contract}
+          dealId={workspace.dealId}
+          founder={isFounderActor(session.actor)}
+          actions={{ sign: signContractAction, void: voidContractAction }}
         />
       ) : null}
       {writable ? (

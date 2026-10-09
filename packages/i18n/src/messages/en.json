@@ -221,6 +221,20 @@
         "invalid_state": "The proposal can no longer be accepted.",
         "not_found": "The request could not be completed."
       }
+    },
+    "contract": {
+      "title": "Agreement",
+      "intro": "Read the agreement to the end. Once both parties sign, you receive the signed PDF.",
+      "waitingStudio": "You have signed. Aurion still has to sign.",
+      "waitingClient": "Aurion has signed. Your signature is still missing.",
+      "signedTitle": "Agreement signed by both parties",
+      "notSigner": "This agreement is signed by whoever accepted the proposal.",
+      "sign": "Sign the agreement",
+      "download": "Download the signed agreement (PDF)",
+      "homeTitle": "Your agreement",
+      "homeSign": "The agreement is ready to sign.",
+      "homeSigned": "The agreement is signed.",
+      "homeOpen": "Open the agreement"
     }
   },
   "commercial": {
@@ -1270,6 +1284,42 @@
         "portal_access": "The decision maker has no portal access yet.",
         "invalid_state": "The proposal cannot change in this state.",
         "not_found": "The proposal could not be saved."
+      }
+    },
+    "signature": {
+      "nameLabel": "Type your full name: {name}",
+      "confirm": "I have read and accept this agreement",
+      "legal": "The signature is recorded with your name, the date, the IP address and the fingerprint of the text.",
+      "errors": {
+        "confirm": "Confirm that you have read and accept the agreement.",
+        "name_mismatch": "The name must be exactly {name}.",
+        "changed": "The agreement changed. Reload the page and read the current version.",
+        "not_found": "The agreement could not be signed."
+      }
+    },
+    "contract": {
+      "title": "Agreement",
+      "status": {
+        "awaiting_signatures": "Awaiting signatures",
+        "signed": "Signed",
+        "void": "Void"
+      },
+      "client": "Client: {name} · {state}",
+      "studio": "Aurion: {name} · {state}",
+      "signedOn": "signed on {date}",
+      "pending": "not signed yet",
+      "read": "Read the agreement",
+      "signForStudio": "Sign for Aurion",
+      "download": "Download the signed agreement (PDF)",
+      "fingerprint": "Fingerprint: {hash}",
+      "voidTitle": "Void agreement",
+      "voidHint": "Void it if the agreement has a mistake. The proposal becomes available again for the client to accept.",
+      "voidReason": "Reason",
+      "voidSubmit": "Void agreement",
+      "errors": {
+        "invalid_input": "Write the reason.",
+        "invalid_state": "The agreement can no longer be voided.",
+        "not_found": "The action could not be completed."
       }
     }
   }

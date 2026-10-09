@@ -97,6 +97,7 @@ export {
 } from './booking/public';
 export type { BookingSource } from './booking/service';
 export { COMMERCIAL_FUNCTIONS } from './automations';
+export { applyStageChange } from './pipeline/service';
 
 export {
   closeFollowUp,

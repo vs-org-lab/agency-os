@@ -3,6 +3,12 @@ import 'server-only';
 export {
   acceptPortalProposal,
   archiveEntity,
+  contractDownloadUrl,
+  loadDealContract,
+  loadPortalContract,
+  signContractAsClient,
+  signContractAsStudio,
+  voidDealContract,
   loadPortalProposal,
   requestPortalProposalChanges,
   loadContractTemplates,
@@ -32,3 +38,4 @@ export type {
   PortalProposal,
   PortalProposalOption,
 } from './acceptance';
+export type { ContractView, PortalContractView } from './signing';

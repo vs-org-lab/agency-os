@@ -31,6 +31,22 @@ export default async function PortalHomePage({ params }: PageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
+      {proposal && proposal.status === 'accepted' && proposal.contractId ? (
+        <section
+          aria-labelledby="portal-contract"
+          className="flex flex-col gap-2 rounded-lg border-2 border-text bg-surface p-4"
+        >
+          <h2 id="portal-contract" className="text-title-sm text-text">
+            {t('contract.homeTitle')}
+          </h2>
+          <Link
+            href={`/portal/contracts/${proposal.contractId}`}
+            className="text-body-sm text-link hover:underline"
+          >
+            {t('contract.homeOpen')}
+          </Link>
+        </section>
+      ) : null}
       {proposal && proposal.status === 'sent' && !proposal.expired ? (
         <section
           aria-labelledby="portal-proposal"

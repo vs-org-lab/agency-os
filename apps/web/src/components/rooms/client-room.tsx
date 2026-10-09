@@ -1,9 +1,9 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
-import type { ClientApprovalView, ClientProjectView } from '@/modules/rooms';
+import type { ClientProjectView } from '@/modules/rooms';
+import { ApprovalDecision, type DecideApproval } from './approval-decision';
 import { UpdateFeed } from './update-feed';
 
 /**
@@ -12,11 +12,11 @@ import { UpdateFeed } from './update-feed';
  */
 export function ClientRoom({
   project,
-  renderApproval,
+  decide,
 }: {
   project: ClientProjectView;
-  /** Decision controls for a pending approval; omitted where the viewer cannot decide. */
-  renderApproval?: (approval: ClientApprovalView) => ReactNode;
+  /** The decision action; only the client's decision maker gets one. */
+  decide?: DecideApproval;
 }) {
   const t = useTranslations('rooms');
   const format = useFormatter();
@@ -77,7 +77,9 @@ export function ClientRoom({
                 {approval.comment ? (
                   <p className="whitespace-pre-line text-body-sm text-text">{approval.comment}</p>
                 ) : null}
-                {approval.status === 'pending' && renderApproval ? renderApproval(approval) : null}
+                {approval.status === 'pending' && decide ? (
+                  <ApprovalDecision approvalId={approval.id} decide={decide} />
+                ) : null}
               </li>
             ))}
           </ul>

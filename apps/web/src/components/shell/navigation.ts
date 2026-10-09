@@ -1,5 +1,5 @@
 export type NavigationIcon =
-  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt' | 'feed';
+  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt' | 'feed' | 'check';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -10,7 +10,9 @@ export type NavigationLabelKey =
   | 'shell.room.dashboard'
   | 'shell.room.updates'
   | 'shell.allClients'
-  | 'shell.portalNav.invoices';
+  | 'shell.portalNav.invoices'
+  | 'shell.portalNav.approvals'
+  | 'shell.portalNav.updates';
 
 export type NavigationCounter = 'unseenApplications';
 
@@ -30,7 +32,7 @@ export type Navigation = {
 export type NavigationLevel =
   | { level: 'studio'; permissions: { pipeline: boolean } }
   | { level: 'room'; clientId: string }
-  | { level: 'portal'; permissions: { invoices: boolean } };
+  | { level: 'portal'; permissions: { invoices: boolean; room: boolean } };
 
 const COMMERCIAL_ITEMS: NavigationItem[] = [
   { href: '/pipeline', labelKey: 'shell.studioNav.pipeline', icon: 'kanban' },
@@ -76,6 +78,12 @@ export function buildNavigation(input: NavigationLevel): Navigation {
         back: null,
         items: [
           { href: '/portal', labelKey: 'shell.studioNav.home', icon: 'home' },
+          ...(input.permissions.room
+            ? ([
+                { href: '/portal/approvals', labelKey: 'shell.portalNav.approvals', icon: 'check' },
+                { href: '/portal/updates', labelKey: 'shell.portalNav.updates', icon: 'feed' },
+              ] as const)
+            : []),
           ...(input.permissions.invoices
             ? [
                 {

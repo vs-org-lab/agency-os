@@ -6,12 +6,15 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalInvoices } from '@/modules/billing/server';
 import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
+import { loadPortalRoom } from '@/modules/rooms/server';
 import {
   PaymentHomeCard,
   paymentCardState,
   ProposalHomeCard,
   proposalCardState,
 } from './portal-cards';
+import { RoomHomeCard, roomCardState } from './room-cards';
+import { portalRoomAccess } from './room-session';
 
 const PAYING_ROLES = ['decision_maker', 'client_finance'];
 
@@ -23,19 +26,27 @@ export default async function PortalHomePage({ params }: PageProps) {
   const session = await requireArea('/portal', locale);
   const [clientId, roles = []] = [...session.ctx.clientRoles.entries()][0] ?? [];
   const pays = roles.some((role) => PAYING_ROLES.includes(role));
-  const [core, proposal, invoices] = clientId
+  const access = portalRoomAccess(session.ctx.clientRoles);
+  const [core, proposal, invoices, room] = clientId
     ? await Promise.all([
         loadPortalCore(session.claims, clientId),
         loadPortalProposal(session.claims, clientId),
         pays ? loadPortalInvoices(session.claims, clientId) : Promise.resolve([]),
+        access.readsRoom ? loadPortalRoom(session.claims, clientId) : Promise.resolve(null),
       ])
-    : [null, null, []];
+    : [null, null, [], null];
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
   const card = proposalCardState(proposal);
   const payment = paymentCardState(invoices);
-  if (!card && !payment && (!core || (!core.briefing && core.documents.length === 0))) {
+  const roomCard = room?.project ? roomCardState(room.project) : null;
+  if (
+    !card &&
+    !payment &&
+    !roomCard &&
+    (!core || (!core.briefing && core.documents.length === 0))
+  ) {
     return <EmptyState title={t('home.title')} description={t('home.description')} />;
   }
 
@@ -44,6 +55,7 @@ export default async function PortalHomePage({ params }: PageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
+      {roomCard ? <RoomHomeCard state={roomCard} /> : null}
       {payment ? <PaymentHomeCard state={payment} /> : null}
       {card ? <ProposalHomeCard state={card} /> : null}
       {documents.length > 0 ? (

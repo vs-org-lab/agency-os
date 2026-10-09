@@ -9,9 +9,10 @@ export default async function PortalLayout({ children, params }: LayoutProps) {
   const session = await requireArea('/portal', requireLocale((await params).locale));
   const roles = [...session.ctx.clientRoles.values()][0] ?? [];
   const invoices = roles.some((role) => role === 'decision_maker' || role === 'client_finance');
+  const room = roles.some((role) => role === 'decision_maker' || role === 'operational');
 
   return (
-    <AppShell session={session} level={{ level: 'portal', permissions: { invoices } }}>
+    <AppShell session={session} level={{ level: 'portal', permissions: { invoices, room } }}>
       {children}
     </AppShell>
   );

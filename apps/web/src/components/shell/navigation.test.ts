@@ -47,15 +47,34 @@ describe('buildNavigation', () => {
   });
 
   it('portal level links portal home and settings', () => {
-    const navigation = buildNavigation({ level: 'portal', permissions: { invoices: false } });
+    const navigation = buildNavigation({
+      level: 'portal',
+      permissions: { invoices: false, room: false },
+    });
 
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal']);
     expect(navigation.footer.map((item) => item.href)).toEqual(['/portal/settings/sessions']);
   });
 
   it('portal level links invoices only for who pays', () => {
-    const navigation = buildNavigation({ level: 'portal', permissions: { invoices: true } });
+    const navigation = buildNavigation({
+      level: 'portal',
+      permissions: { invoices: true, room: false },
+    });
 
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal', '/portal/invoices']);
+  });
+
+  it('portal level links approvals and updates for room members', () => {
+    const navigation = buildNavigation({
+      level: 'portal',
+      permissions: { invoices: false, room: true },
+    });
+
+    expect(navigation.items.map((item) => item.href)).toEqual([
+      '/portal',
+      '/portal/approvals',
+      '/portal/updates',
+    ]);
   });
 });

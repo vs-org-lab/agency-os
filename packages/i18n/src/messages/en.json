@@ -95,7 +95,9 @@
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
-      "invoices": "Invoices"
+      "invoices": "Invoices",
+      "approvals": "Approvals",
+      "updates": "Updates"
     }
   },
   "states": {
@@ -267,6 +269,27 @@
       "errors": {
         "unavailable": "Card payment is not available for this request.",
         "not_found": "This request is no longer available. Refresh the page."
+      }
+    },
+    "room": {
+      "title": "Your project: {name}",
+      "currentPhase": "Current phase: {name}",
+      "noPhase": "The project will start soon.",
+      "nextStep": "Next: {name}",
+      "approvalsLink": "View approvals ({count})",
+      "updatesLink": "View updates",
+      "approvalsTitle": "Approvals",
+      "approvalsEmpty": "Nothing is waiting for your decision.",
+      "updatesTitle": "Updates",
+      "approve": "Approve",
+      "requestChanges": "Request changes",
+      "comment": "What should change",
+      "commentHint": "To request changes, describe what should change.",
+      "decided": "Decision recorded. Thank you.",
+      "errors": {
+        "not_found": "This request is no longer available. Refresh the page.",
+        "comment_required": "Describe what should change.",
+        "invalid_input": "Check the comment."
       }
     }
   },

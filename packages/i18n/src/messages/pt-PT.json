@@ -95,7 +95,9 @@
     },
     "breadcrumb": "Caminho",
     "portalNav": {
-      "invoices": "Faturas"
+      "invoices": "Faturas",
+      "approvals": "Aprovações",
+      "updates": "Atualizações"
     }
   },
   "states": {
@@ -267,6 +269,27 @@
       "errors": {
         "unavailable": "O pagamento com cartão não está disponível para este pedido.",
         "not_found": "Este pedido já não está disponível. Atualize a página."
+      }
+    },
+    "room": {
+      "title": "O seu projeto: {name}",
+      "currentPhase": "Fase atual: {name}",
+      "noPhase": "O projeto vai começar em breve.",
+      "nextStep": "A seguir: {name}",
+      "approvalsLink": "Ver aprovações ({count})",
+      "updatesLink": "Ver atualizações",
+      "approvalsTitle": "Aprovações",
+      "approvalsEmpty": "Não há nada à espera da sua decisão.",
+      "updatesTitle": "Atualizações",
+      "approve": "Aprovar",
+      "requestChanges": "Pedir alterações",
+      "comment": "O que deve mudar",
+      "commentHint": "Para pedir alterações, escreva o que deve mudar.",
+      "decided": "Decisão registada. Obrigado.",
+      "errors": {
+        "not_found": "Este pedido já não está disponível. Atualize a página.",
+        "comment_required": "Escreva o que deve mudar.",
+        "invalid_input": "Confirme o comentário."
       }
     }
   },

@@ -1,4 +1,5 @@
-export type NavigationIcon = 'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target';
+export type NavigationIcon =
+  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -7,7 +8,8 @@ export type NavigationLabelKey =
   | 'shell.studioNav.acquisition'
   | 'shell.settings'
   | 'shell.room.dashboard'
-  | 'shell.allClients';
+  | 'shell.allClients'
+  | 'shell.portalNav.invoices';
 
 export type NavigationCounter = 'unseenApplications';
 
@@ -27,7 +29,7 @@ export type Navigation = {
 export type NavigationLevel =
   | { level: 'studio'; permissions: { pipeline: boolean } }
   | { level: 'room'; clientId: string }
-  | { level: 'portal' };
+  | { level: 'portal'; permissions: { invoices: boolean } };
 
 const COMMERCIAL_ITEMS: NavigationItem[] = [
   { href: '/pipeline', labelKey: 'shell.studioNav.pipeline', icon: 'kanban' },
@@ -66,7 +68,18 @@ export function buildNavigation(input: NavigationLevel): Navigation {
     case 'portal':
       return {
         back: null,
-        items: [{ href: '/portal', labelKey: 'shell.studioNav.home', icon: 'home' }],
+        items: [
+          { href: '/portal', labelKey: 'shell.studioNav.home', icon: 'home' },
+          ...(input.permissions.invoices
+            ? [
+                {
+                  href: '/portal/invoices',
+                  labelKey: 'shell.portalNav.invoices',
+                  icon: 'receipt',
+                } as const,
+              ]
+            : []),
+        ],
         footer: [
           { href: '/portal/settings/sessions', labelKey: 'shell.settings', icon: 'settings' },
         ],

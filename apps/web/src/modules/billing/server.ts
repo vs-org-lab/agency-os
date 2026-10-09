@@ -12,6 +12,7 @@ import {
 } from './invoices';
 import { recordPayment, settleReviewedPayment, type RecordPaymentInput } from './payments';
 import type { PaymentsProvider } from './payments-provider/port';
+import { getPortalInvoices } from './portal';
 import { createStripeProvider } from './payments-provider/stripe';
 import {
   chasePaymentRequest,
@@ -119,4 +120,8 @@ export function billingPdfLink(
   input: { kind: BillingPdfKind; id: string },
 ) {
   return billingPdfUrl(claims, input, billingDeps());
+}
+
+export function loadPortalInvoices(claims: VerifiedClaims, clientId: string) {
+  return withUserContext(claims, (tx) => getPortalInvoices(tx, clientId, lisbonDate(new Date())));
 }

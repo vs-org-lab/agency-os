@@ -3,9 +3,17 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadPortalInvoices } from '@/modules/billing/server';
 import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
-import { ProposalHomeCard, proposalCardState } from './portal-cards';
+import {
+  PaymentHomeCard,
+  paymentCardState,
+  ProposalHomeCard,
+  proposalCardState,
+} from './portal-cards';
+
+const PAYING_ROLES = ['decision_maker', 'client_finance'];
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -13,18 +21,21 @@ export default async function PortalHomePage({ params }: PageProps) {
   const locale = requireLocale((await params).locale);
   setRequestLocale(locale);
   const session = await requireArea('/portal', locale);
-  const clientId = [...session.ctx.clientRoles.keys()][0];
-  const [core, proposal] = clientId
+  const [clientId, roles = []] = [...session.ctx.clientRoles.entries()][0] ?? [];
+  const pays = roles.some((role) => PAYING_ROLES.includes(role));
+  const [core, proposal, invoices] = clientId
     ? await Promise.all([
         loadPortalCore(session.claims, clientId),
         loadPortalProposal(session.claims, clientId),
+        pays ? loadPortalInvoices(session.claims, clientId) : Promise.resolve([]),
       ])
-    : [null, null];
+    : [null, null, []];
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
   const card = proposalCardState(proposal);
-  if (!card && (!core || (!core.briefing && core.documents.length === 0))) {
+  const payment = paymentCardState(invoices);
+  if (!card && !payment && (!core || (!core.briefing && core.documents.length === 0))) {
     return <EmptyState title={t('home.title')} description={t('home.description')} />;
   }
 
@@ -33,6 +44,7 @@ export default async function PortalHomePage({ params }: PageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
+      {payment ? <PaymentHomeCard state={payment} /> : null}
       {card ? <ProposalHomeCard state={card} /> : null}
       {documents.length > 0 ? (
         <section aria-labelledby="portal-presentations" className="flex flex-col gap-3">

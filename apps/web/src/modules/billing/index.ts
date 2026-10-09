@@ -11,3 +11,4 @@ export type {
   PaymentRequestView,
   PaymentView,
 } from './workspace';
+export type { PortalBankDetails, PortalInvoice } from './portal';

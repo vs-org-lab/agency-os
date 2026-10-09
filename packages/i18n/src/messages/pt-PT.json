@@ -92,7 +92,10 @@
     "room": {
       "dashboard": "Dashboard"
     },
-    "breadcrumb": "Caminho"
+    "breadcrumb": "Caminho",
+    "portalNav": {
+      "invoices": "Faturas"
+    }
   },
   "states": {
     "empty": {
@@ -173,7 +176,11 @@
       "proposalBody": "Escolha a opção Orbit com que quer avançar.",
       "proposalOpen": "Ver a proposta",
       "proposalExpiredTitle": "A proposta expirou",
-      "proposalExpiredBody": "Fale connosco para receber uma nova proposta."
+      "proposalExpiredBody": "Fale connosco para receber uma nova proposta.",
+      "paymentTitle": "Pagamento pendente",
+      "paymentBody": "{count, plural, one {Tem # pedido de pagamento por pagar.} other {Tem # pedidos de pagamento por pagar.}}",
+      "paymentOverdue": "Um dos pedidos passou o vencimento.",
+      "paymentOpen": "Ver pagamentos"
     },
     "core": {
       "briefingTitle": "O resumo da nossa conversa",
@@ -237,6 +244,35 @@
       "homeSign": "O contrato está pronto a assinar.",
       "homeSigned": "O contrato está assinado.",
       "homeOpen": "Abrir o contrato"
+    },
+    "invoices": {
+      "heading": "{label} · {number}",
+      "title": "Faturas e pagamentos",
+      "intro": "Os pedidos de pagamento são documentos não fiscais. A fatura é emitida depois do pagamento e fica disponível aqui.",
+      "empty": "Ainda não há pedidos de pagamento.",
+      "status": {
+        "sent": "Por pagar",
+        "paid": "Pago"
+      },
+      "due": "Vence a {date}",
+      "paidOn": "Pago a {date}",
+      "overdue": "Em atraso há {days, plural, one {# dia} other {# dias}}",
+      "issuedBy": "Emitido por {name}",
+      "payCard": "Pagar com cartão",
+      "bankTitle": "Pagar por transferência",
+      "bankName": "Banco",
+      "iban": "IBAN",
+      "bic": "BIC/SWIFT",
+      "reference": "Indique a referência {number} no pagamento.",
+      "requestPdf": "Descarregar o pedido {number} (PDF)",
+      "invoice": "Fatura {number}, emitida a {date}",
+      "invoicePdf": "Descarregar a fatura {number} (PDF)",
+      "invoicePending": "A fatura é emitida depois de o pagamento ser confirmado.",
+      "confirming": "Obrigado. Estamos a confirmar o pagamento; o estado atualiza-se em poucos minutos.",
+      "errors": {
+        "unavailable": "O pagamento com cartão não está disponível para este pedido.",
+        "not_found": "Este pedido já não está disponível. Atualize a página."
+      }
     }
   },
   "commercial": {

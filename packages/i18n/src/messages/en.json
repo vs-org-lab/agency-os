@@ -92,7 +92,10 @@
     "room": {
       "dashboard": "Dashboard"
     },
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "portalNav": {
+      "invoices": "Invoices"
+    }
   },
   "states": {
     "empty": {
@@ -173,7 +176,11 @@
       "proposalBody": "Choose the Orbit option you want to go ahead with.",
       "proposalOpen": "View the proposal",
       "proposalExpiredTitle": "The proposal has expired",
-      "proposalExpiredBody": "Get in touch to receive a new proposal."
+      "proposalExpiredBody": "Get in touch to receive a new proposal.",
+      "paymentTitle": "Payment due",
+      "paymentBody": "{count, plural, one {You have # payment request to pay.} other {You have # payment requests to pay.}}",
+      "paymentOverdue": "One of the requests is past its due date.",
+      "paymentOpen": "View payments"
     },
     "core": {
       "briefingTitle": "The summary of our conversation",
@@ -237,6 +244,35 @@
       "homeSign": "The agreement is ready to sign.",
       "homeSigned": "The agreement is signed.",
       "homeOpen": "Open the agreement"
+    },
+    "invoices": {
+      "heading": "{label} · {number}",
+      "title": "Invoices and payments",
+      "intro": "Payment requests are not tax invoices. The invoice is issued after payment and becomes available here.",
+      "empty": "There are no payment requests yet.",
+      "status": {
+        "sent": "To pay",
+        "paid": "Paid"
+      },
+      "due": "Due {date}",
+      "paidOn": "Paid on {date}",
+      "overdue": "Overdue by {days, plural, one {# day} other {# days}}",
+      "issuedBy": "Issued by {name}",
+      "payCard": "Pay by card",
+      "bankTitle": "Pay by bank transfer",
+      "bankName": "Bank",
+      "iban": "IBAN",
+      "bic": "BIC/SWIFT",
+      "reference": "Quote the reference {number} with your payment.",
+      "requestPdf": "Download request {number} (PDF)",
+      "invoice": "Invoice {number}, issued on {date}",
+      "invoicePdf": "Download invoice {number} (PDF)",
+      "invoicePending": "The invoice is issued once the payment is confirmed.",
+      "confirming": "Thank you. We are confirming the payment; the status updates within minutes.",
+      "errors": {
+        "unavailable": "Card payment is not available for this request.",
+        "not_found": "This request is no longer available. Refresh the page."
+      }
     }
   },
   "commercial": {

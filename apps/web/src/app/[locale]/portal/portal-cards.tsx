@@ -74,3 +74,31 @@ export function ProposalHomeCard({ state }: { state: ProposalCardState }) {
     </section>
   );
 }
+
+export type PaymentCardState = { count: number; overdue: boolean };
+
+/** Open payment requests the client still has to pay, or null when everything is paid. */
+export function paymentCardState(
+  invoices: ReadonlyArray<{ status: 'sent' | 'paid'; overdueDays: number }>,
+): PaymentCardState | null {
+  const open = invoices.filter((invoice) => invoice.status === 'sent');
+  if (open.length === 0) return null;
+  return { count: open.length, overdue: open.some((invoice) => invoice.overdueDays > 0) };
+}
+
+export function PaymentHomeCard({ state }: { state: PaymentCardState }) {
+  const t = useTranslations('portal.home');
+
+  return (
+    <section aria-labelledby="portal-payment" className={CARD}>
+      <h2 id="portal-payment" className="text-title-sm text-text">
+        {t('paymentTitle')}
+      </h2>
+      <p className="text-body-sm text-text-secondary">{t('paymentBody', { count: state.count })}</p>
+      {state.overdue ? <p className="text-body-sm text-danger">{t('paymentOverdue')}</p> : null}
+      <Link href="/portal/invoices" className={LINK}>
+        {t('paymentOpen')}
+      </Link>
+    </section>
+  );
+}

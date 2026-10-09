@@ -43,9 +43,15 @@ describe('buildNavigation', () => {
   });
 
   it('portal level links portal home and settings', () => {
-    const navigation = buildNavigation({ level: 'portal' });
+    const navigation = buildNavigation({ level: 'portal', permissions: { invoices: false } });
 
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal']);
     expect(navigation.footer.map((item) => item.href)).toEqual(['/portal/settings/sessions']);
+  });
+
+  it('portal level links invoices only for who pays', () => {
+    const navigation = buildNavigation({ level: 'portal', permissions: { invoices: true } });
+
+    expect(navigation.items.map((item) => item.href)).toEqual(['/portal', '/portal/invoices']);
   });
 });

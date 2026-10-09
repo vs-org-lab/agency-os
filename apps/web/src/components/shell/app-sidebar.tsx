@@ -7,6 +7,7 @@ import {
   KanbanSquare,
   LayoutDashboard,
   LogOut,
+  ReceiptText,
   Settings,
   Target,
 } from 'lucide-react';
@@ -73,6 +74,7 @@ const ICONS = {
   kanban: KanbanSquare,
   inbox: Inbox,
   target: Target,
+  receipt: ReceiptText,
 } as const;
 
 function NavigationItemLink({

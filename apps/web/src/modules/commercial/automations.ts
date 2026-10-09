@@ -22,7 +22,9 @@ import { anonymizeExpiredApplications } from './applications/anonymize';
 import {
   alertFounders,
   callOutcomeMissing,
+  clientTimeZone,
   leadTimeZoneForDeal,
+  sendClientPortalNotice,
   sendPortalNotice,
   type PortalNoticeTemplate,
   sendBookingCancelled,
@@ -293,6 +295,32 @@ export function portalNoticeFunction(
       await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
       const sent = await step.run('send-portal-notice', () =>
         sendPortalNotice(dealId, template, notificationDeps()),
+      );
+      return { sent };
+    },
+  );
+}
+
+/** Like portalNoticeFunction, for events about a client rather than a deal. */
+export function clientPortalNoticeFunction(
+  id: string,
+  trigger: DomainEventType,
+  template: PortalNoticeTemplate,
+) {
+  return inngest.createFunction(
+    { id, triggers: [{ event: trigger }], retries: RETRIES, onFailure: failureHandler(id) },
+    async ({ event, step }) => {
+      const { clientId } = event.data as EventData<unknown>;
+      if (!clientId) return { sent: false };
+      const sendAt = await step.run('quiet-hours-send-time', async () =>
+        nextAllowedSendTime(
+          new Date(),
+          await clientTimeZone(clientId, notificationDeps()),
+        ).toISOString(),
+      );
+      await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
+      const sent = await step.run('send-portal-notice', () =>
+        sendClientPortalNotice(clientId, template, notificationDeps()),
       );
       return { sent };
     },

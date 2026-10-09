@@ -297,7 +297,11 @@ export type PortalNoticeTemplate =
   | 'lead.payment_requested'
   | 'lead.payment_reminder'
   | 'lead.payment_overdue'
-  | 'lead.payment_received';
+  | 'lead.payment_received'
+  | 'lead.room_update'
+  | 'lead.step_shared'
+  | 'lead.approval_requested'
+  | 'lead.approval_reminder';
 
 /** Tells the decision maker with portal access that something new was shared with them. */
 export async function sendPortalNotice(
@@ -348,6 +352,78 @@ export async function sendPortalNotice(
     },
   });
   return true;
+}
+
+async function latestDealOf(tx: DbTransaction, clientId: string): Promise<string | null> {
+  const [deal] = await tx
+    .select({ id: deals.id })
+    .from(deals)
+    .where(eq(deals.clientId, clientId))
+    .orderBy(desc(deals.createdAt))
+    .limit(1);
+  return deal?.id ?? null;
+}
+
+/**
+ * Tells the client's decision maker with portal access that something new waits in the portal,
+ * for notices about a client rather than a deal (a project may have no deal).
+ */
+export async function sendClientPortalNotice(
+  clientId: string,
+  template: PortalNoticeTemplate,
+  deps: NotificationDeps,
+): Promise<boolean> {
+  const dealId = await deps.contexts.withSystemContext((tx) => latestDealOf(tx, clientId));
+  if (dealId) return sendPortalNotice(dealId, template, deps);
+  const context = await deps.contexts.withSystemContext(async (tx) => {
+    const [client] = await tx
+      .select({ organizationId: clients.organizationId })
+      .from(clients)
+      .where(eq(clients.id, clientId));
+    if (!client) return null;
+    const [contact] = await tx
+      .select({ email: contacts.email, fullName: contacts.fullName })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.clientId, clientId),
+          eq(contacts.role, 'decision_maker'),
+          isNotNull(contacts.portalUserId),
+          isNotNull(contacts.email),
+        ),
+      )
+      .limit(1);
+    if (!contact?.email) return null;
+    return {
+      organizationId: client.organizationId,
+      to: contact.email,
+      firstName: contact.fullName.trim().split(/\s+/)[0] ?? '',
+      sender: await senderFor(tx, client.organizationId),
+    };
+  });
+  if (!context) return false;
+  const locale = context.sender.defaultLocale;
+  await send(deps, {
+    to: context.to,
+    template,
+    locale,
+    sender: context.sender,
+    organizationId: context.organizationId,
+    params: {
+      firstName: context.firstName,
+      agencyName: context.sender.agencyName,
+      portalUrl: portalUrl(deps.appBaseUrl, locale),
+    },
+  });
+  return true;
+}
+
+export async function clientTimeZone(
+  clientId: string,
+  deps: Pick<NotificationDeps, 'contexts'>,
+): Promise<string> {
+  const dealId = await deps.contexts.withSystemContext((tx) => latestDealOf(tx, clientId));
+  return dealId ? leadTimeZoneForDeal(dealId, deps) : resolveTimeZone(null, 'Europe/Lisbon');
 }
 
 export async function leadTimeZoneForDeal(

@@ -2,11 +2,13 @@
 
 import {
   ArrowLeft,
+  CircleCheck,
   Home,
   Inbox,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
+  Newspaper,
   ReceiptText,
   Settings,
   Target,
@@ -75,6 +77,8 @@ const ICONS = {
   inbox: Inbox,
   target: Target,
   receipt: ReceiptText,
+  feed: Newspaper,
+  check: CircleCheck,
 } as const;
 
 function NavigationItemLink({

@@ -212,6 +212,41 @@ export const paymentStatusEnum = appSchema.enum('payment_status', ['reconciled',
 
 export const invoiceIssuerEnum = appSchema.enum('invoice_issuer', ['at_certified', 'agt_portal']);
 
+export const projectStatusEnum = appSchema.enum('project_status', [
+  'active',
+  'paused',
+  'completed',
+  'cancelled',
+]);
+
+export const phaseStatusEnum = appSchema.enum('phase_status', [
+  'pending',
+  'in_progress',
+  'awaiting_approval',
+  'done',
+]);
+
+export const stepStatusEnum = appSchema.enum('step_status', ['todo', 'in_progress', 'done']);
+
+export const updateVisibilityEnum = appSchema.enum('update_visibility', ['internal', 'client']);
+
+export const updateKindEnum = appSchema.enum('update_kind', [
+  'manual',
+  'project_started',
+  'step_shared',
+  'phase_done',
+  'approval_decided',
+]);
+
+export const approvalSubjectEnum = appSchema.enum('approval_subject', ['phase']);
+
+export const approvalStatusEnum = appSchema.enum('approval_status', [
+  'pending',
+  'approved',
+  'changes_requested',
+  'withdrawn',
+]);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -251,6 +286,13 @@ export type PaymentRequestStatus = (typeof paymentRequestStatusEnum.enumValues)[
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
 export type InvoiceIssuer = (typeof invoiceIssuerEnum.enumValues)[number];
+export type ProjectStatus = (typeof projectStatusEnum.enumValues)[number];
+export type PhaseStatus = (typeof phaseStatusEnum.enumValues)[number];
+export type StepStatus = (typeof stepStatusEnum.enumValues)[number];
+export type UpdateVisibility = (typeof updateVisibilityEnum.enumValues)[number];
+export type UpdateKind = (typeof updateKindEnum.enumValues)[number];
+export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
+export type ApprovalStatus = (typeof approvalStatusEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

@@ -547,3 +547,90 @@ export async function createBillingFixture(
     b: await seed(world.clients.b, contracts.b),
   };
 }
+
+export type RoomRecords = {
+  projectId: string;
+  phaseIds: [string, string];
+  visibleStepId: string;
+  internalStepId: string;
+  clientUpdateId: string;
+  internalUpdateId: string;
+  approvalId: string;
+};
+
+export type RoomFixture = { a: RoomRecords; b: RoomRecords };
+
+/**
+ * One project per client with two phases, a client-visible and an internal step, a client and an
+ * internal update and a pending phase approval.
+ */
+export async function createRoomFixture(sql: TransactionSql, world: World): Promise<RoomFixture> {
+  const seed = async (clientId: string): Promise<RoomRecords> => {
+    const [project] = await sql<{ id: string }[]>`
+      insert into public.projects (organization_id, client_id, name, template_key, template_version,
+                                   starts_on)
+      values (${world.organizationId}, ${clientId}, 'Website', 'orbit', 1, current_date)
+      returning id
+    `;
+    if (!project) throw new Error('Room fixture project was not created');
+    const phase = async (position: number, status: string) => {
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.project_phases (organization_id, client_id, project_id, position, name,
+                                           requires_approval, status)
+        values (${world.organizationId}, ${clientId}, ${project.id}, ${position},
+                ${`Fase ${position}`}, ${position === 1}, ${status})
+        returning id
+      `;
+      if (!row) throw new Error('Room fixture phase was not created');
+      return row.id;
+    };
+    const first = await phase(1, 'awaiting_approval');
+    const second = await phase(2, 'pending');
+    const step = async (position: number, visible: boolean) => {
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.project_steps (organization_id, client_id, project_id, phase_id, position,
+                                          name, status, visible_to_client)
+        values (${world.organizationId}, ${clientId}, ${project.id}, ${first}, ${position},
+                ${visible ? 'Passo visível' : 'Passo interno'}, 'done', ${visible})
+        returning id
+      `;
+      if (!row) throw new Error('Room fixture step was not created');
+      return row.id;
+    };
+    const visibleStepId = await step(1, true);
+    const internalStepId = await step(2, false);
+    const update = async (visibility: 'client' | 'internal') => {
+      const [row] = await sql<{ id: string }[]>`
+        insert into public.project_updates (organization_id, client_id, project_id, author_id, body,
+                                            visibility)
+        values (${world.organizationId}, ${clientId}, ${project.id}, ${world.users.founder},
+                ${visibility === 'client' ? 'Atualização para o cliente' : 'Nota interna'},
+                ${visibility})
+        returning id
+      `;
+      if (!row) throw new Error('Room fixture update was not created');
+      return row.id;
+    };
+    const clientUpdateId = await update('client');
+    const internalUpdateId = await update('internal');
+    const [approval] = await sql<{ id: string }[]>`
+      insert into public.approvals (organization_id, client_id, project_id, subject_type, subject_id,
+                                    requested_by)
+      values (${world.organizationId}, ${clientId}, ${project.id}, 'phase', ${first},
+              ${world.users.founder})
+      returning id
+    `;
+    if (!approval) throw new Error('Room fixture approval was not created');
+    return {
+      projectId: project.id,
+      phaseIds: [first, second],
+      visibleStepId,
+      internalStepId,
+      clientUpdateId,
+      internalUpdateId,
+      approvalId: approval.id,
+    };
+  };
+
+  return { a: await seed(world.clients.a), b: await seed(world.clients.b) };
+}

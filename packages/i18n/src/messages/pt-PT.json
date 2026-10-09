@@ -90,11 +90,14 @@
       "acquisition": "Angariação"
     },
     "room": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "updates": "Atualizações"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
-      "invoices": "Faturas"
+      "invoices": "Faturas",
+      "approvals": "Aprovações",
+      "updates": "Atualizações"
     }
   },
   "states": {
@@ -160,12 +163,6 @@
       },
       "overdue": "Atrasado",
       "open": "Abrir"
-    }
-  },
-  "room": {
-    "home": {
-      "title": "Sala sem conteúdo",
-      "description": "O processo, os documentos e a biblioteca desta sala aparecem aqui."
     }
   },
   "portal": {
@@ -273,6 +270,28 @@
         "unavailable": "O pagamento com cartão não está disponível para este pedido.",
         "not_found": "Este pedido já não está disponível. Atualize a página."
       }
+    },
+    "room": {
+      "title": "O seu projeto: {name}",
+      "currentPhase": "Fase atual: {name}",
+      "noPhase": "O projeto vai começar em breve.",
+      "nextStep": "A seguir: {name}",
+      "approvalsLink": "Ver aprovações ({count})",
+      "updatesLink": "Ver atualizações",
+      "approvalsTitle": "Aprovações",
+      "approvalsEmpty": "Não há nada à espera da sua decisão.",
+      "updatesTitle": "Atualizações",
+      "approve": "Aprovar",
+      "requestChanges": "Pedir alterações",
+      "comment": "O que deve mudar",
+      "commentHint": "Para pedir alterações, escreva o que deve mudar.",
+      "decided": "Decisão registada. Obrigado.",
+      "errors": {
+        "not_found": "Este pedido já não está disponível. Atualize a página.",
+        "comment_required": "Escreva o que deve mudar.",
+        "invalid_input": "Confirme o comentário."
+      },
+      "projectSelector": "Projeto"
     }
   },
   "commercial": {
@@ -325,7 +344,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
-        "rooms": "Salas e processo",
+        "approvals": "Aprovações",
         "retainers": "Retainers"
       },
       "rules": {
@@ -341,7 +360,8 @@
         "core_criteria": "Falta cumprir: {gaps}.",
         "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
         "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses.",
-        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2."
+        "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2.",
+        "process_driven": "De 2.3 a 2.9 o negócio acompanha as fases do projeto; avance a fase na sala do cliente."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -738,6 +758,30 @@
         "heading": "Pagamento recebido",
         "body": "Olá {firstName}, recebemos o seu pagamento. Obrigado.\n\nA fatura fica disponível no portal assim que for emitida.",
         "action": "Abrir o portal"
+      },
+      "room_update": {
+        "subject": "Nova atualização do seu projeto",
+        "heading": "Nova atualização do seu projeto",
+        "body": "Olá {firstName}, a equipa da {agencyName} publicou uma atualização no seu projeto. Pode lê-la no portal.",
+        "action": "Ver a atualização"
+      },
+      "step_shared": {
+        "subject": "Há um novo passo no seu projeto",
+        "heading": "Há um novo passo no seu projeto",
+        "body": "Olá {firstName}, o projeto avançou e há um novo passo à sua vista no portal.",
+        "action": "Abrir o portal"
+      },
+      "approval_requested": {
+        "subject": "Uma fase do projeto espera a sua aprovação",
+        "heading": "Uma fase do projeto espera a sua aprovação",
+        "body": "Olá {firstName}, a equipa terminou uma fase que precisa da sua aprovação para o projeto avançar. Pode aprovar ou pedir alterações no portal.",
+        "action": "Ver a aprovação"
+      },
+      "approval_reminder": {
+        "subject": "A sua aprovação continua em falta",
+        "heading": "A sua aprovação continua em falta",
+        "body": "Olá {firstName}, uma fase do projeto continua à espera da sua decisão. O projeto só avança depois dela.",
+        "action": "Ver a aprovação"
       }
     },
     "founder": {
@@ -812,6 +856,18 @@
         "heading": "Pagamento de {companyName} em atraso há {days} dias",
         "body": "O cliente recebeu um novo lembrete. A partir dos 30 dias pode pausar o projeto (X.1).",
         "action": "Abrir o negócio"
+      },
+      "approval_decided": {
+        "subject": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
+        "body": "{decision, select, approved {A fase ficou concluída e o projeto pode seguir para a próxima.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}",
+        "action": "Abrir a sala"
+      },
+      "approval_overdue": {
+        "subject": "Aprovação de {companyName} sem resposta há 5 dias",
+        "heading": "Aprovação de {companyName} sem resposta há 5 dias",
+        "body": "A fase {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "action": "Abrir a sala"
       }
     }
   },
@@ -1101,6 +1157,31 @@
         "unknown": "Campos desconhecidos: {fields}",
         "invalid": "Escreva o texto e feche todas as chavetas."
       }
+    },
+    "processTemplates": {
+      "title": "Processos",
+      "description": "Fases e passos que cada projeto copia ao começar. Uma nova versão não altera projetos em curso.",
+      "templateName": "Nome do modelo",
+      "version": "Versão {version}",
+      "isDefault": "Usar por defeito nos projetos novos",
+      "phase": "Fase {number}",
+      "phaseName": "Nome da fase",
+      "requiresApproval": "Exige aprovação do cliente",
+      "codeOnStart": "Etapa do pipeline ao começar",
+      "codeOnDone": "Etapa do pipeline ao concluir",
+      "noCode": "Nenhuma",
+      "stepName": "Nome do passo",
+      "visibleToClient": "Visível ao cliente",
+      "chained": "Enviado quando o anterior termina",
+      "addStep": "Adicionar passo",
+      "removeStep": "Remover passo",
+      "addPhase": "Adicionar fase",
+      "removePhase": "Remover fase",
+      "newTemplate": "Novo modelo",
+      "publish": "Publicar nova versão",
+      "published": "Versão {version} publicada.",
+      "invalid": "Confirme os nomes: cada fase precisa de pelo menos um passo.",
+      "codeOption": "{code} · {name}"
     }
   },
   "diagnosis": {
@@ -1538,6 +1619,134 @@
         "missing_file": "Carregue o PDF da fatura (até 10 MB).",
         "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
       }
+    }
+  },
+  "rooms": {
+    "noProject": "Ainda não há projetos nesta sala.",
+    "noProjectHint": "O projeto é criado sozinho quando o primeiro pagamento leva o negócio a 2.2, ou pode criá-lo aqui.",
+    "projectSelector": "Projeto",
+    "previewAsClient": "Ver como cliente",
+    "previewNotice": "Pré-visualização: é isto que o cliente vê. Nada interno aparece aqui.",
+    "backToRoom": "Voltar à sala",
+    "newProject": "Novo projeto",
+    "projectName": "Nome do projeto",
+    "template": "Modelo de processo",
+    "createProject": "Criar projeto",
+    "tabs": {
+      "steps": "Passos",
+      "plan": "Plano"
+    },
+    "projectStatus": {
+      "active": "Em curso",
+      "paused": "Em pausa",
+      "completed": "Concluído",
+      "cancelled": "Cancelado"
+    },
+    "phaseStatus": {
+      "pending": "Por começar",
+      "in_progress": "Em curso",
+      "awaiting_approval": "À espera do cliente",
+      "done": "Concluída"
+    },
+    "stepStatus": {
+      "todo": "Por fazer",
+      "in_progress": "Em curso",
+      "done": "Feito"
+    },
+    "card": {
+      "title": "Projeto",
+      "status": "Estado",
+      "currentPhase": "Fase atual",
+      "noCurrentPhase": "Nenhuma fase em curso",
+      "startsOn": "Início",
+      "endsOn": "Fim previsto",
+      "noEnd": "Por definir",
+      "people": "Pessoas",
+      "nobody": "Ninguém atribuído"
+    },
+    "phases": "Fases",
+    "phaseDue": "Data prevista da fase",
+    "requiresApproval": "Exige aprovação do cliente",
+    "actions": {
+      "startPhase": "Começar fase",
+      "completePhase": "Concluir fase",
+      "requestApproval": "Pedir aprovação",
+      "withdrawApproval": "Retirar pedido",
+      "saveDue": "Guardar data"
+    },
+    "step": {
+      "assignee": "Responsável por {name}",
+      "due": "Data de {name}",
+      "visible": "Visível ao cliente",
+      "unassigned": "Sem responsável",
+      "shared": "Enviado ao cliente",
+      "reopened": "Reaberto depois de enviado",
+      "chained": "Começa quando o anterior termina",
+      "next": {
+        "todo": "Começar: {name}",
+        "in_progress": "Marcar como feito: {name}",
+        "done": "Reabrir: {name}"
+      },
+      "nextShort": {
+        "todo": "Começar",
+        "in_progress": "Marcar como feito",
+        "done": "Reabrir"
+      }
+    },
+    "plan": {
+      "title": "Plano",
+      "week": "Semana {start}",
+      "weeks": "Semanas {start} a {end}"
+    },
+    "updates": {
+      "title": "Atualizações",
+      "composer": "Nova atualização",
+      "body": "Texto",
+      "milestone": "Marco (opcional)",
+      "visibility": "Visibilidade",
+      "internal": "Interna",
+      "client": "Visível ao cliente",
+      "publish": "Publicar",
+      "published": "Atualização publicada.",
+      "empty": "Ainda não há atualizações.",
+      "internalBadge": "Interna",
+      "system": "Agency OS",
+      "kinds": {
+        "project_started": "Projeto iniciado: {name}",
+        "step_shared": "Novo passo: {name}",
+        "phase_done": "Fase concluída: {name}",
+        "approval_decided": "Pedido de alterações na fase {name}"
+      }
+    },
+    "approval": {
+      "pending": "À espera da decisão do cliente desde {date}",
+      "approved": "Aprovada pelo cliente a {date}",
+      "changes_requested": "Alterações pedidas a {date}"
+    },
+    "done": {
+      "startPhase": "Fase começada.",
+      "completePhase": "Fase concluída.",
+      "requestApproval": "Pedido de aprovação enviado ao cliente.",
+      "withdrawApproval": "Pedido retirado.",
+      "saved": "Guardado.",
+      "created": "Projeto criado."
+    },
+    "errors": {
+      "not_found": "Não encontrado ou sem permissão.",
+      "invalid_state": "O estado mudou entretanto. Atualize a página.",
+      "invalid_input": "Confirme os campos.",
+      "previous_phase_open": "A fase anterior ainda não está concluída (ou aprovada).",
+      "steps_open": "Ainda há passos por fazer nesta fase.",
+      "approval_required": "Esta fase só termina com a aprovação do cliente.",
+      "deal_has_project": "Este negócio já tem um projeto."
+    },
+    "stepsOf": "Passos de {name}",
+    "phaseLabel": "{position}. {name}",
+    "approvals": "Aprovações",
+    "clientApproval": {
+      "pending": "À espera da sua decisão desde {date}",
+      "approved": "Aprovou a {date}",
+      "changes_requested": "Pediu alterações a {date}"
     }
   }
 }

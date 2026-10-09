@@ -11,6 +11,7 @@ export {
   createContractFixture,
   createCoreFixture,
   createFixtureWorld,
+  createRoomFixture,
   type BillingFixture,
   type BillingRecords,
   type CommercialFixture,
@@ -19,5 +20,7 @@ export {
   type ContractRecords,
   type CoreFixture,
   type CoreRecords,
+  type RoomFixture,
+  type RoomRecords,
   type World,
 } from './fixtures';

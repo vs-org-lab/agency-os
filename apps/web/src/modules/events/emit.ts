@@ -25,6 +25,13 @@ export const DOMAIN_EVENTS = [
   'billing.request.overdue_alert',
   'billing.payment.received',
   'billing.payment.review',
+  'rooms.project.created',
+  'rooms.step.shared',
+  'rooms.update.published',
+  'rooms.approval.requested',
+  'rooms.approval.decided',
+  'rooms.approval.reminded',
+  'rooms.approval.overdue',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

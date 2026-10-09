@@ -19,6 +19,10 @@ export const EMAIL_TEMPLATE_KEYS = [
   'lead.payment_reminder',
   'lead.payment_overdue',
   'lead.payment_received',
+  'lead.room_update',
+  'lead.step_shared',
+  'lead.approval_requested',
+  'lead.approval_reminder',
   'founder.application_received',
   'founder.queue_b_pending',
   'founder.call_outcome_missing',
@@ -31,6 +35,8 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.payment_received',
   'founder.payment_review',
   'founder.payment_overdue',
+  'founder.approval_decided',
+  'founder.approval_overdue',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -56,6 +62,10 @@ export type EmailParams = {
   'lead.payment_reminder': PortalNotice;
   'lead.payment_overdue': PortalNotice;
   'lead.payment_received': PortalNotice;
+  'lead.room_update': PortalNotice;
+  'lead.step_shared': PortalNotice;
+  'lead.approval_requested': PortalNotice;
+  'lead.approval_reminder': PortalNotice;
   'founder.application_received': {
     companyName: string;
     contactName: string;
@@ -75,6 +85,13 @@ export type EmailParams = {
   'founder.payment_received': { companyName: string; dealUrl: string };
   'founder.payment_review': { companyName: string; dealUrl: string };
   'founder.payment_overdue': { companyName: string; dealUrl: string; days: number };
+  'founder.approval_decided': {
+    companyName: string;
+    phaseName: string;
+    decision: 'approved' | 'changes_requested';
+    roomUrl: string;
+  };
+  'founder.approval_overdue': { companyName: string; phaseName: string; roomUrl: string };
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -95,6 +112,10 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'lead.payment_reminder': 'portalUrl',
   'lead.payment_overdue': 'portalUrl',
   'lead.payment_received': 'portalUrl',
+  'lead.room_update': 'portalUrl',
+  'lead.step_shared': 'portalUrl',
+  'lead.approval_requested': 'portalUrl',
+  'lead.approval_reminder': 'portalUrl',
   'founder.application_received': 'dealUrl',
   'founder.queue_b_pending': 'queueUrl',
   'founder.call_outcome_missing': 'dealUrl',
@@ -107,6 +128,8 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.payment_received': 'dealUrl',
   'founder.payment_review': 'dealUrl',
   'founder.payment_overdue': 'dealUrl',
+  'founder.approval_decided': 'roomUrl',
+  'founder.approval_overdue': 'roomUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

@@ -6,6 +6,7 @@ import {
   asUser,
   closeTestSql,
   createBillingFixture,
+  createRoomFixture,
   createFixtureWorld,
   withTestTransaction,
   type World,
@@ -47,10 +48,16 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'payment_requests', clientColumn: 'client_id' },
   { table: 'payments', clientColumn: 'client_id' },
   { table: 'legal_invoices', clientColumn: 'client_id' },
+  { table: 'projects', clientColumn: 'client_id' },
+  { table: 'project_phases', clientColumn: 'client_id' },
+  { table: 'project_steps', clientColumn: 'client_id' },
+  { table: 'project_updates', clientColumn: 'client_id' },
+  { table: 'approvals', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
   const core = (await createBillingFixture(sql, world)).contracts.core;
+  await createRoomFixture(sql, world);
   for (const records of [core.a, core.b]) {
     await sql`update public.core_engagements set briefing_shared_at = now() where id = ${records.engagementId}`;
     await sql`update public.documents set status = 'with_client', shared_at = now() where id = ${records.documentId}`;

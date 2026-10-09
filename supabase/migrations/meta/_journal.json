@@ -183,6 +183,20 @@
       "when": 1791555529482,
       "tag": "20261009141849_billing_counters_policy",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791567081182,
+      "tag": "20261009173121_rooms",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1791567091772,
+      "tag": "20261009173131_rooms_access",
+      "breakpoints": true
     }
   ]
 }

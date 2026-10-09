@@ -15,7 +15,8 @@ import type {
 
 export type BillingActionResult = { ok: true } | { ok: false; code: string };
 
-export type UploadLinkResult = { ok: true; uploadUrl: string } | { ok: false; code: string };
+export type UploadLinkResult =
+  { ok: true; uploadUrl: string; uploadPath: string } | { ok: false; code: string };
 
 export const BILLING_ERRORS = [
   'not_found',
@@ -243,7 +244,7 @@ async function uploadPdf(url: string, file: File): Promise<boolean> {
   const response = await fetch(url, {
     method: 'PUT',
     body: form,
-    headers: { 'x-upsert': 'true' },
+    headers: { 'x-upsert': 'false' },
   }).catch(() => null);
   return response?.ok ?? false;
 }
@@ -306,9 +307,11 @@ export function LegalInvoiceForm({
             setError('upload_failed');
             return;
           }
-          const result = await register({ requestId, ...values }).catch(
-            () => ({ ok: false, code: 'not_found' }) as const,
-          );
+          const result = await register({
+            requestId,
+            ...values,
+            uploadPath: link.uploadPath,
+          }).catch(() => ({ ok: false, code: 'not_found' }) as const);
           if (result.ok) onDone();
           else setError(billingError(result.code));
         })

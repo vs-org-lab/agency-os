@@ -106,7 +106,7 @@ const paymentsEnvSchema = z.discriminatedUnion('PAYMENTS_PROVIDER', [
   z.object({ PAYMENTS_PROVIDER: z.literal('fake') }),
   z.object({
     PAYMENTS_PROVIDER: z.literal('stripe'),
-    STRIPE_SECRET_KEY: z.string().regex(/^(sk|rk)_(test|live)_/),
+    STRIPE_SECRET_KEY: z.string().regex(/^(sk|rk)_test_/),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
   }),
 ]);
@@ -115,13 +115,20 @@ export type PaymentsEnv = z.infer<typeof paymentsEnvSchema>;
 
 let cachedPaymentsEnv: PaymentsEnv | undefined;
 
-/** Card payments run only with Stripe keys; with `fake` the OS records payments by hand. */
-export function paymentsEnv(): PaymentsEnv {
-  cachedPaymentsEnv ??= paymentsEnvSchema.parse({
-    PAYMENTS_PROVIDER: process.env.PAYMENTS_PROVIDER ?? 'fake',
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+/**
+ * Card payments run only with Stripe keys; with `fake` the OS records payments by hand. Only test
+ * keys are accepted until the launch criteria are met (ADR 0003).
+ */
+export function parsePaymentsEnv(source: Record<string, string | undefined>): PaymentsEnv {
+  return paymentsEnvSchema.parse({
+    PAYMENTS_PROVIDER: source.PAYMENTS_PROVIDER ?? 'fake',
+    STRIPE_SECRET_KEY: source.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: source.STRIPE_WEBHOOK_SECRET,
   });
+}
+
+export function paymentsEnv(): PaymentsEnv {
+  cachedPaymentsEnv ??= parsePaymentsEnv(process.env);
   return cachedPaymentsEnv;
 }
 

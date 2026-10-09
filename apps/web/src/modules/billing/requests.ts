@@ -13,6 +13,7 @@ import { toMinorUnits } from '@/modules/contracts';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { canWriteBilling } from './access';
+import { REAUTHENTICATION_REQUIRED, recentlyVerified, writesBillingRow } from './authorize';
 import { formatRequestNumber } from './domain/numbering';
 import { buildMilestones, dueDateFrom, lisbonDate } from './domain/plan';
 import { buildPaymentRequestPdf } from './pdf';
@@ -232,10 +233,12 @@ export async function createPlanForContract(
       .where(eq(proposalOptions.id, contract.optionId));
     if (!option) return skipped;
 
+    const drafts = buildMilestones(option.amount, option.plan);
+    if (drafts.length === 0) return skipped;
     const milestones = await tx
       .insert(billingMilestones)
       .values(
-        buildMilestones(option.amount, option.plan).map((draft) => ({
+        drafts.map((draft) => ({
           ...draft,
           organizationId: contract.organizationId,
           clientId: contract.clientId,
@@ -245,7 +248,7 @@ export async function createPlanForContract(
         })),
       )
       .returning();
-    const first = milestones.find((milestone) => milestone.position === 1);
+    const [first] = [...milestones].sort((left, right) => left.position - right.position);
     if (!first) return skipped;
     return { created: true, requestId: await issueRequest(tx, first, deps, now) };
   });
@@ -254,31 +257,15 @@ export async function createPlanForContract(
   return result;
 }
 
-async function writerFor(
-  deps: BillingDeps,
-  claims: VerifiedClaims,
-  check: (tx: DbTransaction) => Promise<boolean>,
-): Promise<boolean> {
-  return withActor(
-    deps.contexts,
-    claims,
-    async (tx, actor) => canWriteBilling(actor) && (await check(tx)),
-    false,
-  );
-}
-
 export async function requestPayment(
   claims: VerifiedClaims,
   input: { milestoneId: string },
   deps: BillingDeps,
 ): Promise<{ ok: true; requestId: string } | NotFound | { ok: false; rule: 'invalid_state' }> {
   if (!z.uuid().safeParse(input.milestoneId).success) return NOT_FOUND;
-  const allowed = await writerFor(deps, claims, async (tx) => {
-    const rows = await tx
-      .select({ id: billingMilestones.id })
-      .from(billingMilestones)
-      .where(eq(billingMilestones.id, input.milestoneId));
-    return rows.length > 0;
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'milestone',
+    id: input.milestoneId,
   });
   if (!allowed) return NOT_FOUND;
   const now = (deps.now ?? (() => new Date()))();
@@ -299,29 +286,23 @@ export async function requestPayment(
   return result;
 }
 
-async function writableRequest(
-  deps: BillingDeps,
-  claims: VerifiedClaims,
-  requestId: string,
-): Promise<boolean> {
-  if (!z.uuid().safeParse(requestId).success) return false;
-  return writerFor(deps, claims, async (tx) => {
-    const rows = await tx
-      .select({ id: paymentRequests.id })
-      .from(paymentRequests)
-      .where(eq(paymentRequests.id, requestId));
-    return rows.length > 0;
-  });
-}
-
 /** Voids an unpaid request; a paid one is corrected by a credit note in certified software (RN-31). */
 export async function voidPaymentRequest(
   claims: VerifiedClaims,
   input: { requestId: string; reason: string },
   deps: BillingDeps,
-): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_input' | 'invalid_state' }> {
+): Promise<
+  | { ok: true }
+  | NotFound
+  | { ok: false; rule: 'invalid_input' | 'invalid_state' | 'reauthentication_required' }
+> {
   const reason = input.reason.trim();
-  if (!(await writableRequest(deps, claims, input.requestId))) return NOT_FOUND;
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'request',
+    id: input.requestId,
+  });
+  if (!allowed) return NOT_FOUND;
+  if (!recentlyVerified(claims)) return REAUTHENTICATION_REQUIRED;
   if (reason.length === 0 || reason.length > 500) return { ok: false, rule: 'invalid_input' };
   const now = (deps.now ?? (() => new Date()))();
 
@@ -364,7 +345,11 @@ export async function chasePaymentRequest(
   input: { requestId: string },
   deps: BillingDeps,
 ): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_state' | 'too_soon' }> {
-  if (!(await writableRequest(deps, claims, input.requestId))) return NOT_FOUND;
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'request',
+    id: input.requestId,
+  });
+  if (!allowed) return NOT_FOUND;
   const now = (deps.now ?? (() => new Date()))();
 
   const result = await deps.contexts.withSystemContext(async (tx) => {
@@ -425,7 +410,13 @@ export async function createPlanForDeal(
       const [contract] = await tx
         .select({ id: contracts.id })
         .from(contracts)
-        .where(and(eq(contracts.dealId, input.dealId), eq(contracts.status, 'signed')))
+        .where(
+          and(
+            eq(contracts.dealId, input.dealId),
+            eq(contracts.status, 'signed'),
+            eq(contracts.organizationId, actor.organizationId),
+          ),
+        )
         .limit(1);
       return contract?.id ?? null;
     },

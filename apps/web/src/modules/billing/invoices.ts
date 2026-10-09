@@ -1,13 +1,13 @@
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { schema, type DbTransaction, type InvoiceIssuer } from '@agency-os/db';
-import { withActor } from '@/modules/access';
+import { schema, type InvoiceIssuer } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import type { VerifiedClaims } from '@/platform/db';
-import { canWriteBilling } from './access';
+import { REAUTHENTICATION_REQUIRED, recentlyVerified, writesBillingRow } from './authorize';
 import { lisbonDate } from './domain/plan';
 import type { BillingDeps } from './requests';
-import { isPdf, legalInvoicePdfPath } from './storage';
+import { isPdf, legalInvoiceFolder } from './storage';
 
 const { legalInvoices, paymentRequests } = schema;
 
@@ -19,6 +19,8 @@ export type RegisterLegalInvoiceInput = {
   issuer: InvoiceIssuer;
   number: string;
   issuedOn: string;
+  /** The path returned with the upload link the PDF was sent to. */
+  uploadPath: string;
 };
 
 const invoiceSchema = z.object({
@@ -30,28 +32,8 @@ const invoiceSchema = z.object({
     .transform((value) => value.replace(/\p{Cc}+/gu, ' ').trim())
     .pipe(z.string().min(1)),
   issuedOn: z.iso.date(),
+  uploadPath: z.string().max(300),
 });
-
-async function writableRequest(
-  deps: BillingDeps,
-  claims: VerifiedClaims,
-  requestId: string,
-): Promise<boolean> {
-  if (!z.uuid().safeParse(requestId).success) return false;
-  return withActor(
-    deps.contexts,
-    claims,
-    async (tx: DbTransaction, actor) => {
-      if (!canWriteBilling(actor)) return false;
-      const rows = await tx
-        .select({ id: paymentRequests.id })
-        .from(paymentRequests)
-        .where(eq(paymentRequests.id, requestId));
-      return rows.length > 0;
-    },
-    false,
-  );
-}
 
 async function paidRequest(deps: BillingDeps, requestId: string) {
   const [request] = await deps.contexts.withSystemContext((tx) =>
@@ -69,17 +51,29 @@ async function paidRequest(deps: BillingDeps, requestId: string) {
   return request?.status === 'paid' && request.invoiceId === null ? request : null;
 }
 
-/** A signed upload link for the legal invoice PDF of a paid request, at a server-chosen path. */
+/**
+ * A signed upload link for the legal invoice PDF of a paid request. Every link writes to a path
+ * of its own and never overwrites, so a link obtained earlier cannot replace a registered PDF.
+ */
 export async function legalInvoiceUploadUrl(
   claims: VerifiedClaims,
   input: { requestId: string },
   deps: BillingDeps,
-): Promise<{ ok: true; uploadUrl: string } | NotFound | { ok: false; rule: 'invalid_state' }> {
-  if (!(await writableRequest(deps, claims, input.requestId))) return NOT_FOUND;
+): Promise<
+  | { ok: true; uploadUrl: string; uploadPath: string }
+  | NotFound
+  | { ok: false; rule: 'invalid_state' }
+> {
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'request',
+    id: input.requestId,
+  });
+  if (!allowed) return NOT_FOUND;
   const request = await paidRequest(deps, input.requestId);
   if (!request) return { ok: false, rule: 'invalid_state' };
-  const path = legalInvoicePdfPath(request.organizationId, request.clientId, input.requestId);
-  return { ok: true, uploadUrl: await deps.storage.createUploadUrl(path) };
+  const folder = legalInvoiceFolder(request.organizationId, request.clientId, input.requestId);
+  const uploadPath = `${folder}${randomUUID()}.pdf`;
+  return { ok: true, uploadUrl: await deps.storage.createUploadUrl(uploadPath), uploadPath };
 }
 
 /**
@@ -91,9 +85,19 @@ export async function registerLegalInvoice(
   input: RegisterLegalInvoiceInput,
   deps: BillingDeps,
 ): Promise<
-  { ok: true } | NotFound | { ok: false; rule: 'invalid_input' | 'invalid_state' | 'missing_file' }
+  | { ok: true }
+  | NotFound
+  | {
+      ok: false;
+      rule: 'invalid_input' | 'invalid_state' | 'missing_file' | 'reauthentication_required';
+    }
 > {
-  if (!(await writableRequest(deps, claims, input.requestId))) return NOT_FOUND;
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'request',
+    id: input.requestId,
+  });
+  if (!allowed) return NOT_FOUND;
+  if (!recentlyVerified(claims)) return REAUTHENTICATION_REQUIRED;
   const now = (deps.now ?? (() => new Date()))();
   const parsed = invoiceSchema.safeParse(input);
   if (!parsed.success || parsed.data.issuedOn > lisbonDate(now)) {
@@ -102,8 +106,12 @@ export async function registerLegalInvoice(
   const data = parsed.data;
   const request = await paidRequest(deps, data.requestId);
   if (!request) return { ok: false, rule: 'invalid_state' };
-  const path = legalInvoicePdfPath(request.organizationId, request.clientId, data.requestId);
-  const file = await deps.storage.download(path);
+  const folder = legalInvoiceFolder(request.organizationId, request.clientId, data.requestId);
+  const fileName = data.uploadPath.slice(folder.length);
+  if (!data.uploadPath.startsWith(folder) || !/^[0-9a-f-]{36}\.pdf$/.test(fileName)) {
+    return { ok: false, rule: 'invalid_input' };
+  }
+  const file = await deps.storage.download(data.uploadPath);
   if (!file || !isPdf(file)) return { ok: false, rule: 'missing_file' };
 
   return deps.contexts.withSystemContext(async (tx) => {
@@ -128,7 +136,7 @@ export async function registerLegalInvoice(
         issuer: data.issuer,
         number: data.number,
         issuedOn: data.issuedOn,
-        pdfPath: path,
+        pdfPath: data.uploadPath,
         recordedBy: claims.sub,
       })
       .returning({ id: legalInvoices.id });

@@ -12,6 +12,7 @@ const FIRST_OFFSET_DAYS = Math.abs(REMINDER_OFFSETS[0] ?? 0);
 /**
  * Daily reminder sweep (RF-045, AUT-19, RN-34): for each open request, sends only the latest
  * reminder stage reached and not yet sent, and alerts the founder at 15 and 30 days overdue.
+ * A request with a payment waiting for review is left alone until that payment is settled.
  * Returns the number of requests reminded.
  */
 export async function sweepPaymentReminders(
@@ -27,6 +28,10 @@ export async function sweepPaymentReminders(
           eq(paymentRequests.status, 'sent'),
           lt(paymentRequests.lastReminderStage, LAST_STAGE),
           lte(paymentRequests.dueDate, sql`${today}::date + ${FIRST_OFFSET_DAYS}::int`),
+          sql`not exists (
+            select 1 from public.payments p
+            where p.request_id = ${paymentRequests.id} and p.status = 'review'
+          )`,
         ),
       )
       .orderBy(asc(paymentRequests.dueDate))

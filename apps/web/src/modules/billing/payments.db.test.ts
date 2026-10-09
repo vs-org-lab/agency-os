@@ -4,7 +4,6 @@ import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-o
 import { legalInvoiceUploadUrl, registerLegalInvoice } from './invoices';
 import { recordPayment, settleReviewedPayment } from './payments';
 import { createPlanForContract, requestPayment } from './requests';
-import { legalInvoicePdfPath } from './storage';
 import { billingClaims, billingDeps, signedContract } from './testing';
 
 afterAll(async () => {
@@ -205,26 +204,49 @@ describe('legal invoices', () => {
       });
       await recordPayment(claims, { requestId, ...TRANSFER }, deps);
       const upload = await legalInvoiceUploadUrl(claims, { requestId }, deps);
-      expect(upload.ok).toBe(true);
+      if (!upload.ok) throw new Error('Upload link was refused');
+      const input = { requestId, ...INVOICE, uploadPath: upload.uploadPath };
 
-      expect(await registerLegalInvoice(claims, { requestId, ...INVOICE }, deps)).toEqual({
+      expect(await registerLegalInvoice(claims, input, deps)).toEqual({
         ok: false,
         rule: 'missing_file',
       });
-      const path = legalInvoicePdfPath(world.organizationId, contract.clientId, requestId);
-      storage.files.set(path, new Uint8Array([0x89, 0x50, 0x4e, 0x47]));
-      expect(await registerLegalInvoice(claims, { requestId, ...INVOICE }, deps)).toEqual({
+      storage.files.set(upload.uploadPath, new Uint8Array([0x89, 0x50, 0x4e, 0x47]));
+      expect(await registerLegalInvoice(claims, input, deps)).toEqual({
         ok: false,
         rule: 'missing_file',
       });
-      storage.files.set(path, PDF);
-      expect(await registerLegalInvoice(claims, { requestId, ...INVOICE }, deps)).toEqual({
-        ok: true,
-      });
+      storage.files.set(upload.uploadPath, PDF);
+      expect(await registerLegalInvoice(claims, input, deps)).toEqual({ ok: true });
       const [invoice] = await sql<{ number: string; pdf_path: string }[]>`
         select number, pdf_path from public.legal_invoices where request_id = ${requestId}
       `;
-      expect(invoice).toEqual({ number: 'FR 2026/14', pdf_path: path });
+      expect(invoice).toEqual({ number: 'FR 2026/14', pdf_path: upload.uploadPath });
+    });
+  });
+
+  it('each upload link gets its own path and a foreign path is refused', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await signedContract(sql, world);
+      const { deps, storage } = billingDeps(sql);
+      const plan = await createPlanForContract(contract.contractId, deps);
+      const requestId = plan.requestId ?? '';
+      const claims = billingClaims(world.users.founder);
+      await recordPayment(claims, { requestId, ...TRANSFER }, deps);
+
+      const first = await legalInvoiceUploadUrl(claims, { requestId }, deps);
+      const second = await legalInvoiceUploadUrl(claims, { requestId }, deps);
+      if (!first.ok || !second.ok) throw new Error('Upload links were refused');
+      const prefix = `${world.organizationId}/${contract.clientId}/invoices/${requestId}/`;
+      expect(first.uploadPath.startsWith(prefix)).toBe(true);
+      expect(second.uploadPath).not.toBe(first.uploadPath);
+
+      const foreign = `${world.organizationId}/${contract.clientId}/requests/${requestId}.pdf`;
+      storage.files.set(foreign, PDF);
+      expect(
+        await registerLegalInvoice(claims, { requestId, ...INVOICE, uploadPath: foreign }, deps),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
     });
   });
 
@@ -237,22 +259,21 @@ describe('legal invoices', () => {
       const requestId = plan.requestId ?? '';
       const claims = billingClaims(world.users.finance);
       await recordPayment(claims, { requestId, ...TRANSFER }, deps);
-      storage.files.set(
-        legalInvoicePdfPath(world.organizationId, contract.clientId, requestId),
-        PDF,
-      );
+      const upload = await legalInvoiceUploadUrl(claims, { requestId }, deps);
+      if (!upload.ok) throw new Error('Upload link was refused');
+      storage.files.set(upload.uploadPath, PDF);
+      const input = { requestId, ...INVOICE, uploadPath: upload.uploadPath };
 
-      expect(
-        await registerLegalInvoice(
-          billingClaims(world.users.manager),
-          { requestId, ...INVOICE },
-          deps,
-        ),
-      ).toEqual({ ok: false, rule: 'not_found' });
-      expect(await registerLegalInvoice(claims, { requestId, ...INVOICE }, deps)).toEqual({
-        ok: true,
+      expect(await registerLegalInvoice(billingClaims(world.users.manager), input, deps)).toEqual({
+        ok: false,
+        rule: 'not_found',
       });
-      expect(await registerLegalInvoice(claims, { requestId, ...INVOICE }, deps)).toEqual({
+      expect(await registerLegalInvoice(claims, input, deps)).toEqual({ ok: true });
+      expect(await registerLegalInvoice(claims, input, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_state',
+      });
+      expect(await legalInvoiceUploadUrl(claims, { requestId }, deps)).toEqual({
         ok: false,
         rule: 'invalid_state',
       });

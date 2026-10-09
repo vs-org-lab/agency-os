@@ -64,7 +64,14 @@ function actionsMock(overrides: Partial<BillingActions> = {}): BillingActions {
     void: vi.fn(ok),
     record: vi.fn(ok),
     settle: vi.fn(ok),
-    invoiceUpload: vi.fn(async () => ({ ok: true, uploadUrl: 'https://upload.test' }) as const),
+    invoiceUpload: vi.fn(
+      async () =>
+        ({
+          ok: true,
+          uploadUrl: 'https://upload.test',
+          uploadPath: 'org/client/invoices/r/f.pdf',
+        }) as const,
+    ),
     registerInvoice: vi.fn(ok),
     ...overrides,
   };

@@ -26,6 +26,16 @@ describe('buildMilestones', () => {
     expect(milestones.map((milestone) => milestone.amount)).toEqual(['1250000.00', '1250000.01']);
   });
 
+  it('leaves out milestones that round to zero', () => {
+    expect(
+      buildMilestones('0.01', [
+        { label: 'Assinatura', percent: 50 },
+        { label: 'Entrega', percent: 50 },
+      ]),
+    ).toEqual([{ position: 2, label: 'Entrega', percent: 50, amount: '0.01' }]);
+    expect(buildMilestones('0.00', [{ label: 'Assinatura', percent: 100 }])).toEqual([]);
+  });
+
   it('converts minor units to a decimal string', () => {
     expect(fromMinorUnits(5n)).toBe('0.05');
     expect(fromMinorUnits(123456n)).toBe('1234.56');

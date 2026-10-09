@@ -1,12 +1,11 @@
 import { and, count, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type PaymentMethod } from '@agency-os/db';
-import { withActor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
 import { toMinorUnits } from '@/modules/contracts';
 import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
-import { canWriteBilling } from './access';
+import { REAUTHENTICATION_REQUIRED, recentlyVerified, writesBillingRow } from './authorize';
 import { lisbonDate } from './domain/plan';
 import { reconcileDecision } from './domain/reconcile';
 import type { BillingDeps } from './requests';
@@ -102,19 +101,6 @@ export async function emitPaymentReview(
   });
 }
 
-function writer(
-  deps: BillingDeps,
-  claims: VerifiedClaims,
-  visible: (tx: DbTransaction) => Promise<boolean>,
-) {
-  return withActor(
-    deps.contexts,
-    claims,
-    async (tx, actor) => canWriteBilling(actor) && (await visible(tx)),
-    false,
-  );
-}
-
 /** Records a transfer, Multicaixa or other payment received outside the payment provider. */
 export async function recordPayment(
   claims: VerifiedClaims,
@@ -123,17 +109,14 @@ export async function recordPayment(
 ): Promise<
   | { ok: true; status: 'reconciled' | 'review' }
   | NotFound
-  | { ok: false; rule: 'invalid_input' | 'invalid_state' }
+  | { ok: false; rule: 'invalid_input' | 'invalid_state' | 'reauthentication_required' }
 > {
-  if (!z.uuid().safeParse(input.requestId).success) return NOT_FOUND;
-  const allowed = await writer(deps, claims, async (tx) => {
-    const rows = await tx
-      .select({ id: paymentRequests.id })
-      .from(paymentRequests)
-      .where(eq(paymentRequests.id, input.requestId));
-    return rows.length > 0;
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'request',
+    id: input.requestId,
   });
   if (!allowed) return NOT_FOUND;
+  if (!recentlyVerified(claims)) return REAUTHENTICATION_REQUIRED;
   const now = (deps.now ?? (() => new Date()))();
   const parsed = manualPaymentSchema.safeParse(input);
   if (!parsed.success || parsed.data.receivedOn > lisbonDate(now)) {
@@ -197,16 +180,15 @@ export async function settleReviewedPayment(
   claims: VerifiedClaims,
   input: { paymentId: string },
   deps: BillingDeps,
-): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_state' }> {
-  if (!z.uuid().safeParse(input.paymentId).success) return NOT_FOUND;
-  const allowed = await writer(deps, claims, async (tx) => {
-    const rows = await tx
-      .select({ id: payments.id })
-      .from(payments)
-      .where(eq(payments.id, input.paymentId));
-    return rows.length > 0;
+): Promise<
+  { ok: true } | NotFound | { ok: false; rule: 'invalid_state' | 'reauthentication_required' }
+> {
+  const allowed = await writesBillingRow(deps.contexts, claims, {
+    kind: 'payment',
+    id: input.paymentId,
   });
   if (!allowed) return NOT_FOUND;
+  if (!recentlyVerified(claims)) return REAUTHENTICATION_REQUIRED;
   const now = (deps.now ?? (() => new Date()))();
 
   const result = await deps.contexts.withSystemContext(async (tx) => {

@@ -29,12 +29,13 @@ export function requestPdfPath(
   return `${organizationId}/${clientId}/requests/${requestId}.pdf`;
 }
 
-export function legalInvoicePdfPath(
+/** Folder of a request's legal invoice uploads; each upload link adds a file of its own. */
+export function legalInvoiceFolder(
   organizationId: string,
   clientId: string,
   requestId: string,
 ): string {
-  return `${organizationId}/${clientId}/invoices/${requestId}.pdf`;
+  return `${organizationId}/${clientId}/invoices/${requestId}/`;
 }
 
 export type MemoryBillingStorage = BillingStorage & { files: Map<string, Uint8Array> };

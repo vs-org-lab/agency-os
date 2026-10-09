@@ -18,7 +18,7 @@ export function createSupabaseBillingStorage(): BillingStorage {
       return data.signedUrl;
     },
     async createUploadUrl(path) {
-      const { data, error } = await bucket().createSignedUploadUrl(path, { upsert: true });
+      const { data, error } = await bucket().createSignedUploadUrl(path, { upsert: false });
       if (error || !data) {
         throw new Error(`Billing upload link failed: ${error?.message ?? 'no data'}`);
       }

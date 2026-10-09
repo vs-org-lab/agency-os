@@ -122,6 +122,36 @@ test.describe('Aurion Core', () => {
     await moveTo(page, '1.6');
   });
 
+  test('call mode may use the microphone and tab capture', async ({ page }) => {
+    const { company } = uniqueCompany('Core Microfone');
+    const { dealId } = await seedDeal(credentials.organizationId, {
+      company,
+      code: '0.3',
+      withCall: true,
+    });
+    await seedCore(credentials.organizationId, dealId);
+    await signInWithPassword(page, credentials.founder);
+    const allows = (feature: string) =>
+      page.evaluate(
+        (name) =>
+          (
+            document as Document & {
+              featurePolicy?: { allowsFeature(feature: string): boolean };
+            }
+          ).featurePolicy?.allowsFeature(name) ?? null,
+        feature,
+      );
+
+    await page.goto(`/pipeline/${dealId}`);
+    expect(await allows('microphone')).toBe(false);
+    await page.getByRole('tab', { name: 'Core' }).click();
+    await page.getByRole('link', { name: 'Abrir modo call' }).click();
+    await expect(page.getByRole('heading', { name: 'Gravação da call' })).toBeVisible();
+
+    expect(await allows('microphone')).toBe(true);
+    expect(await allows('display-capture')).toBe(true);
+  });
+
   test('uploaded audio becomes the Core transcript @fake-transcription', async ({ page }) => {
     test.setTimeout(120_000);
     const { company } = uniqueCompany('Core Gravação');

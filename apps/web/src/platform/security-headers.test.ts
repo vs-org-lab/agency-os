@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildSecurityHeaders, embedOriginsForPath, generateNonce } from './security-headers';
+import {
+  allowsMediaCapture,
+  buildSecurityHeaders,
+  embedOriginsForPath,
+  generateNonce,
+} from './security-headers';
 
 function directives(csp: string): Map<string, string[]> {
   return new Map(
@@ -69,6 +74,26 @@ describe('security headers', () => {
     for (const feature of ['camera=()', 'microphone=()', 'geolocation=()', 'payment=()']) {
       expect(permissions).toContain(feature);
     }
+  });
+
+  it('allows the microphone and tab capture only where media capture is enabled', () => {
+    const blocked = buildSecurityHeaders('n').get('Permissions-Policy') ?? '';
+    const allowed =
+      buildSecurityHeaders('n', { mediaCapture: true }).get('Permissions-Policy') ?? '';
+
+    expect(blocked).toContain('microphone=()');
+    expect(blocked).toContain('display-capture=()');
+    expect(allowed).toContain('microphone=(self)');
+    expect(allowed).toContain('display-capture=(self)');
+    expect(allowed).toContain('camera=()');
+  });
+
+  it('enables media capture on the call mode route only', () => {
+    expect(allowsMediaCapture('/pipeline/2f1c/core/call')).toBe(true);
+    expect(allowsMediaCapture('/en/pipeline/2f1c/core/call')).toBe(true);
+    expect(allowsMediaCapture('/pipeline/2f1c')).toBe(false);
+    expect(allowsMediaCapture('/pipeline/2f1c/core/call/extra')).toBe(false);
+    expect(allowsMediaCapture('/portal')).toBe(false);
   });
 
   it('allows configured embed origins on apply routes', () => {

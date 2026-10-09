@@ -1153,5 +1153,81 @@
         "not_found": "The recording could not be saved."
       }
     }
+  },
+  "contracts": {
+    "proposal": {
+      "title": "Proposal",
+      "description": "The Orbit options the decision maker chooses from in the portal. Once sent, the proposal can no longer be edited.",
+      "entity": "Contracting entity",
+      "currency": "Currency",
+      "locale": "Contract language",
+      "languages": {
+        "pt-PT": "Portuguese",
+        "en": "English"
+      },
+      "validUntil": "Valid until",
+      "guarantee": "Guarantee",
+      "option": "Option {position}",
+      "defaultNames": {
+        "first": "Essential Orbit",
+        "second": "Orbit with Gravity",
+        "third": "Complete system with Constellation"
+      },
+      "defaultPayments": {
+        "signature": "Signature",
+        "delivery": "Delivery"
+      },
+      "name": "Option name",
+      "summary": "Summary",
+      "scope": "Scope",
+      "scopeLine": "Scope line {position}",
+      "addLine": "Add line",
+      "removeLine": "Remove line {position}",
+      "addFinding": "Add finding",
+      "addFindingPlaceholder": "Aurion findings for 90 days",
+      "amount": "One-off amount",
+      "payments": "Payments",
+      "paymentLabel": "Payment {position} label",
+      "paymentPercent": "Payment {position} percentage",
+      "addPayment": "Add payment",
+      "removePayment": "Remove payment {position}",
+      "paymentsTotal": "Total: {total}%",
+      "retainerToggle": "Includes monthly support",
+      "retainerMonthly": "Monthly amount",
+      "retainerMonths": "Months",
+      "retainerSummary": "{amount} per month, for {months} months",
+      "addOption": "Add option",
+      "removeOption": "Remove option {position}",
+      "save": "Save draft",
+      "saved": "Draft saved.",
+      "send": "Send to the client",
+      "withdraw": "Withdraw proposal",
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent to the client",
+        "accepted": "Accepted by the client",
+        "withdrawn": "Withdrawn"
+      },
+      "sentOn": "Sent on {date}",
+      "acceptedOn": "Accepted on {date}",
+      "validUntilOn": "Valid until {date}",
+      "chosen": "Chosen option",
+      "requests": "Change requests from the client",
+      "hints": {
+        "stage": "To send it, the deal must be at 1.6 (presentation shared with the client).",
+        "portal": "To send it, give the decision maker portal access.",
+        "founder": "Only the founder sends the proposal.",
+        "entity": "Register an issuing entity in Settings › Organisation."
+      },
+      "errors": {
+        "payments": "The payments of each option must add up to 100%.",
+        "invalid_input": "Check the fields of each option and the validity date.",
+        "locked": "The proposal has already been sent.",
+        "stage": "The deal must be at 1.6.",
+        "portal_access": "The decision maker has no portal access yet.",
+        "invalid_state": "The proposal cannot change in this state.",
+        "not_found": "The proposal could not be saved."
+      }
+    }
   }
 }

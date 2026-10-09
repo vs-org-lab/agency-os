@@ -1153,5 +1153,81 @@
         "not_found": "Não foi possível guardar a gravação."
       }
     }
+  },
+  "contracts": {
+    "proposal": {
+      "title": "Proposta",
+      "description": "As opções Orbit que o decisor escolhe no portal. Depois de enviada, a proposta deixa de ser editável.",
+      "entity": "Entidade que contrata",
+      "currency": "Moeda",
+      "locale": "Idioma do contrato",
+      "languages": {
+        "pt-PT": "Português",
+        "en": "Inglês"
+      },
+      "validUntil": "Válida até",
+      "guarantee": "Garantia",
+      "option": "Opção {position}",
+      "defaultNames": {
+        "first": "Orbit essencial",
+        "second": "Orbit com Gravity",
+        "third": "Sistema completo com Constellation"
+      },
+      "defaultPayments": {
+        "signature": "Assinatura",
+        "delivery": "Entrega"
+      },
+      "name": "Nome da opção",
+      "summary": "Resumo",
+      "scope": "Âmbito",
+      "scopeLine": "Linha do âmbito {position}",
+      "addLine": "Acrescentar linha",
+      "removeLine": "Remover linha {position}",
+      "addFinding": "Acrescentar achado",
+      "addFindingPlaceholder": "Achados da Aurion a 90 dias",
+      "amount": "Valor único",
+      "payments": "Pagamentos",
+      "paymentLabel": "Designação do pagamento {position}",
+      "paymentPercent": "Percentagem do pagamento {position}",
+      "addPayment": "Acrescentar pagamento",
+      "removePayment": "Remover pagamento {position}",
+      "paymentsTotal": "Total: {total}%",
+      "retainerToggle": "Inclui acompanhamento mensal",
+      "retainerMonthly": "Valor mensal",
+      "retainerMonths": "Meses",
+      "retainerSummary": "{amount} por mês, durante {months} meses",
+      "addOption": "Acrescentar opção",
+      "removeOption": "Remover opção {position}",
+      "save": "Guardar rascunho",
+      "saved": "Rascunho guardado.",
+      "send": "Enviar ao cliente",
+      "withdraw": "Retirar proposta",
+      "status": {
+        "draft": "Rascunho",
+        "sent": "Enviada ao cliente",
+        "accepted": "Aceite pelo cliente",
+        "withdrawn": "Retirada"
+      },
+      "sentOn": "Enviada a {date}",
+      "acceptedOn": "Aceite a {date}",
+      "validUntilOn": "Válida até {date}",
+      "chosen": "Opção escolhida",
+      "requests": "Pedidos de alteração do cliente",
+      "hints": {
+        "stage": "Para enviar, o negócio tem de estar em 1.6 (apresentação partilhada com o cliente).",
+        "portal": "Para enviar, dê acesso ao portal ao decisor.",
+        "founder": "Só o fundador envia a proposta.",
+        "entity": "Registe uma entidade emissora em Definições › Organização."
+      },
+      "errors": {
+        "payments": "Os pagamentos de cada opção têm de somar 100%.",
+        "invalid_input": "Confirme os campos de cada opção e a validade.",
+        "locked": "A proposta já foi enviada.",
+        "stage": "O negócio tem de estar em 1.6.",
+        "portal_access": "O decisor ainda não tem acesso ao portal.",
+        "invalid_state": "A proposta não pode mudar neste estado.",
+        "not_found": "Não foi possível guardar a proposta."
+      }
+    }
   }
 }

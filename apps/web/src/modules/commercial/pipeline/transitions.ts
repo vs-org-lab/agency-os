@@ -7,7 +7,7 @@ import {
   type PipelineStage,
 } from './codes';
 
-export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'retainers';
+export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'rooms' | 'retainers';
 
 export type TransitionRefusal =
   | 'same_code'
@@ -20,6 +20,7 @@ export type TransitionRefusal =
   | 'core_criteria'
   | 'contract_required'
   | 'core_required'
+  | 'payment_required'
   | 'module_pending';
 
 export type TransitionFacts = {
@@ -30,6 +31,8 @@ export type TransitionFacts = {
   contractSigned: boolean;
   /** The client had a Core delivered (1.6) in the last 12 months (RN-03). */
   coreDeliveredWithinYear: boolean;
+  /** A reconciled payment exists on one of the deal's payment requests (RN-04, exit from 2.1). */
+  firstPaymentReceived: boolean;
 };
 
 export type TransitionActor = 'system' | 'founder' | 'staff';
@@ -56,7 +59,7 @@ export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set([
 
 export const STAGE_MODULE: Readonly<Partial<Record<PipelineStage, PendingModule>>> = {
   core: 'diagnosis',
-  orbit: 'billing',
+  orbit: 'rooms',
   gravity: 'retainers',
   constellation: 'retainers',
 };
@@ -74,6 +77,10 @@ const STAGE_LINKS: ReadonlyArray<readonly [PipelineCode, PipelineCode]> = [
 const PAUSED_CODES: readonly PipelineCode[] = ['X.1', 'X.2'];
 
 const PROJECT_START: PipelineCode = '2.1';
+
+const KICKOFF: PipelineCode = '2.2';
+
+const BILLING_CODES: readonly PipelineCode[] = [PROJECT_START, KICKOFF];
 
 const MISSING_CORE: CoreReadiness = {
   briefingHasContent: false,
@@ -133,7 +140,8 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
 
   const targetStage = stageOf(to);
   if (!ENABLED_STAGES.has(targetStage)) return refuse('module_pending', STAGE_MODULE[targetStage]);
-  if (targetStage === 'orbit' && to !== PROJECT_START) return refuse('module_pending', 'billing');
+  if (targetStage === 'orbit' && !BILLING_CODES.includes(to))
+    return refuse('module_pending', 'rooms');
 
   if (movement === 'back') {
     if (actor === 'staff') return refuse('founder_only');
@@ -148,6 +156,9 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
   if (to === PROJECT_START) {
     if (!facts.contractSigned) return refuse('contract_required');
     if (from === '0.4' && !facts.coreDeliveredWithinYear) return refuse('core_required');
+  }
+  if (from === PROJECT_START && to === KICKOFF && !facts.firstPaymentReceived) {
+    return refuse('payment_required');
   }
   if (stageOf(from) === 'core' && targetStage === 'core') {
     const gaps = stageOneGaps(to, facts.coreReadiness ?? MISSING_CORE);

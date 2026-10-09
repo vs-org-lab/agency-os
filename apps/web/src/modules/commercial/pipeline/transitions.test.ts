@@ -27,9 +27,9 @@ const ALLOWED_FOR_FOUNDER: Record<PipelineCode, PipelineCode[]> = {
   '1.4': ['1.5', '1.3', ...OFF_CYCLE],
   '1.5': ['1.6', '1.4', ...OFF_CYCLE],
   '1.6': ['1.5', '2.1', ...OFF_CYCLE],
-  '2.1': OFF_CYCLE,
+  '2.1': ['2.2', ...OFF_CYCLE],
   '2.2': ['2.1', ...OFF_CYCLE],
-  '2.3': OFF_CYCLE,
+  '2.3': ['2.2', ...OFF_CYCLE],
   '2.4': OFF_CYCLE,
   '2.5': OFF_CYCLE,
   '2.6': OFF_CYCLE,
@@ -66,6 +66,7 @@ function input(
       coreReadiness: READY,
       contractSigned: true,
       coreDeliveredWithinYear: true,
+      firstPaymentReceived: true,
     },
     ...overrides,
   };
@@ -99,6 +100,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -117,6 +119,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -137,6 +140,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -155,6 +159,7 @@ describe('evaluateTransition', () => {
             coreReadiness: { ...READY, crossReviewed: false, internalItems: 1 },
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -174,6 +179,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -193,6 +199,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -208,6 +215,7 @@ describe('evaluateTransition', () => {
             coreReadiness: null,
             contractSigned: false,
             coreDeliveredWithinYear: false,
+            firstPaymentReceived: false,
           },
         }),
       ),
@@ -233,11 +241,24 @@ describe('evaluateTransition', () => {
     });
   });
 
-  it('2.2 waits for billing', () => {
-    expect(evaluateTransition(input({ from: '2.1', to: '2.2' }))).toEqual({
+  it('2.1 to 2.2 needs the first payment', () => {
+    const facts = { ...input({ from: '2.1', to: '2.2' }).facts, firstPaymentReceived: false };
+
+    expect(evaluateTransition(input({ from: '2.1', to: '2.2', facts }))).toEqual({
+      allowed: false,
+      rule: 'payment_required',
+    });
+    expect(evaluateTransition(input({ from: '2.1', to: '2.2' }))).toEqual({ allowed: true });
+    expect(
+      evaluateTransition(input({ from: '2.1', to: '2.2', actor: 'system', reason: null })),
+    ).toEqual({ allowed: true });
+  });
+
+  it('2.3 waits for rooms', () => {
+    expect(evaluateTransition(input({ from: '2.2', to: '2.3' }))).toEqual({
       allowed: false,
       rule: 'module_pending',
-      module: 'billing',
+      module: 'rooms',
     });
   });
 

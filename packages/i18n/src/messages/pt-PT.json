@@ -757,6 +757,30 @@
         "heading": "Pagamento recebido",
         "body": "Olá {firstName}, recebemos o seu pagamento. Obrigado.\n\nA fatura fica disponível no portal assim que for emitida.",
         "action": "Abrir o portal"
+      },
+      "room_update": {
+        "subject": "Nova atualização do seu projeto",
+        "heading": "Nova atualização do seu projeto",
+        "body": "Olá {firstName}, a equipa da {agencyName} publicou uma atualização no seu projeto. Pode lê-la no portal.",
+        "action": "Ver a atualização"
+      },
+      "step_shared": {
+        "subject": "Há um novo passo no seu projeto",
+        "heading": "Há um novo passo no seu projeto",
+        "body": "Olá {firstName}, o projeto avançou e há um novo passo à sua vista no portal.",
+        "action": "Abrir o portal"
+      },
+      "approval_requested": {
+        "subject": "Uma fase do projeto espera a sua aprovação",
+        "heading": "Uma fase do projeto espera a sua aprovação",
+        "body": "Olá {firstName}, a equipa terminou uma fase que precisa da sua aprovação para o projeto avançar. Pode aprovar ou pedir alterações no portal.",
+        "action": "Ver a aprovação"
+      },
+      "approval_reminder": {
+        "subject": "A sua aprovação continua em falta",
+        "heading": "A sua aprovação continua em falta",
+        "body": "Olá {firstName}, uma fase do projeto continua à espera da sua decisão. O projeto só avança depois dela.",
+        "action": "Ver a aprovação"
       }
     },
     "founder": {
@@ -831,6 +855,18 @@
         "heading": "Pagamento de {companyName} em atraso há {days} dias",
         "body": "O cliente recebeu um novo lembrete. A partir dos 30 dias pode pausar o projeto (X.1).",
         "action": "Abrir o negócio"
+      },
+      "approval_decided": {
+        "subject": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
+        "body": "{decision, select, approved {A fase ficou concluída e o projeto pode seguir para a próxima.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}",
+        "action": "Abrir a sala"
+      },
+      "approval_overdue": {
+        "subject": "Aprovação de {companyName} sem resposta há 5 dias",
+        "heading": "Aprovação de {companyName} sem resposta há 5 dias",
+        "body": "A fase {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "action": "Abrir a sala"
       }
     }
   },

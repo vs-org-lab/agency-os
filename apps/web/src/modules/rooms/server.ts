@@ -123,3 +123,4 @@ export function publishRoomUpdate(
 ) {
   return publishUpdate(session.claims, input, roomsDeps());
 }
+export { ROOM_FUNCTIONS } from './automations';

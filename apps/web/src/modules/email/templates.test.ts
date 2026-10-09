@@ -102,6 +102,37 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     dealUrl: 'https://os.example.com/pipeline/deal',
     days: 15,
   },
+  'lead.room_update': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.step_shared': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.approval_requested': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.approval_reminder': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'founder.approval_decided': {
+    companyName: 'Empresa Exemplo',
+    phaseName: 'Descoberta e arquitetura',
+    decision: 'changes_requested',
+    roomUrl: 'https://os.example.com/c/client',
+  },
+  'founder.approval_overdue': {
+    companyName: 'Empresa Exemplo',
+    phaseName: 'Descoberta e arquitetura',
+    roomUrl: 'https://os.example.com/c/client',
+  },
   'founder.proposal_accepted': {
     companyName: 'Empresa Exemplo',
     optionName: 'Orbit com Gravity',
@@ -178,6 +209,21 @@ describe('renderEmail', () => {
     });
 
     expect(email.subject).toBe('Pagamento de Empresa Exemplo em atraso há 30 dias');
+  });
+
+  it('tells the team whether the client approved or asked for changes', () => {
+    const params = {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Descoberta e arquitetura',
+      roomUrl: 'https://os.example.com/c/client',
+    };
+    expect(
+      renderEmail('founder.approval_decided', 'pt-PT', { ...params, decision: 'approved' }).subject,
+    ).toBe('Empresa Exemplo aprovou a fase Descoberta e arquitetura');
+    expect(
+      renderEmail('founder.approval_decided', 'pt-PT', { ...params, decision: 'changes_requested' })
+        .subject,
+    ).toBe('Empresa Exemplo pediu alterações na fase Descoberta e arquitetura');
   });
 
   it('escapes html in parameters', () => {

@@ -97,6 +97,7 @@ export {
 } from './booking/public';
 export type { BookingSource } from './booking/service';
 export {
+  clientPortalNoticeFunction,
   COMMERCIAL_FUNCTIONS,
   failureHandler,
   notificationDeps,

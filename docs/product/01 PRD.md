@@ -98,7 +98,7 @@ Cada requisito é uma capacidade obrigatória da versão final. O código do mó
 - **RF-032** O Figma incorporado tem navegação de diapositivos, ecrã inteiro e "Abrir no Figma", e avisa quando o link não está público.
 - **RF-033** Ações: Retirar para rascunho, Substituir, Mudar link, Remover; cada mudança guarda uma versão.
 - **RF-034** Comentários por documento; o que a equipa escreve chega ao cliente por email e o cliente responde no portal.
-- **RF-035** Contrato gerado a partir de modelo, com campos preenchidos (cliente, âmbito, valores, marcos, garantia), enviado para assinatura eletrónica, com estado por signatário.
+- **RF-035** Contrato gerado a partir de modelo, com campos preenchidos (cliente, âmbito, valores, marcos, garantia), enviado para assinatura eletrónica, com estado por signatário. A assinatura é eletrónica simples, feita no próprio OS ([ADR 0008](../decisions/0008-simple-electronic-signature.md)).
 - **RF-036** A proposta aceite no portal gera o contrato automaticamente.
 
 ### M05 · Faturação e pagamentos

@@ -299,7 +299,9 @@
         "call_outcome_required": "Record the call outcome before moving to 0.4.",
         "module_pending": "Available once the {module} module exists.",
         "not_found": "This deal does not exist or you do not have access to it.",
-        "core_criteria": "Still missing: {gaps}."
+        "core_criteria": "Still missing: {gaps}.",
+        "contract_required": "Without a signed contract, the deal cannot enter 2.1.",
+        "core_required": "Only clients with a Core delivered in the last 12 months enter 2.1 without a new Core."
       },
       "codeOption": "{code} · {name}",
       "gaps": {

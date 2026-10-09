@@ -299,7 +299,9 @@
         "call_outcome_required": "Registe o resultado da chamada antes de passar a 0.4.",
         "module_pending": "Disponível quando o módulo {module} existir.",
         "not_found": "Este negócio não existe ou não tem acesso a ele.",
-        "core_criteria": "Falta cumprir: {gaps}."
+        "core_criteria": "Falta cumprir: {gaps}.",
+        "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
+        "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses."
       },
       "codeOption": "{code} · {name}",
       "gaps": {

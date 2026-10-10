@@ -100,7 +100,8 @@
     "portalNav": {
       "invoices": "Invoices",
       "approvals": "Approvals",
-      "updates": "Updates"
+      "updates": "Updates",
+      "team": "Colleagues"
     }
   },
   "states": {
@@ -1046,7 +1047,8 @@
       "application": "Application",
       "booking": "Booking",
       "templates": "Templates",
-      "organization": "Organisation"
+      "organization": "Organisation",
+      "team": "Team"
     },
     "application": {
       "title": "Application",
@@ -1871,5 +1873,94 @@
     },
     "delete": "Delete",
     "deleteLabel": "Delete task {title}"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Who works in the studio, with each person’s role, clients and load.",
+    "roles": {
+      "founder": "Founder",
+      "project_manager": "Project manager",
+      "freelancer": "Freelancer",
+      "finance": "Finance",
+      "decision_maker": "Decision maker",
+      "operational": "Operational",
+      "client_finance": "Finance"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "revoked": "No access"
+    },
+    "table": {
+      "label": "Team members",
+      "person": "Person",
+      "role": "Role",
+      "status": "Status",
+      "clients": "Clients",
+      "load": "Load",
+      "availability": "Availability",
+      "rate": "Cost",
+      "loadValue": "{tasks, plural, one {# task} other {# tasks}} this week · {projects, plural, one {# project} other {# projects}}",
+      "hours": "{hours} h per week",
+      "noHours": "No hours set",
+      "perHour": "{amount}/h",
+      "noRate": "No cost set",
+      "resend": "Resend invitation",
+      "resendLabel": "Resend the invitation to {name}",
+      "resent": "Invitation sent again."
+    },
+    "invite": {
+      "heading": "Invite",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "submit": "Send invitation",
+      "sent": "Invitation sent."
+    },
+    "member": {
+      "back": "Team",
+      "role": "Role",
+      "saveRole": "Change role",
+      "roleSaved": "Role updated.",
+      "access": "Access",
+      "revoke": "Revoke access",
+      "restore": "Restore access",
+      "revoked": "Access revoked.",
+      "restored": "Access restored.",
+      "rates": "Cost and availability",
+      "ratesHint": "Only founders and finance see these values.",
+      "hourlyCost": "Hourly cost",
+      "currency": "Currency",
+      "weeklyHours": "Hours per week",
+      "saveRates": "Save",
+      "ratesSaved": "Saved.",
+      "summary": "{email} · {role} · {status}"
+    },
+    "assignments": {
+      "clients": "Assigned clients",
+      "projects": "Assigned projects",
+      "projectsHint": "Freelancers only see the projects assigned to them.",
+      "none": "There are no clients yet.",
+      "noProjects": "Assign a client with projects first.",
+      "project": "{project} · {client}",
+      "saved": "Assignment saved."
+    },
+    "colleagues": {
+      "title": "Colleagues",
+      "description": "Who from your company signs in to the portal and what they can do.",
+      "label": "Portal colleagues",
+      "you": "You",
+      "revoke": "Revoke access",
+      "revokeLabel": "Revoke access for {name}",
+      "roleLabel": "Role of {name}",
+      "saved": "Saved."
+    },
+    "errors": {
+      "not_found": "You are not allowed to do this.",
+      "invalid_input": "Check the fields and try again.",
+      "invalid_state": "This action no longer applies.",
+      "last_founder": "The organisation needs at least one active founder.",
+      "last_decision_maker": "The company needs at least one active decision maker."
+    }
   }
 }

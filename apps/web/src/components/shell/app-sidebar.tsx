@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CircleCheck,
   ListChecks,
+  Users,
   Home,
   Inbox,
   KanbanSquare,
@@ -81,6 +82,7 @@ const ICONS = {
   feed: Newspaper,
   check: CircleCheck,
   tasks: ListChecks,
+  users: Users,
 } as const;
 
 function NavigationItemLink({

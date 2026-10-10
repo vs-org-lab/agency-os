@@ -238,7 +238,7 @@ export const updateKindEnum = appSchema.enum('update_kind', [
   'approval_decided',
 ]);
 
-export const approvalSubjectEnum = appSchema.enum('approval_subject', ['phase']);
+export const approvalSubjectEnum = appSchema.enum('approval_subject', ['phase', 'file_version']);
 
 export const approvalStatusEnum = appSchema.enum('approval_status', [
   'pending',
@@ -248,6 +248,14 @@ export const approvalStatusEnum = appSchema.enum('approval_status', [
 ]);
 
 export const taskStatusEnum = appSchema.enum('task_status', ['open', 'done']);
+
+export const proofKindEnum = appSchema.enum('proof_kind', ['image', 'pdf', 'video']);
+
+export const proofVersionStatusEnum = appSchema.enum('proof_version_status', [
+  'uploading',
+  'ready',
+  'rejected',
+]);
 
 export const taskSourceEnum = appSchema.enum('task_source', ['manual', 'kickoff', 'welcome_kit']);
 
@@ -296,6 +304,8 @@ export type StepStatus = (typeof stepStatusEnum.enumValues)[number];
 export type UpdateVisibility = (typeof updateVisibilityEnum.enumValues)[number];
 export type UpdateKind = (typeof updateKindEnum.enumValues)[number];
 export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
+export type ProofKind = (typeof proofKindEnum.enumValues)[number];
+export type ProofVersionStatus = (typeof proofVersionStatusEnum.enumValues)[number];
 export type ApprovalStatus = (typeof approvalStatusEnum.enumValues)[number];
 export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
 export type TaskSource = (typeof taskSourceEnum.enumValues)[number];

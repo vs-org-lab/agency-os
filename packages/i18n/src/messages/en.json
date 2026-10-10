@@ -100,6 +100,7 @@
     "portalNav": {
       "invoices": "Invoices",
       "approvals": "Approvals",
+      "proofs": "Proofs",
       "updates": "Updates",
       "team": "Colleagues"
     }
@@ -831,6 +832,18 @@
         "heading": "Your approval is still pending",
         "body": "Hi {firstName}, a project phase is still waiting for your decision. The project moves on once you decide.",
         "action": "View the approval"
+      },
+      "proof_comment": {
+        "subject": "A reply from the {agencyName} team",
+        "heading": "The team replied",
+        "body": "Hello {firstName}, the {agencyName} team left a comment on a file for approval. You can read it in the portal.",
+        "action": "See in the portal"
+      },
+      "rounds_warning": {
+        "subject": "You are close to the revision round limit",
+        "heading": "Close to the round limit",
+        "body": "Hello {firstName}, the project is close to its planned revision rounds. Change requests beyond the limit are quoted separately.",
+        "action": "Open the portal"
       }
     },
     "founder": {
@@ -907,15 +920,33 @@
         "action": "Open the deal"
       },
       "approval_decided": {
-        "subject": "{decision, select, approved {{companyName} approved the phase {phaseName}} other {{companyName} requested changes on the phase {phaseName}}}",
-        "heading": "{decision, select, approved {{companyName} approved the phase {phaseName}} other {{companyName} requested changes on the phase {phaseName}}}",
-        "body": "{decision, select, approved {The phase is done and the project can move to the next one.} other {The phase is back in progress. The client comment is in the room.}}",
+        "subject": "{decision, select, approved {{companyName} approved the {subject, select, file {file} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} other {phase}} {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} approved the {subject, select, file {file} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} other {phase}} {phaseName}}}",
+        "body": "{decision, select, approved {{subject, select, file {The file is approved.} other {The phase is done and the project can move to the next one.}}} other {{subject, select, file {The change request and the comments are in the room.} other {The phase is back in progress. The client comment is in the room.}}}}",
         "action": "Open the room"
       },
       "approval_overdue": {
         "subject": "{companyName} approval unanswered for 5 days",
         "heading": "{companyName} approval unanswered for 5 days",
-        "body": "The phase {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
+        "body": "The {subject, select, file {file} other {phase}} {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
+        "action": "Open the room"
+      },
+      "proof_comment": {
+        "subject": "New comment from {companyName} on {fileTitle}",
+        "heading": "New comment from {companyName}",
+        "body": "The client left a comment on {fileTitle}.",
+        "action": "See the comment"
+      },
+      "rounds_warning": {
+        "subject": "{companyName} used {used} of {limit} revision rounds",
+        "heading": "{companyName} is close to the revision limit",
+        "body": "The project has used {used} of its {limit} revision rounds. Worth aligning with the client before the next one.",
+        "action": "Open the room"
+      },
+      "extra_round": {
+        "subject": "Extra round at {companyName}",
+        "heading": "Extra round at {companyName}",
+        "body": "The client requested changes beyond the limit of {limit} rounds ({used} used). A task to quote the extra round was created.",
         "action": "Open the room"
       }
     },
@@ -1900,8 +1931,9 @@
       "noRate": "No cost set",
       "resend": "Resend invitation",
       "resendLabel": "Resend the invitation to {name}",
-      "resent": "Invitation sent again.",
-      "clientCount": "{count, plural, one {# client} other {# clients}}"
+      "clientCount": "{count, plural, one {# client} other {# clients}}",
+      "resending": "Resending…",
+      "resentShort": "Invitation sent"
     },
     "invite": {
       "heading": "Invite",
@@ -1959,5 +1991,112 @@
       "already_member": "This person already has access.",
       "revoked_member": "This person has no access. Restore it from their page."
     }
+  },
+  "proofing": {
+    "section": {
+      "title": "For approval",
+      "description": "Images, PDFs and videos the client comments on and approves.",
+      "empty": "There are no files for approval in this project yet.",
+      "newFile": "New file",
+      "fileTitle": "Title",
+      "file": "File",
+      "fileHint": "PNG, JPEG, WebP, PDF, MP4 or WebM, up to 50 MB.",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "uploaded": "File uploaded.",
+      "newVersion": "New version",
+      "requestApproval": "Request approval",
+      "requested": "Approval request sent to the client.",
+      "withdraw": "Withdraw request",
+      "open": "Open",
+      "version": "Version {number}",
+      "openComments": "{count, plural, =0 {No open comments} one {# open comment} other {# open comments}}",
+      "rounds": "{used} of {limit} rounds used",
+      "revisionLimit": "Revision rounds",
+      "saveLimit": "Save",
+      "limitSaved": "Limit saved."
+    },
+    "status": {
+      "uploading": "Uploading",
+      "rejected": "Rejected",
+      "noRequest": "No request",
+      "pending": "Waiting for the client",
+      "approved": "Approved",
+      "changes_requested": "Changes requested",
+      "withdrawn": "Request withdrawn"
+    },
+    "viewer": {
+      "label": "File for approval",
+      "imageAlt": "{title}, version {number}",
+      "page": "Page {page} of {pages}",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "pinHint": "Click the file, or use Enter and the arrow keys, to comment on a spot.",
+      "videoHint": "Pause the video at the moment you want to comment on.",
+      "commentHere": "Comment at this moment",
+      "pinLabel": "Comment {number}",
+      "newPin": "New comment",
+      "loading": "Loading the file…",
+      "failed": "The file could not be shown.",
+      "pinSurface": "File to comment on a spot. Enter marks the centre, arrow keys move the marker (Shift for larger steps).",
+      "pinPosition": "Marker at {x}% of the width and {y}% of the height."
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments yet.",
+      "body": "Comment",
+      "internal": "Internal (the client does not see it)",
+      "internalBadge": "Internal",
+      "send": "Comment",
+      "sent": "Comment sent.",
+      "reply": "Reply",
+      "replyBody": "Reply",
+      "sendReply": "Send reply",
+      "resolve": "Resolve",
+      "reopen": "Reopen",
+      "resolved": "Resolved",
+      "general": "General",
+      "point": "Spot {number}",
+      "pagePoint": "Spot {number}, page {page}",
+      "time": "Spot {number}, {time}",
+      "clearAnchor": "Remove the spot",
+      "byLine": "{author}{client, select, yes { · Client} other {}} · {date}"
+    },
+    "decision": {
+      "extraWarning": "This request goes beyond the {limit} planned revision rounds and will be quoted separately.",
+      "roundsUsed": "{used} of {limit} revision rounds used."
+    },
+    "errors": {
+      "not_found": "You are not allowed to do this.",
+      "invalid_input": "Check the fields and try again.",
+      "invalid_state": "This action no longer applies to this version.",
+      "invalid_file": "The file is not an accepted type or is over 50 MB.",
+      "upload_failed": "The upload failed. Try again."
+    },
+    "approvals": {
+      "phases": "Phases",
+      "files": "Files",
+      "waiting": "Waiting since {date}",
+      "openFile": "Open {name}"
+    },
+    "clientList": {
+      "title": "Proofs",
+      "description": "The files the team sent you, with the state of each one.",
+      "empty": "You have not received files to review yet.",
+      "version": "Version {number}",
+      "status": {
+        "pending": "Waiting for your decision",
+        "approved": "Approved",
+        "changes_requested": "Changes requested",
+        "none": "Sent"
+      }
+    }
+  },
+  "interaction": {
+    "holdToConfirm": "{label}, hold to confirm",
+    "holding": "Keep holding…",
+    "confirmed": "Confirmed.",
+    "confirmAction": "Confirm: {label}",
+    "cancel": "Cancel"
   }
 }

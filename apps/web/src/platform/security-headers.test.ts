@@ -47,6 +47,23 @@ describe('security headers', () => {
     ]);
   });
 
+  it('serves proof images and videos from the storage origin only', () => {
+    const csp = directives(
+      buildSecurityHeaders('abc123', {
+        storageSources: ['https://project.supabase.co'],
+      }).get('Content-Security-Policy') ?? '',
+    );
+
+    expect(csp.get('img-src')).toEqual(["'self'", 'data:', 'blob:', 'https://project.supabase.co']);
+    expect(csp.get('media-src')).toEqual(["'self'", 'blob:', 'https://project.supabase.co']);
+    expect(csp.get('worker-src')).toEqual(["'self'", 'blob:']);
+    expect(
+      directives(buildSecurityHeaders('abc123').get('Content-Security-Policy') ?? '').get(
+        'media-src',
+      ),
+    ).toEqual(["'self'", 'blob:']);
+  });
+
   it('allows unsafe-eval only in development', () => {
     const production = buildSecurityHeaders('n').get('Content-Security-Policy') ?? '';
     const development =

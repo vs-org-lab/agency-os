@@ -3,6 +3,8 @@ import { randomBytes } from 'node:crypto';
 export type SecurityHeaderOptions = {
   isDevelopment?: boolean;
   connectSources?: string[];
+  /** Origins that serve signed files shown in the page: proof images and videos (SEC-31). */
+  storageSources?: string[];
   frameSources?: string[];
   frameAncestors?: string[];
   /** Allows the microphone and tab capture for this document (call mode recording). */
@@ -49,7 +51,9 @@ export function buildContentSecurityPolicy(
     'default-src': ["'self'"],
     'script-src': scriptSources,
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:'],
+    'img-src': ["'self'", 'data:', 'blob:', ...(options.storageSources ?? [])],
+    'media-src': ["'self'", 'blob:', ...(options.storageSources ?? [])],
+    'worker-src': ["'self'", 'blob:'],
     'font-src': ["'self'"],
     'connect-src': ["'self'", ...(options.connectSources ?? [])],
     'frame-src': [...FIGMA_FRAME_SOURCES, ...(options.frameSources ?? [])],

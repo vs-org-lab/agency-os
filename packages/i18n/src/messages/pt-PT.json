@@ -100,6 +100,7 @@
     "portalNav": {
       "invoices": "Faturas",
       "approvals": "Aprovações",
+      "proofs": "Provas",
       "updates": "Atualizações",
       "team": "Colegas"
     }
@@ -831,6 +832,18 @@
         "heading": "A sua aprovação continua em falta",
         "body": "Olá {firstName}, uma fase do projeto continua à espera da sua decisão. O projeto só avança depois dela.",
         "action": "Ver a aprovação"
+      },
+      "proof_comment": {
+        "subject": "Resposta da equipa da {agencyName}",
+        "heading": "A equipa respondeu",
+        "body": "Olá {firstName}, a equipa da {agencyName} deixou um comentário num ficheiro para aprovação. Pode lê-lo no portal.",
+        "action": "Ver no portal"
+      },
+      "rounds_warning": {
+        "subject": "Está perto do limite de rondas de revisão",
+        "heading": "Perto do limite de rondas",
+        "body": "Olá {firstName}, o projeto está perto do limite de rondas de revisão previsto. Pedidos de alterações acima do limite são orçamentados à parte.",
+        "action": "Abrir o portal"
       }
     },
     "founder": {
@@ -907,15 +920,33 @@
         "action": "Abrir o negócio"
       },
       "approval_decided": {
-        "subject": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
-        "heading": "{decision, select, approved {{companyName} aprovou a fase {phaseName}} other {{companyName} pediu alterações na fase {phaseName}}}",
-        "body": "{decision, select, approved {A fase ficou concluída e o projeto pode seguir para a próxima.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}",
+        "subject": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
+        "body": "{decision, select, approved {{subject, select, file {O ficheiro ficou aprovado.} other {A fase ficou concluída e o projeto pode seguir para a próxima.}}} other {{subject, select, file {O pedido de alterações e os comentários estão na sala.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}}}",
         "action": "Abrir a sala"
       },
       "approval_overdue": {
         "subject": "Aprovação de {companyName} sem resposta há 5 dias",
         "heading": "Aprovação de {companyName} sem resposta há 5 dias",
-        "body": "A fase {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "body": "{subject, select, file {O ficheiro} other {A fase}} {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "action": "Abrir a sala"
+      },
+      "proof_comment": {
+        "subject": "Novo comentário de {companyName} em {fileTitle}",
+        "heading": "Novo comentário de {companyName}",
+        "body": "O cliente deixou um comentário em {fileTitle}.",
+        "action": "Ver o comentário"
+      },
+      "rounds_warning": {
+        "subject": "{companyName} usou {used} de {limit} rondas de revisão",
+        "heading": "{companyName} está perto do limite de rondas",
+        "body": "O projeto já usou {used} das {limit} rondas de revisão. Vale a pena alinhar com o cliente antes da próxima.",
+        "action": "Abrir a sala"
+      },
+      "extra_round": {
+        "subject": "Ronda extra em {companyName}",
+        "heading": "Ronda extra em {companyName}",
+        "body": "O cliente pediu alterações acima do limite de {limit} rondas ({used} usadas). Ficou criada a tarefa para orçamentar a ronda extra.",
         "action": "Abrir a sala"
       }
     },
@@ -1900,8 +1931,9 @@
       "noRate": "Sem custo definido",
       "resend": "Reenviar convite",
       "resendLabel": "Reenviar o convite a {name}",
-      "resent": "Convite reenviado.",
-      "clientCount": "{count, plural, one {# cliente} other {# clientes}}"
+      "clientCount": "{count, plural, one {# cliente} other {# clientes}}",
+      "resending": "A reenviar…",
+      "resentShort": "Convite reenviado"
     },
     "invite": {
       "heading": "Convidar",
@@ -1959,5 +1991,112 @@
       "already_member": "Esta pessoa já tem acesso.",
       "revoked_member": "Esta pessoa está sem acesso. Reponha o acesso na ficha dela."
     }
+  },
+  "proofing": {
+    "section": {
+      "title": "Para aprovação",
+      "description": "Imagens, PDFs e vídeos que o cliente comenta e aprova.",
+      "empty": "Ainda não há ficheiros para aprovação neste projeto.",
+      "newFile": "Novo ficheiro",
+      "fileTitle": "Título",
+      "file": "Ficheiro",
+      "fileHint": "PNG, JPEG, WebP, PDF, MP4 ou WebM, até 50 MB.",
+      "upload": "Carregar",
+      "uploading": "A carregar…",
+      "uploaded": "Ficheiro carregado.",
+      "newVersion": "Nova versão",
+      "requestApproval": "Pedir aprovação",
+      "requested": "Pedido de aprovação enviado ao cliente.",
+      "withdraw": "Retirar pedido",
+      "open": "Abrir",
+      "version": "Versão {number}",
+      "openComments": "{count, plural, =0 {Sem comentários por resolver} one {# comentário por resolver} other {# comentários por resolver}}",
+      "rounds": "{used} de {limit} rondas usadas",
+      "revisionLimit": "Limite de rondas",
+      "saveLimit": "Guardar",
+      "limitSaved": "Limite guardado."
+    },
+    "status": {
+      "uploading": "A carregar",
+      "rejected": "Recusado",
+      "noRequest": "Sem pedido",
+      "pending": "À espera do cliente",
+      "approved": "Aprovado",
+      "changes_requested": "Alterações pedidas",
+      "withdrawn": "Pedido retirado"
+    },
+    "viewer": {
+      "label": "Ficheiro para aprovação",
+      "imageAlt": "{title}, versão {number}",
+      "page": "Página {page} de {pages}",
+      "previousPage": "Página anterior",
+      "nextPage": "Página seguinte",
+      "pinHint": "Clique no ficheiro, ou use Enter e as setas, para comentar num ponto.",
+      "videoHint": "Pause o vídeo no momento que quer comentar.",
+      "commentHere": "Comentar neste momento",
+      "pinLabel": "Comentário {number}",
+      "newPin": "Novo comentário",
+      "loading": "A carregar o ficheiro…",
+      "failed": "Não foi possível mostrar o ficheiro.",
+      "pinSurface": "Ficheiro para comentar num ponto. Enter marca o centro, as setas movem o marcador (Shift para passos maiores).",
+      "pinPosition": "Marcador a {x}% da largura e {y}% da altura."
+    },
+    "comments": {
+      "title": "Comentários",
+      "empty": "Ainda não há comentários.",
+      "body": "Comentário",
+      "internal": "Interno (o cliente não vê)",
+      "internalBadge": "Interno",
+      "send": "Comentar",
+      "sent": "Comentário enviado.",
+      "reply": "Responder",
+      "replyBody": "Resposta",
+      "sendReply": "Enviar resposta",
+      "resolve": "Resolver",
+      "reopen": "Reabrir",
+      "resolved": "Resolvido",
+      "general": "Geral",
+      "point": "Ponto {number}",
+      "pagePoint": "Ponto {number}, página {page}",
+      "time": "Ponto {number}, {time}",
+      "clearAnchor": "Tirar o ponto",
+      "byLine": "{author}{client, select, yes { · Cliente} other {}} · {date}"
+    },
+    "decision": {
+      "extraWarning": "Este pedido ultrapassa as {limit} rondas de revisão previstas e será orçamentado à parte.",
+      "roundsUsed": "{used} de {limit} rondas de revisão usadas."
+    },
+    "errors": {
+      "not_found": "Não tem permissão para esta ação.",
+      "invalid_input": "Verifique os campos e tente de novo.",
+      "invalid_state": "Esta ação já não se aplica a esta versão.",
+      "invalid_file": "O ficheiro não é um tipo aceite ou ultrapassa 50 MB.",
+      "upload_failed": "O carregamento falhou. Tente de novo."
+    },
+    "approvals": {
+      "phases": "Fases",
+      "files": "Ficheiros",
+      "waiting": "À espera desde {date}",
+      "openFile": "Abrir {name}"
+    },
+    "clientList": {
+      "title": "Provas",
+      "description": "Os ficheiros que a equipa lhe enviou, com o estado de cada um.",
+      "empty": "Ainda não recebeu ficheiros para rever.",
+      "version": "Versão {number}",
+      "status": {
+        "pending": "À espera da sua decisão",
+        "approved": "Aprovado",
+        "changes_requested": "Alterações pedidas",
+        "none": "Enviado"
+      }
+    }
+  },
+  "interaction": {
+    "holdToConfirm": "{label}, mantenha premido para confirmar",
+    "holding": "Continue a premir…",
+    "confirmed": "Confirmado.",
+    "confirmAction": "Confirmar: {label}",
+    "cancel": "Cancelar"
   }
 }

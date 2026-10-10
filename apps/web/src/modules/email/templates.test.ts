@@ -122,15 +122,44 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal',
   },
+  'lead.proof_comment': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
+  'lead.rounds_warning': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal',
+  },
   'founder.approval_decided': {
     companyName: 'Empresa Exemplo',
     phaseName: 'Descoberta e arquitetura',
     decision: 'changes_requested',
+    subject: 'phase',
     roomUrl: 'https://os.example.com/c/client',
   },
   'founder.approval_overdue': {
     companyName: 'Empresa Exemplo',
     phaseName: 'Descoberta e arquitetura',
+    subject: 'file',
+    roomUrl: 'https://os.example.com/c/client',
+  },
+  'founder.proof_comment': {
+    companyName: 'Empresa Exemplo',
+    fileTitle: 'Logótipo',
+    roomUrl: 'https://os.example.com/c/client/proofs/version',
+  },
+  'founder.rounds_warning': {
+    companyName: 'Empresa Exemplo',
+    used: 3,
+    limit: 3,
+    roomUrl: 'https://os.example.com/c/client',
+  },
+  'founder.extra_round': {
+    companyName: 'Empresa Exemplo',
+    used: 4,
+    limit: 3,
     roomUrl: 'https://os.example.com/c/client',
   },
   'team.invitation': {
@@ -236,6 +265,7 @@ describe('renderEmail', () => {
     const params = {
       companyName: 'Empresa Exemplo',
       phaseName: 'Descoberta e arquitetura',
+      subject: 'phase' as const,
       roomUrl: 'https://os.example.com/c/client',
     };
     expect(
@@ -245,6 +275,26 @@ describe('renderEmail', () => {
       renderEmail('founder.approval_decided', 'pt-PT', { ...params, decision: 'changes_requested' })
         .subject,
     ).toBe('Empresa Exemplo pediu alterações na fase Descoberta e arquitetura');
+  });
+
+  it('names the file when the decision is on a file', () => {
+    expect(
+      renderEmail('founder.approval_decided', 'pt-PT', {
+        companyName: 'Empresa Exemplo',
+        phaseName: 'Logótipo',
+        subject: 'file',
+        decision: 'changes_requested',
+        roomUrl: 'https://os.example.com/c/client',
+      }).subject,
+    ).toBe('Empresa Exemplo pediu alterações no ficheiro Logótipo');
+    expect(
+      renderEmail('founder.extra_round', 'pt-PT', {
+        companyName: 'Empresa Exemplo',
+        used: 4,
+        limit: 3,
+        roomUrl: 'https://os.example.com/c/client',
+      }).text,
+    ).toContain('limite de 3 rondas (4 usadas)');
   });
 
   it('invites a team member with their role', () => {

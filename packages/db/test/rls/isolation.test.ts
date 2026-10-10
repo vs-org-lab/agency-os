@@ -56,6 +56,9 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'approvals', clientColumn: 'client_id' },
   { table: 'tasks', clientColumn: 'client_id' },
   { table: 'project_staff_assignments', clientColumn: 'client_id' },
+  { table: 'proof_files', clientColumn: 'client_id' },
+  { table: 'proof_versions', clientColumn: 'client_id' },
+  { table: 'proof_comments', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -68,6 +71,28 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
     await sql`
       insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
       values (${world.organizationId}, ${clientId}, ${records.projectId}, ${world.users.freelancer})
+    `;
+  }
+  for (const [clientId, records] of [
+    [world.clients.a, rooms.a],
+    [world.clients.b, rooms.b],
+  ] as const) {
+    const [file] = await sql<{ id: string }[]>`
+      insert into public.proof_files (organization_id, client_id, project_id, title)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, 'Peça')
+      returning id
+    `;
+    const [version] = await sql<{ id: string }[]>`
+      insert into public.proof_versions (organization_id, client_id, project_id, file_id, number,
+                                         storage_path)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, ${file?.id ?? ''}, 1,
+              'isolation/proof')
+      returning id
+    `;
+    await sql`
+      insert into public.proof_comments (organization_id, client_id, project_id, version_id, body)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, ${version?.id ?? ''},
+              'Nota')
     `;
   }
   await createTaskFixture(sql, world);

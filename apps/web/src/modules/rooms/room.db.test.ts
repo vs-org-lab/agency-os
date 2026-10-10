@@ -141,7 +141,7 @@ describe('room reads', () => {
       );
 
       expect(
-        approvals.map((entry) => [entry.id, entry.projectName, entry.phaseName]).sort(),
+        approvals.map((entry) => [entry.id, entry.projectName, entry.subjectName]).sort(),
       ).toEqual(
         [
           [rooms.a.approvalId, 'Website', 'Fase 1'],

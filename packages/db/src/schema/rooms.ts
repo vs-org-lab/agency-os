@@ -71,6 +71,9 @@ export const projects = pgTable(
     templateVersion: integer('template_version').notNull(),
     startsOn: date('starts_on').notNull(),
     endsOn: date('ends_on'),
+    revisionLimit: integer('revision_limit').notNull().default(3),
+    /** The revision limit for which the 80% warning was last sent (AUT-17). */
+    roundsWarnedLimit: integer('rounds_warned_limit'),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'restrict' }),
     ...timestamps,
   },
@@ -86,6 +89,7 @@ export const projects = pgTable(
       name: 'projects_deal_client_fk',
     }).onDelete('restrict'),
     unique('projects_id_client_id_key').on(table.id, table.clientId),
+    check('projects_revision_limit_range', sql`${table.revisionLimit} between 1 and 20`),
     uniqueIndex('projects_deal_key')
       .on(table.dealId)
       .where(sql`${table.dealId} is not null`),
@@ -211,6 +215,7 @@ export const approvals = pgTable(
     comment: text('comment'),
     remindedAt: timestamp('reminded_at', { withTimezone: true }),
     alertedAt: timestamp('alerted_at', { withTimezone: true }),
+    extraRound: boolean('extra_round').notNull().default(false),
     ...timestamps,
   },
   (table) => [

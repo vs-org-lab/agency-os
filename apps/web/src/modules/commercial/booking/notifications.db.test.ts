@@ -222,6 +222,7 @@ describe('notifications', () => {
         {
           companyName: 'Empresa Exemplo',
           phaseName: 'Descoberta',
+          subject: 'phase',
           roomUrl: 'https://os.example.com/c/client',
         },
         depsFor(sql, email),

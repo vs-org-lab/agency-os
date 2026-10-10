@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
-import { ApprovalDecision } from '@/components/rooms/approval-decision';
+import { ApprovalsList } from '@/components/proofing/approvals-list';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalApprovals } from '@/modules/rooms/server';
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
-/** P-02: phases waiting for the client's decision; only the decision maker decides. */
+/** P-02: phases and files waiting for the client, grouped; only the decision maker decides. */
 export default async function PortalApprovalsPage({ params }: PageProps) {
   const locale = requireLocale((await params).locale);
   setRequestLocale(locale);
@@ -30,22 +30,7 @@ export default async function PortalApprovalsPage({ params }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
       <h1 className="text-title text-text">{t('approvalsTitle')}</h1>
-      <ul className="flex flex-col gap-4">
-        {pending.map((approval) => (
-          <li
-            key={approval.id}
-            className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
-          >
-            <div className="flex flex-col gap-1">
-              <h2 className="text-title-sm text-text">{approval.phaseName}</h2>
-              <p className="text-body-sm text-text-secondary">{approval.projectName}</p>
-            </div>
-            {access.decides ? (
-              <ApprovalDecision approvalId={approval.id} decide={decideApprovalAction} />
-            ) : null}
-          </li>
-        ))}
-      </ul>
+      <ApprovalsList approvals={pending} decides={access.decides} decide={decideApprovalAction} />
     </div>
   );
 }

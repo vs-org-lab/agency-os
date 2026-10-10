@@ -15,7 +15,7 @@ export {
 export { nextChainedStep, type StepState, type StepStatus } from './domain/steps';
 export { planWeeks } from './domain/plan';
 export { ORBIT_PROCESS, ORBIT_TEMPLATE_KEY } from './templates/defaults';
-export type { ClientPendingApproval } from './portal';
+export { getClientApprovals, type ClientPendingApproval } from './portal';
 export type {
   ClientApprovalView,
   ClientPhaseView,
@@ -31,3 +31,4 @@ export type {
   StepView,
   UpdateView,
 } from './views';
+export { approvalNotice, type ApprovalNotice } from './notices';

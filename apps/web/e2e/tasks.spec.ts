@@ -61,6 +61,12 @@ test.describe('Tasks, home and updates', () => {
     await page.getByRole('checkbox', { name: title }).click();
     await expect(page.getByText(title)).toHaveCount(0, { timeout: 30_000 });
 
+    await page.goto('/tasks');
+    await page.getByLabel('Estado').selectOption('done');
+    await page.getByRole('button', { name: 'Filtrar' }).click();
+    await expect(page).toHaveURL(/\/tasks\?.*status=done/);
+    await expect(page.getByRole('region', { name: 'Concluídas' }).getByText(title)).toBeVisible();
+
     await page.goto('/');
     await expect(page.getByRole('link', { name: new RegExp(`Tarefa: ${title}`) })).toHaveCount(0);
 

@@ -4,6 +4,7 @@ import { TaskFilters } from '@/components/tasks/task-filters';
 import { TaskForm } from '@/components/tasks/task-form';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
+import { getPathname } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { parseTaskFilter, taskToday } from '@/modules/tasks';
 import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
@@ -57,7 +58,7 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
         </details>
       ) : null}
       <TaskFilters
-        action={`/c/${clientId}/tasks`}
+        action={getPathname({ href: `/c/${clientId}/tasks`, locale })}
         clients={null}
         people={options.people}
         current={{

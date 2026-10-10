@@ -4,6 +4,7 @@ import { TaskFilters } from '@/components/tasks/task-filters';
 import { TaskForm } from '@/components/tasks/task-form';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
+import { getPathname } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { parseTaskFilter, taskToday } from '@/modules/tasks';
 import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
@@ -58,7 +59,7 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
         </details>
       ) : null}
       <TaskFilters
-        action="/tasks"
+        action={getPathname({ href: '/tasks', locale })}
         clients={options.clients}
         people={options.people}
         current={{

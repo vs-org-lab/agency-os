@@ -111,6 +111,11 @@ async function main(): Promise<void> {
       values (${organizationId}, ${founderId})
       on conflict (organization_id) do update set host_user_id = excluded.host_user_id
     `;
+    // Every run books real slots; earlier runs would otherwise fill the booking horizon.
+    await sql`
+      update public.calls set status = 'cancelled'
+      where organization_id = ${organizationId} and status = 'scheduled' and starts_at > now()
+    `;
   } finally {
     await sql.end();
   }

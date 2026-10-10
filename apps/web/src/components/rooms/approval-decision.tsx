@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Label } from '@agency-os/ui/components/label';
@@ -20,7 +19,11 @@ function decisionError(code: string): DecisionError {
   return code === 'comment_required' || code === 'invalid_input' ? code : 'not_found';
 }
 
-/** P-02: the decision maker approves, or asks for changes with a comment (RN-41). */
+/**
+ * P-02: the decision maker approves, or asks for changes with a comment (RN-41). The confirmation
+ * replaces the controls and stays until the next navigation; refreshing here would drop the decided
+ * approval from the list and the confirmation with it.
+ */
 export function ApprovalDecision({
   approvalId,
   decide,
@@ -29,7 +32,6 @@ export function ApprovalDecision({
   decide: DecideApproval;
 }) {
   const t = useTranslations('portal.room');
-  const router = useRouter();
   const [comment, setComment] = useState('');
   const [result, setResult] = useState<{ ok: true } | { ok: false; error: DecisionError } | null>(
     null,
@@ -44,7 +46,6 @@ export function ApprovalDecision({
         () => ({ ok: false, code: 'not_found' }) as const,
       );
       setResult(outcome.ok ? { ok: true } : { ok: false, error: decisionError(outcome.code) });
-      if (outcome.ok) router.refresh();
     });
 
   if (result?.ok) return <FormMessage tone="success">{t('decided')}</FormMessage>;

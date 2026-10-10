@@ -8,7 +8,8 @@ import type { ClientProjectView } from '@/modules/rooms';
 import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approval-decision';
 import { RoomHomeCard, roomCardState } from './room-cards';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+const refresh = vi.hoisted(() => vi.fn());
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 vi.mock('@/i18n/navigation', () => ({
   Link: ({
     href,
@@ -123,6 +124,18 @@ describe('portal room', () => {
     expect(screen.getByRole('link', { name: 'Ver aprovações (1)' }).getAttribute('href')).toBe(
       '/portal/approvals',
     );
+  });
+
+  it('approving keeps the confirmation on screen', async () => {
+    const decide: DecideApproval = vi.fn(async () => ({ ok: true as const }));
+    withIntl(<ApprovalDecision approvalId="approval-1" decide={decide} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Aprovar' }));
+    });
+
+    expect(screen.getByText('Decisão registada. Obrigado.')).toBeTruthy();
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it('change request button stays disabled without a comment', async () => {

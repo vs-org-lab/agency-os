@@ -35,11 +35,12 @@ test.describe('Tasks, home and updates', () => {
     await expectAccessible(page);
 
     await page.getByRole('link', { name: 'Nova tarefa' }).click();
-    await page.getByLabel('Título').fill(title);
-    await page.getByLabel('Cliente').first().selectOption({ label: room.company });
-    await page.getByLabel('Data').fill(lisbonDate(-1));
-    await page.getByLabel('Subtarefas').fill('Exportar ficheiros');
-    await page.getByRole('button', { name: 'Criar tarefa' }).click();
+    const form = page.getByRole('form', { name: 'Nova tarefa' });
+    await form.getByLabel('Título').fill(title);
+    await form.getByLabel('Cliente').selectOption({ label: room.company });
+    await form.getByLabel('Data').fill(lisbonDate(-1));
+    await form.getByLabel('Subtarefas').fill('Exportar ficheiros');
+    await form.getByRole('button', { name: 'Criar tarefa' }).click();
     await expect(page.getByText('Tarefa criada.')).toBeVisible({ timeout: 30_000 });
     await page.goto('/tasks');
     const today = page.getByRole('region', { name: 'Hoje' });

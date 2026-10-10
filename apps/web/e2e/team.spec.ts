@@ -17,7 +17,10 @@ async function expectAccessible(page: Page): Promise<void> {
 }
 
 test.describe('Team and invitations', () => {
-  test('an invited freelancer sees only the assigned project', async ({ page, browser }) => {
+  test('an invited freelancer sees only the assigned project @captured-email', async ({
+    page,
+    browser,
+  }) => {
     test.setTimeout(300_000);
     const suffix = randomUUID().slice(0, 8);
     const freelancerName = `Freelancer ${suffix}`;

@@ -154,8 +154,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: pnpm --filter web e2e:seed
-      - name: End-to-end tests without public application writes or fake transcription
-        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription"
+      - name: End-to-end tests without public application writes, fake transcription or captured emails
+        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email"
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

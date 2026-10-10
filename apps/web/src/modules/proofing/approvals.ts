@@ -3,19 +3,12 @@ import { z } from 'zod';
 import { schema, type ApprovalStatus, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
-import { roomActor } from '@/modules/rooms/server';
+import { roomActor, soleClientManager } from '@/modules/rooms/server';
 import type { VerifiedClaims } from '@/platform/db';
 import { roundsStatus, type RoundsStatus } from './domain/rounds';
 import type { ProofingDeps } from './files';
 
-const {
-  approvals,
-  clientStaffAssignments,
-  organizationMemberships,
-  projects,
-  proofVersions,
-  tasks,
-} = schema;
+const { approvals, projects, proofVersions, tasks } = schema;
 
 type NotFound = { ok: false; rule: 'not_found' };
 const NOT_FOUND: NotFound = { ok: false, rule: 'not_found' };
@@ -131,29 +124,6 @@ async function usedRounds(tx: DbTransaction, projectId: string): Promise<number>
   return Number(row?.total ?? 0);
 }
 
-/** The client's single assigned manager, who quotes the extra round; null when there is none or several. */
-async function soleManager(tx: DbTransaction, clientId: string): Promise<string | null> {
-  const rows = await tx
-    .select({ userId: clientStaffAssignments.userId })
-    .from(clientStaffAssignments)
-    .innerJoin(
-      organizationMemberships,
-      and(
-        eq(organizationMemberships.userId, clientStaffAssignments.userId),
-        eq(organizationMemberships.organizationId, clientStaffAssignments.organizationId),
-      ),
-    )
-    .where(
-      and(
-        eq(clientStaffAssignments.clientId, clientId),
-        sql`${clientStaffAssignments.archivedAt} is null`,
-        eq(organizationMemberships.role, 'project_manager'),
-        eq(organizationMemberships.status, 'active'),
-      ),
-    );
-  return rows.length === 1 ? (rows[0]?.userId ?? null) : null;
-}
-
 /**
  * The decision maker approves a file version or asks for changes with a comment (RN-41). Each
  * change request counts a round of the project (RF-073); the warning at 80% goes once per limit
@@ -254,7 +224,7 @@ export async function decideFileApproval(
         clientId: approval.clientId,
         projectId: approval.projectId,
         title: EXTRA_ROUND_TASK,
-        assigneeId: await soleManager(tx, approval.clientId),
+        assigneeId: await soleClientManager(tx, approval.clientId),
         dueOn: LISBON_DATE.format(new Date(now.getTime() + 2 * DAY_MS)),
       });
       await emit(tx, {

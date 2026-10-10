@@ -161,10 +161,10 @@ export async function getClientRoom(
 
 export type ClientPendingApproval = {
   id: string;
-  kind: 'phase' | 'file';
+  kind: 'phase' | 'file' | 'delivery';
   projectId: string;
   projectName: string;
-  /** The phase name or the file title. */
+  /** The phase name, the file title or, for the final approval, the project name. */
   subjectName: string;
   /** The file version to open, for file approvals. */
   versionId: string | null;
@@ -178,7 +178,7 @@ export async function getClientApprovals(
 ): Promise<ClientPendingApproval[]> {
   const rows = await tx.execute<{
     id: string;
-    kind: 'phase' | 'file';
+    kind: 'phase' | 'file' | 'delivery';
     project_id: string;
     project_name: string;
     subject_name: string;
@@ -199,6 +199,12 @@ export async function getClientApprovals(
     join public.portal_proof_versions v on v.id = a.subject_id
     where a.client_id = ${clientId}::uuid and a.status = 'pending'
       and a.subject_type = 'file_version'
+    union all
+    select a.id, 'delivery' as kind, a.project_id, p.name as project_name,
+           p.name as subject_name, null::uuid as version_id, a.requested_at
+    from public.portal_approvals a
+    join public.portal_projects p on p.id = a.subject_id
+    where a.client_id = ${clientId}::uuid and a.status = 'pending' and a.subject_type = 'project'
     order by requested_at desc, id
   `);
   return rows.map((row) => ({

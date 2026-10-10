@@ -1,14 +1,18 @@
-import { and, eq, ne, sql } from 'drizzle-orm';
+import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { schema, type ApprovalStatus } from '@agency-os/db';
+import { schema, type ApprovalStatus, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
 import { roomActor } from './authorize';
+import { soleClientManager } from './managers';
 import { completePhaseInTx } from './process';
 import type { RoomsDeps } from './runtime-types';
 
-const { approvals, projectPhases, projectSteps, projectUpdates } = schema;
+const { approvals, projectPhases, projectSteps, projectUpdates, projects, tasks } = schema;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const LISBON_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' });
 
 type NotFound = { ok: false; rule: 'not_found' };
 const NOT_FOUND: NotFound = { ok: false, rule: 'not_found' };
@@ -91,6 +95,186 @@ export async function requestPhaseApproval(
   return result;
 }
 
+/** The task that brings a final approval with requested changes back to the client's manager. */
+export const FINAL_REVIEW_TASK = 'Rever entrega final';
+
+/**
+ * "Pedir aprovação final": a completed project, with every phase done, waits for the client's
+ * final approval (spec 2D.2, decision 5). A pending request is returned as it is; an approved one
+ * cannot be asked again.
+ */
+export async function requestFinalApproval(
+  claims: VerifiedClaims,
+  input: { projectId: string },
+  deps: RoomsDeps,
+): Promise<{ ok: true; approvalId: string } | { ok: false; rule: 'not_found' | 'invalid_state' }> {
+  if (!z.uuid().safeParse(input.projectId).success) return NOT_FOUND;
+  const clientId = await deps.contexts.withUserContext(claims, async (tx) => {
+    const [project] = await tx
+      .select({ clientId: projects.clientId })
+      .from(projects)
+      .where(eq(projects.id, input.projectId));
+    return project?.clientId ?? null;
+  });
+  const actor = clientId ? await roomActor(deps.contexts, claims, clientId, 'write') : null;
+  if (!actor) return NOT_FOUND;
+  const now = (deps.now ?? (() => new Date()))();
+
+  const result = await deps.contexts.withSystemContext(async (tx) => {
+    const [project] = await tx
+      .select()
+      .from(projects)
+      .where(eq(projects.id, input.projectId))
+      .for('update');
+    if (!project || project.organizationId !== actor.organizationId) return NOT_FOUND;
+    const [existing] = await tx
+      .select({ id: approvals.id, status: approvals.status })
+      .from(approvals)
+      .where(
+        and(
+          eq(approvals.subjectType, 'project'),
+          eq(approvals.subjectId, project.id),
+          inArray(approvals.status, ['pending', 'approved']),
+        ),
+      )
+      .limit(1);
+    if (existing?.status === 'pending') {
+      return { ok: true as const, approvalId: existing.id, created: false };
+    }
+    const open = await tx
+      .select({ id: projectPhases.id })
+      .from(projectPhases)
+      .where(and(eq(projectPhases.projectId, project.id), ne(projectPhases.status, 'done')))
+      .limit(1);
+    if (existing || project.status !== 'completed' || open.length > 0) {
+      return { ok: false as const, rule: 'invalid_state' as const };
+    }
+
+    const [approval] = await tx
+      .insert(approvals)
+      .values({
+        organizationId: project.organizationId,
+        clientId: project.clientId,
+        projectId: project.id,
+        subjectType: 'project',
+        subjectId: project.id,
+        requestedBy: actor.userId,
+        requestedAt: now,
+      })
+      .returning({ id: approvals.id });
+    if (!approval) throw new Error('Final approval was not requested');
+    await recordAudit(tx, {
+      organizationId: project.organizationId,
+      action: 'approval.requested',
+      resourceType: 'approval',
+      resourceId: approval.id,
+      clientId: project.clientId,
+      metadata: { subject: 'project', subjectId: project.id },
+    });
+    await emit(tx, {
+      type: 'rooms.approval.requested',
+      organizationId: project.organizationId,
+      clientId: project.clientId,
+      payload: { projectId: project.id, approvalId: approval.id },
+    });
+    return { ok: true as const, approvalId: approval.id, created: true };
+  });
+
+  if (!result.ok) return result;
+  if (result.created) await (deps.flush ?? requestFlush)();
+  return { ok: true, approvalId: result.approvalId };
+}
+
+type ApprovalRow = typeof approvals.$inferSelect;
+
+/**
+ * The final approval's effects: approved delivers the project and emits
+ * `rooms.project.delivered`; changes requested opens the review task for the client's manager.
+ */
+async function decideProjectInTx(
+  tx: DbTransaction,
+  approval: ApprovalRow,
+  decision: ApprovalDecision,
+  comment: string,
+  now: Date,
+): Promise<void> {
+  if (decision === 'changes_requested') {
+    await tx.insert(tasks).values({
+      organizationId: approval.organizationId,
+      clientId: approval.clientId,
+      projectId: approval.projectId,
+      title: FINAL_REVIEW_TASK,
+      notes: comment,
+      assigneeId: await soleClientManager(tx, approval.clientId),
+      dueOn: LISBON_DATE.format(new Date(now.getTime() + 2 * DAY_MS)),
+    });
+    return;
+  }
+  const [project] = await tx
+    .update(projects)
+    .set({ status: 'delivered', deliveredAt: now })
+    .where(eq(projects.id, approval.projectId))
+    .returning({ name: projects.name });
+  if (!project) throw new Error('Delivered project was not found');
+  await tx.insert(projectUpdates).values({
+    organizationId: approval.organizationId,
+    clientId: approval.clientId,
+    projectId: approval.projectId,
+    kind: 'project_delivered',
+    body: project.name,
+    visibility: 'client',
+  });
+  await recordAudit(tx, {
+    organizationId: approval.organizationId,
+    action: 'project.delivered',
+    resourceType: 'project',
+    resourceId: approval.projectId,
+    clientId: approval.clientId,
+    metadata: { approvalId: approval.id },
+  });
+  await emit(tx, {
+    type: 'rooms.project.delivered',
+    organizationId: approval.organizationId,
+    clientId: approval.clientId,
+    payload: { projectId: approval.projectId },
+  });
+}
+
+/** A phase approval's effects: approved completes the phase; changes return it to the team. */
+async function decidePhaseInTx(
+  tx: DbTransaction,
+  approval: ApprovalRow,
+  decision: ApprovalDecision,
+  deciderId: string,
+  deps: RoomsDeps,
+  now: Date,
+): Promise<void> {
+  const [phase] = await tx
+    .select()
+    .from(projectPhases)
+    .where(eq(projectPhases.id, approval.subjectId))
+    .for('update');
+  if (!phase) throw new Error('Approved phase was not found');
+  if (decision === 'approved') {
+    const completed = await completePhaseInTx(tx, phase, deps, now);
+    if (!completed.ok) throw new Error(`Approved phase could not complete: ${completed.rule}`);
+    return;
+  }
+  await tx
+    .update(projectPhases)
+    .set({ status: 'in_progress' })
+    .where(eq(projectPhases.id, phase.id));
+  await tx.insert(projectUpdates).values({
+    organizationId: phase.organizationId,
+    clientId: phase.clientId,
+    projectId: phase.projectId,
+    authorId: deciderId,
+    kind: 'approval_decided',
+    body: phase.name,
+    visibility: 'client',
+  });
+}
+
 export type ApprovalDecision = 'approved' | 'changes_requested';
 
 /**
@@ -133,7 +317,7 @@ export async function decideApproval(
       .from(approvals)
       .where(eq(approvals.id, input.approvalId))
       .for('update');
-    if (!approval || approval.subjectType !== 'phase') return NOT_FOUND;
+    if (!approval || approval.subjectType === 'file_version') return NOT_FOUND;
     if (approval.status !== 'pending') {
       return { ok: true as const, status: approval.status, decided: false };
     }
@@ -146,30 +330,10 @@ export async function decideApproval(
         comment: comment || null,
       })
       .where(eq(approvals.id, approval.id));
-    const [phase] = await tx
-      .select()
-      .from(projectPhases)
-      .where(eq(projectPhases.id, approval.subjectId))
-      .for('update');
-    if (!phase) throw new Error('Approved phase was not found');
-
-    if (input.decision === 'approved') {
-      const completed = await completePhaseInTx(tx, phase, deps, now);
-      if (!completed.ok) throw new Error(`Approved phase could not complete: ${completed.rule}`);
+    if (approval.subjectType === 'project') {
+      await decideProjectInTx(tx, approval, input.decision, comment, now);
     } else {
-      await tx
-        .update(projectPhases)
-        .set({ status: 'in_progress' })
-        .where(eq(projectPhases.id, phase.id));
-      await tx.insert(projectUpdates).values({
-        organizationId: phase.organizationId,
-        clientId: phase.clientId,
-        projectId: phase.projectId,
-        authorId: claims.sub,
-        kind: 'approval_decided',
-        body: phase.name,
-        visibility: 'client',
-      });
+      await decidePhaseInTx(tx, approval, input.decision, claims.sub, deps, now);
     }
     await recordAudit(tx, {
       organizationId: approval.organizationId,

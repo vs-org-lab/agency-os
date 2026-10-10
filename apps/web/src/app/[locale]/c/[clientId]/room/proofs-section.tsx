@@ -48,7 +48,11 @@ function useProofAction() {
   return { outcome, setOutcome, pending, run };
 }
 
-/** Starts a version, sends the bytes straight to storage and asks the server to check them. */
+/**
+ * Starts a version, sends the bytes straight to storage and asks the server to check them. A
+ * failed upload is still checked, so the server closes the version instead of leaving it
+ * uploading.
+ */
 async function uploadVersion(
   start: () => ReturnType<StartUpload>,
   file: File,
@@ -57,8 +61,10 @@ async function uploadVersion(
   if (file.size > MAX_PROOF_UPLOAD_BYTES) return { ok: false, code: 'invalid_file' };
   const started = await start();
   if (!started.ok) return started;
-  if (!(await uploadToSignedUrl(started.uploadUrl, file)))
+  if (!(await uploadToSignedUrl(started.uploadUrl, file))) {
+    await finish(started.versionId).catch(() => null);
     return { ok: false, code: 'upload_failed' };
+  }
   return finish(started.versionId);
 }
 
@@ -152,12 +158,9 @@ function FileCard({
   const id = useId();
   const { outcome, setOutcome, pending, run } = useProofAction();
   const current = file.versions[0];
+  // The server accepts requests on the latest ready version; uploads in progress do not count.
   const latestReady = file.versions.find((version) => version.status === 'ready');
-  const canRequest =
-    writable &&
-    latestReady &&
-    latestReady.id === current?.id &&
-    latestReady.approval?.status !== 'pending';
+  const canRequest = writable && latestReady && latestReady.approval?.status !== 'pending';
 
   return (
     <li className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
@@ -193,13 +196,15 @@ function FileCard({
               {t('section.requestApproval')}
             </Button>
           ) : null}
-          {current?.approval?.status === 'pending' ? (
+          {latestReady?.approval?.status === 'pending' ? (
             <Button
               type="button"
               size="sm"
               variant="outline"
               disabled={pending}
-              onClick={() => run('requested', () => actions.withdraw(current.approval?.id ?? ''))}
+              onClick={() =>
+                run('requested', () => actions.withdraw(latestReady.approval?.id ?? ''))
+              }
             >
               {t('section.withdraw')}
             </Button>

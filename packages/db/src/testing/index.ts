@@ -13,6 +13,7 @@ export {
   createFixtureWorld,
   createRoomFixture,
   createTaskFixture,
+  createTeamFixture,
   type BillingFixture,
   type BillingRecords,
   type CommercialFixture,
@@ -24,5 +25,6 @@ export {
   type RoomFixture,
   type RoomRecords,
   type TaskFixture,
+  type TeamFixture,
   type World,
 } from './fixtures';

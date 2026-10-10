@@ -564,43 +564,46 @@ export type RoomFixture = { a: RoomRecords; b: RoomRecords };
  * One project per client with two phases, a client-visible and an internal step, a client and an
  * internal update and a pending phase approval.
  */
-export async function createRoomFixture(sql: TransactionSql, world: World): Promise<RoomFixture> {
-  const seed = async (clientId: string): Promise<RoomRecords> => {
-    const [project] = await sql<{ id: string }[]>`
+async function seedRoomRecords(
+  sql: TransactionSql,
+  world: World,
+  clientId: string,
+): Promise<RoomRecords> {
+  const [project] = await sql<{ id: string }[]>`
       insert into public.projects (organization_id, client_id, name, template_key, template_version,
                                    starts_on)
       values (${world.organizationId}, ${clientId}, 'Website', 'orbit', 1, current_date)
       returning id
     `;
-    if (!project) throw new Error('Room fixture project was not created');
-    const phase = async (position: number, status: string) => {
-      const [row] = await sql<{ id: string }[]>`
+  if (!project) throw new Error('Room fixture project was not created');
+  const phase = async (position: number, status: string) => {
+    const [row] = await sql<{ id: string }[]>`
         insert into public.project_phases (organization_id, client_id, project_id, position, name,
                                            requires_approval, status)
         values (${world.organizationId}, ${clientId}, ${project.id}, ${position},
                 ${`Fase ${position}`}, ${position === 1}, ${status})
         returning id
       `;
-      if (!row) throw new Error('Room fixture phase was not created');
-      return row.id;
-    };
-    const first = await phase(1, 'awaiting_approval');
-    const second = await phase(2, 'pending');
-    const step = async (position: number, visible: boolean) => {
-      const [row] = await sql<{ id: string }[]>`
+    if (!row) throw new Error('Room fixture phase was not created');
+    return row.id;
+  };
+  const first = await phase(1, 'awaiting_approval');
+  const second = await phase(2, 'pending');
+  const step = async (position: number, visible: boolean) => {
+    const [row] = await sql<{ id: string }[]>`
         insert into public.project_steps (organization_id, client_id, project_id, phase_id, position,
                                           name, status, visible_to_client)
         values (${world.organizationId}, ${clientId}, ${project.id}, ${first}, ${position},
                 ${visible ? 'Passo visível' : 'Passo interno'}, 'done', ${visible})
         returning id
       `;
-      if (!row) throw new Error('Room fixture step was not created');
-      return row.id;
-    };
-    const visibleStepId = await step(1, true);
-    const internalStepId = await step(2, false);
-    const update = async (visibility: 'client' | 'internal') => {
-      const [row] = await sql<{ id: string }[]>`
+    if (!row) throw new Error('Room fixture step was not created');
+    return row.id;
+  };
+  const visibleStepId = await step(1, true);
+  const internalStepId = await step(2, false);
+  const update = async (visibility: 'client' | 'internal') => {
+    const [row] = await sql<{ id: string }[]>`
         insert into public.project_updates (organization_id, client_id, project_id, author_id, body,
                                             visibility)
         values (${world.organizationId}, ${clientId}, ${project.id}, ${world.users.founder},
@@ -608,31 +611,35 @@ export async function createRoomFixture(sql: TransactionSql, world: World): Prom
                 ${visibility})
         returning id
       `;
-      if (!row) throw new Error('Room fixture update was not created');
-      return row.id;
-    };
-    const clientUpdateId = await update('client');
-    const internalUpdateId = await update('internal');
-    const [approval] = await sql<{ id: string }[]>`
+    if (!row) throw new Error('Room fixture update was not created');
+    return row.id;
+  };
+  const clientUpdateId = await update('client');
+  const internalUpdateId = await update('internal');
+  const [approval] = await sql<{ id: string }[]>`
       insert into public.approvals (organization_id, client_id, project_id, subject_type, subject_id,
                                     requested_by)
       values (${world.organizationId}, ${clientId}, ${project.id}, 'phase', ${first},
               ${world.users.founder})
       returning id
     `;
-    if (!approval) throw new Error('Room fixture approval was not created');
-    return {
-      projectId: project.id,
-      phaseIds: [first, second],
-      visibleStepId,
-      internalStepId,
-      clientUpdateId,
-      internalUpdateId,
-      approvalId: approval.id,
-    };
+  if (!approval) throw new Error('Room fixture approval was not created');
+  return {
+    projectId: project.id,
+    phaseIds: [first, second],
+    visibleStepId,
+    internalStepId,
+    clientUpdateId,
+    internalUpdateId,
+    approvalId: approval.id,
   };
+}
 
-  return { a: await seed(world.clients.a), b: await seed(world.clients.b) };
+export async function createRoomFixture(sql: TransactionSql, world: World): Promise<RoomFixture> {
+  return {
+    a: await seedRoomRecords(sql, world, world.clients.a),
+    b: await seedRoomRecords(sql, world, world.clients.b),
+  };
 }
 
 export type TaskFixture = {
@@ -670,4 +677,44 @@ export async function createTaskFixture(sql: TransactionSql, world: World): Prom
   `;
   if (!item) throw new Error('Task fixture item was not created');
   return { clientATaskId, clientBTaskId, studioTaskId, freelancerTaskId, itemId: item.id };
+}
+
+export type TeamFixture = {
+  rooms: RoomFixture;
+  /** A second project of client A, with its own rows, that the freelancer is not assigned to. */
+  other: RoomRecords;
+  assignedTaskId: string;
+  otherTaskId: string;
+};
+
+/**
+ * Client A with two projects; the freelancer (assigned to client A) is assigned only to the first.
+ * Each project has a task, and the freelancer has a rates row.
+ */
+export async function createTeamFixture(sql: TransactionSql, world: World): Promise<TeamFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const other = await seedRoomRecords(sql, world, world.clients.a);
+  await sql`
+    insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
+    values (${world.organizationId}, ${world.clients.a}, ${rooms.a.projectId},
+            ${world.users.freelancer})
+  `;
+  const task = async (projectId: string, title: string) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.tasks (organization_id, client_id, project_id, title, created_by)
+      values (${world.organizationId}, ${world.clients.a}, ${projectId}, ${title},
+              ${world.users.founder})
+      returning id
+    `;
+    if (!row) throw new Error('Team fixture task was not created');
+    return row.id;
+  };
+  const assignedTaskId = await task(rooms.a.projectId, 'Tarefa do projeto atribuído');
+  const otherTaskId = await task(other.projectId, 'Tarefa do outro projeto');
+  await sql`
+    insert into public.team_member_rates (organization_id, user_id, hourly_cost, currency,
+                                          weekly_hours)
+    values (${world.organizationId}, ${world.users.freelancer}, 35, 'EUR', 20)
+  `;
+  return { rooms, other, assignedTaskId, otherTaskId };
 }

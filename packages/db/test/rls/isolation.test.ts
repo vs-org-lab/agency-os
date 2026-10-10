@@ -55,11 +55,21 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'project_updates', clientColumn: 'client_id' },
   { table: 'approvals', clientColumn: 'client_id' },
   { table: 'tasks', clientColumn: 'client_id' },
+  { table: 'project_staff_assignments', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
   const core = (await createBillingFixture(sql, world)).contracts.core;
-  await createRoomFixture(sql, world);
+  const rooms = await createRoomFixture(sql, world);
+  for (const [clientId, records] of [
+    [world.clients.a, rooms.a],
+    [world.clients.b, rooms.b],
+  ] as const) {
+    await sql`
+      insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, ${world.users.freelancer})
+    `;
+  }
   await createTaskFixture(sql, world);
   for (const records of [core.a, core.b]) {
     await sql`update public.core_engagements set briefing_shared_at = now() where id = ${records.engagementId}`;

@@ -106,6 +106,7 @@ export {
 } from './automations';
 export { alertFounders } from './booking/notifications';
 export { applyStageChange } from './pipeline/service';
+export { listTodayItems, type TodayItem } from './today';
 
 export {
   closeFollowUp,
@@ -119,7 +120,6 @@ export {
   loadDealDetail,
   loadPipelineCards,
   loadSettingsData,
-  loadToday,
   moveDeal,
   publishForm,
   recordApplicationsSeen,

@@ -87,11 +87,14 @@
       "home": "Home",
       "pipeline": "Pipeline",
       "applications": "Applications",
-      "acquisition": "Acquisition"
+      "acquisition": "Acquisition",
+      "updates": "Updates",
+      "tasks": "Tasks"
     },
     "room": {
       "dashboard": "Dashboard",
-      "updates": "Updates"
+      "updates": "Updates",
+      "tasks": "Tasks"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -146,23 +149,68 @@
   },
   "studio": {
     "home": {
-      "title": "The studio is ready",
-      "description": "Work modules appear here as they are enabled."
+      "title": "Home",
+      "date": "{date}",
+      "actions": {
+        "label": "Quick actions",
+        "newTask": "New task",
+        "pipeline": "Open the pipeline",
+        "updates": "See updates"
+      },
+      "indicators": {
+        "label": "Indicators",
+        "clients": "Active clients",
+        "activeProjects": "Active projects",
+        "waiting": "Waiting on you",
+        "receivable": "Receivable",
+        "none": "Nothing receivable"
+      },
+      "upcoming": {
+        "title": "Upcoming events",
+        "empty": "No calls booked in the next 7 days.",
+        "call": "Call with {client}"
+      },
+      "clients": {
+        "title": "Clients",
+        "empty": "No clients with an active project yet.",
+        "progress": "{done} of {total} phases",
+        "noProject": "No phases",
+        "lastActivity": "Last activity {date}",
+        "noActivity": "No activity"
+      }
     },
     "today": {
       "title": "Today",
       "description": "What needs you, in order of urgency.",
       "empty": {
         "title": "Nothing pending today",
-        "description": "Follow-ups, queue B and today's calls appear here."
+        "description": "Due and late tasks, late steps, change requests, overdue payments, follow-ups and today's calls appear here."
       },
       "kinds": {
         "follow_up": "Day {day} follow-up",
         "queue_b": "Application in queue B",
-        "call": "Call at {time}"
+        "call": "Call at {time}",
+        "task": "Task: {title}",
+        "step": "Late step: {title}",
+        "approval": "Changes requested: {title}",
+        "payment": "Request {title} overdue"
       },
       "overdue": "Overdue",
       "open": "Open"
+    },
+    "feed": {
+      "title": "Updates",
+      "description": "What clients did in the last 30 days.",
+      "empty": {
+        "title": "No updates in the last 30 days",
+        "description": "Client acceptances, signatures, payments and approvals appear here."
+      },
+      "types": {
+        "proposal_accepted": "Proposal accepted",
+        "contract_signed": "Contract signed by the client",
+        "payment_received": "Payment received",
+        "approval_decided": "{decision, select, approved {Approval granted} changes_requested {Changes requested on an approval} other {Approval decided}}"
+      }
     }
   },
   "portal": {

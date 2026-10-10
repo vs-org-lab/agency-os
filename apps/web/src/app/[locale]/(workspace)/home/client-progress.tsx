@@ -1,0 +1,64 @@
+import { useFormatter, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import type { HomeClient } from '@/modules/studio';
+
+/** Clients with an active project, the share of its phases done and the latest room activity. */
+export function ClientProgress({ clients }: { clients: HomeClient[] }) {
+  const t = useTranslations('studio.home.clients');
+  const format = useFormatter();
+
+  if (clients.length === 0) {
+    return <p className="text-body-sm text-text-secondary">{t('empty')}</p>;
+  }
+
+  return (
+    <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+      {clients.map((client) => {
+        const progress = client.progress;
+        const percent =
+          progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+        return (
+          <li key={client.id}>
+            <Link
+              href={`/c/${client.id}`}
+              className="flex flex-col gap-2 px-4 py-3 hover:bg-surface-muted"
+            >
+              <span className="flex items-baseline justify-between gap-4">
+                <span className="truncate text-body font-medium text-text">{client.name}</span>
+                <span className="shrink-0 text-caption text-text-secondary">
+                  {client.lastActivityAt
+                    ? t('lastActivity', {
+                        date: format.relativeTime(client.lastActivityAt),
+                      })
+                    : t('noActivity')}
+                </span>
+              </span>
+              {progress ? (
+                <span className="flex items-center gap-3">
+                  <span
+                    role="progressbar"
+                    aria-label={client.name}
+                    aria-valuemin={0}
+                    aria-valuemax={progress.total}
+                    aria-valuenow={progress.done}
+                    className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-muted"
+                  >
+                    <span
+                      className="block h-full rounded-full bg-primary"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </span>
+                  <span className="shrink-0 text-caption text-text-secondary tabular-nums">
+                    {t('progress', { done: progress.done, total: progress.total })}
+                  </span>
+                </span>
+              ) : (
+                <span className="text-caption text-text-secondary">{t('noProject')}</span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

@@ -94,7 +94,8 @@
     "room": {
       "dashboard": "Dashboard",
       "updates": "Atualizações",
-      "tasks": "Tarefas"
+      "tasks": "Tarefas",
+      "library": "Biblioteca"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -102,7 +103,8 @@
       "approvals": "Aprovações",
       "proofs": "Provas",
       "updates": "Atualizações",
-      "team": "Colegas"
+      "team": "Colegas",
+      "library": "Biblioteca"
     }
   },
   "states": {
@@ -1850,7 +1852,8 @@
         "phase_done": "Fase concluída: {name}",
         "approval_decided": "Pedido de alterações na fase {name}",
         "project_delivered": "Projeto entregue"
-      }
+      },
+      "attachments": "Anexos"
     },
     "approval": {
       "pending": "À espera da decisão do cliente desde {date}",
@@ -1872,7 +1875,8 @@
       "previous_phase_open": "A fase anterior ainda não está concluída (ou aprovada).",
       "steps_open": "Ainda há passos por fazer nesta fase.",
       "approval_required": "Esta fase só termina com a aprovação do cliente.",
-      "deal_has_project": "Este negócio já tem um projeto."
+      "deal_has_project": "Este negócio já tem um projeto.",
+      "attachment_hidden": "Há anexos de pastas internas. Uma atualização visível ao cliente só leva ficheiros de pastas visíveis."
     },
     "stepsOf": "Passos de {name}",
     "phaseLabel": "{position}. {name}",
@@ -2168,6 +2172,104 @@
       "sent": "Obrigado pelo seu testemunho.",
       "required": "Escreva o testemunho e o seu nome.",
       "failed": "Não foi possível guardar. Tente de novo."
+    }
+  },
+  "library": {
+    "title": "Biblioteca",
+    "breadcrumb": "Caminho da pasta",
+    "search": "Pesquisar ficheiros",
+    "searchSubmit": "Pesquisar",
+    "clearSearch": "Limpar pesquisa",
+    "filters": {
+      "label": "Filtrar",
+      "all": "Tudo",
+      "folders": "Pastas",
+      "image": "Imagens",
+      "video": "Vídeo",
+      "document": "Documentos"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "name": "Nome",
+      "date": "Mais recentes",
+      "size": "Tamanho"
+    },
+    "view": {
+      "label": "Vista",
+      "grid": "Grelha",
+      "list": "Lista"
+    },
+    "newFolder": "Nova pasta",
+    "folderName": "Nome da pasta",
+    "create": "Criar",
+    "upload": "Carregar ficheiros",
+    "uploadFolder": "Carregar pasta",
+    "uploading": "A carregar {done} de {total}…",
+    "uploaded": "{count, plural, one {# ficheiro carregado.} other {# ficheiros carregados.}}",
+    "rejected": "{count, plural, one {# ficheiro recusado: o tipo não é aceite ou não corresponde ao conteúdo.} other {# ficheiros recusados: o tipo não é aceite ou não corresponde ao conteúdo.}}",
+    "uploadHint": "Imagens, vídeos, PDF, Word, Excel, PowerPoint, ZIP, PSD e fontes, até 50 MB cada.",
+    "openFolderToUpload": "Abra ou crie uma pasta para carregar ficheiros.",
+    "downloadAll": "Descarregar tudo",
+    "downloadFolder": "Descarregar pasta",
+    "preparingZip": "A preparar o ZIP…",
+    "download": "Descarregar {name}",
+    "delete": "Apagar",
+    "deleteFile": "Apagar {name}",
+    "deleteFolder": "Apagar pasta",
+    "confirmDeleteFolder": "Apagar a pasta \"{name}\" e tudo o que tem dentro? Não dá para desfazer.",
+    "confirmDeleteFile": "Apagar \"{name}\"? Não dá para desfazer.",
+    "rename": "Mudar o nome",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "visibility": {
+      "internal": "Interna",
+      "client": "Visível ao cliente",
+      "makeClient": "Mostrar ao cliente",
+      "makeInternal": "Tornar interna",
+      "inherited": "As subpastas e os ficheiros seguem esta visibilidade."
+    },
+    "fileCount": "{count, plural, =0 {Vazia} one {# ficheiro} other {# ficheiros}}",
+    "empty": "Esta pasta está vazia.",
+    "emptyRoot": "Ainda não há pastas neste projeto.",
+    "emptyRootHint": "Crie uma pasta para começar a organizar os ficheiros.",
+    "emptyPortal": "Ainda não há ficheiros partilhados consigo.",
+    "noResults": "Nenhum ficheiro corresponde.",
+    "noProject": "Ainda não há projetos com Biblioteca.",
+    "columns": {
+      "name": "Nome",
+      "folder": "Pasta",
+      "size": "Tamanho",
+      "date": "Data",
+      "uploadedBy": "Carregado por",
+      "actions": "Ações"
+    },
+    "kinds": {
+      "image": "Imagem",
+      "video": "Vídeo",
+      "document": "Documento",
+      "other": "Ficheiro"
+    },
+    "inFolder": "em {folder}",
+    "errors": {
+      "not_found": "Não encontrado ou sem permissão.",
+      "invalid_input": "Confirme o nome e os ficheiros.",
+      "name_taken": "Já existe uma pasta com esse nome aqui.",
+      "too_deep": "As pastas só vão até quatro níveis.",
+      "storage_full": "O espaço de armazenamento está quase cheio. Apague ficheiros antigos antes de carregar mais.",
+      "invalid_file": "O ficheiro foi recusado: o tipo não é aceite ou não corresponde ao conteúdo.",
+      "zip_too_large": "Há ficheiros demais para um ZIP (máximo de 500 ficheiros e 500 MB). Descarregue pasta a pasta.",
+      "upload_failed": "O carregamento falhou. Verifique a ligação e tente outra vez.",
+      "download_failed": "O download falhou. Verifique a ligação e tente outra vez."
+    },
+    "attachments": {
+      "label": "Anexos",
+      "choose": "Anexar ficheiros da Biblioteca",
+      "filter": "Filtrar ficheiros",
+      "selected": "{count} de 10 selecionados",
+      "limit": "Pode anexar até 10 ficheiros.",
+      "internalWarning": "Há ficheiros de pastas internas selecionados. Uma atualização visível ao cliente só leva ficheiros de pastas visíveis.",
+      "none": "A Biblioteca deste projeto ainda não tem ficheiros.",
+      "download": "Descarregar {name}"
     }
   }
 }

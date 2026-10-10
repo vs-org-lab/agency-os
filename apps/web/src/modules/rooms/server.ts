@@ -128,6 +128,7 @@ export function publishRoomUpdate(
     body: string;
     milestone: string | null;
     visibility: UpdateVisibility;
+    fileIds?: string[];
   },
 ) {
   return publishUpdate(session.claims, input, roomsDeps());

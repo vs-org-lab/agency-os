@@ -86,6 +86,7 @@ export async function publishUpdateAction(input: {
   body: string;
   milestone: string | null;
   visibility: 'internal' | 'client';
+  fileIds: string[];
 }) {
   return run((current) => publishRoomUpdate(current, input));
 }

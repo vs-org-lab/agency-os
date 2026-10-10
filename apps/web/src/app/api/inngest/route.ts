@@ -1,17 +1,5 @@
 import { serve } from 'inngest/next';
-import { BILLING_FUNCTIONS } from '@/modules/billing/server';
-import { COMMERCIAL_FUNCTIONS } from '@/modules/commercial/server';
-import { ROOM_FUNCTIONS } from '@/modules/rooms/server';
-import { CONTRACT_FUNCTIONS } from '@/modules/contracts/server';
-import { inngest, outboxDispatch } from '@/modules/events';
+import { inngest } from '@/modules/events';
+import { INNGEST_FUNCTIONS } from './functions';
 
-export const { GET, POST, PUT } = serve({
-  client: inngest,
-  functions: [
-    outboxDispatch,
-    ...COMMERCIAL_FUNCTIONS,
-    ...CONTRACT_FUNCTIONS,
-    ...BILLING_FUNCTIONS,
-    ...ROOM_FUNCTIONS,
-  ],
-});
+export const { GET, POST, PUT } = serve({ client: inngest, functions: INNGEST_FUNCTIONS });

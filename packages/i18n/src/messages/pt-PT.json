@@ -87,11 +87,14 @@
       "home": "Início",
       "pipeline": "Pipeline",
       "applications": "Candidaturas",
-      "acquisition": "Angariação"
+      "acquisition": "Angariação",
+      "updates": "Atualizações",
+      "tasks": "Tarefas"
     },
     "room": {
       "dashboard": "Dashboard",
-      "updates": "Atualizações"
+      "updates": "Atualizações",
+      "tasks": "Tarefas"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -146,23 +149,68 @@
   },
   "studio": {
     "home": {
-      "title": "O estúdio está pronto",
-      "description": "Os módulos de trabalho aparecem aqui à medida que forem ativados."
+      "title": "Início",
+      "date": "{date}",
+      "actions": {
+        "label": "Ações rápidas",
+        "newTask": "Nova tarefa",
+        "pipeline": "Abrir o pipeline",
+        "updates": "Ver atualizações"
+      },
+      "indicators": {
+        "label": "Indicadores",
+        "clients": "Clientes ativos",
+        "activeProjects": "Projetos ativos",
+        "waiting": "À espera de si",
+        "receivable": "Por receber",
+        "none": "Nada por receber"
+      },
+      "upcoming": {
+        "title": "Próximos eventos",
+        "empty": "Sem chamadas marcadas nos próximos 7 dias.",
+        "call": "Chamada com {client}"
+      },
+      "clients": {
+        "title": "Clientes",
+        "empty": "Ainda não há clientes com projeto ativo.",
+        "progress": "{done} de {total} fases",
+        "noProject": "Sem fases",
+        "lastActivity": "Última atividade {date}",
+        "noActivity": "Sem atividade"
+      }
     },
     "today": {
       "title": "Hoje",
       "description": "O que precisa de si, por ordem de urgência.",
       "empty": {
         "title": "Nada pendente para hoje",
-        "description": "Os acompanhamentos, a Fila B e as chamadas do dia aparecem aqui."
+        "description": "Tarefas, passos e aprovações em atraso, pagamentos vencidos, acompanhamentos e chamadas do dia aparecem aqui."
       },
       "kinds": {
         "follow_up": "Acompanhamento do dia {day}",
         "queue_b": "Candidatura na Fila B",
-        "call": "Chamada às {time}"
+        "call": "Chamada às {time}",
+        "task": "Tarefa: {title}",
+        "step": "Passo atrasado: {title}",
+        "approval": "Alterações pedidas: {title}",
+        "payment": "Pedido {title} vencido"
       },
       "overdue": "Atrasado",
       "open": "Abrir"
+    },
+    "feed": {
+      "title": "Atualizações",
+      "description": "O que os clientes fizeram nos últimos 30 dias.",
+      "empty": {
+        "title": "Sem atualizações nos últimos 30 dias",
+        "description": "Aceitações, assinaturas, pagamentos e aprovações dos clientes aparecem aqui."
+      },
+      "types": {
+        "proposal_accepted": "Proposta aceite",
+        "contract_signed": "Contrato assinado pelo cliente",
+        "payment_received": "Pagamento recebido",
+        "approval_decided": "{decision, select, approved {Aprovação concedida} changes_requested {Alterações pedidas numa aprovação} other {Aprovação decidida}}"
+      }
     }
   },
   "portal": {
@@ -1748,5 +1796,58 @@
       "approved": "Aprovou a {date}",
       "changes_requested": "Pediu alterações a {date}"
     }
+  },
+  "tasks": {
+    "title": "Tarefas",
+    "description": "O que há para fazer, no estúdio e nos clientes.",
+    "roomDescription": "As tarefas internas deste cliente. O cliente não as vê.",
+    "groups": {
+      "today": "Hoje",
+      "this_week": "Esta semana",
+      "later": "Mais tarde",
+      "done": "Concluídas"
+    },
+    "overdue": "Atrasado",
+    "noDate": "Sem data",
+    "studio": "Estúdio",
+    "unassigned": "Sem responsável",
+    "edit": "Editar",
+    "itemsLabel": "Subtarefas de {title}",
+    "empty": {
+      "title": "Sem tarefas",
+      "description": "As tarefas criadas aqui ou pelo processo aparecem nesta lista."
+    },
+    "filters": {
+      "label": "Filtros",
+      "client": "Cliente",
+      "assignee": "Responsável",
+      "status": "Estado",
+      "all": "Todos",
+      "open": "Por fazer",
+      "done": "Concluídas",
+      "submit": "Filtrar"
+    },
+    "form": {
+      "heading": "Nova tarefa",
+      "title": "Título",
+      "notes": "Notas",
+      "client": "Cliente",
+      "studio": "Estúdio (sem cliente)",
+      "assignee": "Responsável",
+      "none": "Sem responsável",
+      "dueOn": "Data",
+      "items": "Subtarefas",
+      "itemsHint": "Uma por linha.",
+      "submit": "Criar tarefa",
+      "save": "Guardar",
+      "created": "Tarefa criada.",
+      "saved": "Alterações guardadas."
+    },
+    "errors": {
+      "not_found": "Não tem permissão para esta ação.",
+      "invalid_input": "Verifique os campos e tente de novo."
+    },
+    "delete": "Apagar",
+    "deleteLabel": "Apagar tarefa {title}"
   }
 }

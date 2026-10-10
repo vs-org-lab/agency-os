@@ -634,3 +634,40 @@ export async function createRoomFixture(sql: TransactionSql, world: World): Prom
 
   return { a: await seed(world.clients.a), b: await seed(world.clients.b) };
 }
+
+export type TaskFixture = {
+  clientATaskId: string;
+  clientBTaskId: string;
+  studioTaskId: string;
+  /** A client B task assigned to the freelancer, who is assigned only to client A. */
+  freelancerTaskId: string;
+  itemId: string;
+};
+
+export async function createTaskFixture(sql: TransactionSql, world: World): Promise<TaskFixture> {
+  const task = async (clientId: string | null, title: string, assigneeId: string | null) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.tasks (organization_id, client_id, title, assignee_id, due_on, created_by)
+      values (${world.organizationId}, ${clientId}, ${title}, ${assigneeId}, current_date,
+              ${world.users.founder})
+      returning id
+    `;
+    if (!row) throw new Error('Task fixture task was not created');
+    return row.id;
+  };
+  const clientATaskId = await task(world.clients.a, 'Rever o mapa', null);
+  const clientBTaskId = await task(world.clients.b, 'Preparar proposta', null);
+  const studioTaskId = await task(null, 'Atualizar o portfólio', null);
+  const freelancerTaskId = await task(
+    world.clients.b,
+    'Exportar ficheiros',
+    world.users.freelancer,
+  );
+  const [item] = await sql<{ id: string }[]>`
+    insert into public.task_items (organization_id, task_id, position, title)
+    values (${world.organizationId}, ${clientATaskId}, 1, 'Ler o feedback')
+    returning id
+  `;
+  if (!item) throw new Error('Task fixture item was not created');
+  return { clientATaskId, clientBTaskId, studioTaskId, freelancerTaskId, itemId: item.id };
+}

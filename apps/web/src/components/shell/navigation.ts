@@ -1,14 +1,26 @@
 export type NavigationIcon =
-  'home' | 'settings' | 'dashboard' | 'kanban' | 'inbox' | 'target' | 'receipt' | 'feed' | 'check';
+  | 'home'
+  | 'settings'
+  | 'dashboard'
+  | 'kanban'
+  | 'inbox'
+  | 'target'
+  | 'receipt'
+  | 'feed'
+  | 'check'
+  | 'tasks';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
   | 'shell.studioNav.pipeline'
   | 'shell.studioNav.applications'
   | 'shell.studioNav.acquisition'
+  | 'shell.studioNav.updates'
+  | 'shell.studioNav.tasks'
   | 'shell.settings'
   | 'shell.room.dashboard'
   | 'shell.room.updates'
+  | 'shell.room.tasks'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -52,6 +64,8 @@ export function buildNavigation(input: NavigationLevel): Navigation {
         back: null,
         items: [
           { href: '/', labelKey: 'shell.studioNav.home', icon: 'home' },
+          { href: '/updates', labelKey: 'shell.studioNav.updates', icon: 'feed' },
+          { href: '/tasks', labelKey: 'shell.studioNav.tasks', icon: 'tasks' },
           ...(input.permissions.pipeline ? COMMERCIAL_ITEMS : []),
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
@@ -69,6 +83,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             href: `/c/${input.clientId}/updates`,
             labelKey: 'shell.room.updates',
             icon: 'feed',
+          },
+          {
+            href: `/c/${input.clientId}/tasks`,
+            labelKey: 'shell.room.tasks',
+            icon: 'tasks',
           },
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],

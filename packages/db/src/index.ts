@@ -47,6 +47,8 @@ export type {
   PhaseStatus,
   ProjectStatus,
   StepStatus,
+  TaskSource,
+  TaskStatus,
   UpdateKind,
   UpdateVisibility,
   PaymentMethod,

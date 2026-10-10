@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildNavigation } from './navigation';
 
 describe('buildNavigation', () => {
-  it('room level sidebar shows back to all clients link', () => {
+  it('room navigation lists tasks', () => {
     const navigation = buildNavigation({ level: 'room', clientId: 'client-1' });
 
     expect(navigation.back).toEqual({ href: '/', labelKey: 'shell.allClients' });
@@ -13,14 +13,15 @@ describe('buildNavigation', () => {
     expect(navigation.items.map((item) => item.href)).toEqual([
       '/c/client-1',
       '/c/client-1/updates',
+      '/c/client-1/tasks',
     ]);
   });
 
-  it('studio level has no back link and links home and settings', () => {
+  it('studio navigation lists updates and tasks', () => {
     const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: false } });
 
     expect(navigation.back).toBeNull();
-    expect(navigation.items.map((item) => item.href)).toEqual(['/']);
+    expect(navigation.items.map((item) => item.href)).toEqual(['/', '/updates', '/tasks']);
     expect(navigation.footer.map((item) => item.href)).toEqual(['/settings']);
   });
 
@@ -29,6 +30,8 @@ describe('buildNavigation', () => {
 
     expect(navigation.items.map((item) => [item.href, item.icon])).toEqual([
       ['/', 'home'],
+      ['/updates', 'feed'],
+      ['/tasks', 'tasks'],
       ['/pipeline', 'kanban'],
       ['/applications', 'inbox'],
       ['/acquisition', 'target'],

@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   CircleCheck,
+  ListChecks,
   Home,
   Inbox,
   KanbanSquare,
@@ -79,6 +80,7 @@ const ICONS = {
   receipt: ReceiptText,
   feed: Newspaper,
   check: CircleCheck,
+  tasks: ListChecks,
 } as const;
 
 function NavigationItemLink({

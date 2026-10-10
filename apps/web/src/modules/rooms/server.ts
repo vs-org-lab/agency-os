@@ -128,3 +128,5 @@ export { ROOM_FUNCTIONS } from './automations';
 export function loadPortalApprovals(claims: VerifiedClaims, clientId: string) {
   return withUserContext(claims, (tx) => getClientApprovals(tx, clientId));
 }
+export { roomActor } from './authorize';
+export { isRoomStaff } from './process';

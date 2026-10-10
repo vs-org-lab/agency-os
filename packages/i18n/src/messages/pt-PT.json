@@ -2095,6 +2095,8 @@
   "interaction": {
     "holdToConfirm": "{label}, mantenha premido para confirmar",
     "holding": "Continue a premir…",
-    "confirmed": "Confirmado."
+    "confirmed": "Confirmado.",
+    "confirmAction": "Confirmar: {label}",
+    "cancel": "Cancelar"
   }
 }

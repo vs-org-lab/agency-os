@@ -73,6 +73,34 @@ describe('HoldToConfirm', () => {
   });
 });
 
+describe('HoldToConfirm for assistive technology', () => {
+  it('a click without a pointer hold asks for an explicit confirmation', () => {
+    const onConfirm = vi.fn();
+    renderWithIntl(<HoldToConfirm label="Retirar acesso" onConfirm={onConfirm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Retirar acesso/ }));
+    expect(onConfirm).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: messages.interaction.cancel }));
+    expect(onConfirm).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /Retirar acesso/ }));
+    const confirm = screen.getByRole('button', { name: 'Confirmar: Retirar acesso' });
+    expect(document.activeElement).toBe(confirm);
+    fireEvent.click(confirm);
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('the fill takes its duration only from motion-safe styles', () => {
+    renderWithIntl(<HoldToConfirm label="Retirar acesso" onConfirm={() => {}} />);
+    const button = screen.getByRole('button', { name: /Retirar acesso/ });
+
+    fireEvent.pointerDown(button);
+    const fill = button.querySelector('[aria-hidden="true"]') as HTMLElement;
+    expect(fill.style.transitionDuration).toBe('');
+    expect(fill.className).toContain('motion-safe:duration-(--hold-duration)');
+  });
+});
+
 describe('ActionButton', () => {
   it('shows the pending label while running and the done label after', async () => {
     let finish: (value: { ok: true }) => void = () => {};
@@ -92,11 +120,18 @@ describe('ActionButton', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Pedir aprovação' }));
     });
-    expect(screen.getByRole('button', { name: 'A pedir…' }).hasAttribute('disabled')).toBe(true);
+    const running = screen.getByRole('button', { name: 'A pedir…' });
+    expect(running.getAttribute('aria-disabled')).toBe('true');
+    expect(running.hasAttribute('disabled')).toBe(false);
+    await act(async () => {
+      fireEvent.click(running);
+    });
+    expect(action).toHaveBeenCalledTimes(1);
     await act(async () => {
       finish({ ok: true });
     });
     expect(screen.getByRole('button', { name: 'Pedido enviado' })).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toBe('Pedido enviado');
     act(() => {
       vi.advanceTimersByTime(2500);
     });

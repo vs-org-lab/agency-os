@@ -43,38 +43,46 @@ export function ActionButton({
   );
 
   return (
-    <Button
-      type="button"
-      variant={variant}
-      size={size}
-      disabled={disabled || state === 'pending'}
-      aria-label={state === 'idle' && ariaLabel ? ariaLabel : labels[state]}
-      onClick={() => {
-        setState('pending');
-        startTransition(async () => {
-          const result = await action().catch(() => ({ ok: false, code: 'not_found' }) as const);
-          onResult?.(result);
-          setState(result.ok ? 'done' : 'idle');
-          if (result.ok) {
-            reset.current = setTimeout(() => setState('idle'), DONE_RESET_MS);
-          }
-        });
-      }}
-    >
-      <span className="inline-grid">
-        {(Object.keys(labels) as ActionState[]).map((key) => (
-          <span
-            key={key}
-            aria-hidden="true"
-            className={cn(
-              '[grid-area:1/1] motion-safe:transition-opacity motion-safe:duration-[120ms] motion-safe:ease-out',
-              key === state ? 'opacity-100' : 'opacity-0',
-            )}
-          >
-            {labels[key]}
-          </span>
-        ))}
+    <>
+      {/* Pending stays focusable (aria-disabled) so keyboard focus is not dropped mid-action. */}
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        disabled={disabled}
+        aria-disabled={state === 'pending' || undefined}
+        aria-label={state === 'idle' && ariaLabel ? ariaLabel : labels[state]}
+        onClick={() => {
+          if (state === 'pending') return;
+          setState('pending');
+          startTransition(async () => {
+            const result = await action().catch(() => ({ ok: false, code: 'not_found' }) as const);
+            onResult?.(result);
+            setState(result.ok ? 'done' : 'idle');
+            if (result.ok) {
+              reset.current = setTimeout(() => setState('idle'), DONE_RESET_MS);
+            }
+          });
+        }}
+      >
+        <span className="inline-grid">
+          {(Object.keys(labels) as ActionState[]).map((key) => (
+            <span
+              key={key}
+              aria-hidden="true"
+              className={cn(
+                '[grid-area:1/1] motion-safe:transition-opacity motion-safe:duration-120 motion-safe:ease-out',
+                key === state ? 'opacity-100' : 'opacity-0',
+              )}
+            >
+              {labels[key]}
+            </span>
+          ))}
+        </span>
+      </Button>
+      <span role="status" className="sr-only">
+        {state === 'done' ? labels.done : ''}
       </span>
-    </Button>
+    </>
   );
 }

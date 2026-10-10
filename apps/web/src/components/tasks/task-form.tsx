@@ -109,6 +109,7 @@ export function TaskForm({
 
   return (
     <form
+      aria-label={t('form.heading')}
       className="grid gap-3 md:grid-cols-2"
       onChange={() => setOutcome(null)}
       onSubmit={(event) => {

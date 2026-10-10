@@ -9,3 +9,4 @@ export {
   type EmailTemplateKey,
   type RenderedEmail,
 } from './templates';
+export { activeFounders, organizationSender, type OrganizationSender } from './sender';

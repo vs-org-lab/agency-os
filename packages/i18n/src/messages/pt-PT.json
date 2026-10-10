@@ -100,7 +100,8 @@
     "portalNav": {
       "invoices": "Faturas",
       "approvals": "Aprovações",
-      "updates": "Atualizações"
+      "updates": "Atualizações",
+      "team": "Colegas"
     }
   },
   "states": {
@@ -917,6 +918,28 @@
         "body": "A fase {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
         "action": "Abrir a sala"
       }
+    },
+    "team": {
+      "invitation": {
+        "subject": "Convite para a equipa da {agencyName}",
+        "heading": "Bem-vindo à equipa da {agencyName}",
+        "body": "Olá {fullName}, foi convidado para a equipa da {agencyName} como {role, select, project_manager {gestor de projeto} freelancer {freelancer} finance {finanças} other {membro da equipa}}.\n\nDefina a sua palavra-passe e a verificação em dois passos para entrar. O link só funciona uma vez.",
+        "action": "Aceitar o convite"
+      },
+      "task_assigned": {
+        "subject": "Nova tarefa: {title}",
+        "heading": "Tem uma tarefa nova",
+        "body": "Olá {fullName}, ficou responsável pela tarefa «{title}» {scope, select, client {do cliente {clientName}} other {do estúdio}}, {due, select, none {sem data definida} other {para {due}}}.",
+        "action": "Abrir a tarefa"
+      }
+    },
+    "client": {
+      "invitation": {
+        "subject": "Convite para o portal da {agencyName}",
+        "heading": "O seu acesso ao portal",
+        "body": "Olá {fullName}, foi convidado para o portal da {agencyName} da empresa {clientName} como {role, select, decision_maker {decisor} operational {operacional} client_finance {finanças} other {membro}}.\n\nNo portal acompanha o projeto, aprova o trabalho e consulta as faturas. O link só funciona uma vez.",
+        "action": "Entrar no portal"
+      }
     }
   },
   "publicApply": {
@@ -1024,7 +1047,8 @@
       "application": "Candidatura",
       "booking": "Agenda",
       "templates": "Modelos",
-      "organization": "Organização"
+      "organization": "Organização",
+      "team": "Equipa"
     },
     "application": {
       "title": "Candidatura",
@@ -1849,5 +1873,91 @@
     },
     "delete": "Apagar",
     "deleteLabel": "Apagar tarefa {title}"
+  },
+  "team": {
+    "title": "Equipa",
+    "description": "Quem trabalha no estúdio, com o papel, os clientes e a carga de cada pessoa.",
+    "roles": {
+      "founder": "Fundador",
+      "project_manager": "Gestor de projeto",
+      "freelancer": "Freelancer",
+      "finance": "Finanças",
+      "decision_maker": "Decisor",
+      "operational": "Operacional",
+      "client_finance": "Finanças"
+    },
+    "status": {
+      "invited": "Convidado",
+      "active": "Ativo",
+      "revoked": "Sem acesso"
+    },
+    "table": {
+      "label": "Pessoas da equipa",
+      "loadValue": "{tasks, plural, one {# tarefa} other {# tarefas}} esta semana · {projects, plural, one {# projeto} other {# projetos}}",
+      "hours": "{hours} h por semana",
+      "noHours": "Sem horas definidas",
+      "perHour": "{amount}/h",
+      "noRate": "Sem custo definido",
+      "resend": "Reenviar convite",
+      "resendLabel": "Reenviar o convite a {name}",
+      "resent": "Convite reenviado.",
+      "clientCount": "{count, plural, one {# cliente} other {# clientes}}"
+    },
+    "invite": {
+      "heading": "Convidar",
+      "name": "Nome",
+      "email": "Email",
+      "role": "Papel",
+      "submit": "Enviar convite",
+      "sent": "Convite enviado."
+    },
+    "member": {
+      "back": "Equipa",
+      "role": "Papel",
+      "saveRole": "Mudar papel",
+      "roleSaved": "Papel atualizado.",
+      "access": "Acesso",
+      "revoke": "Retirar acesso",
+      "restore": "Repor acesso",
+      "revoked": "Acesso retirado.",
+      "restored": "Acesso reposto.",
+      "rates": "Custo e disponibilidade",
+      "ratesHint": "Só o fundador e as finanças veem estes valores.",
+      "hourlyCost": "Custo por hora",
+      "currency": "Moeda",
+      "weeklyHours": "Horas por semana",
+      "saveRates": "Guardar",
+      "ratesSaved": "Guardado.",
+      "summary": "{email} · {role} · {status}"
+    },
+    "assignments": {
+      "clients": "Clientes atribuídos",
+      "projects": "Projetos atribuídos",
+      "projectsHint": "O freelancer só vê os projetos que lhe estão atribuídos.",
+      "none": "Ainda não há clientes.",
+      "noProjects": "Atribua primeiro um cliente com projetos.",
+      "project": "{project} · {client}",
+      "saved": "Atribuição guardada."
+    },
+    "colleagues": {
+      "title": "Colegas",
+      "description": "Quem da sua empresa entra no portal e o que pode fazer.",
+      "label": "Colegas no portal",
+      "you": "Você",
+      "revoke": "Retirar acesso",
+      "revokeLabel": "Retirar o acesso de {name}",
+      "roleLabel": "Papel de {name}",
+      "saved": "Guardado."
+    },
+    "errors": {
+      "not_found": "Não tem permissão para esta ação.",
+      "invalid_input": "Verifique os campos e tente de novo.",
+      "invalid_state": "Esta ação já não se aplica.",
+      "last_founder": "A organização precisa de pelo menos um fundador ativo.",
+      "last_decision_maker": "A empresa precisa de pelo menos um decisor ativo.",
+      "client_account": "Este email pertence a uma conta de cliente e não pode entrar na equipa.",
+      "already_member": "Esta pessoa já tem acesso.",
+      "revoked_member": "Esta pessoa está sem acesso. Reponha o acesso na ficha dela."
+    }
   }
 }

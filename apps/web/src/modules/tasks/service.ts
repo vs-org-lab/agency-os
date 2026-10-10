@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { schema, type DbTransaction, type TaskStatus } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
+import { emit } from '@/modules/events';
 import { isRoomStaff, roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
@@ -85,8 +86,9 @@ async function validAssignee(
   organizationId: string,
   clientId: string | null,
   assigneeId: string,
+  projectId: string | null = null,
 ): Promise<boolean> {
-  if (clientId) return isRoomStaff(tx, organizationId, clientId, assigneeId);
+  if (clientId) return isRoomStaff(tx, organizationId, clientId, assigneeId, projectId);
   const [member] = await tx
     .select({ userId: organizationMemberships.userId })
     .from(organizationMemberships)
@@ -118,7 +120,13 @@ export async function createTask(
   return deps.contexts.withSystemContext(async (tx) => {
     if (
       data.assigneeId &&
-      !(await validAssignee(tx, actor.organizationId, clientId, data.assigneeId))
+      !(await validAssignee(
+        tx,
+        actor.organizationId,
+        clientId,
+        data.assigneeId,
+        data.projectId ?? null,
+      ))
     ) {
       return { ok: false as const, rule: 'invalid_input' as const };
     }
@@ -161,7 +169,26 @@ export async function createTask(
       clientId,
       metadata: { source: 'manual' },
     });
+    if (data.assigneeId && data.assigneeId !== actor.userId) {
+      await emitAssigned(tx, actor.organizationId, clientId, task.id, data.assigneeId);
+    }
     return { ok: true as const, taskId: task.id };
+  });
+}
+
+/** Someone other than the caller now has the task; they are told by email. */
+function emitAssigned(
+  tx: DbTransaction,
+  organizationId: string,
+  clientId: string | null,
+  taskId: string,
+  assigneeId: string,
+): Promise<string> {
+  return emit(tx, {
+    type: 'tasks.task.assigned',
+    organizationId,
+    clientId: clientId ?? undefined,
+    payload: { taskId, assigneeId },
   });
 }
 
@@ -170,7 +197,12 @@ async function readableTask(deps: TasksDeps, claims: VerifiedClaims, taskId: str
   if (!z.uuid().safeParse(taskId).success) return null;
   return deps.contexts.withUserContext(claims, async (tx) => {
     const [task] = await tx
-      .select({ id: tasks.id, clientId: tasks.clientId, assigneeId: tasks.assigneeId })
+      .select({
+        id: tasks.id,
+        clientId: tasks.clientId,
+        projectId: tasks.projectId,
+        assigneeId: tasks.assigneeId,
+      })
       .from(tasks)
       .where(eq(tasks.id, taskId));
     return task ?? null;
@@ -196,7 +228,13 @@ export async function updateTask(
     if (
       patch.assigneeId &&
       patch.assigneeId !== task.assigneeId &&
-      !(await validAssignee(tx, actor.organizationId, task.clientId, patch.assigneeId))
+      !(await validAssignee(
+        tx,
+        actor.organizationId,
+        task.clientId,
+        patch.assigneeId,
+        task.projectId,
+      ))
     ) {
       return { ok: false as const, rule: 'invalid_input' as const };
     }
@@ -209,6 +247,13 @@ export async function updateTask(
       clientId: task.clientId,
       metadata: patch,
     });
+    if (
+      patch.assigneeId &&
+      patch.assigneeId !== task.assigneeId &&
+      patch.assigneeId !== actor.userId
+    ) {
+      await emitAssigned(tx, actor.organizationId, task.clientId, task.id, patch.assigneeId);
+    }
     return { ok: true as const };
   });
 }

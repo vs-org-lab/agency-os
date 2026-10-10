@@ -63,6 +63,11 @@ describe('rooms access', () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const rooms = await createRoomFixture(sql, world);
+      await sql`
+        insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
+        values (${world.organizationId}, ${world.clients.a}, ${rooms.a.projectId},
+                ${world.users.freelancer})
+      `;
 
       for (const user of [world.users.manager, world.users.freelancer]) {
         await asUser(sql, user);

@@ -9,6 +9,13 @@ export function endOfWeek(day: string): string {
   return new Date(time + ((7 - weekday) % 7) * DAY_MS).toISOString().slice(0, 10);
 }
 
+/** The Monday that starts the week of the given calendar date. */
+export function startOfWeek(day: string): string {
+  const time = Date.parse(`${day}T00:00:00Z`);
+  const weekday = new Date(time).getUTCDay();
+  return new Date(time - ((weekday + 6) % 7) * DAY_MS).toISOString().slice(0, 10);
+}
+
 /** S-03 grouping: overdue and due today, due by Sunday, or later (including undated). */
 export function taskGroup(dueOn: string | null, today: string): TaskGroup {
   if (dueOn === null) return 'later';

@@ -34,6 +34,7 @@ export {
   acceptInvitation,
   bootstrapFounder,
   inviteClientUser,
+  resendInvitation,
   inviteTeamMember,
   lookupUserIdByEmail,
   organizationSlug,

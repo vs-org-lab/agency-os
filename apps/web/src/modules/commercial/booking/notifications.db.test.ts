@@ -14,6 +14,7 @@ import { createDbContexts } from '@/platform/db';
 import type { CalendarPort } from '../calendar/port';
 import { hashManageToken } from './links';
 import {
+  alertClientTeam,
   alertFounders,
   sendBookingLinkEmail,
   sendCallConfirmation,
@@ -197,6 +198,42 @@ describe('notifications', () => {
 
       expect(email.sent.map((message) => message.to)).toContain('partner@studio.example');
       expect(email.sent).toHaveLength(2);
+    });
+  });
+
+  it('approval alerts reach the client managers once', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await sql`
+        insert into public.client_staff_assignments (organization_id, client_id, user_id)
+        values (${world.organizationId}, ${world.clients.a}, ${world.users.founder})
+      `;
+      const recipients = await sql<{ id: string; email: string }[]>`
+        select id, email from auth.users
+        where id in (${world.users.founder}, ${world.users.manager}, ${world.users.freelancer})
+      `;
+      const emailOf = (userId: string) => recipients.find((row) => row.id === userId)?.email;
+      const email = recordingEmail();
+
+      const sent = await alertClientTeam(
+        world.organizationId,
+        world.clients.a,
+        'founder.approval_overdue',
+        {
+          companyName: 'Empresa Exemplo',
+          phaseName: 'Descoberta',
+          roomUrl: 'https://os.example.com/c/client',
+        },
+        depsFor(sql, email),
+      );
+
+      expect(sent).toBe(2);
+      expect(email.sent.map((message) => message.to).sort()).toEqual(
+        [emailOf(world.users.founder), emailOf(world.users.manager)].sort(),
+      );
+      expect(email.sent.map((message) => message.to)).not.toContain(
+        emailOf(world.users.freelancer),
+      );
     });
   });
 

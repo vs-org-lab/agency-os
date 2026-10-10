@@ -10,9 +10,10 @@ export default async function PortalLayout({ children, params }: LayoutProps) {
   const roles = [...session.ctx.clientRoles.values()][0] ?? [];
   const invoices = roles.some((role) => role === 'decision_maker' || role === 'client_finance');
   const room = roles.some((role) => role === 'decision_maker' || role === 'operational');
+  const team = roles.includes('decision_maker');
 
   return (
-    <AppShell session={session} level={{ level: 'portal', permissions: { invoices, room } }}>
+    <AppShell session={session} level={{ level: 'portal', permissions: { invoices, room, team } }}>
       {children}
     </AppShell>
   );

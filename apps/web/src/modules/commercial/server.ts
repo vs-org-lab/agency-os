@@ -104,7 +104,7 @@ export {
   portalNoticeFunction,
   RETRIES,
 } from './automations';
-export { alertFounders } from './booking/notifications';
+export { alertClientTeam, alertFounders } from './booking/notifications';
 export { applyStageChange } from './pipeline/service';
 export { listTodayItems, type TodayItem } from './today';
 

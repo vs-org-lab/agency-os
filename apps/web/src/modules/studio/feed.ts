@@ -6,7 +6,7 @@ import { canSeePipeline } from '@/modules/commercial';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { isStudioStaff } from './access';
 
-const { clients, domainEvents } = schema;
+const { clients, domainEvents, projects } = schema;
 
 export const FEED_EVENT_TYPES = [
   'contracts.proposal.accepted',
@@ -45,7 +45,7 @@ const FEED_DAYS = 30;
 const FEED_LIMIT = 100;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-type FeedPayload = { dealId?: unknown; decision?: unknown };
+type FeedPayload = { dealId?: unknown; decision?: unknown; projectId?: unknown };
 
 function text(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
@@ -80,6 +80,9 @@ export async function loadStudioFeed(
         pipeline: canSeePipeline(actor),
         types: visibleTypes(actor),
         clients: new Map(readable.map((client) => [client.id, client.name])),
+        projects: new Set(
+          (await tx.select({ id: projects.id }).from(projects)).map((project) => project.id),
+        ),
       };
     },
     null,
@@ -113,6 +116,8 @@ export async function loadStudioFeed(
     const clientName = row.clientId ? scope.clients.get(row.clientId) : undefined;
     if (!row.clientId || clientName === undefined) return [];
     const payload = (row.payload ?? {}) as FeedPayload;
+    const projectId = text(payload.projectId);
+    if (projectId && !scope.projects.has(projectId)) return [];
     const dealId = text(payload.dealId);
     return [
       {

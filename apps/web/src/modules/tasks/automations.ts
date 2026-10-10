@@ -1,7 +1,8 @@
 import 'server-only';
-import { failureHandler, RETRIES } from '@/modules/commercial/server';
+import { failureHandler, notificationDeps, RETRIES } from '@/modules/commercial/server';
 import { inngest } from '@/modules/events';
 import { withSystemContext, withUserContext } from '@/platform/db';
+import { sendTaskAssignedNotice } from './notices';
 import { createKickoffTasks } from './service';
 
 type ProjectCreatedData = { payload: { projectId?: string; dealId?: string | null } };
@@ -23,4 +24,29 @@ const kickoffTasks = inngest.createFunction(
   },
 );
 
-export const TASK_FUNCTIONS = [kickoffTasks];
+type TaskAssignedData = { payload: { taskId?: string; assigneeId?: string } };
+
+/** A task given to someone else reaches them by email. */
+const assignedNotice = inngest.createFunction(
+  {
+    id: 'tasks-assigned-notice',
+    triggers: [{ event: 'tasks.task.assigned' }],
+    retries: RETRIES,
+    onFailure: failureHandler('tasks-assigned-notice'),
+  },
+  async ({ event, step }) => {
+    const { taskId, assigneeId } = (event.data as TaskAssignedData).payload;
+    if (!taskId || !assigneeId) return { sent: false };
+    const sent = await step.run('send-task-assigned', () => {
+      const deps = notificationDeps();
+      return sendTaskAssignedNotice(taskId, assigneeId, {
+        contexts: { withSystemContext },
+        email: deps.email,
+        appBaseUrl: deps.appBaseUrl,
+      });
+    });
+    return { sent };
+  },
+);
+
+export const TASK_FUNCTIONS = [kickoffTasks, assignedNotice];

@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema } from '@agency-os/db';
 import { withActor } from '@/modules/access';
@@ -72,6 +72,7 @@ export async function listTaskOptions(
         and(
           eq(organizationMemberships.organizationId, scope.organizationId),
           eq(organizationMemberships.status, 'active'),
+          isNull(organizationMemberships.archivedAt),
           inArray(organizationMemberships.role, ['founder', 'project_manager', 'freelancer']),
         ),
       ),
@@ -79,7 +80,12 @@ export async function listTaskOptions(
       .select({ userId: clientStaffAssignments.userId, clientId: clientStaffAssignments.clientId })
       .from(clientStaffAssignments)
       .innerJoin(clients, eq(clients.id, clientStaffAssignments.clientId))
-      .where(eq(clients.organizationId, scope.organizationId)),
+      .where(
+        and(
+          eq(clients.organizationId, scope.organizationId),
+          isNull(clientStaffAssignments.archivedAt),
+        ),
+      ),
   }));
 
   const people = new Map<string, TaskPerson>();

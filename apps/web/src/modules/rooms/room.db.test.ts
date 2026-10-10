@@ -3,6 +3,7 @@ import {
   closeTestSql,
   createFixtureWorld,
   createRoomFixture,
+  createTeamFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { createProjectAsStaff } from './projects';
@@ -56,6 +57,11 @@ describe('room reads', () => {
         deps,
       );
       if (!second.ok) throw new Error('Second project was not created');
+      await sql`
+        insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
+        values (${world.organizationId}, ${world.clients.a}, ${rooms.a.projectId},
+                ${world.users.freelancer})
+      `;
 
       const room = await loadRoom(
         claims,
@@ -142,6 +148,84 @@ describe('room reads', () => {
           [approval?.id, 'Campanha', 'Conceito'],
         ].sort(),
       );
+    });
+  });
+
+  it('freelancer room lists only assigned projects', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = roomDeps(sql);
+
+      const room = await loadRoom(
+        roomClaims(world.users.freelancer),
+        { clientId: world.clients.a },
+        deps,
+      );
+
+      expect(room?.projects.map((project) => project.id)).toEqual([team.rooms.a.projectId]);
+      expect(room?.project?.id).toBe(team.rooms.a.projectId);
+      const manager = await loadRoom(
+        roomClaims(world.users.manager),
+        { clientId: world.clients.a },
+        deps,
+      );
+      expect(manager?.projects).toHaveLength(2);
+    });
+  });
+
+  it('freelancer cannot open another project by id', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = roomDeps(sql);
+      const claims = roomClaims(world.users.freelancer);
+
+      const room = await loadRoom(
+        claims,
+        { clientId: world.clients.a, projectId: team.other.projectId },
+        deps,
+      );
+      const preview = await loadRoomPreview(
+        claims,
+        { clientId: world.clients.a, projectId: team.other.projectId },
+        deps,
+      );
+
+      expect(room?.project?.id).not.toBe(team.other.projectId);
+      expect(JSON.stringify(room)).not.toContain(team.other.projectId);
+      expect(JSON.stringify(preview)).not.toContain(team.other.projectId);
+    });
+  });
+
+  it('unassigned staff and freelancers off the project are not offered', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      await sql`
+        update public.client_staff_assignments set archived_at = now()
+        where client_id = ${world.clients.a} and user_id = ${world.users.manager}
+      `;
+      const { deps } = roomDeps(sql);
+      const founder = roomClaims(world.users.founder);
+
+      const assigned = await loadRoom(
+        founder,
+        { clientId: world.clients.a, projectId: team.rooms.a.projectId },
+        deps,
+      );
+      const other = await loadRoom(
+        founder,
+        { clientId: world.clients.a, projectId: team.other.projectId },
+        deps,
+      );
+
+      const ids = (people: Array<{ id: string }> | undefined) => people?.map((person) => person.id);
+      expect(ids(assigned?.people)).not.toContain(world.users.manager);
+      expect(ids(assigned?.team)).not.toContain(world.users.manager);
+      expect(ids(assigned?.people)).toContain(world.users.freelancer);
+      expect(ids(other?.people)).not.toContain(world.users.freelancer);
+      expect(ids(other?.people)).toContain(world.users.founder);
     });
   });
 });

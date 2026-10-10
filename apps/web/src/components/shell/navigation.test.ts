@@ -52,7 +52,7 @@ describe('buildNavigation', () => {
   it('portal level links portal home and settings', () => {
     const navigation = buildNavigation({
       level: 'portal',
-      permissions: { invoices: false, room: false },
+      permissions: { invoices: false, room: false, team: false },
     });
 
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal']);
@@ -62,7 +62,7 @@ describe('buildNavigation', () => {
   it('portal level links invoices only for who pays', () => {
     const navigation = buildNavigation({
       level: 'portal',
-      permissions: { invoices: true, room: false },
+      permissions: { invoices: true, room: false, team: false },
     });
 
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal', '/portal/invoices']);
@@ -71,13 +71,25 @@ describe('buildNavigation', () => {
   it('portal level links approvals and updates for room members', () => {
     const navigation = buildNavigation({
       level: 'portal',
-      permissions: { invoices: false, room: true },
+      permissions: { invoices: false, room: true, team: false },
     });
 
     expect(navigation.items.map((item) => item.href)).toEqual([
       '/portal',
       '/portal/approvals',
       '/portal/updates',
+    ]);
+  });
+
+  it('portal level links colleagues for decision makers', () => {
+    const navigation = buildNavigation({
+      level: 'portal',
+      permissions: { invoices: true, room: true, team: true },
+    });
+
+    expect(navigation.items.map((item) => [item.href, item.icon])).toContainEqual([
+      '/portal/settings/team',
+      'users',
     ]);
   });
 });

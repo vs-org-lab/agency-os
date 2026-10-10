@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createTeamFixture,
   testDatabase,
   withTestTransaction,
 } from '@agency-os/db/testing';
@@ -105,6 +106,32 @@ describe('studio feed', () => {
       const feed = await loadStudioFeed(claimsFor(world.users.freelancer), NOW, { contexts });
 
       expect(feed?.map((entry) => entry.id)).toEqual([ids['rooms.approval.decided']]);
+    });
+  });
+
+  it('freelancer feed skips approvals of other projects', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const approvalEvent = async (projectId: string) => {
+        const [row] = await sql<{ id: string }[]>`
+          insert into public.domain_events (organization_id, client_id, type, payload, created_at)
+          values (${world.organizationId}, ${world.clients.a}, 'rooms.approval.decided',
+                  ${JSON.stringify({ projectId, decision: 'approved' })}::jsonb,
+                  ${new Date(NOW.getTime() - 60_000).toISOString()}::timestamptz)
+          returning id
+        `;
+        return row?.id ?? '';
+      };
+      const assigned = await approvalEvent(team.rooms.a.projectId);
+      const other = await approvalEvent(team.other.projectId);
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const freelancer = await loadStudioFeed(claimsFor(world.users.freelancer), NOW, { contexts });
+      const manager = await loadStudioFeed(claimsFor(world.users.manager), NOW, { contexts });
+
+      expect(freelancer?.map((entry) => entry.id)).toEqual([assigned]);
+      expect(manager?.map((entry) => entry.id).sort()).toEqual([assigned, other].sort());
     });
   });
 

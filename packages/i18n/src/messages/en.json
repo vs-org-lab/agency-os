@@ -100,7 +100,8 @@
     "portalNav": {
       "invoices": "Invoices",
       "approvals": "Approvals",
-      "updates": "Updates"
+      "updates": "Updates",
+      "team": "Colleagues"
     }
   },
   "states": {
@@ -917,6 +918,28 @@
         "body": "The phase {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
         "action": "Open the room"
       }
+    },
+    "team": {
+      "invitation": {
+        "subject": "Your invitation to the {agencyName} team",
+        "heading": "Welcome to the {agencyName} team",
+        "body": "Hello {fullName}, you have been invited to the {agencyName} team as {role, select, project_manager {project manager} freelancer {freelancer} finance {finance} other {team member}}.\n\nSet your password and two-step verification to sign in. The link works once.",
+        "action": "Accept the invitation"
+      },
+      "task_assigned": {
+        "subject": "New task: {title}",
+        "heading": "You have a new task",
+        "body": "Hello {fullName}, you are now responsible for the task \"{title}\" {scope, select, client {for {clientName}} other {for the studio}}, {due, select, none {with no date set} other {due {due}}}.",
+        "action": "Open the task"
+      }
+    },
+    "client": {
+      "invitation": {
+        "subject": "Your invitation to the {agencyName} portal",
+        "heading": "Your portal access",
+        "body": "Hello {fullName}, you have been invited to the {agencyName} portal for {clientName} as {role, select, decision_maker {decision maker} operational {operational} client_finance {finance} other {member}}.\n\nIn the portal you follow the project, approve the work and see your invoices. The link works once.",
+        "action": "Open the portal"
+      }
     }
   },
   "publicApply": {
@@ -1024,7 +1047,8 @@
       "application": "Application",
       "booking": "Booking",
       "templates": "Templates",
-      "organization": "Organisation"
+      "organization": "Organisation",
+      "team": "Team"
     },
     "application": {
       "title": "Application",
@@ -1849,5 +1873,91 @@
     },
     "delete": "Delete",
     "deleteLabel": "Delete task {title}"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Who works in the studio, with each person’s role, clients and load.",
+    "roles": {
+      "founder": "Founder",
+      "project_manager": "Project manager",
+      "freelancer": "Freelancer",
+      "finance": "Finance",
+      "decision_maker": "Decision maker",
+      "operational": "Operational",
+      "client_finance": "Finance"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "revoked": "No access"
+    },
+    "table": {
+      "label": "Team members",
+      "loadValue": "{tasks, plural, one {# task} other {# tasks}} this week · {projects, plural, one {# project} other {# projects}}",
+      "hours": "{hours} h per week",
+      "noHours": "No hours set",
+      "perHour": "{amount}/h",
+      "noRate": "No cost set",
+      "resend": "Resend invitation",
+      "resendLabel": "Resend the invitation to {name}",
+      "resent": "Invitation sent again.",
+      "clientCount": "{count, plural, one {# client} other {# clients}}"
+    },
+    "invite": {
+      "heading": "Invite",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "submit": "Send invitation",
+      "sent": "Invitation sent."
+    },
+    "member": {
+      "back": "Team",
+      "role": "Role",
+      "saveRole": "Change role",
+      "roleSaved": "Role updated.",
+      "access": "Access",
+      "revoke": "Revoke access",
+      "restore": "Restore access",
+      "revoked": "Access revoked.",
+      "restored": "Access restored.",
+      "rates": "Cost and availability",
+      "ratesHint": "Only founders and finance see these values.",
+      "hourlyCost": "Hourly cost",
+      "currency": "Currency",
+      "weeklyHours": "Hours per week",
+      "saveRates": "Save",
+      "ratesSaved": "Saved.",
+      "summary": "{email} · {role} · {status}"
+    },
+    "assignments": {
+      "clients": "Assigned clients",
+      "projects": "Assigned projects",
+      "projectsHint": "Freelancers only see the projects assigned to them.",
+      "none": "There are no clients yet.",
+      "noProjects": "Assign a client with projects first.",
+      "project": "{project} · {client}",
+      "saved": "Assignment saved."
+    },
+    "colleagues": {
+      "title": "Colleagues",
+      "description": "Who from your company signs in to the portal and what they can do.",
+      "label": "Portal colleagues",
+      "you": "You",
+      "revoke": "Revoke access",
+      "revokeLabel": "Revoke access for {name}",
+      "roleLabel": "Role of {name}",
+      "saved": "Saved."
+    },
+    "errors": {
+      "not_found": "You are not allowed to do this.",
+      "invalid_input": "Check the fields and try again.",
+      "invalid_state": "This action no longer applies.",
+      "last_founder": "The organisation needs at least one active founder.",
+      "last_decision_maker": "The company needs at least one active decision maker.",
+      "client_account": "This email belongs to a client account and cannot join the team.",
+      "already_member": "This person already has access.",
+      "revoked_member": "This person has no access. Restore it from their page."
+    }
   }
 }

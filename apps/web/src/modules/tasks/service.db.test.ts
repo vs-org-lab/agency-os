@@ -3,6 +3,7 @@ import {
   closeTestSql,
   createFixtureWorld,
   createRoomFixture,
+  createTeamFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
 import {
@@ -115,6 +116,27 @@ describe('tasks', () => {
     });
   });
 
+  it('a project task goes to a freelancer only when they are on the project', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const input = {
+        title: 'Rever',
+        clientId: world.clients.a,
+        assigneeId: world.users.freelancer,
+      };
+
+      expect(
+        await createTask(founder, { ...input, projectId: team.other.projectId }, deps),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
+      expect(
+        (await createTask(founder, { ...input, projectId: team.rooms.a.projectId }, deps)).ok,
+      ).toBe(true);
+    });
+  });
+
   it('the assignee must be founder or staff assigned to the client', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
@@ -152,6 +174,22 @@ describe('tasks', () => {
         studioPeople?.people.find((person) => person.id === userId)?.clientIds;
       expect(clientsOf(world.users.founder)).toBeNull();
       expect(clientsOf(world.users.freelancer)).toEqual([world.clients.a]);
+    });
+  });
+
+  it('unassigned staff are not offered as assignees', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      await sql`
+        update public.client_staff_assignments set archived_at = now()
+        where client_id = ${world.clients.a} and user_id = ${world.users.manager}
+      `;
+
+      const options = await listTaskOptions(taskClaims(world.users.founder), world.clients.a, deps);
+
+      expect(options?.people.map((person) => person.id)).not.toContain(world.users.manager);
+      expect(options?.people.map((person) => person.id)).toContain(world.users.freelancer);
     });
   });
 
@@ -237,6 +275,55 @@ describe('tasks', () => {
         select count(*)::int as count from public.tasks where id = ${own.taskId}
       `;
       expect(row?.count).toBe(0);
+    });
+  });
+
+  it('assigning a task to someone else emits the event', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const created = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Rever', clientId: world.clients.a, assigneeId: world.users.freelancer },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await updateTask(
+        taskClaims(world.users.founder),
+        { taskId: created.taskId, assigneeId: world.users.manager },
+        deps,
+      );
+
+      const events = await sql<{ assignee: string }[]>`
+        select payload ->> 'assigneeId' as assignee from public.domain_events
+        where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
+          and payload ->> 'taskId' = ${created.taskId}
+        order by created_at, id
+      `;
+      expect(events.map((event) => event.assignee).sort()).toEqual(
+        [world.users.freelancer, world.users.manager].sort(),
+      );
+    });
+  });
+
+  it('self assignment emits nothing', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const manager = taskClaims(world.users.manager);
+      const created = await createTask(
+        manager,
+        { title: 'Ligar', clientId: world.clients.a, assigneeId: world.users.manager },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await updateTask(manager, { taskId: created.taskId, title: 'Ligar ao cliente' }, deps);
+
+      const events = await sql`
+        select 1 from public.domain_events
+        where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
+      `;
+      expect(events).toHaveLength(0);
     });
   });
 });

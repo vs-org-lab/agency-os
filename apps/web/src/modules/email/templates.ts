@@ -37,6 +37,9 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.payment_overdue',
   'founder.approval_decided',
   'founder.approval_overdue',
+  'team.invitation',
+  'client.invitation',
+  'team.task_assigned',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -92,6 +95,27 @@ export type EmailParams = {
     roomUrl: string;
   };
   'founder.approval_overdue': { companyName: string; phaseName: string; roomUrl: string };
+  'team.invitation': {
+    fullName: string;
+    agencyName: string;
+    role: 'project_manager' | 'freelancer' | 'finance';
+    inviteUrl: string;
+  };
+  'client.invitation': {
+    fullName: string;
+    agencyName: string;
+    clientName: string;
+    role: 'decision_maker' | 'operational' | 'client_finance';
+    inviteUrl: string;
+  };
+  'team.task_assigned': {
+    fullName: string;
+    title: string;
+    scope: 'client' | 'studio';
+    clientName: string;
+    due: string;
+    taskUrl: string;
+  };
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -130,6 +154,9 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.payment_overdue': 'dealUrl',
   'founder.approval_decided': 'roomUrl',
   'founder.approval_overdue': 'roomUrl',
+  'team.invitation': 'inviteUrl',
+  'client.invitation': 'inviteUrl',
+  'team.task_assigned': 'taskUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

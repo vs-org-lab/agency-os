@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { PDFDocument } from 'pdf-lib';
 import { magicLinkPath } from './support/admin';
 import { signInWithPassword } from './support/auth';
 import { readCredentials } from './support/credentials';
@@ -48,6 +49,15 @@ function png(width: number, height: number, rgb: [number, number, number]): Buff
     chunk('IDAT', deflateSync(pixels)),
     chunk('IEND', Buffer.alloc(0)),
   ]);
+}
+
+/** A PDF with one line of text on each of its pages. */
+async function pdf(pages: number): Promise<Buffer> {
+  const document = await PDFDocument.create();
+  for (let number = 1; number <= pages; number += 1) {
+    document.addPage([420, 595]).drawText(`Página ${number}`, { x: 40, y: 540, size: 24 });
+  }
+  return Buffer.from(await document.save());
 }
 
 async function openProofsTab(page: Page, clientId: string) {
@@ -122,5 +132,45 @@ test.describe('File proofing', () => {
     await client.getByRole('button', { name: 'Aprovar' }).click();
     await expect(client.getByText('Decisão registada. Obrigado.')).toBeVisible({ timeout: 30_000 });
     await clientContext.close();
+  });
+
+  test('a pdf proof renders page by page under the content security policy', async ({ page }) => {
+    test.setTimeout(180_000);
+    const policyErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' && /Content Security Policy/i.test(message.text())) {
+        policyErrors.push(message.text());
+      }
+    });
+    const title = `Guia ${randomUUID().slice(0, 6)}`;
+    const seeded = await seedRoomProject(credentials.organizationId);
+
+    await signInWithPassword(page, credentials.founder);
+    await openProofsTab(page, seeded.clientId);
+    await page.getByText('Novo ficheiro').click();
+    await page.getByLabel('Título').fill(title);
+    await page.getByLabel('Ficheiro', { exact: true }).setInputFiles({
+      name: 'guia.pdf',
+      mimeType: 'application/pdf',
+      buffer: await pdf(2),
+    });
+    await page.getByRole('button', { name: 'Carregar' }).click();
+    await expect(page.getByText('Ficheiro carregado.')).toBeVisible({ timeout: 30_000 });
+    await page.reload();
+    await page.getByRole('tab', { name: 'Para aprovação' }).click();
+    await page
+      .getByRole('listitem')
+      .filter({ hasText: title })
+      .getByRole('link', { name: 'Abrir' })
+      .click();
+
+    await expect(page.locator('canvas[aria-label="Página 1 de 2"]')).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByText('A carregar o ficheiro…')).toBeHidden({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Página seguinte' }).click();
+    await expect(page.locator('canvas[aria-label="Página 2 de 2"]')).toBeVisible();
+    await expect(page.getByText('Não foi possível mostrar o ficheiro.')).toBeHidden();
+    expect(policyErrors).toEqual([]);
   });
 });

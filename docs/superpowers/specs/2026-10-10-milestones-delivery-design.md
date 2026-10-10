@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Data                    | 2026-10-10                                                                                                                                                                     |
-| Estado                  | Aprovado (luz verde permanente do fundador, 2026-10-09)                                                                                                                        |
+| Estado                  | Implementado (2026-10-10)                                                                                                                                                      |
 | Vaga                    | 2 (2A → 2B → 2C → 2D.1 → **2D.2 Marcos e entrega** → 2E … 2G)                                                                                                                  |
 | Módulos                 | M05 (RF-040), M07, M08, M17 (RF-161)                                                                                                                                           |
 | Documentação de produto | `04` (RN-04, RN-32, RN-51), `07` (AUT-16, AUT-21), `02` (F5, P-02), `03` (US-21), `08` (matriz de acessos: salas e processo)                                                   |

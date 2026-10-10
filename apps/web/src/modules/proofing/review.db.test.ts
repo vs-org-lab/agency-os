@@ -227,11 +227,7 @@ describe('proof review', () => {
         { approvalId: approval.approvalId, decision: 'changes_requested', comment: 'Terceira' },
         deps,
       );
-      const again = await requestVersionApproval(
-        manager,
-        { versionId: proof.versionTwoId },
-        deps,
-      );
+      const again = await requestVersionApproval(manager, { versionId: proof.versionTwoId }, deps);
       if (!again.ok) throw new Error('Approval was not requested');
       await decideFileApproval(
         decider,
@@ -243,6 +239,93 @@ describe('proof review', () => {
         where organization_id = ${world.organizationId} and type = 'proofing.rounds.warning'
       `;
       expect(after).toHaveLength(1);
+    });
+  });
+});
+
+describe('proof review edge cases', () => {
+  it('team replies inside an internal thread stay internal', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps } = proofingDeps(sql);
+
+      const reply = await addProofComment(
+        proofClaims(world.users.manager),
+        { versionId: proof.versionTwoId, body: 'Concordo', parentId: proof.internalCommentId },
+        deps,
+      );
+      if (!reply.ok) throw new Error('Reply was not added');
+
+      await sql`reset role`;
+      const [row] = await sql<{ internal: boolean }[]>`
+        select internal from public.proof_comments where id = ${reply.commentId}
+      `;
+      expect(row?.internal).toBe(true);
+    });
+  });
+
+  it('confirming an older upload keeps the request on a newer version', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps, storage } = proofingDeps(sql);
+      const manager = proofClaims(world.users.manager);
+
+      const slow = await addProofVersion(manager, { fileId: proof.fileId }, deps);
+      const fast = await addProofVersion(manager, { fileId: proof.fileId }, deps);
+      if (!slow.ok || !fast.ok) throw new Error('Versions were not added');
+      storage.files.set(fast.uploadUrl.replace('memory://upload/', ''), PNG_BYTES);
+      await confirmProofVersion(manager, { versionId: fast.versionId }, deps);
+      const requested = await requestVersionApproval(manager, { versionId: fast.versionId }, deps);
+      if (!requested.ok) throw new Error('Approval was not requested');
+      storage.files.set(slow.uploadUrl.replace('memory://upload/', ''), PNG_BYTES);
+      await confirmProofVersion(manager, { versionId: slow.versionId }, deps);
+
+      await sql`reset role`;
+      const [approval] = await sql<{ status: string }[]>`
+        select status::text from public.approvals where id = ${requested.approvalId}
+      `;
+      expect(approval?.status).toBe('pending');
+    });
+  });
+
+  it('a version still uploading does not block requesting the previous one', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps } = proofingDeps(sql);
+      const manager = proofClaims(world.users.manager);
+      await sql`update public.approvals set status = 'withdrawn' where id = ${proof.approvalId}`;
+
+      const stuck = await addProofVersion(manager, { fileId: proof.fileId }, deps);
+      if (!stuck.ok) throw new Error('Version was not added');
+      const requested = await requestVersionApproval(
+        manager,
+        { versionId: proof.versionTwoId },
+        deps,
+      );
+      expect(requested.ok).toBe(true);
+    });
+  });
+
+  it('finance staff neither comment on proofs nor resolve comments', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps } = proofingDeps(sql);
+      const finance = proofClaims(world.users.finance);
+
+      expect(
+        await addProofComment(finance, { versionId: proof.versionTwoId, body: 'Custo?' }, deps),
+      ).toEqual({ ok: false, rule: 'not_found' });
+      expect(
+        await resolveProofComment(
+          finance,
+          { commentId: proof.clientCommentId, resolved: true },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'not_found' });
     });
   });
 });

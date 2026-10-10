@@ -15,10 +15,13 @@ const bodySchema = z.string().trim().min(1).max(2000);
 
 type Commenter = 'team' | 'client';
 
+/** Decision 6: the founder, the client's managers and the project's freelancers comment. */
+const COMMENTING_ROLES = sql`array['founder', 'project_manager', 'freelancer']::app.org_role[]`;
+
 /**
- * Who comments on a version: the room team that reads the project (row level security), or the
- * client's decision maker or operational user through the portal view (only versions sent for
- * approval).
+ * Who comments on a version: the room team that reads the project (row level security) in a
+ * commenting role, or the client's decision maker or operational user through the portal view
+ * (only versions sent for approval).
  */
 async function commenter(
   claims: VerifiedClaims,
@@ -27,10 +30,15 @@ async function commenter(
 ): Promise<Commenter | null> {
   return deps.contexts.withUserContext(claims, async (tx) => {
     const [team] = await tx
-      .select({ id: proofVersions.id })
+      .select({ organizationId: proofVersions.organizationId })
       .from(proofVersions)
       .where(and(eq(proofVersions.id, versionId), eq(proofVersions.status, 'ready')));
-    if (team) return 'team';
+    if (team) {
+      const [role] = await tx.execute<{ allowed: boolean }>(
+        sql`select app.has_org_role(${team.organizationId}::uuid, ${COMMENTING_ROLES}) as allowed`,
+      );
+      return role?.allowed === true ? 'team' : null;
+    }
     const rows = await tx.execute<{ id: string }>(
       sql`select id from public.portal_proof_versions where id = ${versionId}::uuid`,
     );
@@ -53,8 +61,10 @@ export async function addProofComment(
   const role = await commenter(claims, input.versionId, deps);
   if (!role) return NOT_FOUND;
   const body = bodySchema.safeParse(input.body);
-  const internal = input.internal === true;
-  if (!body.success || (internal && role === 'client')) return { ok: false, rule: 'invalid_input' };
+  const requestedInternal = input.internal === true;
+  if (!body.success || (requestedInternal && role === 'client')) {
+    return { ok: false, rule: 'invalid_input' };
+  }
   if (input.parentId && !uuid.safeParse(input.parentId).success) {
     return { ok: false, rule: 'invalid_input' };
   }
@@ -67,6 +77,7 @@ export async function addProofComment(
     if (!version?.kind) return NOT_FOUND;
     const anchor = parseAnchor(version.kind, input.anchor, version.pages);
     if (anchor === 'invalid') return { ok: false as const, rule: 'invalid_input' as const };
+    let internal = requestedInternal;
     if (input.parentId) {
       const [parent] = await tx
         .select({ id: proofComments.id, internal: proofComments.internal })
@@ -81,6 +92,8 @@ export async function addProofComment(
       if (!parent || (parent.internal && role === 'client')) {
         return { ok: false as const, rule: 'invalid_input' as const };
       }
+      // RN-23: a reply inside an internal thread is internal, whatever the form sent.
+      internal = internal || parent.internal;
     }
     let number: number | null = null;
     if (!input.parentId) {
@@ -131,13 +144,13 @@ export async function resolveProofComment(
   deps: ProofingDeps,
 ): Promise<{ ok: true } | NotFound> {
   if (!uuid.safeParse(input.commentId).success) return NOT_FOUND;
-  const visible = await deps.contexts.withUserContext(claims, (tx) =>
+  const [visible] = await deps.contexts.withUserContext(claims, (tx) =>
     tx
-      .select({ id: proofComments.id })
+      .select({ versionId: proofComments.versionId })
       .from(proofComments)
       .where(eq(proofComments.id, input.commentId)),
   );
-  if (visible.length === 0) return NOT_FOUND;
+  if (!visible || (await commenter(claims, visible.versionId, deps)) !== 'team') return NOT_FOUND;
   const now = (deps.now ?? (() => new Date()))();
   await deps.contexts.withSystemContext((tx) =>
     tx

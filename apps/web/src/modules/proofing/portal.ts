@@ -107,3 +107,43 @@ export async function getClientProofVersion(
     rounds: roundsStatus(used?.total ?? 0, version.revision_limit),
   };
 }
+
+export type ClientProofSummary = {
+  versionId: string;
+  title: string;
+  number: number;
+  status: ApprovalStatus | null;
+};
+
+/**
+ * The client's proofs: the latest version of each file sent for approval, with the state of its
+ * latest request, so decided proofs stay reachable after they leave the approvals list.
+ */
+export async function getClientProofs(tx: DbTransaction): Promise<ClientProofSummary[]> {
+  const rows = await tx.execute<{
+    id: string;
+    title: string;
+    number: number;
+    status: ApprovalStatus | null;
+  }>(sql`
+    select latest.id, latest.title, latest.number, approval.status
+    from (
+      select distinct on (v.file_id) v.id, v.title, v.number, v.created_at
+      from public.portal_proof_versions v
+      order by v.file_id, v.number desc
+    ) latest
+    left join lateral (
+      select a.status from public.portal_approvals a
+      where a.subject_type = 'file_version' and a.subject_id = latest.id
+      order by a.requested_at desc, a.id desc
+      limit 1
+    ) approval on true
+    order by latest.created_at desc, latest.id
+  `);
+  return rows.map((row) => ({
+    versionId: row.id,
+    title: row.title,
+    number: row.number,
+    status: row.status,
+  }));
+}

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, count, desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type ApprovalStatus, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
@@ -29,7 +29,10 @@ export const EXTRA_ROUND_TASK = 'Orçamentar ronda extra';
 
 type Deps = ProofingDeps & { flush?: () => Promise<void> };
 
-/** Pending requests on the file's other versions are withdrawn: the client decides the latest. */
+/**
+ * Pending requests on the file's older versions are withdrawn: the client decides the latest. A
+ * slow upload confirmed after a newer version leaves that newer request alone.
+ */
 export async function withdrawOlderRequests(
   tx: DbTransaction,
   fileId: string,
@@ -37,9 +40,10 @@ export async function withdrawOlderRequests(
 ): Promise<void> {
   await tx.execute(sql`
     update public.approvals a set status = 'withdrawn'
-    from public.proof_versions v
+    from public.proof_versions v, public.proof_versions current_version
     where a.subject_type = 'file_version' and a.subject_id = v.id and a.status = 'pending'
-      and v.file_id = ${fileId}::uuid and v.id <> ${currentVersionId}::uuid
+      and current_version.id = ${currentVersionId}::uuid
+      and v.file_id = ${fileId}::uuid and v.number < current_version.number
   `);
 }
 
@@ -62,7 +66,7 @@ export async function requestVersionApproval(
     const [latest] = await tx
       .select({ id: proofVersions.id })
       .from(proofVersions)
-      .where(and(eq(proofVersions.fileId, version.fileId), ne(proofVersions.status, 'rejected')))
+      .where(and(eq(proofVersions.fileId, version.fileId), eq(proofVersions.status, 'ready')))
       .orderBy(desc(proofVersions.number))
       .limit(1);
     if (version.status !== 'ready' || latest?.id !== version.id) {

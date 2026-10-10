@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import type { DbContexts } from '@/platform/db';
 
-const { clients, profiles, proofComments, proofFiles, proofVersions } = schema;
+const { clients, profiles, projects, proofComments, proofFiles, proofVersions } = schema;
 
 export type ProofNoticeDeps = {
   contexts: Pick<DbContexts, 'withSystemContext'>;
@@ -31,16 +31,32 @@ export async function proofCommentNotice(
         authorKind: profiles.kind,
         fileTitle: proofFiles.title,
         companyName: clients.name,
+        insideInternalThread: sql<boolean>`exists (
+          select 1 from public.proof_comments parent
+          where parent.id = ${proofComments.parentId} and parent.internal
+        )`,
+        // The same rule as portal_proof_versions, without the membership check.
+        clientSees: sql<boolean>`(
+          ${proofVersions.status} = 'ready' and ${proofFiles.archivedAt} is null
+          and ${projects.status} <> 'cancelled'
+          and exists (
+            select 1 from public.approvals a
+            where a.subject_type = 'file_version' and a.subject_id = ${proofVersions.id}
+          )
+        )`,
       })
       .from(proofComments)
       .innerJoin(proofVersions, eq(proofVersions.id, proofComments.versionId))
       .innerJoin(proofFiles, eq(proofFiles.id, proofVersions.fileId))
+      .innerJoin(projects, eq(projects.id, proofVersions.projectId))
       .innerJoin(clients, eq(clients.id, proofComments.clientId))
       .leftJoin(profiles, eq(profiles.id, proofComments.authorId))
       .where(eq(proofComments.id, commentId));
-    if (!row || row.internal) return null;
+    if (!row || row.internal || row.insideInternalThread) return null;
+    const audience = row.authorKind === 'client' ? 'team' : 'client';
+    if (audience === 'client' && !row.clientSees) return null;
     return {
-      audience: row.authorKind === 'client' ? 'team' : 'client',
+      audience,
       clientId: row.clientId,
       organizationId: row.organizationId,
       params: {

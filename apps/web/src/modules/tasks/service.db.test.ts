@@ -7,6 +7,7 @@ import {
 } from '@agency-os/db/testing';
 import {
   createKickoffTasks,
+  deleteTask,
   createTask,
   listTasks,
   setTaskItem,
@@ -146,6 +147,96 @@ describe('tasks', () => {
       const freelancer = await listTaskOptions(taskClaims(world.users.freelancer), null, deps);
       expect(freelancer?.canCreate).toBe(false);
       expect(await listTaskOptions(taskClaims(world.users.decisionMakerA), null, deps)).toBeNull();
+      const studioPeople = await listTaskOptions(taskClaims(world.users.founder), null, deps);
+      const clientsOf = (userId: string) =>
+        studioPeople?.people.find((person) => person.id === userId)?.clientIds;
+      expect(clientsOf(world.users.founder)).toBeNull();
+      expect(clientsOf(world.users.freelancer)).toEqual([world.clients.a]);
+    });
+  });
+
+  it('a task stays editable after its assignee leaves the client', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const created = await createTask(
+        founder,
+        { title: 'Rever', clientId: world.clients.a, assigneeId: world.users.freelancer },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await sql`
+        delete from public.client_staff_assignments
+        where client_id = ${world.clients.a} and user_id = ${world.users.freelancer}
+      `;
+
+      expect(
+        await updateTask(
+          founder,
+          { taskId: created.taskId, title: 'Rever cores', assigneeId: world.users.freelancer },
+          deps,
+        ),
+      ).toEqual({ ok: true });
+      expect(
+        await updateTask(
+          founder,
+          { taskId: created.taskId, assigneeId: world.users.manager },
+          deps,
+        ),
+      ).toEqual({ ok: true });
+    });
+  });
+
+  it('lists whether the reader may edit each task', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      await sql`
+        insert into public.tasks (organization_id, client_id, title, assignee_id, created_by)
+        values (${world.organizationId}, ${world.clients.a}, 'Na sala A', null,
+                ${world.users.founder}),
+               (${world.organizationId}, ${world.clients.b}, 'Atribuída na sala B',
+                ${world.users.manager}, ${world.users.founder})
+      `;
+
+      const tasks = await deps.contexts.withUserContext(taskClaims(world.users.manager), (tx) =>
+        listTasks(tx, { status: 'open' }),
+      );
+
+      expect(Object.fromEntries(tasks.map((task) => [task.title, task.canEdit]))).toEqual({
+        'Na sala A': true,
+        'Atribuída na sala B': false,
+      });
+    });
+  });
+
+  it('managers delete tasks in their clients only', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const own = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Apagar', clientId: world.clients.a },
+        deps,
+      );
+      const other = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Manter', clientId: world.clients.b },
+        deps,
+      );
+      if (!own.ok || !other.ok) throw new Error('Tasks were not created');
+      const manager = taskClaims(world.users.manager);
+
+      expect(await deleteTask(manager, { taskId: other.taskId }, deps)).toEqual({
+        ok: false,
+        rule: 'not_found',
+      });
+      expect(await deleteTask(manager, { taskId: own.taskId }, deps)).toEqual({ ok: true });
+      const [row] = await sql<{ count: number }[]>`
+        select count(*)::int as count from public.tasks where id = ${own.taskId}
+      `;
+      expect(row?.count).toBe(0);
     });
   });
 });

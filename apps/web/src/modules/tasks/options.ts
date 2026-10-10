@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { schema } from '@agency-os/db';
 import { withActor } from '@/modules/access';
 import type { VerifiedClaims } from '@/platform/db';
+import { canTakeTask, type TaskPerson } from './domain/people';
 import type { TasksDeps } from './service';
 
 const { clientStaffAssignments, clients, organizationMemberships, profiles } = schema;
@@ -11,7 +12,7 @@ export type TaskOption = { id: string; name: string };
 
 export type TaskOptions = {
   clients: TaskOption[];
-  people: TaskOption[];
+  people: TaskPerson[];
   /** Founders and project managers create tasks; everyone else only completes their own. */
   canCreate: boolean;
 };
@@ -58,8 +59,8 @@ export async function listTaskOptions(
   if (scope === null) return null;
   if (clientId && !scope.clients.some((client) => client.id === clientId)) return null;
 
-  const people = await deps.contexts.withSystemContext(async (tx) => {
-    const members = await tx
+  const { members, assignments } = await deps.contexts.withSystemContext(async (tx) => ({
+    members: await tx
       .selectDistinct({
         id: profiles.id,
         name: profiles.fullName,
@@ -73,22 +74,32 @@ export async function listTaskOptions(
           eq(organizationMemberships.status, 'active'),
           inArray(organizationMemberships.role, ['founder', 'project_manager', 'freelancer']),
         ),
-      );
-    if (!clientId) return members;
-    const assigned = await tx
-      .select({ userId: clientStaffAssignments.userId })
+      ),
+    assignments: await tx
+      .select({ userId: clientStaffAssignments.userId, clientId: clientStaffAssignments.clientId })
       .from(clientStaffAssignments)
-      .where(eq(clientStaffAssignments.clientId, clientId));
-    const assignedIds = new Set(assigned.map((row) => row.userId));
-    return members.filter((member) => member.role === 'founder' || assignedIds.has(member.id));
-  });
+      .innerJoin(clients, eq(clients.id, clientStaffAssignments.clientId))
+      .where(eq(clients.organizationId, scope.organizationId)),
+  }));
 
-  const unique = new Map(people.map((person) => [person.id, person.name]));
+  const people = new Map<string, TaskPerson>();
+  for (const member of members) {
+    const current = people.get(member.id);
+    const founder = member.role === 'founder' || current?.clientIds === null;
+    people.set(member.id, {
+      id: member.id,
+      name: member.name,
+      clientIds: founder
+        ? null
+        : assignments.filter((row) => row.userId === member.id).map((row) => row.clientId),
+    });
+  }
+  const eligible = [...people.values()].filter(
+    (person) => !clientId || canTakeTask(person, clientId),
+  );
   return {
     clients: scope.clients,
-    people: [...unique]
-      .map(([id, name]) => ({ id, name }))
-      .sort((left, right) => left.name.localeCompare(right.name)),
+    people: eligible.sort((left, right) => left.name.localeCompare(right.name)),
     canCreate: scope.canCreate,
   };
 }

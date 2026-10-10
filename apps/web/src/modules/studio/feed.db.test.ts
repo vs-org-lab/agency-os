@@ -83,6 +83,31 @@ describe('studio feed', () => {
     });
   });
 
+  it('freelancers see approvals but no commercial or billing events', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const ids: Record<string, string> = {};
+      for (const type of [
+        'contracts.proposal.accepted',
+        'contracts.contract.client_signed',
+        'billing.payment.received',
+        'rooms.approval.decided',
+      ]) {
+        ids[type] = await insertEvent(sql, {
+          organizationId: world.organizationId,
+          clientId: world.clients.a,
+          type,
+          daysAgo: 1,
+        });
+      }
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const feed = await loadStudioFeed(claimsFor(world.users.freelancer), NOW, { contexts });
+
+      expect(feed?.map((entry) => entry.id)).toEqual([ids['rooms.approval.decided']]);
+    });
+  });
+
   it('feed keeps 30 days', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

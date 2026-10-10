@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
-import { withActor } from '@/modules/access';
+import { withActor, type Actor } from '@/modules/access';
+import { canReadBilling } from '@/modules/billing';
 import { canSeePipeline } from '@/modules/commercial';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { isStudioStaff } from './access';
@@ -27,6 +28,18 @@ export type FeedEntry = {
   href: string;
   occurredAt: Date;
 };
+
+/**
+ * Event types the actor may see under the security access matrix: freelancers read no proposals,
+ * contracts or payments.
+ */
+function visibleTypes(actor: Actor): FeedEventType[] {
+  return FEED_EVENT_TYPES.filter((type) => {
+    if (type === 'billing.payment.received') return canReadBilling(actor);
+    if (type.startsWith('contracts.')) return canSeePipeline(actor);
+    return true;
+  });
+}
 
 const FEED_DAYS = 30;
 const FEED_LIMIT = 100;
@@ -65,6 +78,7 @@ export async function loadStudioFeed(
       return {
         organizationId: actor.organizationId,
         pipeline: canSeePipeline(actor),
+        types: visibleTypes(actor),
         clients: new Map(readable.map((client) => [client.id, client.name])),
       };
     },
@@ -87,7 +101,7 @@ export async function loadStudioFeed(
         and(
           eq(domainEvents.organizationId, scope.organizationId),
           inArray(domainEvents.clientId, [...scope.clients.keys()]),
-          inArray(domainEvents.type, [...FEED_EVENT_TYPES]),
+          inArray(domainEvents.type, scope.types),
           gte(domainEvents.createdAt, new Date(now.getTime() - FEED_DAYS * DAY_MS)),
         ),
       )

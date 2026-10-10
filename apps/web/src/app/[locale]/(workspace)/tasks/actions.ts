@@ -5,6 +5,7 @@ import type { NewTaskInput, TaskChanges } from '@/components/tasks/task-form';
 import type { TaskActionResult } from '@/components/tasks/task-errors';
 import {
   createStudioTask,
+  deleteStudioTask,
   setStudioTaskItem,
   setStudioTaskStatus,
   updateStudioTask,
@@ -33,6 +34,10 @@ export async function createTaskAction(input: NewTaskInput) {
 
 export async function updateTaskAction(input: TaskChanges) {
   return run((session) => updateStudioTask(session, input));
+}
+
+export async function deleteTaskAction(taskId: string) {
+  return run((session) => deleteStudioTask(session, taskId));
 }
 
 export async function setTaskStatusAction(taskId: string, status: 'open' | 'done') {

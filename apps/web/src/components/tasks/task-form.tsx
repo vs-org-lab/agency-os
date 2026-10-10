@@ -7,7 +7,7 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
-import type { TaskView } from '@/modules/tasks';
+import { canTakeTask, type TaskPerson, type TaskView } from '@/modules/tasks';
 import {
   TASK_FIELD,
   taskError,
@@ -54,7 +54,7 @@ function PersonSelect({
   onChange,
 }: {
   id: string;
-  people: TaskOptionView[];
+  people: TaskPerson[];
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -84,7 +84,7 @@ export function TaskForm({
   create,
 }: {
   clients: TaskOptionView[];
-  people: TaskOptionView[];
+  people: TaskPerson[];
   fixedClientId: string | null;
   create: (input: NewTaskInput) => Promise<TaskActionResult>;
 }) {
@@ -96,6 +96,8 @@ export function TaskForm({
   const [dueOn, setDueOn] = useState('');
   const [items, setItems] = useState('');
   const { outcome, setOutcome, pending, run } = useOutcome();
+  const targetClientId = fixedClientId ?? (clientId || null);
+  const eligible = people.filter((person) => canTakeTask(person, targetClientId));
 
   const reset = () => {
     setTitle('');
@@ -145,7 +147,12 @@ export function TaskForm({
             id="task-client"
             className={TASK_FIELD}
             value={clientId}
-            onChange={(event) => setClientId(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setClientId(next);
+              const current = people.find((person) => person.id === assigneeId);
+              if (current && !canTakeTask(current, next || null)) setAssigneeId('');
+            }}
           >
             <option value="">{t('form.studio')}</option>
             {clients.map((client) => (
@@ -160,7 +167,7 @@ export function TaskForm({
         <Label htmlFor="task-assignee">{t('form.assignee')}</Label>
         <PersonSelect
           id="task-assignee"
-          people={people}
+          people={eligible}
           value={assigneeId}
           onChange={setAssigneeId}
         />
@@ -217,7 +224,7 @@ export function TaskEditForm({
   update,
 }: {
   task: TaskView;
-  people: TaskOptionView[];
+  people: TaskPerson[];
   update: (input: TaskChanges) => Promise<TaskActionResult>;
 }) {
   const t = useTranslations('tasks');
@@ -259,7 +266,7 @@ export function TaskEditForm({
         <Label htmlFor={`${prefix}-assignee`}>{t('form.assignee')}</Label>
         <PersonSelect
           id={`${prefix}-assignee`}
-          people={people}
+          people={people.filter((person) => canTakeTask(person, task.clientId))}
           value={assigneeId}
           onChange={setAssigneeId}
         />

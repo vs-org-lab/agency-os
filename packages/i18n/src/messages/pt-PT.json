@@ -1823,7 +1823,6 @@
       "assignee": "Responsável",
       "status": "Estado",
       "all": "Todos",
-      "studio": "Estúdio",
       "open": "Por fazer",
       "done": "Concluídas",
       "submit": "Filtrar"
@@ -1847,6 +1846,8 @@
     "errors": {
       "not_found": "Não tem permissão para esta ação.",
       "invalid_input": "Verifique os campos e tente de novo."
-    }
+    },
+    "delete": "Apagar",
+    "deleteLabel": "Apagar tarefa {title}"
   }
 }

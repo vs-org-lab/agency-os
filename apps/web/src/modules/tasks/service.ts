@@ -39,6 +39,8 @@ export type TaskView = {
   dueOn: string | null;
   status: TaskStatus;
   items: TaskItemView[];
+  /** Whether the reader may edit or delete the task, beyond completing it. */
+  canEdit: boolean;
 };
 
 const title = z.string().trim().min(1).max(200);
@@ -193,6 +195,7 @@ export async function updateTask(
   return deps.contexts.withSystemContext(async (tx) => {
     if (
       patch.assigneeId &&
+      patch.assigneeId !== task.assigneeId &&
       !(await validAssignee(tx, actor.organizationId, task.clientId, patch.assigneeId))
     ) {
       return { ok: false as const, rule: 'invalid_input' as const };
@@ -295,9 +298,16 @@ export async function listTasks(
     assignee_name: string | null;
     due_on: string | null;
     status: TaskStatus;
+    can_edit: boolean;
   }>(sql`
     select t.id, t.title, t.notes, t.client_id, c.name as client_name, t.project_id, t.assignee_id,
-           p.full_name as assignee_name, t.due_on::text as due_on, t.status::text as status
+           p.full_name as assignee_name, t.due_on::text as due_on, t.status::text as status,
+           case
+             when t.client_id is null then app.has_org_role(
+               t.organization_id, array['founder', 'project_manager']::app.org_role[]
+             )
+             else app.can_write_rooms(t.organization_id, t.client_id)
+           end as can_edit
     from public.tasks t
     left join public.clients c on c.id = t.client_id
     left join public.profiles p on p.id = t.assignee_id
@@ -325,6 +335,7 @@ export async function listTasks(
     assigneeName: row.assignee_name,
     dueOn: row.due_on,
     status: row.status,
+    canEdit: row.can_edit,
     items: items
       .filter((item) => item.taskId === row.id)
       .map((item) => ({

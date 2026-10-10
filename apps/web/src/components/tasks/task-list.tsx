@@ -3,16 +3,12 @@
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
+import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { FormMessage } from '@/components/forms/form-message';
-import { taskGroup, type TaskGroup, type TaskView } from '@/modules/tasks';
-import {
-  taskError,
-  type TaskActionResult,
-  type TaskError,
-  type TaskOptionView,
-} from './task-errors';
+import { taskGroup, type TaskGroup, type TaskPerson, type TaskView } from '@/modules/tasks';
+import { taskError, type TaskActionResult, type TaskError } from './task-errors';
 import { TaskEditForm, type TaskChanges } from './task-form';
 
 type ListGroup = TaskGroup | 'done';
@@ -26,9 +22,11 @@ type TaskListProps = {
   showClient: boolean;
   setStatus: (taskId: string, status: 'open' | 'done') => Promise<TaskActionResult>;
   setItem: (itemId: string, done: boolean) => Promise<TaskActionResult>;
+  /** Editing and deleting, shown only on tasks the reader may edit (`TaskView.canEdit`). */
   edit?: {
-    people: TaskOptionView[];
+    people: TaskPerson[];
     update: (input: TaskChanges) => Promise<TaskActionResult>;
+    remove: (taskId: string) => Promise<TaskActionResult>;
   };
 };
 
@@ -127,11 +125,23 @@ function TaskRow({
         </ul>
       ) : null}
       {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
-      {edit && !done ? (
+      {edit && task.canEdit && !done ? (
         <details className="pl-7">
           <summary className="cursor-pointer text-body-sm text-link">{t('edit')}</summary>
-          <div className="pt-3">
+          <div className="flex flex-col gap-3 pt-3">
             <TaskEditForm task={task} people={edit.people} update={edit.update} />
+            <div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={pending}
+                aria-label={t('deleteLabel', { title: task.title })}
+                onClick={() => run(() => edit.remove(task.id))}
+              >
+                {t('delete')}
+              </Button>
+            </div>
           </div>
         </details>
       ) : null}

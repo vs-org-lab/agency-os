@@ -211,6 +211,13 @@
       "when": 1791582983767,
       "tag": "20261009215623_tasks_access",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1791594447661,
+      "tag": "20261010010727_tasks_assignee_membership",
+      "breakpoints": true
     }
   ]
 }

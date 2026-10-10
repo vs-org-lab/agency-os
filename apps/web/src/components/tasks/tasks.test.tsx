@@ -38,13 +38,65 @@ function task(overrides: Partial<TaskView>): TaskView {
     dueOn: null,
     status: 'open',
     items: [],
+    canEdit: true,
     ...overrides,
   };
 }
 
 const OK = async () => ({ ok: true as const });
 
+const FOUNDER = {
+  id: '3e8b0c43-4f4d-4d1b-8d88-5c9d3e4f5061',
+  name: 'Ana Fundadora',
+  clientIds: null,
+};
+const FREELANCER = { id: PERSON, name: 'Rui Freelancer', clientIds: [CLIENT_A] };
+
 describe('tasks', () => {
+  it('offers edit and delete only on tasks the reader may edit', async () => {
+    const remove = vi.fn(OK);
+    const editable = task({ title: 'Minha sala' });
+    renderWithIntl(
+      <TaskList
+        tasks={[editable, task({ title: 'Só concluir', canEdit: false })]}
+        today={TODAY}
+        showClient
+        setStatus={OK}
+        setItem={OK}
+        edit={{ people: [FOUNDER], update: OK, remove }}
+      />,
+    );
+
+    expect(screen.getAllByText('Editar')).toHaveLength(1);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Apagar tarefa Minha sala' }));
+    });
+    expect(remove).toHaveBeenCalledWith(editable.id);
+  });
+
+  it('task form offers only people who may take the chosen client task', () => {
+    renderWithIntl(
+      <TaskForm
+        clients={[
+          { id: CLIENT_A, name: 'Atlas Lda' },
+          { id: CLIENT_B, name: 'Boreal SA' },
+        ]}
+        people={[FOUNDER, FREELANCER]}
+        fixedClientId={null}
+        create={OK}
+      />,
+    );
+    const assigneeNames = () =>
+      Array.from((screen.getByLabelText('Responsável') as HTMLSelectElement).options).map(
+        (option) => option.text,
+      );
+
+    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: CLIENT_B } });
+    expect(assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora']);
+    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: CLIENT_A } });
+    expect(assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora', 'Rui Freelancer']);
+  });
+
   it('groups tasks by today, this week and later', () => {
     renderWithIntl(
       <TaskList
@@ -135,7 +187,7 @@ describe('tasks', () => {
     renderWithIntl(
       <TaskForm
         clients={[{ id: CLIENT_A, name: 'Atlas Lda' }]}
-        people={[{ id: PERSON, name: 'Rita Gestora' }]}
+        people={[{ id: PERSON, name: 'Rita Gestora', clientIds: null }]}
         fixedClientId={null}
         create={create}
       />,

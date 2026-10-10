@@ -9,6 +9,7 @@ import { parseTaskFilter, taskToday } from '@/modules/tasks';
 import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
 import {
   createTaskAction,
+  deleteTaskAction,
   setTaskItemAction,
   setTaskStatusAction,
   updateTaskAction,
@@ -72,7 +73,7 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
         showClient
         setStatus={setTaskStatusAction}
         setItem={setTaskItemAction}
-        edit={options.canCreate ? { people: options.people, update: updateTaskAction } : undefined}
+        edit={{ people: options.people, update: updateTaskAction, remove: deleteTaskAction }}
       />
     </div>
   );

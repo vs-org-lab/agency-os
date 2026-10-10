@@ -99,4 +99,22 @@ describe('tasks access', () => {
       expect(updated.count).toBe(0);
     });
   });
+
+  it('assignees without mfa or an active membership read nothing', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const tasks = await createTaskFixture(sql, world);
+      await asUser(sql, world.users.freelancer, { aal: 'aal1' });
+      expect(await visibleIds(sql, 'tasks')).toEqual([]);
+
+      await asSystem(sql);
+      await sql`
+        update public.organization_memberships set status = 'revoked'
+        where user_id = ${world.users.freelancer} and organization_id = ${world.organizationId}
+      `;
+      await asUser(sql, world.users.freelancer);
+      expect(await visibleIds(sql, 'tasks')).not.toContain(tasks.freelancerTaskId);
+      expect(await visibleIds(sql, 'tasks')).toEqual([]);
+    });
+  });
 });

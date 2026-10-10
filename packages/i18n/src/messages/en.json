@@ -1823,7 +1823,6 @@
       "assignee": "Assignee",
       "status": "Status",
       "all": "All",
-      "studio": "Studio",
       "open": "To do",
       "done": "Done",
       "submit": "Filter"
@@ -1847,6 +1846,8 @@
     "errors": {
       "not_found": "You are not allowed to do this.",
       "invalid_input": "Check the fields and try again."
-    }
+    },
+    "delete": "Delete",
+    "deleteLabel": "Delete task {title}"
   }
 }

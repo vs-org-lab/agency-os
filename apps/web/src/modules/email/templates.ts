@@ -25,6 +25,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'lead.approval_reminder',
   'lead.proof_comment',
   'lead.rounds_warning',
+  'lead.testimonial_request',
   'founder.application_received',
   'founder.queue_b_pending',
   'founder.call_outcome_missing',
@@ -45,6 +46,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.proof_comment',
   'founder.rounds_warning',
   'founder.extra_round',
+  'founder.testimonial_received',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -76,6 +78,7 @@ export type EmailParams = {
   'lead.approval_reminder': PortalNotice;
   'lead.proof_comment': PortalNotice;
   'lead.rounds_warning': PortalNotice;
+  'lead.testimonial_request': PortalNotice;
   'founder.application_received': {
     companyName: string;
     contactName: string;
@@ -99,18 +102,24 @@ export type EmailParams = {
     companyName: string;
     phaseName: string;
     decision: 'approved' | 'changes_requested';
-    subject: 'phase' | 'file';
+    subject: 'phase' | 'file' | 'delivery';
     roomUrl: string;
   };
   'founder.approval_overdue': {
     companyName: string;
     phaseName: string;
-    subject: 'phase' | 'file';
+    subject: 'phase' | 'file' | 'delivery';
     roomUrl: string;
   };
   'founder.proof_comment': { companyName: string; fileTitle: string; roomUrl: string };
   'founder.rounds_warning': { companyName: string; used: number; limit: number; roomUrl: string };
   'founder.extra_round': { companyName: string; used: number; limit: number; roomUrl: string };
+  'founder.testimonial_received': {
+    companyName: string;
+    authorName: string;
+    body: string;
+    roomUrl: string;
+  };
   'team.invitation': {
     fullName: string;
     agencyName: string;
@@ -158,6 +167,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'lead.approval_reminder': 'portalUrl',
   'lead.proof_comment': 'portalUrl',
   'lead.rounds_warning': 'portalUrl',
+  'lead.testimonial_request': 'portalUrl',
   'founder.application_received': 'dealUrl',
   'founder.queue_b_pending': 'queueUrl',
   'founder.call_outcome_missing': 'dealUrl',
@@ -178,6 +188,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.proof_comment': 'roomUrl',
   'founder.rounds_warning': 'roomUrl',
   'founder.extra_round': 'roomUrl',
+  'founder.testimonial_received': 'roomUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

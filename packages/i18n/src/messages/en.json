@@ -1881,6 +1881,28 @@
       "pending": "Waiting for your decision since {date}",
       "approved": "You approved on {date}",
       "changes_requested": "You requested changes on {date}"
+    },
+    "delivery": {
+      "title": "Final delivery",
+      "ready": "Every phase is done. Ask the client for the final approval to deliver the project.",
+      "waiting": "Waiting for the client's final approval.",
+      "changesRequested": "The client asked for changes on the final delivery:",
+      "request": "Request final approval",
+      "withdraw": "Withdraw the request",
+      "delivered": "Project delivered on {date}.",
+      "done": {
+        "requested": "Final approval request sent to the client.",
+        "withdrawn": "Request withdrawn."
+      },
+      "errors": {
+        "not_found": "Not found or not allowed.",
+        "invalid_state": "The status has changed. Refresh the page.",
+        "invalid_input": "Check the fields.",
+        "previous_phase_open": "The previous phase is not done (or approved) yet.",
+        "steps_open": "There are still steps to do in this phase.",
+        "approval_required": "This phase only ends with the client approval.",
+        "deal_has_project": "This deal already has a project."
+      }
     }
   },
   "tasks": {

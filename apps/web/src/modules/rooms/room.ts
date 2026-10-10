@@ -126,6 +126,7 @@ async function buildProject(
       })),
   }));
 
+  const finalApproval = approvalRows.find((approval) => approval.subjectType === 'project');
   const project: ProjectView = {
     id: selected.id,
     name: selected.name,
@@ -133,6 +134,10 @@ async function buildProject(
     startsOn: selected.startsOn,
     endsOn: selected.endsOn,
     dealId: selected.dealId,
+    deliveredAt: isoOrNull(selected.deliveredAt),
+    finalApproval: finalApproval
+      ? { id: finalApproval.id, status: finalApproval.status, comment: finalApproval.comment }
+      : null,
     phases,
     updates: updateRows.map((update) => ({
       id: update.id,

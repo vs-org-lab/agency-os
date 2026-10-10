@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ProjectView } from '@/modules/rooms';
+import { FinalApprovalCard } from './final-approval';
 import { PlanView } from './plan-view';
 import { ProcessBoard, type ProcessActions } from './process-board';
 import { UpdateComposer, type PublishUpdate } from './update-composer';
@@ -21,6 +22,8 @@ const PROJECT: ProjectView = {
   startsOn: '2026-10-12',
   endsOn: '2026-11-20',
   dealId: null,
+  finalApproval: null,
+  deliveredAt: null,
   approvals: [],
   updates: [],
   phases: [
@@ -132,6 +135,29 @@ describe('ProcessBoard', () => {
     expect(screen.queryByLabelText('Responsável por Questionário de descoberta')).toBeNull();
   });
 
+  it('freelancers get step and update controls on their project only', () => {
+    withIntl(
+      <ProcessBoard
+        project={PROJECT}
+        people={[]}
+        writable={false}
+        editable
+        currentUserId="freelancer-2"
+        actions={actionsMock()}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Pedir aprovação' })).toBeNull();
+    expect(
+      (
+        screen.getByRole('button', {
+          name: 'Marcar como feito: Questionário de descoberta',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(false);
+    expect(screen.getByLabelText('Responsável por Questionário de descoberta')).toBeTruthy();
+  });
+
   it('selects the phase in progress by default and lists its steps', () => {
     withIntl(
       <ProcessBoard
@@ -228,5 +254,79 @@ describe('UpdateComposer', () => {
     });
     expect((screen.getByLabelText('Texto') as HTMLTextAreaElement).value).toBe('Mapa pronto');
     expect(screen.getByRole('alert').textContent).toBe('Confirme os campos.');
+  });
+});
+
+describe('FinalApprovalCard', () => {
+  const done = PROJECT.phases.map((phase) => ({ ...phase, status: 'done' as const }));
+
+  it('the plan offers the final approval when every phase is done', async () => {
+    const request = vi.fn(async () => ({ ok: true }) as const);
+    withIntl(
+      <FinalApprovalCard
+        project={{ ...PROJECT, status: 'completed', phases: done }}
+        writable
+        request={request}
+        withdraw={vi.fn(async () => ({ ok: true }) as const)}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Pedir aprovação final' }));
+    });
+    expect(request).toHaveBeenCalledWith(PROJECT.id);
+    expect(screen.getByText('Pedido de aprovação final enviado ao cliente.')).toBeTruthy();
+  });
+
+  it('shows the pending request and the changes the client asked for', () => {
+    withIntl(
+      <FinalApprovalCard
+        project={{
+          ...PROJECT,
+          status: 'completed',
+          phases: done,
+          finalApproval: { id: 'final-1', status: 'changes_requested', comment: 'Falta o rodapé' },
+        }}
+        writable
+        request={vi.fn(async () => ({ ok: true }) as const)}
+        withdraw={vi.fn(async () => ({ ok: true }) as const)}
+      />,
+    );
+
+    expect(screen.getByText('Falta o rodapé')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Pedir aprovação final' })).toBeTruthy();
+  });
+
+  it('a delivered project shows its date', () => {
+    withIntl(
+      <FinalApprovalCard
+        project={{
+          ...PROJECT,
+          status: 'delivered',
+          phases: done,
+          deliveredAt: '2026-10-12T09:00:00.000Z',
+          finalApproval: { id: 'final-1', status: 'approved', comment: null },
+        }}
+        writable
+        request={vi.fn(async () => ({ ok: true }) as const)}
+        withdraw={vi.fn(async () => ({ ok: true }) as const)}
+      />,
+    );
+
+    expect(screen.getByText('Projeto entregue a 12 de outubro de 2026.')).toBeTruthy();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('shows nothing while phases are open', () => {
+    withIntl(
+      <FinalApprovalCard
+        project={PROJECT}
+        writable
+        request={vi.fn(async () => ({ ok: true }) as const)}
+        withdraw={vi.fn(async () => ({ ok: true }) as const)}
+      />,
+    );
+
+    expect(screen.queryByRole('region', { name: 'Entrega final' })).toBeNull();
   });
 });

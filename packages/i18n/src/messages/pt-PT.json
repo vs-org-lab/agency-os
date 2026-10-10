@@ -1881,6 +1881,28 @@
       "pending": "À espera da sua decisão desde {date}",
       "approved": "Aprovou a {date}",
       "changes_requested": "Pediu alterações a {date}"
+    },
+    "delivery": {
+      "title": "Entrega final",
+      "ready": "Todas as fases estão feitas. Peça ao cliente a aprovação final para entregar o projeto.",
+      "waiting": "À espera da aprovação final do cliente.",
+      "changesRequested": "O cliente pediu alterações na entrega final:",
+      "request": "Pedir aprovação final",
+      "withdraw": "Retirar o pedido",
+      "delivered": "Projeto entregue a {date}.",
+      "done": {
+        "requested": "Pedido de aprovação final enviado ao cliente.",
+        "withdrawn": "Pedido retirado."
+      },
+      "errors": {
+        "not_found": "Não encontrado ou sem permissão.",
+        "invalid_state": "O estado mudou entretanto. Atualize a página.",
+        "invalid_input": "Confirme os campos.",
+        "previous_phase_open": "A fase anterior ainda não está concluída (ou aprovada).",
+        "steps_open": "Ainda há passos por fazer nesta fase.",
+        "approval_required": "Esta fase só termina com a aprovação do cliente.",
+        "deal_has_project": "Este negócio já tem um projeto."
+      }
     }
   },
   "tasks": {

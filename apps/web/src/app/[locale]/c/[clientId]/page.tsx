@@ -10,6 +10,7 @@ import {
   completePhaseAction,
   createProjectAction,
   requestApprovalAction,
+  requestFinalApprovalAction,
   setStepStatusAction,
   startPhaseAction,
   updatePhaseAction,
@@ -24,6 +25,7 @@ import {
   startProofVersionAction,
   withdrawProofApprovalAction,
 } from './proof-actions';
+import { FinalApprovalCard } from './room/final-approval';
 import { NewProjectForm } from './room/new-project-form';
 import { PlanView } from './room/plan-view';
 import { ProcessBoard } from './room/process-board';
@@ -46,7 +48,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   const { project: projectId } = await searchParams;
   const data = await loadStaffRoom(session, { clientId, projectId });
   if (!data) notFound();
-  const { room, writable } = data;
+  const { room, writable, editable } = data;
   const templates = writable
     ? await loadProcessTemplates({
         claims: session.claims,
@@ -85,6 +87,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
                 project={room.project}
                 people={room.people}
                 writable={writable}
+                editable={editable}
                 currentUserId={session.claims.sub}
                 actions={{
                   startPhase: startPhaseAction,
@@ -96,6 +99,14 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
                   updateStep: updateStepAction,
                 }}
               />
+              <div className="pt-4">
+                <FinalApprovalCard
+                  project={room.project}
+                  writable={writable}
+                  request={requestFinalApprovalAction}
+                  withdraw={withdrawApprovalAction}
+                />
+              </div>
             </TabsContent>
             <TabsContent value="plan" className="pt-4">
               <PlanView phases={room.project.phases} startsOn={room.project.startsOn} />

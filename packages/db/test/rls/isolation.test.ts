@@ -59,6 +59,7 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'proof_files', clientColumn: 'client_id' },
   { table: 'proof_versions', clientColumn: 'client_id' },
   { table: 'proof_comments', clientColumn: 'client_id' },
+  { table: 'testimonials', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -93,6 +94,12 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
       insert into public.proof_comments (organization_id, client_id, project_id, version_id, body)
       values (${world.organizationId}, ${clientId}, ${records.projectId}, ${version?.id ?? ''},
               'Nota')
+    `;
+    await sql`
+      insert into public.testimonials (organization_id, client_id, project_id, body, author_name,
+                                       author_role)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, 'Excelente', 'Cliente',
+              'Diretora')
     `;
   }
   await createTaskFixture(sql, world);

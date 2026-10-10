@@ -195,6 +195,12 @@ export const billingMilestoneStatusEnum = appSchema.enum('billing_milestone_stat
   'paid',
 ]);
 
+export const milestoneTriggerEnum = appSchema.enum('milestone_trigger', [
+  'signature',
+  'phase_approval',
+  'delivery',
+]);
+
 export const paymentRequestStatusEnum = appSchema.enum('payment_request_status', [
   'sent',
   'paid',
@@ -216,6 +222,7 @@ export const projectStatusEnum = appSchema.enum('project_status', [
   'active',
   'paused',
   'completed',
+  'delivered',
   'cancelled',
 ]);
 
@@ -236,9 +243,14 @@ export const updateKindEnum = appSchema.enum('update_kind', [
   'step_shared',
   'phase_done',
   'approval_decided',
+  'project_delivered',
 ]);
 
-export const approvalSubjectEnum = appSchema.enum('approval_subject', ['phase', 'file_version']);
+export const approvalSubjectEnum = appSchema.enum('approval_subject', [
+  'phase',
+  'file_version',
+  'project',
+]);
 
 export const approvalStatusEnum = appSchema.enum('approval_status', [
   'pending',
@@ -294,6 +306,7 @@ export type ProposalStatus = (typeof proposalStatusEnum.enumValues)[number];
 export type ContractStatus = (typeof contractStatusEnum.enumValues)[number];
 export type SignatureParty = (typeof signaturePartyEnum.enumValues)[number];
 export type BillingMilestoneStatus = (typeof billingMilestoneStatusEnum.enumValues)[number];
+export type MilestoneTrigger = (typeof milestoneTriggerEnum.enumValues)[number];
 export type PaymentRequestStatus = (typeof paymentRequestStatusEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];

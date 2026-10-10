@@ -24,12 +24,14 @@ import {
   currencyEnum,
   invoiceIssuerEnum,
   localeEnum,
+  milestoneTriggerEnum,
   paymentMethodEnum,
   paymentRequestStatusEnum,
   paymentStatusEnum,
 } from './enums';
 import { organizations } from './organizations';
 import { profiles } from './profiles';
+import { projectPhases } from './rooms';
 
 /** The issuing entity as it stood when the payment request was sent. */
 export type PaymentRequestIssuerDetails = {
@@ -80,6 +82,8 @@ export const billingMilestones = pgTable(
     amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
     currency: currencyEnum('currency').notNull(),
     status: billingMilestoneStatusEnum('status').notNull().default('pending'),
+    trigger: milestoneTriggerEnum('trigger').notNull(),
+    phaseId: uuid('phase_id'),
     ...timestamps,
   },
   (table) => [
@@ -98,11 +102,20 @@ export const billingMilestones = pgTable(
       foreignColumns: [contracts.id, contracts.clientId],
       name: 'billing_milestones_contract_client_fk',
     }).onDelete('restrict'),
+    foreignKey({
+      columns: [table.phaseId, table.clientId],
+      foreignColumns: [projectPhases.id, projectPhases.clientId],
+      name: 'billing_milestones_phase_client_fk',
+    }).onDelete('restrict'),
     unique('billing_milestones_position_key').on(table.contractId, table.position),
     unique('billing_milestones_id_client_id_key').on(table.id, table.clientId),
     index('billing_milestones_deal_idx').on(table.dealId, table.position),
     check('billing_milestones_amount_positive', sql`${table.amount} > 0`),
     check('billing_milestones_percent_range', sql`${table.percent} between 1 and 100`),
+    check(
+      'billing_milestones_phase_only_on_phase_approval',
+      sql`${table.phaseId} is null or ${table.trigger} = 'phase_approval'`,
+    ),
   ],
 ).enableRLS();
 

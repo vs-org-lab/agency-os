@@ -845,6 +845,12 @@
         "heading": "Perto do limite de rondas",
         "body": "Olá {firstName}, o projeto está perto do limite de rondas de revisão previsto. Pedidos de alterações acima do limite são orçamentados à parte.",
         "action": "Abrir o portal"
+      },
+      "testimonial_request": {
+        "subject": "Como correu o projeto com a {agencyName}?",
+        "heading": "Conte-nos como correu",
+        "body": "Olá {firstName}, o projeto com a {agencyName} está entregue. Obrigado pela confiança.\n\nSe quiser deixar um testemunho curto sobre o trabalho, demora um minuto. Só o publicamos com a sua autorização.",
+        "action": "Deixar testemunho"
       }
     },
     "founder": {
@@ -921,15 +927,15 @@
         "action": "Abrir o negócio"
       },
       "approval_decided": {
-        "subject": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
-        "heading": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
-        "body": "{decision, select, approved {{subject, select, file {O ficheiro ficou aprovado.} other {A fase ficou concluída e o projeto pode seguir para a próxima.}}} other {{subject, select, file {O pedido de alterações e os comentários estão na sala.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}}}",
+        "subject": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} delivery {a entrega final de} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} delivery {na entrega final de} other {na fase}} {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} delivery {a entrega final de} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} delivery {na entrega final de} other {na fase}} {phaseName}}}",
+        "body": "{decision, select, approved {{subject, select, file {O ficheiro ficou aprovado.} delivery {O projeto ficou entregue. O OS emite a fatura final, pede o testemunho e cria as tarefas da caixa de celebração e da proposta de ativação.} other {A fase ficou concluída e o projeto pode seguir para a próxima.}}} other {{subject, select, file {O pedido de alterações e os comentários estão na sala.} delivery {O comentário do cliente está na sala e a tarefa \"Rever entrega final\" ficou com o gestor do cliente.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}}}",
         "action": "Abrir a sala"
       },
       "approval_overdue": {
         "subject": "Aprovação de {companyName} sem resposta há 5 dias",
         "heading": "Aprovação de {companyName} sem resposta há 5 dias",
-        "body": "{subject, select, file {O ficheiro} other {A fase}} {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "body": "{subject, select, file {O ficheiro} delivery {A entrega final de} other {A fase}} {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
         "action": "Abrir a sala"
       },
       "proof_comment": {
@@ -948,6 +954,12 @@
         "subject": "Ronda extra em {companyName}",
         "heading": "Ronda extra em {companyName}",
         "body": "O cliente pediu alterações acima do limite de {limit} rondas ({used} usadas). Ficou criada a tarefa para orçamentar a ronda extra.",
+        "action": "Abrir a sala"
+      },
+      "testimonial_received": {
+        "subject": "Testemunho de {companyName}",
+        "heading": "Novo testemunho de {companyName}",
+        "body": "{authorName} escreveu:\n\n{body}",
         "action": "Abrir a sala"
       }
     },
@@ -1744,6 +1756,7 @@
       "active": "Em curso",
       "paused": "Em pausa",
       "completed": "Concluído",
+      "delivered": "Entregue",
       "cancelled": "Cancelado"
     },
     "phaseStatus": {
@@ -1819,7 +1832,8 @@
         "project_started": "Projeto iniciado: {name}",
         "step_shared": "Novo passo: {name}",
         "phase_done": "Fase concluída: {name}",
-        "approval_decided": "Pedido de alterações na fase {name}"
+        "approval_decided": "Pedido de alterações na fase {name}",
+        "project_delivered": "Projeto entregue"
       }
     },
     "approval": {

@@ -15,7 +15,7 @@ import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { canWriteBilling } from './access';
 import { REAUTHENTICATION_REQUIRED, recentlyVerified, writesBillingRow } from './authorize';
 import { formatRequestNumber } from './domain/numbering';
-import { buildMilestones, dueDateFrom, lisbonDate } from './domain/plan';
+import { buildMilestones, dueDateFrom, lisbonDate, milestoneTriggers } from './domain/plan';
 import { buildPaymentRequestPdf } from './pdf';
 import { requestPdfPath, type BillingStorage } from './storage';
 
@@ -235,11 +235,13 @@ export async function createPlanForContract(
 
     const drafts = buildMilestones(option.amount, option.plan);
     if (drafts.length === 0) return skipped;
+    const triggers = milestoneTriggers(drafts.length);
     const milestones = await tx
       .insert(billingMilestones)
       .values(
-        drafts.map((draft) => ({
+        drafts.map((draft, index) => ({
           ...draft,
+          trigger: triggers[index] ?? 'phase_approval',
           organizationId: contract.organizationId,
           clientId: contract.clientId,
           dealId: contract.dealId,

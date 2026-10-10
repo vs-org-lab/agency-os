@@ -845,6 +845,12 @@
         "heading": "Close to the round limit",
         "body": "Hello {firstName}, the project is close to its planned revision rounds. Change requests beyond the limit are quoted separately.",
         "action": "Open the portal"
+      },
+      "testimonial_request": {
+        "subject": "How did the project with {agencyName} go?",
+        "heading": "Tell us how it went",
+        "body": "Hello {firstName}, the project with {agencyName} is delivered. Thank you for your trust.\n\nIf you would like to leave a short testimonial about the work, it takes a minute. We only publish it with your permission.",
+        "action": "Leave a testimonial"
       }
     },
     "founder": {
@@ -921,15 +927,15 @@
         "action": "Open the deal"
       },
       "approval_decided": {
-        "subject": "{decision, select, approved {{companyName} approved the {subject, select, file {file} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} other {phase}} {phaseName}}}",
-        "heading": "{decision, select, approved {{companyName} approved the {subject, select, file {file} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} other {phase}} {phaseName}}}",
-        "body": "{decision, select, approved {{subject, select, file {The file is approved.} other {The phase is done and the project can move to the next one.}}} other {{subject, select, file {The change request and the comments are in the room.} other {The phase is back in progress. The client comment is in the room.}}}}",
+        "subject": "{decision, select, approved {{companyName} approved the {subject, select, file {file} delivery {final delivery of} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} delivery {final delivery of} other {phase}} {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} approved the {subject, select, file {file} delivery {final delivery of} other {phase}} {phaseName}} other {{companyName} requested changes on the {subject, select, file {file} delivery {final delivery of} other {phase}} {phaseName}}}",
+        "body": "{decision, select, approved {{subject, select, file {The file is approved.} delivery {The project is delivered. The OS issues the final invoice, asks for a testimonial and creates the celebration box and activation proposal tasks.} other {The phase is done and the project can move to the next one.}}} other {{subject, select, file {The change request and the comments are in the room.} delivery {The client comment is in the room and the \"Rever entrega final\" task went to the client manager.} other {The phase is back in progress. The client comment is in the room.}}}}",
         "action": "Open the room"
       },
       "approval_overdue": {
         "subject": "{companyName} approval unanswered for 5 days",
         "heading": "{companyName} approval unanswered for 5 days",
-        "body": "The {subject, select, file {file} other {phase}} {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
+        "body": "The {subject, select, file {file} delivery {final delivery of} other {phase}} {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
         "action": "Open the room"
       },
       "proof_comment": {
@@ -948,6 +954,12 @@
         "subject": "Extra round at {companyName}",
         "heading": "Extra round at {companyName}",
         "body": "The client requested changes beyond the limit of {limit} rounds ({used} used). A task to quote the extra round was created.",
+        "action": "Open the room"
+      },
+      "testimonial_received": {
+        "subject": "Testimonial from {companyName}",
+        "heading": "New testimonial from {companyName}",
+        "body": "{authorName} wrote:\n\n{body}",
         "action": "Open the room"
       }
     },
@@ -1744,6 +1756,7 @@
       "active": "In progress",
       "paused": "Paused",
       "completed": "Completed",
+      "delivered": "Delivered",
       "cancelled": "Cancelled"
     },
     "phaseStatus": {
@@ -1819,7 +1832,8 @@
         "project_started": "Project started: {name}",
         "step_shared": "New step: {name}",
         "phase_done": "Phase completed: {name}",
-        "approval_decided": "Changes requested on phase {name}"
+        "approval_decided": "Changes requested on phase {name}",
+        "project_delivered": "Project delivered"
       }
     },
     "approval": {

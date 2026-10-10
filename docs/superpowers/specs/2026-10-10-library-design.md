@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                                                 |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-10                                                                                                                                                            |
-| Estado                  | Aprovado (aprovação permanente do fundador)                                                                                                                           |
+| Estado                  | Implementado (2026-10-11)                                                                                                                                             |
 | Vaga                    | 2 (2A → 2B → 2C → 2D.1 → 2D.2 → **2E.1 Biblioteca** → 2E.2 Documentos da sala → 2F Brand Hub → 2G Agenda)                                                             |
 | Módulos                 | M09 (RF-080, RF-081, RF-083), M06 (RF-055, ficheiros nas atualizações)                                                                                                |
 | Documentação de produto | `01` (RF-055, RF-080 a RF-083), `02` (C-02, C-06, P-04, P-05), `03` (US-16), `06` (entidade Biblioteca), `08` (matriz, SEC-30, SEC-31)                                |

@@ -6,6 +6,8 @@ import { Button } from '@agency-os/ui/components/button';
 import { pointerPercent } from './anchor-format';
 import { Pins, type Pin } from './pins';
 
+type RenderTask = { promise: Promise<void>; cancel(): void };
+
 type PdfDocument = {
   numPages: number;
   getPage(page: number): Promise<{
@@ -13,8 +15,9 @@ type PdfDocument = {
     render(options: {
       canvasContext: CanvasRenderingContext2D;
       viewport: { width: number; height: number };
-    }): { promise: Promise<void> };
+    }): RenderTask;
   }>;
+  destroy(): Promise<void> | void;
 };
 
 /** A PDF proof drawn page by page with pdf.js; clicking a page picks a point on that page. */
@@ -48,25 +51,29 @@ export function PdfCanvas({
 
   useEffect(() => {
     let cancelled = false;
+    let loaded: PdfDocument | null = null;
     (async () => {
       const pdfjs = await import('pdfjs-dist');
       pdfjs.GlobalWorkerOptions.workerSrc = new URL(
         'pdfjs-dist/build/pdf.worker.min.mjs',
         import.meta.url,
       ).toString();
-      const loaded = (await pdfjs.getDocument({ url: src }).promise) as unknown as PdfDocument;
-      if (!cancelled) setDocument(loaded);
+      loaded = (await pdfjs.getDocument({ url: src }).promise) as unknown as PdfDocument;
+      if (cancelled) void loaded.destroy();
+      else setDocument(loaded);
     })().catch(() => {
       if (!cancelled) setState('failed');
     });
     return () => {
       cancelled = true;
+      if (loaded) void loaded.destroy();
     };
   }, [src]);
 
   useEffect(() => {
     if (!document || !canvas.current) return;
     let cancelled = false;
+    let task: RenderTask | null = null;
     (async () => {
       const pdfPage = await document.getPage(page);
       const viewport = pdfPage.getViewport({ scale: 1.5 });
@@ -75,13 +82,16 @@ export function PdfCanvas({
       if (!element || !context || cancelled) return;
       element.width = viewport.width;
       element.height = viewport.height;
-      await pdfPage.render({ canvasContext: context, viewport }).promise;
+      task = pdfPage.render({ canvasContext: context, viewport });
+      await task.promise;
       if (!cancelled) setState('ready');
     })().catch(() => {
       if (!cancelled) setState('failed');
     });
+    // pdf.js refuses a second render on a canvas that is still drawing; cancel it first.
     return () => {
       cancelled = true;
+      task?.cancel();
     };
   }, [document, page]);
 

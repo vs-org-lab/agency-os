@@ -68,7 +68,7 @@ describe('buildNavigation', () => {
     expect(navigation.items.map((item) => item.href)).toEqual(['/portal', '/portal/invoices']);
   });
 
-  it('portal level links approvals and updates for room members', () => {
+  it('portal level links approvals, proofs and updates for room members', () => {
     const navigation = buildNavigation({
       level: 'portal',
       permissions: { invoices: false, room: true, team: false },
@@ -77,6 +77,7 @@ describe('buildNavigation', () => {
     expect(navigation.items.map((item) => item.href)).toEqual([
       '/portal',
       '/portal/approvals',
+      '/portal/proofs',
       '/portal/updates',
     ]);
   });

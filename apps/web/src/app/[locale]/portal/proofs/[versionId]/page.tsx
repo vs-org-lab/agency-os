@@ -30,8 +30,8 @@ export default async function PortalProofPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <Link href="/portal/approvals" className="text-body-sm text-link hover:underline">
-          {t('approvals.files')}
+        <Link href="/portal/proofs" className="text-body-sm text-link hover:underline">
+          {t('clientList.title')}
         </Link>
         <h1 className="text-title text-text">{version.title}</h1>
         <p className="flex flex-wrap items-center gap-2 text-body-sm text-text-secondary">

@@ -100,6 +100,7 @@
     "portalNav": {
       "invoices": "Invoices",
       "approvals": "Approvals",
+      "proofs": "Proofs",
       "updates": "Updates",
       "team": "Colleagues"
     }
@@ -2075,6 +2076,18 @@
       "files": "Files",
       "waiting": "Waiting since {date}",
       "openFile": "Open {name}"
+    },
+    "clientList": {
+      "title": "Proofs",
+      "description": "The files the team sent you, with the state of each one.",
+      "empty": "You have not received files to review yet.",
+      "version": "Version {number}",
+      "status": {
+        "pending": "Waiting for your decision",
+        "approved": "Approved",
+        "changes_requested": "Changes requested",
+        "none": "Sent"
+      }
     }
   },
   "interaction": {

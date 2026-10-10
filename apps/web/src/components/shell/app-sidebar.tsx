@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   CircleCheck,
+  Images,
   ListChecks,
   Users,
   Home,
@@ -83,6 +84,7 @@ const ICONS = {
   check: CircleCheck,
   tasks: ListChecks,
   users: Users,
+  proofs: Images,
 } as const;
 
 function NavigationItemLink({

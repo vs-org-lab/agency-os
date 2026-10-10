@@ -9,7 +9,7 @@ import {
   proofFileUrl,
   type ProofingDeps,
 } from './files';
-import { getClientProofVersion } from './portal';
+import { getClientProofs, getClientProofVersion } from './portal';
 import { createSupabaseProofStorage } from './supabase-storage';
 import { loadProofs, loadProofVersion, loadRounds } from './views';
 
@@ -28,6 +28,10 @@ export function loadProjectRounds(claims: VerifiedClaims, projectId: string) {
 
 export function loadStaffProofVersion(claims: VerifiedClaims, versionId: string) {
   return loadProofVersion(claims, versionId, deps());
+}
+
+export function loadClientProofs(claims: VerifiedClaims) {
+  return withUserContext(claims, (tx) => getClientProofs(tx));
 }
 
 export function loadClientProofVersion(claims: VerifiedClaims, versionId: string) {

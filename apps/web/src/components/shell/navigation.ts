@@ -9,7 +9,8 @@ export type NavigationIcon =
   | 'feed'
   | 'check'
   | 'tasks'
-  | 'users';
+  | 'users'
+  | 'proofs';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -25,6 +26,7 @@ export type NavigationLabelKey =
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
+  | 'shell.portalNav.proofs'
   | 'shell.portalNav.updates'
   | 'shell.portalNav.team';
 
@@ -102,6 +104,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
           ...(input.permissions.room
             ? ([
                 { href: '/portal/approvals', labelKey: 'shell.portalNav.approvals', icon: 'check' },
+                { href: '/portal/proofs', labelKey: 'shell.portalNav.proofs', icon: 'proofs' },
                 { href: '/portal/updates', labelKey: 'shell.portalNav.updates', icon: 'feed' },
               ] as const)
             : []),

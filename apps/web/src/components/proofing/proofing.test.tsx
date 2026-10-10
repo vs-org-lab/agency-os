@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ProofCommentView } from '@/modules/proofing';
 import { ApprovalsList } from './approvals-list';
+import { ClientProofList } from './client-proof-list';
 import { DecisionPanel } from './decision-panel';
 import { ProofViewer } from './proof-viewer';
 import { RevisionLimitForm } from './revision-limit-form';
@@ -279,5 +280,25 @@ describe('proofing components', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     });
     expect(save).toHaveBeenCalledWith('p-1', 5);
+  });
+});
+
+describe('client proof list', () => {
+  it('links every proof sent to the client with the state of its request', () => {
+    renderWithIntl(
+      <ClientProofList
+        proofs={[
+          { versionId: 'v-2', title: 'Logótipo', number: 2, status: 'changes_requested' },
+          { versionId: 'v-9', title: 'Cartaz', number: 1, status: 'pending' },
+        ]}
+      />,
+    );
+
+    const logo = screen.getByRole('link', { name: /Logótipo/ });
+    expect(logo.getAttribute('href')).toBe('/portal/proofs/v-2');
+    expect(logo.textContent).toContain(messages.proofing.clientList.status.changes_requested);
+    expect(screen.getByRole('link', { name: /Cartaz/ }).textContent).toContain(
+      messages.proofing.clientList.status.pending,
+    );
   });
 });

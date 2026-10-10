@@ -72,3 +72,17 @@ export async function signedContract(sql: TransactionSql, world: World): Promise
   await sql`update public.deals set pipeline_code = '2.1' where id = ${records.dealId}`;
   return { contractId: records.contractId, dealId: records.dealId, clientId: world.clients.a };
 }
+
+/** The deal's project, delivered, so its delivery milestone is no longer locked (RN-32). */
+export async function deliveredProject(
+  sql: TransactionSql,
+  world: World,
+  contract: SignedContract,
+): Promise<void> {
+  await sql`
+    insert into public.projects (organization_id, client_id, deal_id, name, template_key,
+                                 template_version, starts_on, status)
+    values (${world.organizationId}, ${contract.clientId}, ${contract.dealId}, 'Website', 'orbit', 1,
+            current_date, 'delivered')
+  `;
+}

@@ -4,7 +4,7 @@ import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-o
 import { legalInvoiceUploadUrl, registerLegalInvoice } from './invoices';
 import { recordPayment, settleReviewedPayment } from './payments';
 import { createPlanForContract, requestPayment } from './requests';
-import { billingClaims, billingDeps, signedContract } from './testing';
+import { billingClaims, billingDeps, deliveredProject, signedContract } from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -75,6 +75,7 @@ describe('payments', () => {
       const [second] = await sql<{ id: string }[]>`
         select id from public.billing_milestones where contract_id = ${contract.contractId} and position = 2
       `;
+      await deliveredProject(sql, world, contract);
       const next = await requestPayment(claims, { milestoneId: second?.id ?? '' }, deps);
       if (!next.ok) throw new Error('Second request was not issued');
 

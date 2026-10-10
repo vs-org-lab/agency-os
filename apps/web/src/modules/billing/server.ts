@@ -7,6 +7,7 @@ import {
   registerLegalInvoice,
   type RegisterLegalInvoiceInput,
 } from './invoices';
+import { requestDeliveryMilestones, setMilestonePhase } from './links';
 import { recordPayment, settleReviewedPayment, type RecordPaymentInput } from './payments';
 import type { PaymentsProvider } from './payments-provider/port';
 import { getPortalInvoices } from './portal';
@@ -41,6 +42,19 @@ export type BillingSession = { claims: VerifiedClaims };
 
 export function requestMilestonePayment(session: BillingSession, input: { milestoneId: string }) {
   return requestPayment(session.claims, input, billingDeps());
+}
+
+/** Moves a pending phase-approval milestone to another approval phase, or unlinks it. */
+export function setMilestoneLinkedPhase(
+  session: BillingSession,
+  input: { milestoneId: string; phaseId: string | null },
+) {
+  return setMilestonePhase(session.claims, input, billingDeps());
+}
+
+/** AUT-21: the final invoice of a delivered project. */
+export function issueDeliveryRequests(projectId: string) {
+  return requestDeliveryMilestones(projectId, billingDeps());
 }
 
 export function voidRequest(session: BillingSession, input: { requestId: string; reason: string }) {

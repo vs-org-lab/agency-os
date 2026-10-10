@@ -1,14 +1,21 @@
 import 'server-only';
+import { issueDeliveryRequests } from '@/modules/billing/server';
+import { isPipelineCode } from '@/modules/commercial';
 import {
   alertClientTeam,
+  applyStageChange,
   clientPortalNoticeFunction,
+  clientTimeZone,
   failureHandler,
   notificationDeps,
   RETRIES,
+  sendClientPortalNotice,
 } from '@/modules/commercial/server';
+import { nextAllowedSendTime } from '@/modules/email';
 import { inngest, type DomainEventType } from '@/modules/events';
 import type { EmailTemplateKey } from '@/modules/email';
 import { withSystemContext } from '@/platform/db';
+import { completeDelivery } from './delivery';
 import { approvalNotice } from './notices';
 import { createProjectForDeal } from './projects';
 import { sweepApprovalReminders } from './reminders';
@@ -89,8 +96,57 @@ const approvalReminders = inngest.createFunction(
     ),
 );
 
+/**
+ * AUT-21: a delivered project gets its final invoice, the deal moves to 2.10, the founder gets the
+ * celebration box and activation proposal tasks and the decision maker is asked for a testimonial.
+ */
+const projectDelivered = inngest.createFunction(
+  {
+    id: 'rooms-project-delivered',
+    triggers: [{ event: 'rooms.project.delivered' }],
+    retries: RETRIES,
+    onFailure: failureHandler('rooms-project-delivered'),
+  },
+  async ({ event, step }) => {
+    const data = event.data as { clientId: string | null; payload: { projectId?: string } };
+    const { projectId } = data.payload;
+    if (!projectId || !data.clientId) return { delivered: false };
+    const clientId = data.clientId;
+    await step.run('request-delivery-milestones', () => issueDeliveryRequests(projectId));
+    const completed = await step.run('complete-delivery', () =>
+      completeDelivery(projectId, {
+        contexts: { withSystemContext },
+        moveDeal: async (tx, dealId, code) => {
+          if (!isPipelineCode(code)) return false;
+          const change = await applyStageChange(tx, {
+            dealId,
+            to: code,
+            reason: null,
+            actor: 'system',
+          });
+          return change.ok;
+        },
+      }),
+    );
+    const sendAt = await step.run('quiet-hours-send-time', async () =>
+      nextAllowedSendTime(
+        new Date(),
+        await clientTimeZone(clientId, notificationDeps()),
+      ).toISOString(),
+    );
+    await step.sleepUntil('respect-quiet-hours', new Date(sendAt));
+    const asked = await step.run('testimonial-request', () =>
+      sendClientPortalNotice(clientId, 'lead.testimonial_request', notificationDeps(), {
+        path: `/testimonial/${projectId}`,
+      }),
+    );
+    return { delivered: true, ...completed, asked };
+  },
+);
+
 export const ROOM_FUNCTIONS = [
   projectOnKickoff,
+  projectDelivered,
   approvalReminders,
   clientPortalNoticeFunction(
     'rooms-update-published',

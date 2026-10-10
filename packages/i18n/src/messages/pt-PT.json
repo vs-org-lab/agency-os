@@ -2031,13 +2031,15 @@
       "page": "Página {page} de {pages}",
       "previousPage": "Página anterior",
       "nextPage": "Página seguinte",
-      "pinHint": "Clique no ficheiro para comentar num ponto.",
+      "pinHint": "Clique no ficheiro, ou use Enter e as setas, para comentar num ponto.",
       "videoHint": "Pause o vídeo no momento que quer comentar.",
       "commentHere": "Comentar neste momento",
       "pinLabel": "Comentário {number}",
       "newPin": "Novo comentário",
       "loading": "A carregar o ficheiro…",
-      "failed": "Não foi possível mostrar o ficheiro."
+      "failed": "Não foi possível mostrar o ficheiro.",
+      "pinSurface": "Ficheiro para comentar num ponto. Enter marca o centro, as setas movem o marcador (Shift para passos maiores).",
+      "pinPosition": "Marcador a {x}% da largura e {y}% da altura."
     },
     "comments": {
       "title": "Comentários",

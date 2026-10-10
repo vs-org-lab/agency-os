@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
-import { pointerPercent } from './anchor-format';
+import { PinSurface } from './pin-surface';
 import { Pins, type Pin } from './pins';
 
 type RenderTask = { promise: Promise<void>; cancel(): void };
@@ -20,7 +20,7 @@ type PdfDocument = {
   destroy(): Promise<void> | void;
 };
 
-/** A PDF proof drawn page by page with pdf.js; clicking a page picks a point on that page. */
+/** A PDF proof drawn page by page with pdf.js; a click or the keyboard picks a point on a page. */
 export function PdfCanvas({
   src,
   pages,
@@ -100,14 +100,7 @@ export function PdfCanvas({
       {state === 'failed' ? (
         <p className="text-body-sm text-danger">{t('failed')}</p>
       ) : (
-        <div
-          className="relative mx-auto w-fit max-w-full cursor-crosshair select-none"
-          onClick={(event) => {
-            if (!canPin || state !== 'ready') return;
-            const point = pointerPercent(event, event.currentTarget.getBoundingClientRect());
-            if (point) onPick(point);
-          }}
-        >
+        <PinSurface canPin={canPin && state === 'ready'} pending={pending} onPick={onPick}>
           <canvas
             ref={canvas}
             className="block max-h-[70vh] max-w-full"
@@ -120,7 +113,7 @@ export function PdfCanvas({
           ) : (
             <Pins pins={pins} pending={pending} activeId={activeId} onSelect={onSelect} />
           )}
-        </div>
+        </PinSurface>
       )}
       <div className="flex items-center justify-center gap-3">
         <Button

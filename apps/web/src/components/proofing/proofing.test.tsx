@@ -302,3 +302,32 @@ describe('client proof list', () => {
     );
   });
 });
+
+describe('keyboard pins', () => {
+  it('places and moves a pin on an image with the keyboard', () => {
+    renderWithIntl(
+      <ProofViewer
+        kind="image"
+        src="https://files.example/logo.png"
+        title="Logótipo"
+        number={2}
+        pages={null}
+        comments={[]}
+        audience="team"
+        canComment
+        addComment={OK}
+      />,
+    );
+
+    const surface = screen.getByRole('application', { name: messages.proofing.viewer.pinSurface });
+    surface.focus();
+    fireEvent.keyDown(surface, { key: 'Enter' });
+    expect(screen.getByRole('img', { name: messages.proofing.viewer.newPin }).style.left).toBe(
+      '50%',
+    );
+    fireEvent.keyDown(surface, { key: 'ArrowRight' });
+    fireEvent.keyDown(surface, { key: 'ArrowUp', shiftKey: true });
+    const pin = screen.getByRole('img', { name: messages.proofing.viewer.newPin });
+    expect([pin.style.left, pin.style.top]).toEqual(['52%', '40%']);
+  });
+});

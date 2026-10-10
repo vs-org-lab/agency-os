@@ -2031,13 +2031,15 @@
       "page": "Page {page} of {pages}",
       "previousPage": "Previous page",
       "nextPage": "Next page",
-      "pinHint": "Click the file to comment on a spot.",
+      "pinHint": "Click the file, or use Enter and the arrow keys, to comment on a spot.",
       "videoHint": "Pause the video at the moment you want to comment on.",
       "commentHere": "Comment at this moment",
       "pinLabel": "Comment {number}",
       "newPin": "New comment",
       "loading": "Loading the file…",
-      "failed": "The file could not be shown."
+      "failed": "The file could not be shown.",
+      "pinSurface": "File to comment on a spot. Enter marks the centre, arrow keys move the marker (Shift for larger steps).",
+      "pinPosition": "Marker at {x}% of the width and {y}% of the height."
     },
     "comments": {
       "title": "Comments",

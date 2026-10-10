@@ -26,7 +26,9 @@ const pdf = vi.hoisted(() => {
       cancel: () => {
         cancel();
         busy = false;
-        reject(Object.assign(new Error('Rendering cancelled'), { name: 'RenderingCancelledException' }));
+        reject(
+          Object.assign(new Error('Rendering cancelled'), { name: 'RenderingCancelledException' }),
+        );
       },
     };
   });

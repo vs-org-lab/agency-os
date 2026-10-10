@@ -95,6 +95,7 @@ export type ApprovalDecision = 'approved' | 'changes_requested';
 
 /**
  * The client's decision maker approves a phase or asks for changes, with a comment (RN-41).
+ * File version approvals are decided by the proofing module.
  * Approving completes the phase; asking for changes returns it to the team. A decided approval
  * keeps its first decision.
  */
@@ -132,7 +133,7 @@ export async function decideApproval(
       .from(approvals)
       .where(eq(approvals.id, input.approvalId))
       .for('update');
-    if (!approval) return NOT_FOUND;
+    if (!approval || approval.subjectType !== 'phase') return NOT_FOUND;
     if (approval.status !== 'pending') {
       return { ok: true as const, status: approval.status, decided: false };
     }

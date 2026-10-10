@@ -5,7 +5,7 @@ import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approv
 import { Link } from '@/i18n/navigation';
 import type { ClientPendingApproval } from '@/modules/rooms';
 
-/** P-02: what waits for the client, grouped by type, with how long each has waited. */
+/** P-02: what waits for the client, grouped by type (phases, files, final delivery), with how long each has waited. */
 export function ApprovalsList({
   approvals,
   decides,
@@ -20,6 +20,10 @@ export function ApprovalsList({
   const groups = [
     { key: 'phases' as const, items: approvals.filter((approval) => approval.kind === 'phase') },
     { key: 'files' as const, items: approvals.filter((approval) => approval.kind === 'file') },
+    {
+      key: 'delivery' as const,
+      items: approvals.filter((approval) => approval.kind === 'delivery'),
+    },
   ].filter((group) => group.items.length > 0);
 
   return (

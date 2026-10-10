@@ -2130,7 +2130,8 @@
       "phases": "Fases",
       "files": "Ficheiros",
       "waiting": "À espera desde {date}",
-      "openFile": "Abrir {name}"
+      "openFile": "Abrir {name}",
+      "delivery": "Entrega final"
     },
     "clientList": {
       "title": "Provas",
@@ -2151,5 +2152,22 @@
     "confirmed": "Confirmado.",
     "confirmAction": "Confirmar: {label}",
     "cancel": "Cancelar"
+  },
+  "testimonials": {
+    "title": "Testemunho",
+    "unavailable": "Este projeto ainda não está entregue ou não tem acesso ao testemunho.",
+    "form": {
+      "intro": "O projeto {project} está entregue. Conte-nos, em poucas linhas, como foi trabalhar connosco.",
+      "body": "O seu testemunho",
+      "count": "{used} de {max} caracteres",
+      "name": "Nome",
+      "role": "Função",
+      "consent": "Autorizo a publicação deste testemunho, com o meu nome e função, no site e em apresentações da agência.",
+      "submit": "Enviar testemunho",
+      "update": "Atualizar testemunho",
+      "sent": "Obrigado pelo seu testemunho.",
+      "required": "Escreva o testemunho e o seu nome.",
+      "failed": "Não foi possível guardar. Tente de novo."
+    }
   }
 }

@@ -2130,7 +2130,8 @@
       "phases": "Phases",
       "files": "Files",
       "waiting": "Waiting since {date}",
-      "openFile": "Open {name}"
+      "openFile": "Open {name}",
+      "delivery": "Final delivery"
     },
     "clientList": {
       "title": "Proofs",
@@ -2151,5 +2152,22 @@
     "confirmed": "Confirmed.",
     "confirmAction": "Confirm: {label}",
     "cancel": "Cancel"
+  },
+  "testimonials": {
+    "title": "Testimonial",
+    "unavailable": "This project is not delivered yet or you do not have access to its testimonial.",
+    "form": {
+      "intro": "The {project} project is delivered. Tell us, in a few lines, what it was like to work with us.",
+      "body": "Your testimonial",
+      "count": "{used} of {max} characters",
+      "name": "Name",
+      "role": "Role",
+      "consent": "I allow this testimonial, with my name and role, to be published on the agency website and in presentations.",
+      "submit": "Send testimonial",
+      "update": "Update testimonial",
+      "sent": "Thank you for your testimonial.",
+      "required": "Write the testimonial and your name.",
+      "failed": "It could not be saved. Try again."
+    }
   }
 }

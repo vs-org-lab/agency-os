@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -262,6 +262,30 @@ describe('proofing components', () => {
     expect(screen.getByRole('link', { name: 'Abrir Logótipo' }).getAttribute('href')).toBe(
       '/portal/proofs/v-2',
     );
+  });
+
+  it('approvals group the delivery and let the decision maker decide it', () => {
+    renderWithIntl(
+      <ApprovalsList
+        approvals={[
+          {
+            id: 'a-3',
+            kind: 'delivery',
+            projectId: 'p-1',
+            projectName: 'Website',
+            subjectName: 'Website',
+            versionId: null,
+            requestedAt: '2026-10-12T09:00:00.000Z',
+          },
+        ]}
+        decides
+        decide={OK}
+      />,
+    );
+
+    const group = screen.getByRole('region', { name: 'Entrega final' });
+    expect(within(group).getByText('Website', { selector: 'h3' })).toBeTruthy();
+    expect(within(group).getByRole('button', { name: 'Aprovar' })).toBeTruthy();
   });
 
   it('revision limit form saves between 1 and 20', async () => {

@@ -161,10 +161,13 @@ export async function getClientRoom(
 
 export type ClientPendingApproval = {
   id: string;
+  kind: 'phase' | 'file';
   projectId: string;
   projectName: string;
-  phaseId: string;
-  phaseName: string;
+  /** The phase name or the file title. */
+  subjectName: string;
+  /** The file version to open, for file approvals. */
+  versionId: string | null;
   requestedAt: string;
 };
 
@@ -175,26 +178,36 @@ export async function getClientApprovals(
 ): Promise<ClientPendingApproval[]> {
   const rows = await tx.execute<{
     id: string;
+    kind: 'phase' | 'file';
     project_id: string;
     project_name: string;
-    phase_id: string;
-    phase_name: string;
+    subject_name: string;
+    version_id: string | null;
     requested_at: Timestamp;
   }>(sql`
-    select a.id, a.project_id, p.name as project_name, a.subject_id as phase_id,
-           ph.name as phase_name, a.requested_at
+    select a.id, 'phase' as kind, a.project_id, p.name as project_name,
+           ph.name as subject_name, null::uuid as version_id, a.requested_at
     from public.portal_approvals a
     join public.portal_projects p on p.id = a.project_id
     join public.portal_project_phases ph on ph.id = a.subject_id
+    where a.client_id = ${clientId}::uuid and a.status = 'pending' and a.subject_type = 'phase'
+    union all
+    select a.id, 'file' as kind, a.project_id, p.name as project_name,
+           v.title as subject_name, v.id as version_id, a.requested_at
+    from public.portal_approvals a
+    join public.portal_projects p on p.id = a.project_id
+    join public.portal_proof_versions v on v.id = a.subject_id
     where a.client_id = ${clientId}::uuid and a.status = 'pending'
-    order by a.requested_at desc, a.id
+      and a.subject_type = 'file_version'
+    order by requested_at desc, id
   `);
   return rows.map((row) => ({
     id: row.id,
+    kind: row.kind,
     projectId: row.project_id,
     projectName: row.project_name,
-    phaseId: row.phase_id,
-    phaseName: row.phase_name,
+    subjectName: row.subject_name,
+    versionId: row.version_id,
     requestedAt: new Date(row.requested_at).toISOString(),
   }));
 }

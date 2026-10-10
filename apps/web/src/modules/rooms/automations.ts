@@ -64,6 +64,7 @@ function approvalAlertFunction(id: string, trigger: DomainEventType, template: A
             ? {
                 companyName: notice.companyName,
                 phaseName: notice.phaseName,
+                subject: notice.subject,
                 roomUrl: notice.roomUrl,
               }
             : notice;

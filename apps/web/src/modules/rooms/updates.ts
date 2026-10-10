@@ -4,7 +4,7 @@ import { schema, type UpdateVisibility } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
-import { roomActor } from './authorize';
+import { projectEditor } from './authorize';
 import type { RoomsDeps } from './runtime-types';
 
 const { projectUpdates, projects } = schema;
@@ -40,7 +40,9 @@ export async function publishUpdate(
       .where(eq(projects.id, input.projectId));
     return project?.clientId ?? null;
   });
-  const actor = clientId ? await roomActor(deps.contexts, claims, clientId, 'write') : null;
+  const actor = clientId
+    ? await projectEditor(deps.contexts, claims, clientId, input.projectId)
+    : null;
   if (!actor || !clientId) return { ok: false, rule: 'not_found' };
   const parsed = updateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, rule: 'invalid_input' };

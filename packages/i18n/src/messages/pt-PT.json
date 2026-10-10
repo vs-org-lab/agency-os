@@ -211,7 +211,8 @@
         "proposal_accepted": "Proposta aceite",
         "contract_signed": "Contrato assinado pelo cliente",
         "payment_received": "Pagamento recebido",
-        "approval_decided": "{decision, select, approved {Aprovação concedida} changes_requested {Alterações pedidas numa aprovação} other {Aprovação decidida}}"
+        "approval_decided": "{decision, select, approved {Aprovação concedida} changes_requested {Alterações pedidas numa aprovação} other {Aprovação decidida}}",
+        "proof_comment": "Comentário em {file}"
       }
     }
   },

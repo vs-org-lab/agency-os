@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createProofFixture,
   createTeamFixture,
   testDatabase,
   withTestTransaction,
@@ -155,6 +156,42 @@ describe('studio feed', () => {
       const feed = await loadStudioFeed(claimsFor(world.users.founder), NOW, { contexts });
 
       expect(feed?.map((entry) => entry.id)).toEqual([recent]);
+    });
+  });
+
+  it('the feed shows client comments on proofs and not team comments', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const comment = async (byClient: boolean) => {
+        const payload = {
+          projectId: proof.rooms.a.projectId,
+          versionId: proof.versionTwoId,
+          commentId: byClient ? proof.clientCommentId : proof.internalCommentId,
+          byClient,
+          internal: !byClient,
+        };
+        const [row] = await sql<{ id: string }[]>`
+          insert into public.domain_events (organization_id, client_id, type, payload, created_at)
+          values (${world.organizationId}, ${world.clients.a}, 'proofing.comment.added',
+                  ${JSON.stringify(payload)}::jsonb, ${NOW.toISOString()}::timestamptz)
+          returning id
+        `;
+        return row?.id ?? '';
+      };
+      const fromClient = await comment(true);
+      await comment(false);
+
+      const feed = await loadStudioFeed(claimsFor(world.users.founder), NOW, {
+        contexts: createDbContexts(testDatabase(sql)),
+      });
+      expect(feed?.filter((entry) => entry.type === 'proofing.comment.added')).toEqual([
+        expect.objectContaining({
+          id: fromClient,
+          subjectName: 'Logótipo',
+          href: `/c/${world.clients.a}/proofs/${proof.versionTwoId}`,
+        }),
+      ]);
     });
   });
 });

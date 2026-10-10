@@ -211,7 +211,8 @@
         "proposal_accepted": "Proposal accepted",
         "contract_signed": "Contract signed by the client",
         "payment_received": "Payment received",
-        "approval_decided": "{decision, select, approved {Approval granted} changes_requested {Changes requested on an approval} other {Approval decided}}"
+        "approval_decided": "{decision, select, approved {Approval granted} changes_requested {Changes requested on an approval} other {Approval decided}}",
+        "proof_comment": "Comment on {file}"
       }
     }
   },

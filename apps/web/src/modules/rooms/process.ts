@@ -4,7 +4,7 @@ import { schema, type DbTransaction, type StepStatus } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
-import { roomActor } from './authorize';
+import { projectEditor, roomActor } from './authorize';
 import { canCompletePhase, canStartPhase, type ApprovalState } from './domain/phases';
 import { nextChainedStep } from './domain/steps';
 import type { RoomsDeps } from './runtime-types';
@@ -38,23 +38,32 @@ export type ProcessRefusal =
 async function visibleClient(
   contexts: Pick<DbContexts, 'withUserContext'>,
   claims: VerifiedClaims,
-  target: { phaseId: string } | { stepId: string },
+  target: { phaseId: string },
 ): Promise<string | null> {
-  const id = 'phaseId' in target ? target.phaseId : target.stepId;
-  if (!z.uuid().safeParse(id).success) return null;
-  return contexts.withUserContext(claims, async (tx) => {
-    const [row] =
-      'phaseId' in target
-        ? await tx
-            .select({ clientId: projectPhases.clientId })
-            .from(projectPhases)
-            .where(eq(projectPhases.id, id))
-        : await tx
-            .select({ clientId: projectSteps.clientId })
-            .from(projectSteps)
-            .where(eq(projectSteps.id, id));
-    return row?.clientId ?? null;
-  });
+  if (!z.uuid().safeParse(target.phaseId).success) return null;
+  const [row] = await contexts.withUserContext(claims, (tx) =>
+    tx
+      .select({ clientId: projectPhases.clientId })
+      .from(projectPhases)
+      .where(eq(projectPhases.id, target.phaseId)),
+  );
+  return row?.clientId ?? null;
+}
+
+/** The client and project of a step the caller can see, under their row level security. */
+async function visibleStep(
+  contexts: Pick<DbContexts, 'withUserContext'>,
+  claims: VerifiedClaims,
+  stepId: string,
+): Promise<{ clientId: string; projectId: string } | null> {
+  if (!z.uuid().safeParse(stepId).success) return null;
+  const [row] = await contexts.withUserContext(claims, (tx) =>
+    tx
+      .select({ clientId: projectSteps.clientId, projectId: projectSteps.projectId })
+      .from(projectSteps)
+      .where(eq(projectSteps.id, stepId)),
+  );
+  return row ?? null;
 }
 
 async function phaseWriter(deps: RoomsDeps, claims: VerifiedClaims, phaseId: string) {
@@ -246,10 +255,10 @@ export async function setStepStatus(
   deps: RoomsDeps,
 ): Promise<{ ok: true } | { ok: false; rule: ProcessRefusal }> {
   if (!STEP_STATUSES.includes(input.status)) return { ok: false, rule: 'invalid_input' };
-  const clientId = await visibleClient(deps.contexts, claims, { stepId: input.stepId });
-  if (!clientId) return NOT_FOUND;
-  const writer = await roomActor(deps.contexts, claims, clientId, 'write');
-  const reader = writer ?? (await roomActor(deps.contexts, claims, clientId, 'read'));
+  const scope = await visibleStep(deps.contexts, claims, input.stepId);
+  if (!scope) return NOT_FOUND;
+  const writer = await projectEditor(deps.contexts, claims, scope.clientId, scope.projectId);
+  const reader = writer ?? (await roomActor(deps.contexts, claims, scope.clientId, 'read'));
   if (!reader) return NOT_FOUND;
   const now = (deps.now ?? (() => new Date()))();
 
@@ -395,9 +404,12 @@ export async function updateStep(
   },
   deps: RoomsDeps,
 ): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' }> {
-  const clientId = await visibleClient(deps.contexts, claims, { stepId: input.stepId });
-  const actor = clientId ? await roomActor(deps.contexts, claims, clientId, 'write') : null;
-  if (!actor || !clientId) return NOT_FOUND;
+  const scope = await visibleStep(deps.contexts, claims, input.stepId);
+  const actor = scope
+    ? await projectEditor(deps.contexts, claims, scope.clientId, scope.projectId)
+    : null;
+  if (!actor || !scope) return NOT_FOUND;
+  const clientId = scope.clientId;
   const parsed = stepPatchSchema.safeParse(input);
   if (!parsed.success) return { ok: false, rule: 'invalid_input' };
   const { stepId, ...patch } = parsed.data;

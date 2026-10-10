@@ -37,6 +37,7 @@ function entry(overrides: Partial<FeedEntry>): FeedEntry {
     clientName: 'Atlas Lda',
     dealId: DEAL_ID,
     decision: null,
+    subjectName: null,
     href: `/pipeline/${DEAL_ID}`,
     occurredAt: new Date('2026-10-11T10:00:00Z'),
     ...overrides,
@@ -73,6 +74,26 @@ describe('StudioFeed', () => {
       `/pipeline/${DEAL_ID}`,
       `/c/${CLIENT_ID}`,
     ]);
+  });
+
+  it('the feed names the commented file', () => {
+    render(
+      <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
+        <StudioFeed
+          entries={[
+            entry({
+              type: 'proofing.comment.added',
+              subjectName: 'Logótipo',
+              href: `/c/${CLIENT_ID}/proofs/version-1`,
+            }),
+          ]}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    const link = screen.getByRole('link');
+    expect(link.textContent).toContain('Comentário em Logótipo');
+    expect(link.getAttribute('href')).toBe(`/c/${CLIENT_ID}/proofs/version-1`);
   });
 
   it('shows the empty state without entries', () => {

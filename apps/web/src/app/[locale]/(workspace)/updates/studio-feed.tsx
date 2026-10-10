@@ -8,6 +8,7 @@ const TYPE_KEYS = {
   'contracts.contract.client_signed': 'contract_signed',
   'billing.payment.received': 'payment_received',
   'rooms.approval.decided': 'approval_decided',
+  'proofing.comment.added': 'proof_comment',
 } as const satisfies Record<FeedEventType, string>;
 
 /** S-02: client activity, newest first, each entry linking to its deal or room. */
@@ -29,7 +30,10 @@ export function StudioFeed({ entries }: { entries: FeedEntry[] }) {
           >
             <span className="flex min-w-0 flex-col">
               <span className="truncate text-body font-medium text-text">
-                {t(`types.${TYPE_KEYS[entry.type]}`, { decision: entry.decision ?? 'other' })}
+                {t(`types.${TYPE_KEYS[entry.type]}`, {
+                  decision: entry.decision ?? 'other',
+                  file: entry.subjectName ?? '',
+                })}
               </span>
               <span className="truncate text-caption text-text-secondary">{entry.clientName}</span>
             </span>

@@ -3,11 +3,12 @@ import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { authorize, loadAccessContext, type Actor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
+import { organizationSender, renderEmail, type EmailPort } from '@/modules/email';
 import { emit } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { normalizeEmail, type UserKind } from './auth-port';
 
-const { clientMemberships, organizationMemberships, organizations, profiles } = schema;
+const { clientMemberships, clients, organizationMemberships, organizations, profiles } = schema;
 
 export type Session = { claims: VerifiedClaims; actor: Actor };
 
@@ -18,11 +19,83 @@ export type AdminPort = {
   ): Promise<{ userId: string }>;
 };
 
+/** Creates the account when needed and returns a single-use link for the OS to send. */
+export type InvitationLinkPort = {
+  createInvitationLink(
+    email: string,
+    options: { data?: Record<string, unknown> },
+  ): Promise<{ userId: string; link: string }>;
+};
+
 export type InvitationDeps = {
+  contexts: DbContexts;
+  links: InvitationLinkPort;
+  email: EmailPort;
+};
+
+export type BootstrapDeps = {
   contexts: DbContexts;
   admin: AdminPort;
   invitationRedirectUrl: string;
 };
+
+type StoredInvitation = { membershipId: string; created: boolean } | { error: 'forbidden' };
+
+type TeamRole = 'project_manager' | 'freelancer' | 'finance';
+type ClientRole = 'decision_maker' | 'operational' | 'client_finance';
+
+type InvitationEmail =
+  | { kind: 'internal'; to: string; fullName: string; role: TeamRole; link: string }
+  | {
+      kind: 'client';
+      to: string;
+      fullName: string;
+      role: ClientRole;
+      clientId: string;
+      link: string;
+    };
+
+/** Sends the invitation with the OS templates; the link never leaves this call. */
+async function sendInvitationEmail(
+  organizationId: string,
+  invitation: InvitationEmail,
+  deps: Pick<InvitationDeps, 'contexts' | 'email'>,
+): Promise<void> {
+  const { sender, clientName } = await deps.contexts.withSystemContext(async (tx) => {
+    const [client] =
+      invitation.kind === 'client'
+        ? await tx
+            .select({ name: clients.name })
+            .from(clients)
+            .where(eq(clients.id, invitation.clientId))
+        : [];
+    return { sender: await organizationSender(tx, organizationId), clientName: client?.name ?? '' };
+  });
+  const rendered =
+    invitation.kind === 'internal'
+      ? renderEmail('team.invitation', sender.defaultLocale, {
+          fullName: invitation.fullName,
+          agencyName: sender.agencyName,
+          role: invitation.role,
+          inviteUrl: invitation.link,
+        })
+      : renderEmail('client.invitation', sender.defaultLocale, {
+          fullName: invitation.fullName,
+          agencyName: sender.agencyName,
+          clientName,
+          role: invitation.role,
+          inviteUrl: invitation.link,
+        });
+  await deps.email.send({
+    to: invitation.to,
+    template: invitation.kind === 'internal' ? 'team.invitation' : 'client.invitation',
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+    fromName: sender.fromName,
+    organizationId,
+  });
+}
 
 export type InvitationResult = { membershipId: string } | { error: 'forbidden' | 'invalid_input' };
 
@@ -74,8 +147,7 @@ export async function inviteTeamMember(
   if (!parsed.success) return { error: 'invalid_input' };
   if (!(await canInvite(session, deps))) return { error: 'forbidden' };
 
-  const { userId } = await deps.admin.inviteUserByEmail(parsed.data.email, {
-    redirectTo: deps.invitationRedirectUrl,
+  const { userId, link } = await deps.links.createInvitationLink(parsed.data.email, {
     data: { full_name: parsed.data.fullName },
   });
   await deps.contexts.withSystemContext((tx) =>
@@ -83,43 +155,62 @@ export async function inviteTeamMember(
   );
 
   const organizationId = session.actor.organizationId;
-  return deps.contexts.withUserContext(session.claims, async (tx) => {
-    const [created] = await tx
-      .insert(organizationMemberships)
-      .values({ organizationId, userId, role: parsed.data.role, status: 'invited' })
-      .onConflictDoNothing({
-        target: [organizationMemberships.organizationId, organizationMemberships.userId],
-      })
-      .returning({ id: organizationMemberships.id });
+  const result = await deps.contexts.withUserContext(
+    session.claims,
+    async (tx): Promise<StoredInvitation> => {
+      const [created] = await tx
+        .insert(organizationMemberships)
+        .values({ organizationId, userId, role: parsed.data.role, status: 'invited' })
+        .onConflictDoNothing({
+          target: [organizationMemberships.organizationId, organizationMemberships.userId],
+        })
+        .returning({ id: organizationMemberships.id });
 
-    if (!created) {
-      const [existing] = await tx
-        .select({ id: organizationMemberships.id })
-        .from(organizationMemberships)
-        .where(
-          and(
-            eq(organizationMemberships.organizationId, organizationId),
-            eq(organizationMemberships.userId, userId),
-          ),
-        );
-      if (!existing) return { error: 'forbidden' as const };
-      return { membershipId: existing.id };
-    }
+      if (!created) {
+        const [existing] = await tx
+          .select({ id: organizationMemberships.id })
+          .from(organizationMemberships)
+          .where(
+            and(
+              eq(organizationMemberships.organizationId, organizationId),
+              eq(organizationMemberships.userId, userId),
+            ),
+          );
+        if (!existing) return { error: 'forbidden' as const };
+        return { membershipId: existing.id, created: false };
+      }
 
-    await emit(tx, {
-      type: 'identity.user.invited',
+      await emit(tx, {
+        type: 'identity.user.invited',
+        organizationId,
+        payload: { membershipId: created.id, userId, kind: 'internal', role: parsed.data.role },
+      });
+      await recordAudit(tx, {
+        organizationId,
+        action: 'invitation.created',
+        resourceType: 'organization_membership',
+        resourceId: created.id,
+        metadata: { role: parsed.data.role },
+      });
+      return { membershipId: created.id, created: true };
+    },
+  );
+
+  if ('created' in result && result.created) {
+    await sendInvitationEmail(
       organizationId,
-      payload: { membershipId: created.id, userId, kind: 'internal', role: parsed.data.role },
-    });
-    await recordAudit(tx, {
-      organizationId,
-      action: 'invitation.created',
-      resourceType: 'organization_membership',
-      resourceId: created.id,
-      metadata: { role: parsed.data.role },
-    });
-    return { membershipId: created.id };
-  });
+      {
+        kind: 'internal',
+        to: parsed.data.email,
+        fullName: parsed.data.fullName,
+        role: parsed.data.role,
+        link,
+      },
+      deps,
+    );
+    return { membershipId: result.membershipId };
+  }
+  return 'membershipId' in result ? { membershipId: result.membershipId } : result;
 }
 
 export async function inviteClientUser(
@@ -131,8 +222,7 @@ export async function inviteClientUser(
   if (!parsed.success) return { error: 'invalid_input' };
   if (!(await canInvite(session, deps, parsed.data.clientId))) return { error: 'forbidden' };
 
-  const { userId } = await deps.admin.inviteUserByEmail(parsed.data.email, {
-    redirectTo: deps.invitationRedirectUrl,
+  const { userId, link } = await deps.links.createInvitationLink(parsed.data.email, {
     data: { full_name: parsed.data.fullName },
   });
   await deps.contexts.withSystemContext((tx) =>
@@ -141,38 +231,134 @@ export async function inviteClientUser(
 
   const organizationId = session.actor.organizationId;
   const { clientId, role } = parsed.data;
-  return deps.contexts.withUserContext(session.claims, async (tx) => {
-    const [created] = await tx
-      .insert(clientMemberships)
-      .values({ organizationId, clientId, userId, role, status: 'invited' })
-      .onConflictDoNothing({ target: [clientMemberships.clientId, clientMemberships.userId] })
-      .returning({ id: clientMemberships.id });
+  const result = await deps.contexts.withUserContext(
+    session.claims,
+    async (tx): Promise<StoredInvitation> => {
+      const [created] = await tx
+        .insert(clientMemberships)
+        .values({ organizationId, clientId, userId, role, status: 'invited' })
+        .onConflictDoNothing({ target: [clientMemberships.clientId, clientMemberships.userId] })
+        .returning({ id: clientMemberships.id });
 
-    if (!created) {
-      const [existing] = await tx
-        .select({ id: clientMemberships.id })
-        .from(clientMemberships)
-        .where(and(eq(clientMemberships.clientId, clientId), eq(clientMemberships.userId, userId)));
-      if (!existing) return { error: 'forbidden' as const };
-      return { membershipId: existing.id };
-    }
+      if (!created) {
+        const [existing] = await tx
+          .select({ id: clientMemberships.id })
+          .from(clientMemberships)
+          .where(
+            and(eq(clientMemberships.clientId, clientId), eq(clientMemberships.userId, userId)),
+          );
+        if (!existing) return { error: 'forbidden' as const };
+        return { membershipId: existing.id, created: false };
+      }
 
-    await emit(tx, {
-      type: 'identity.user.invited',
+      await emit(tx, {
+        type: 'identity.user.invited',
+        organizationId,
+        clientId,
+        payload: { membershipId: created.id, userId, kind: 'client', role },
+      });
+      await recordAudit(tx, {
+        organizationId,
+        action: 'invitation.created',
+        resourceType: 'client_membership',
+        resourceId: created.id,
+        clientId,
+        metadata: { role },
+      });
+      return { membershipId: created.id, created: true };
+    },
+  );
+
+  if ('created' in result && result.created) {
+    await sendInvitationEmail(
       organizationId,
-      clientId,
-      payload: { membershipId: created.id, userId, kind: 'client', role },
-    });
-    await recordAudit(tx, {
-      organizationId,
-      action: 'invitation.created',
-      resourceType: 'client_membership',
-      resourceId: created.id,
-      clientId,
-      metadata: { role },
-    });
-    return { membershipId: created.id };
+      {
+        kind: 'client',
+        to: parsed.data.email,
+        fullName: parsed.data.fullName,
+        role,
+        clientId,
+        link,
+      },
+      deps,
+    );
+    return { membershipId: result.membershipId };
+  }
+  return 'membershipId' in result ? { membershipId: result.membershipId } : result;
+}
+
+/**
+ * Sends a fresh link to an invitation nobody has accepted yet, under the same rules as inviting.
+ * Older links stay single use and expire on their own.
+ */
+export async function resendInvitation(
+  session: Session,
+  input: { membershipId: string; kind: 'internal' | 'client' },
+  deps: InvitationDeps,
+): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_state' }> {
+  if (!z.uuid().safeParse(input.membershipId).success) return { ok: false, rule: 'not_found' };
+  const organizationId = session.actor.organizationId;
+  const pending = await deps.contexts.withSystemContext(async (tx) => {
+    const table = input.kind === 'internal' ? organizationMemberships : clientMemberships;
+    const [row] = await tx
+      .select({
+        userId: table.userId,
+        role: table.role,
+        status: table.status,
+        clientId: input.kind === 'client' ? clientMemberships.clientId : sql<null>`null`,
+        email: sql<string | null>`(select email from auth.users u where u.id = ${table.userId})`,
+        fullName: profiles.fullName,
+      })
+      .from(table)
+      .innerJoin(profiles, eq(profiles.id, table.userId))
+      .where(
+        and(
+          eq(table.id, input.membershipId),
+          eq(table.organizationId, organizationId),
+          isNull(table.archivedAt),
+        ),
+      );
+    return row ?? null;
   });
+  if (!pending || !pending.email) return { ok: false, rule: 'not_found' };
+  if (!(await canInvite(session, deps, pending.clientId ?? undefined))) {
+    return { ok: false, rule: 'not_found' };
+  }
+  if (pending.status !== 'invited') return { ok: false, rule: 'invalid_state' };
+
+  const { link } = await deps.links.createInvitationLink(pending.email, {
+    data: { full_name: pending.fullName },
+  });
+  await sendInvitationEmail(
+    organizationId,
+    input.kind === 'internal'
+      ? {
+          kind: 'internal',
+          to: pending.email,
+          fullName: pending.fullName,
+          role: pending.role as TeamRole,
+          link,
+        }
+      : {
+          kind: 'client',
+          to: pending.email,
+          fullName: pending.fullName,
+          role: pending.role as ClientRole,
+          clientId: pending.clientId ?? '',
+          link,
+        },
+    deps,
+  );
+  await deps.contexts.withUserContext(session.claims, (tx) =>
+    recordAudit(tx, {
+      organizationId,
+      action: 'invitation.resent',
+      resourceType: input.kind === 'internal' ? 'organization_membership' : 'client_membership',
+      resourceId: input.membershipId,
+      clientId: pending.clientId ?? undefined,
+    }),
+  );
+  return { ok: true };
 }
 
 export async function acceptInvitation(
@@ -234,7 +420,7 @@ export type BootstrapResult = { organizationId: string; userId: string; created:
 
 export async function bootstrapFounder(
   input: { email: string; fullName: string; organizationName: string },
-  deps: InvitationDeps,
+  deps: BootstrapDeps,
 ): Promise<BootstrapResult> {
   const founderEmail = normalizeEmail(input.email);
   const name = fullName.parse(input.fullName);

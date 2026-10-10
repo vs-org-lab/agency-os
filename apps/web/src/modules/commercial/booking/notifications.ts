@@ -1,12 +1,14 @@
-import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { schema, type CallKind, type DbTransaction } from '@agency-os/db';
 import { isLocale, type Locale } from '@agency-os/i18n';
 import {
   renderEmail,
-  senderName,
   type EmailParams,
   type EmailPort,
   type EmailTemplateKey,
+  activeFounders,
+  organizationSender,
+  type OrganizationSender,
 } from '@/modules/email';
 import type { DbContexts } from '@/platform/db';
 import {
@@ -19,7 +21,7 @@ import {
 } from './links';
 import { resolveTimeZone } from './slots';
 
-const { applications, calls, clients, contacts, deals, organizations } = schema;
+const { applications, calls, clients, contacts, deals } = schema;
 
 export type NotificationDeps = {
   contexts: Pick<DbContexts, 'withSystemContext'>;
@@ -31,43 +33,7 @@ export type NotificationDeps = {
 
 type FounderTemplate = Extract<EmailTemplateKey, `founder.${string}`>;
 
-type Sender = { agencyName: string; fromName: string; defaultLocale: Locale };
-
-async function senderFor(tx: DbTransaction, organizationId: string): Promise<Sender> {
-  const [organization] = await tx
-    .select({
-      name: organizations.name,
-      branding: organizations.portalBranding,
-      locale: organizations.defaultLocale,
-    })
-    .from(organizations)
-    .where(eq(organizations.id, organizationId));
-  if (!organization) throw new Error(`Organization ${organizationId} was not found`);
-  const agencyName = organization.branding.displayName ?? organization.name;
-
-  const founders = await activeFounders(tx, organizationId);
-  return {
-    agencyName,
-    fromName: senderName(founders[0]?.fullName ?? '', agencyName),
-    defaultLocale: organization.locale,
-  };
-}
-
-async function activeFounders(
-  tx: DbTransaction,
-  organizationId: string,
-): Promise<Array<{ email: string; fullName: string }>> {
-  return tx.execute<{ email: string; fullName: string }>(sql`
-    select u.email, p.full_name as "fullName"
-    from public.organization_memberships m
-    join public.profiles p on p.id = m.user_id
-    join auth.users u on u.id = m.user_id
-    where m.organization_id = ${organizationId}::uuid
-      and m.role = 'founder' and m.status = 'active' and m.archived_at is null
-      and p.archived_at is null and u.email is not null
-    order by m.created_at
-  `);
-}
+type Sender = OrganizationSender;
 
 type LeadContext = {
   organizationId: string;
@@ -137,7 +103,7 @@ export async function alertFounders<K extends FounderTemplate>(
   deps: NotificationDeps,
 ): Promise<number> {
   const { sender, founders } = await deps.contexts.withSystemContext(async (tx) => ({
-    sender: await senderFor(tx, organizationId),
+    sender: await organizationSender(tx, organizationId),
     founders: await activeFounders(tx, organizationId),
   }));
   for (const founder of founders) {
@@ -160,7 +126,7 @@ export async function sendBookingLinkEmail(
   const now = deps.now();
   const context = await deps.contexts.withSystemContext(async (tx) => {
     const lead = await leadForDeal(tx, dealId);
-    return lead ? { lead, sender: await senderFor(tx, lead.organizationId) } : null;
+    return lead ? { lead, sender: await organizationSender(tx, lead.organizationId) } : null;
   });
   const to = context?.lead.email;
   if (!context || !to) return false;
@@ -254,7 +220,7 @@ async function leadCallMessage(
     return {
       call,
       lead: await leadForDeal(tx, call.dealId),
-      sender: await senderFor(tx, call.organizationId),
+      sender: await organizationSender(tx, call.organizationId),
       manageToken: token,
     };
   });
@@ -333,7 +299,7 @@ export async function sendPortalNotice(
       to: contact.email,
       firstName: contact.fullName.trim().split(/\s+/)[0] ?? '',
       lead: await leadForDeal(tx, dealId),
-      sender: await senderFor(tx, deal.organizationId),
+      sender: await organizationSender(tx, deal.organizationId),
     };
   });
   if (!context) return false;
@@ -398,7 +364,7 @@ export async function sendClientPortalNotice(
       organizationId: client.organizationId,
       to: contact.email,
       firstName: contact.fullName.trim().split(/\s+/)[0] ?? '',
-      sender: await senderFor(tx, client.organizationId),
+      sender: await organizationSender(tx, client.organizationId),
     };
   });
   if (!context) return false;

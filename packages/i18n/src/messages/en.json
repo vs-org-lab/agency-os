@@ -917,6 +917,22 @@
         "body": "The phase {phaseName} has been waiting for the client decision for 5 days. A direct call may help.",
         "action": "Open the room"
       }
+    },
+    "team": {
+      "invitation": {
+        "subject": "Your invitation to the {agencyName} team",
+        "heading": "Welcome to the {agencyName} team",
+        "body": "Hello {fullName}, you have been invited to the {agencyName} team as {role, select, project_manager {project manager} freelancer {freelancer} finance {finance} other {team member}}.\n\nSet your password and two-step verification to sign in. The link works once.",
+        "action": "Accept the invitation"
+      }
+    },
+    "client": {
+      "invitation": {
+        "subject": "Your invitation to the {agencyName} portal",
+        "heading": "Your portal access",
+        "body": "Hello {fullName}, you have been invited to the {agencyName} portal for {clientName} as {role, select, decision_maker {decision maker} operational {operational} client_finance {finance} other {member}}.\n\nIn the portal you follow the project, approve the work and see your invoices. The link works once.",
+        "action": "Open the portal"
+      }
     }
   },
   "publicApply": {

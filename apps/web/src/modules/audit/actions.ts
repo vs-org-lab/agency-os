@@ -4,6 +4,7 @@ export const AUDIT_ACTIONS = [
   'auth.mfa_failed',
   'auth.mfa_enrolled',
   'invitation.created',
+  'invitation.resent',
   'invitation.accepted',
   'membership.changed',
   'session.revoked',

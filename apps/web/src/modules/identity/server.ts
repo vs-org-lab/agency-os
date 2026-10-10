@@ -1,19 +1,21 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
+import { createClient } from '@supabase/supabase-js';
 import { cookies, headers } from 'next/headers';
 import type { Locale } from '@agency-os/i18n';
 import { resolveActor } from '@/modules/access';
 import { recordAudit, type AuditAction } from '@/modules/audit';
+import { emailPort } from '@/modules/email/server';
 import { activityCookieName, INACTIVITY_LIMIT_MS, signActivity } from '@/platform/activity-cookie';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { serverEnv } from '@/platform/env';
 import { clientIpAddress, isSecureRequest, requestOrigin } from '@/platform/request';
 import { createSupabaseServerClient } from '@/platform/supabase-server';
 import { accountActionAllowed } from './account-assurance';
-import { createSupabaseAdminPort } from './admin';
 import type { IdentityDeps, UserKind } from './auth-port';
 import { isPwnedPassword } from './hibp';
-import { acceptInvitation, type InvitationDeps } from './invitations';
+import { createInvitationLinkPort } from './invite-link';
+import { acceptInvitation, lookupUserIdByEmail, type InvitationDeps } from './invitations';
 import type { SetPasswordDeps } from './set-password';
 
 export async function lookupUserKindByEmail(email: string): Promise<UserKind | null> {
@@ -88,13 +90,21 @@ export async function createInvitationDeps(locale: Locale): Promise<InvitationDe
   const origin = requestOrigin(await headers());
   const prefix = locale === 'pt-PT' ? '' : `/${locale}`;
 
+  const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  }).auth.admin;
+
   return {
     contexts,
-    admin: createSupabaseAdminPort(
-      { url: env.NEXT_PUBLIC_SUPABASE_URL, secretKey: env.SUPABASE_SECRET_KEY },
-      contexts,
+    links: createInvitationLinkPort(
+      admin,
+      {
+        acceptUrl: `${origin}${prefix}/accept-invitation`,
+        callbackUrl: `${origin}${prefix}/callback`,
+      },
+      (address) => lookupUserIdByEmail(contexts, address),
     ),
-    invitationRedirectUrl: `${origin}${prefix}/accept-invitation`,
+    email: emailPort(),
   };
 }
 

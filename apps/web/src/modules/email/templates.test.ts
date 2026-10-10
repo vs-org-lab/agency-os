@@ -133,6 +133,19 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     phaseName: 'Descoberta e arquitetura',
     roomUrl: 'https://os.example.com/c/client',
   },
+  'team.invitation': {
+    fullName: 'Rui Costa',
+    agencyName: 'Aurion',
+    role: 'freelancer',
+    inviteUrl: 'https://os.example.com/accept-invitation?token_hash=hash&type=invite',
+  },
+  'client.invitation': {
+    fullName: 'Marta Lopes',
+    agencyName: 'Aurion',
+    clientName: 'Empresa Exemplo',
+    role: 'operational',
+    inviteUrl: 'https://os.example.com/accept-invitation?token_hash=hash&type=invite',
+  },
   'founder.proposal_accepted': {
     companyName: 'Empresa Exemplo',
     optionName: 'Orbit com Gravity',
@@ -224,6 +237,22 @@ describe('renderEmail', () => {
       renderEmail('founder.approval_decided', 'pt-PT', { ...params, decision: 'changes_requested' })
         .subject,
     ).toBe('Empresa Exemplo pediu alterações na fase Descoberta e arquitetura');
+  });
+
+  it('invites a team member with their role', () => {
+    const email = renderEmail('team.invitation', 'pt-PT', SAMPLE_PARAMS['team.invitation']);
+
+    expect(email.subject).toBe('Convite para a equipa da Aurion');
+    expect(email.text).toContain('como freelancer');
+    expect(email.html).toContain('https://os.example.com/accept-invitation?token_hash=hash');
+  });
+
+  it('invites a client user to the portal of their company', () => {
+    const email = renderEmail('client.invitation', 'en', SAMPLE_PARAMS['client.invitation']);
+
+    expect(email.subject).toBe('Your invitation to the Aurion portal');
+    expect(email.text).toContain('Empresa Exemplo');
+    expect(email.text).toContain('as operational');
   });
 
   it('escapes html in parameters', () => {

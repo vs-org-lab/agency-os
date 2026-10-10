@@ -917,6 +917,22 @@
         "body": "A fase {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
         "action": "Abrir a sala"
       }
+    },
+    "team": {
+      "invitation": {
+        "subject": "Convite para a equipa da {agencyName}",
+        "heading": "Bem-vindo à equipa da {agencyName}",
+        "body": "Olá {fullName}, foi convidado para a equipa da {agencyName} como {role, select, project_manager {gestor de projeto} freelancer {freelancer} finance {finanças} other {membro da equipa}}.\n\nDefina a sua palavra-passe e a verificação em dois passos para entrar. O link só funciona uma vez.",
+        "action": "Aceitar o convite"
+      }
+    },
+    "client": {
+      "invitation": {
+        "subject": "Convite para o portal da {agencyName}",
+        "heading": "O seu acesso ao portal",
+        "body": "Olá {fullName}, foi convidado para o portal da {agencyName} da empresa {clientName} como {role, select, decision_maker {decisor} operational {operacional} client_finance {finanças} other {membro}}.\n\nNo portal acompanha o projeto, aprova o trabalho e consulta as faturas. O link só funciona uma vez.",
+        "action": "Entrar no portal"
+      }
     }
   },
   "publicApply": {

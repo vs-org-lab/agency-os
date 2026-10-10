@@ -188,9 +188,12 @@ describe('team components', () => {
       weeklyHours: 30,
     });
 
+    vi.useFakeTimers();
+    fireEvent.pointerDown(screen.getByRole('button', { name: /Retirar acesso/ }));
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Retirar acesso' }));
+      vi.advanceTimersByTime(1600);
     });
+    vi.useRealTimers();
     expect(revoke).toHaveBeenCalledWith(FREELANCER.userId);
     expect(screen.queryByRole('button', { name: 'Repor acesso' })).toBeNull();
   });
@@ -222,9 +225,9 @@ describe('team components', () => {
     );
 
     expect(screen.getByText('Você')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Retirar o acesso de Marta Lopes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Retirar o acesso de Marta Lopes/ })).toBeNull();
     expect(screen.queryByLabelText('Papel de Marta Lopes')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Retirar o acesso de Paulo Reis' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Retirar o acesso de Paulo Reis/ })).toBeTruthy();
     expect(screen.getByLabelText('Papel de Paulo Reis')).toBeTruthy();
   });
 });

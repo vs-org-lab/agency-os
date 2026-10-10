@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
-import { Button } from '@agency-os/ui/components/button';
 import type { ClientRole } from '@agency-os/db';
 import { FormMessage } from '@/components/forms/form-message';
+import { HoldToConfirm } from '@/components/ui/hold-to-confirm';
 import type { ColleagueView } from '@/modules/team';
 import { TEAM_FIELD, type TeamActionResult } from './team-errors';
 import { useTeamAction } from './use-team-action';
@@ -65,16 +65,12 @@ export function ColleagueList({
                   ))}
                 </select>
                 {colleague.status === 'revoked' ? null : (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
+                  <HoldToConfirm
+                    label={t('colleagues.revoke')}
+                    ariaLabel={t('colleagues.revokeLabel', { name: colleague.name })}
                     disabled={pending}
-                    aria-label={t('colleagues.revokeLabel', { name: colleague.name })}
-                    onClick={() => run('saved', () => revoke(colleague.membershipId))}
-                  >
-                    {t('colleagues.revoke')}
-                  </Button>
+                    onConfirm={() => run('saved', () => revoke(colleague.membershipId))}
+                  />
                 )}
               </span>
             )}

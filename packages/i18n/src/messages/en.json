@@ -1930,8 +1930,9 @@
       "noRate": "No cost set",
       "resend": "Resend invitation",
       "resendLabel": "Resend the invitation to {name}",
-      "resent": "Invitation sent again.",
-      "clientCount": "{count, plural, one {# client} other {# clients}}"
+      "clientCount": "{count, plural, one {# client} other {# clients}}",
+      "resending": "Resending…",
+      "resentShort": "Invitation sent"
     },
     "invite": {
       "heading": "Invite",
@@ -2075,5 +2076,10 @@
       "waiting": "Waiting since {date}",
       "openFile": "Open {name}"
     }
+  },
+  "interaction": {
+    "holdToConfirm": "{label}, hold to confirm",
+    "holding": "Keep holding…",
+    "confirmed": "Confirmed."
   }
 }

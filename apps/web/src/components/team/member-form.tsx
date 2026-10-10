@@ -8,6 +8,7 @@ import { Label } from '@agency-os/ui/components/label';
 import type { OrgRole } from '@agency-os/db';
 import { currencies, type Currency } from '@agency-os/i18n';
 import { FormMessage } from '@/components/forms/form-message';
+import { HoldToConfirm } from '@/components/ui/hold-to-confirm';
 import type { MemberView } from '@/modules/team';
 import { TEAM_FIELD, type TeamActionResult } from './team-errors';
 import { useTeamAction, type TeamOutcome } from './use-team-action';
@@ -106,15 +107,11 @@ export function MemberForm({
               {t('member.restore')}
             </Button>
           ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="text-danger"
+            <HoldToConfirm
+              label={t('member.revoke')}
               disabled={access.pending}
-              onClick={() => access.run('revoked', () => revoke(member.userId))}
-            >
-              {t('member.revoke')}
-            </Button>
+              onConfirm={() => access.run('revoked', () => revoke(member.userId))}
+            />
           )}
         </form>
         <Outcome outcome={access.outcome} />

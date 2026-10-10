@@ -1930,8 +1930,9 @@
       "noRate": "Sem custo definido",
       "resend": "Reenviar convite",
       "resendLabel": "Reenviar o convite a {name}",
-      "resent": "Convite reenviado.",
-      "clientCount": "{count, plural, one {# cliente} other {# clientes}}"
+      "clientCount": "{count, plural, one {# cliente} other {# clientes}}",
+      "resending": "A reenviar…",
+      "resentShort": "Convite reenviado"
     },
     "invite": {
       "heading": "Convidar",
@@ -2075,5 +2076,10 @@
       "waiting": "À espera desde {date}",
       "openFile": "Abrir {name}"
     }
+  },
+  "interaction": {
+    "holdToConfirm": "{label}, mantenha premido para confirmar",
+    "holding": "Continue a premir…",
+    "confirmed": "Confirmado."
   }
 }

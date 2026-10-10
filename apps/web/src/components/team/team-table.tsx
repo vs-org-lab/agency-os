@@ -1,15 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
-import { Button } from '@agency-os/ui/components/button';
 import { formatMoney, type Locale } from '@agency-os/i18n';
 import { FormMessage } from '@/components/forms/form-message';
 import { Link } from '@/i18n/navigation';
 import { toMinorUnits } from '@/modules/contracts';
 import type { TeamMemberView } from '@/modules/team';
 import type { TeamActionResult } from './team-errors';
-import { useTeamAction } from './use-team-action';
+import { ActionButton } from '@/components/ui/action-button';
+import { teamError, type TeamError } from './team-errors';
 
 const STATUS_STYLE = {
   active: 'bg-success-bg text-success',
@@ -27,7 +28,7 @@ export function TeamTable({
 }) {
   const t = useTranslations('team');
   const locale = useLocale() as Locale;
-  const { outcome, pending, run } = useTeamAction();
+  const [failure, setFailure] = useState<TeamError | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
@@ -81,26 +82,24 @@ export function TeamTable({
               </span>
             </span>
             {member.status === 'invited' ? (
-              <Button
-                type="button"
-                size="sm"
+              <ActionButton
                 variant="outline"
-                disabled={pending}
-                aria-label={t('table.resendLabel', { name: member.name })}
-                onClick={() => run('resent', () => resend(member.membershipId))}
-              >
-                {t('table.resend')}
-              </Button>
+                labels={{
+                  idle: t('table.resend'),
+                  pending: t('table.resending'),
+                  done: t('table.resentShort'),
+                }}
+                ariaLabel={t('table.resendLabel', { name: member.name })}
+                action={() => resend(member.membershipId)}
+                onResult={(result) => setFailure(result.ok ? null : teamError(result.code))}
+              />
             ) : (
               <span />
             )}
           </li>
         ))}
       </ul>
-      {outcome?.ok === false ? (
-        <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
-      ) : null}
-      {outcome?.ok ? <FormMessage tone="success">{t('table.resent')}</FormMessage> : null}
+      {failure ? <FormMessage tone="danger">{t(`errors.${failure}`)}</FormMessage> : null}
     </div>
   );
 }

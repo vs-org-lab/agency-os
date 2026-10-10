@@ -10,6 +10,8 @@ export const AUDIT_ACTIONS = [
   'team.access_restored',
   'team.assignment_changed',
   'team.rates_updated',
+  'colleague.role_changed',
+  'colleague.access_revoked',
   'invitation.accepted',
   'membership.changed',
   'session.revoked',

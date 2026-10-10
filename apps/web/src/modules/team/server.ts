@@ -1,6 +1,7 @@
 import 'server-only';
-import type { OrgRole } from '@agency-os/db';
-import type { Currency } from '@agency-os/i18n';
+import type { ClientRole, OrgRole } from '@agency-os/db';
+import type { Currency, Locale } from '@agency-os/i18n';
+import { createInvitationDeps } from '@/modules/identity';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import {
   changeRole,
@@ -12,6 +13,12 @@ import {
   setProjectAssignment,
   setRates,
 } from './service';
+import {
+  changeColleagueRole,
+  inviteColleague,
+  listColleagues,
+  revokeColleague,
+} from './colleagues';
 
 const deps = () => ({ contexts: { withUserContext, withSystemContext } });
 
@@ -59,4 +66,28 @@ export function saveMemberRates(
   },
 ) {
   return setRates(claims, input, deps());
+}
+
+export async function loadColleagues(claims: VerifiedClaims, clientId: string) {
+  return listColleagues(claims, clientId, deps());
+}
+
+export async function inviteClientColleague(
+  claims: VerifiedClaims,
+  input: { clientId: string; email: string; fullName: string; role: ClientRole },
+  locale: Locale,
+) {
+  return inviteColleague(claims, input, await createInvitationDeps(locale));
+}
+
+export function changeClientColleagueRole(
+  claims: VerifiedClaims,
+  membershipId: string,
+  role: ClientRole,
+) {
+  return changeColleagueRole(claims, { membershipId, role }, deps());
+}
+
+export function revokeClientColleague(claims: VerifiedClaims, membershipId: string) {
+  return revokeColleague(claims, { membershipId }, deps());
 }

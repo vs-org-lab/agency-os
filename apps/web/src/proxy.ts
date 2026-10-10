@@ -36,6 +36,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
   const securityHeaders = buildSecurityHeaders(nonce, {
     isDevelopment: process.env.NODE_ENV === 'development',
     connectSources: supabaseUrl ? [supabaseUrl] : [],
+    storageSources: supabaseUrl ? [supabaseUrl] : [],
     frameAncestors: embedOriginsForPath(request.nextUrl.pathname, process.env.APPLY_EMBED_ORIGINS),
     mediaCapture: allowsMediaCapture(request.nextUrl.pathname),
   });

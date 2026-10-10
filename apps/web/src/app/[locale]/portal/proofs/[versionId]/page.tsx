@@ -6,7 +6,7 @@ import { ProofViewer } from '@/components/proofing/proof-viewer';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
-import { loadClientProofVersion, proofLink } from '@/modules/proofing/server';
+import { loadClientProofVersion } from '@/modules/proofing/server';
 import { portalRoomAccess } from '../../room-session';
 import { commentOnClientProofAction, decideProofAction } from '../actions';
 
@@ -24,8 +24,6 @@ export default async function PortalProofPage({ params }: PageProps) {
   if (!access.readsRoom) notFound();
   const version = await loadClientProofVersion(session.claims, versionId);
   if (!version) notFound();
-  const src = await proofLink(session.claims, versionId);
-  if (!src) notFound();
   const t = await getTranslations('proofing');
   const pending = version.approval?.status === 'pending' ? version.approval : null;
 
@@ -48,7 +46,7 @@ export default async function PortalProofPage({ params }: PageProps) {
       ) : null}
       <ProofViewer
         kind={version.kind}
-        src={src}
+        src={`/api/proofs/${versionId}/file`}
         title={version.title}
         number={version.number}
         pages={version.pages}

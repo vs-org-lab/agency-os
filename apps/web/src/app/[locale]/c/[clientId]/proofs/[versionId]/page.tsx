@@ -5,7 +5,7 @@ import { ProofViewer } from '@/components/proofing/proof-viewer';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
-import { loadStaffProofVersion, proofLink } from '@/modules/proofing/server';
+import { loadStaffProofVersion } from '@/modules/proofing/server';
 import { commentOnProofAction, resolveProofCommentAction } from '../../proof-actions';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +20,6 @@ export default async function StaffProofPage({ params }: PageProps) {
   const session = await requireArea('/', locale);
   const version = await loadStaffProofVersion(session.claims, versionId);
   if (!version || version.clientId !== clientId) notFound();
-  const src = await proofLink(session.claims, versionId);
-  if (!src) notFound();
   const t = await getTranslations('proofing');
   const commentOnVersion = commentOnProofAction.bind(null, versionId);
 
@@ -44,7 +42,7 @@ export default async function StaffProofPage({ params }: PageProps) {
       </header>
       <ProofViewer
         kind={version.kind}
-        src={src}
+        src={`/api/proofs/${versionId}/file`}
         title={version.title}
         number={version.number}
         pages={version.pages}

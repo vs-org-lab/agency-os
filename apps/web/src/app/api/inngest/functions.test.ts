@@ -14,6 +14,8 @@ describe('inngest functions', () => {
         expect.stringContaining('proofing-comment-notice'),
         expect.stringContaining('proofing-rounds-warning'),
         expect.stringContaining('proofing-extra-round'),
+        expect.stringContaining('billing-link-phases'),
+        expect.stringContaining('billing-milestones-on-phase-approved'),
       ]),
     );
     expect(new Set(ids).size).toBe(ids.length);

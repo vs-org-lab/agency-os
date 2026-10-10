@@ -17,6 +17,7 @@ import { REAUTHENTICATION_REQUIRED, recentlyVerified, writesBillingRow } from '.
 import { formatRequestNumber } from './domain/numbering';
 import { buildMilestones, dueDateFrom, lisbonDate, milestoneTriggers } from './domain/plan';
 import { buildPaymentRequestPdf } from './pdf';
+import { milestoneLocked } from './release';
 import { requestPdfPath, type BillingStorage } from './storage';
 
 const {
@@ -119,7 +120,7 @@ async function requestParties(
  * Issues the payment request of one milestone: allocates the next number, freezes both parties
  * and the bank details, stores the PDF and emits `billing.request.sent`.
  */
-async function issueRequest(
+export async function issueRequest(
   tx: DbTransaction,
   milestone: MilestoneRow,
   deps: BillingDeps,
@@ -263,7 +264,11 @@ export async function requestPayment(
   claims: VerifiedClaims,
   input: { milestoneId: string },
   deps: BillingDeps,
-): Promise<{ ok: true; requestId: string } | NotFound | { ok: false; rule: 'invalid_state' }> {
+): Promise<
+  | { ok: true; requestId: string }
+  | NotFound
+  | { ok: false; rule: 'invalid_state' | 'milestone_locked' }
+> {
   if (!z.uuid().safeParse(input.milestoneId).success) return NOT_FOUND;
   const allowed = await writesBillingRow(deps.contexts, claims, {
     kind: 'milestone',
@@ -281,6 +286,9 @@ export async function requestPayment(
     if (!milestone) return NOT_FOUND;
     if (milestone.status !== 'pending')
       return { ok: false as const, rule: 'invalid_state' as const };
+    if (await milestoneLocked(tx, milestone)) {
+      return { ok: false as const, rule: 'milestone_locked' as const };
+    }
     return { ok: true as const, requestId: await issueRequest(tx, milestone, deps, now) };
   });
 

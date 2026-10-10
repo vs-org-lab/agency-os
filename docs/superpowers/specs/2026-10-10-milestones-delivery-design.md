@@ -18,7 +18,7 @@ Fecha também dois itens adiados para aqui: os comentários de clientes no feed 
 ## 2. Decisões
 
 1. **Gatilho do marco.** Cada marco ganha um gatilho: `signature` (assinatura, como hoje no AUT-12), `phase_approval` (aprovação de uma fase ligada) ou `delivery` (aprovação final). Ao criar o plano: o primeiro marco é `signature`; havendo mais de um, o último é `delivery`; os do meio são `phase_approval`. Os marcos existentes são migrados com a mesma regra.
-2. **Ligação à fase.** Um marco `phase_approval` aponta para uma fase do projeto do negócio. A ligação é automática quando o projeto é criado (2.2): os marcos do meio ligam-se, por ordem, às fases que pedem aprovação. Um 40/30/30 no processo Orbit fica: 40% na assinatura, 30% na aprovação de "Descoberta e arquitetura", 30% na entrega. Se houver mais marcos do meio do que fases com aprovação, os que sobram ficam sem fase. O fundador e as finanças mudam a fase de um marco pendente no separador de faturação do cliente; só fases do projeto do negócio que pedem aprovação e ainda não foram aprovadas.
+2. **Ligação à fase.** Um marco `phase_approval` aponta para uma fase do projeto do negócio. A ligação é automática quando o projeto é criado (2.2): os marcos do meio ligam-se, por ordem, às fases que pedem aprovação. Um 40/30/30 no processo Orbit fica: 40% na assinatura, 30% na aprovação de "Descoberta e arquitetura", 30% na entrega. Se houver mais marcos do meio do que fases com aprovação, os que sobram ficam sem fase. O fundador e as finanças mudam a fase de um marco pendente na faturação do negócio (Pipeline › negócio › Faturação); só fases do projeto do negócio que pedem aprovação e ainda não foram aprovadas.
 3. **RN-32 no pedido manual.** "Pedir pagamento" recusa um marco `phase_approval` cuja fase ainda não está aprovada e um marco `delivery` antes da aprovação final (`milestone_locked`). Um marco `phase_approval` sem fase continua a poder ser pedido à mão.
 4. **AUT-16.** Quando o cliente aprova uma fase, uma função Inngest emite o pedido de cada marco pendente ligado a essa fase. É idempotente: um marco que já não está pendente fica como está.
 5. **Aprovação final.** Novo tipo de aprovação `project`. A equipa pede-a na sala quando todas as fases estão feitas (projeto `completed`). O decisor decide no portal, em P-02, num grupo "Entrega":
@@ -40,7 +40,7 @@ Fecha também dois itens adiados para aqui: os comentários de clientes no feed 
 
 ### Incluído
 
-1. **Faturação do cliente:** a coluna "Liberta em" em cada marco (assinatura, fase X, entrega) e, nos pendentes `phase_approval`, a escolha da fase; o botão "Pedir pagamento" fica desativado com o motivo quando o marco está preso.
+1. **Faturação do negócio:** a coluna "Liberta em" em cada marco (assinatura, fase X, entrega) e, nos pendentes `phase_approval`, a escolha da fase; o botão "Pedir pagamento" fica desativado com o motivo quando o marco está preso.
 2. **Sala:** "Pedir aprovação final" no plano quando todas as fases estão feitas; o estado do pedido; o projeto entregue com a data.
 3. **Portal:** grupo "Entrega" em P-02 com aprovar e pedir alterações; a página do testemunho.
 4. **Automações:** AUT-16 e AUT-21 como funções Inngest; ligação automática dos marcos às fases quando o projeto é criado.

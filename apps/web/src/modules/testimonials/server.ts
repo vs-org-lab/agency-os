@@ -1,7 +1,8 @@
 import 'server-only';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { getClientTestimonial } from './portal';
-import { submitTestimonial, type TestimonialInput } from './service';
+import type { TestimonialInput } from './input';
+import { submitTestimonial } from './service';
 
 const deps = () => ({ contexts: { withUserContext, withSystemContext } });
 

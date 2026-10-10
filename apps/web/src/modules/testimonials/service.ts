@@ -4,25 +4,14 @@ import { schema } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import { testimonialInputSchema, type TestimonialInput } from './input';
 
 const { testimonials } = schema;
-
-export const MAX_TESTIMONIAL_LENGTH = 1000;
 
 export type TestimonialDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
   flush?: () => Promise<void>;
 };
-
-const inputSchema = z.object({
-  projectId: z.uuid(),
-  body: z.string().trim().min(1).max(MAX_TESTIMONIAL_LENGTH),
-  authorName: z.string().trim().min(1).max(120),
-  authorRole: z.string().trim().max(120),
-  consentPublish: z.boolean(),
-});
-
-export type TestimonialInput = z.input<typeof inputSchema>;
 
 /**
  * The client's decision maker leaves, or replaces, the testimonial of a delivered project
@@ -33,7 +22,7 @@ export async function submitTestimonial(
   input: TestimonialInput,
   deps: TestimonialDeps,
 ): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' }> {
-  const parsed = inputSchema.safeParse(input);
+  const parsed = testimonialInputSchema.safeParse(input);
   if (!parsed.success) {
     return z.uuid().safeParse(input.projectId).success
       ? { ok: false, rule: 'invalid_input' }

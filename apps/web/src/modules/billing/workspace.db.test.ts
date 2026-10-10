@@ -1,5 +1,10 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-os/db/testing';
+import {
+  closeTestSql,
+  createDeliveryFixture,
+  createFixtureWorld,
+  withTestTransaction,
+} from '@agency-os/db/testing';
 import { recordPayment } from './payments';
 import { createPlanForContract } from './requests';
 import { billingClaims, billingDeps, signedContract } from './testing';
@@ -10,6 +15,34 @@ afterAll(async () => {
 });
 
 describe('deal billing', () => {
+  it('milestones say what releases them and whether they are locked', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const delivery = await createDeliveryFixture(sql, world);
+      const { deps } = billingDeps(sql);
+
+      const billing = await deps.contexts.withUserContext(
+        billingClaims(world.users.finance),
+        (tx) => getDealBilling(tx, delivery.dealId, '2026-10-12'),
+      );
+
+      expect(
+        billing?.milestones.map(({ trigger, phase, locked }) => ({ trigger, phase, locked })),
+      ).toEqual([
+        { trigger: 'signature', phase: null, locked: false },
+        {
+          trigger: 'phase_approval',
+          phase: { id: delivery.approvalPhaseId, name: 'Fase 1' },
+          locked: false,
+        },
+        { trigger: 'delivery', phase: null, locked: true },
+      ]);
+      expect(billing?.approvalPhases).toEqual([
+        { id: delivery.approvalPhaseId, name: 'Fase 1', done: true },
+      ]);
+    });
+  });
+
   it('lists milestones with the open request, payments and overdue days', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

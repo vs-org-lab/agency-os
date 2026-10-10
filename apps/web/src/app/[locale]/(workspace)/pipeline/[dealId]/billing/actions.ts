@@ -11,6 +11,7 @@ import {
   recordManualPayment,
   registerInvoice,
   requestMilestonePayment,
+  setMilestoneLinkedPhase,
   settlePayment,
   voidRequest,
 } from '@/modules/billing/server';
@@ -94,4 +95,13 @@ export async function registerInvoiceAction(
   const current = await session();
   if (!current) return { ok: false, code: 'not_found' };
   return await outcome(await registerInvoice(current, input));
+}
+
+export async function linkMilestonePhaseAction(
+  milestoneId: string,
+  phaseId: string | null,
+): Promise<BillingActionResult> {
+  const current = await session();
+  if (!current) return { ok: false, code: 'not_found' };
+  return await outcome(await setMilestoneLinkedPhase(current, { milestoneId, phaseId }));
 }

@@ -7,6 +7,7 @@ export type {
   BillingPdfKind,
   DealBilling,
   LegalInvoiceView,
+  ApprovalPhaseView,
   MilestoneView,
   PaymentRequestView,
   PaymentView,

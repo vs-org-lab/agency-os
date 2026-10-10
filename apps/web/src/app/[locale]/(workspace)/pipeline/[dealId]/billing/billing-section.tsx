@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
@@ -8,6 +8,7 @@ import { Button } from '@agency-os/ui/components/button';
 import { formatMoney, type Currency, type Locale } from '@agency-os/i18n';
 import { FormMessage } from '@/components/forms/form-message';
 import type {
+  ApprovalPhaseView,
   DealBilling,
   MilestoneView,
   PaymentRequestView,
@@ -36,10 +37,18 @@ export type BillingActions = {
   settle(paymentId: string): Promise<BillingActionResult>;
   invoiceUpload(requestId: string): Promise<UploadLinkResult>;
   registerInvoice(input: RegisterLegalInvoiceInput): Promise<BillingActionResult>;
+  linkPhase(milestoneId: string, phaseId: string | null): Promise<BillingActionResult>;
 };
 
 type DoneKey =
-  'createPlan' | 'request' | 'chase' | 'void' | 'record' | 'settle' | 'registerInvoice';
+  | 'createPlan'
+  | 'request'
+  | 'chase'
+  | 'void'
+  | 'record'
+  | 'settle'
+  | 'registerInvoice'
+  | 'linkPhase';
 
 type Feedback = { tone: 'success'; key: DoneKey } | { tone: 'danger'; error: BillingError };
 
@@ -226,13 +235,64 @@ function RequestBlock({
   );
 }
 
+function releaseText(
+  t: ReturnType<typeof useTranslations<'billing.deal'>>,
+  milestone: MilestoneView,
+): string {
+  if (milestone.trigger === 'signature') return t('releases.signature');
+  if (milestone.trigger === 'delivery') return t('releases.delivery');
+  return milestone.phase
+    ? t('releases.phase', { phase: milestone.phase.name })
+    : t('releases.manual');
+}
+
+/** Spec 2D.2, decision 2: the founder or finance picks the approval phase of a pending milestone. */
+function PhasePicker({
+  milestone,
+  phases,
+  disabled,
+  onChange,
+}: {
+  milestone: MilestoneView;
+  phases: ApprovalPhaseView[];
+  disabled: boolean;
+  onChange: (phaseId: string | null) => void;
+}) {
+  const t = useTranslations('billing.deal');
+  const id = useId();
+  const options = phases.filter((phase) => !phase.done || phase.id === milestone.phase?.id);
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="sr-only">
+        {t('phaseLabel', { label: milestone.label })}
+      </label>
+      <select
+        id={id}
+        className="h-11 max-w-72 rounded-md border border-border bg-surface px-3 text-body text-text md:h-9"
+        value={milestone.phase?.id ?? ''}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value === '' ? null : event.target.value)}
+      >
+        <option value="">{t('noPhase')}</option>
+        {options.map((phase) => (
+          <option key={phase.id} value={phase.id}>
+            {phase.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function MilestoneCard({
   milestone,
+  phases,
   writable,
   actions,
   onFeedback,
 }: {
   milestone: MilestoneView;
+  phases: ApprovalPhaseView[];
   writable: boolean;
   actions: BillingActions;
   onFeedback: (feedback: Feedback) => void;
@@ -241,6 +301,18 @@ function MilestoneCard({
   const locale = useLocale() as Locale;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const linkPhase = (phaseId: string | null) =>
+    startTransition(async () => {
+      const result = await actions
+        .linkPhase(milestone.id, phaseId)
+        .catch(() => ({ ok: false, code: 'not_found' }) as const);
+      onFeedback(
+        result.ok
+          ? { tone: 'success', key: 'linkPhase' }
+          : { tone: 'danger', error: billingError(result.code) },
+      );
+      if (result.ok) router.refresh();
+    });
 
   return (
     <li className="flex flex-col gap-3 rounded-md border border-border p-3">
@@ -259,6 +331,22 @@ function MilestoneCard({
           {t(`milestoneStatus.${milestone.status}`)}
         </Badge>
       </div>
+      <p className="text-caption text-text-secondary">{releaseText(t, milestone)}</p>
+      {writable && milestone.status === 'pending' && milestone.trigger === 'phase_approval' ? (
+        <PhasePicker
+          milestone={milestone}
+          phases={phases}
+          disabled={pending}
+          onChange={linkPhase}
+        />
+      ) : null}
+      {milestone.locked ? (
+        <p className="text-body-sm text-text-secondary">
+          {milestone.trigger === 'delivery'
+            ? t('locked.delivery')
+            : t('locked.phase', { phase: milestone.phase?.name ?? '' })}
+        </p>
+      ) : null}
       {milestone.request ? (
         <RequestBlock
           request={milestone.request}
@@ -270,7 +358,7 @@ function MilestoneCard({
         <div>
           <Button
             size="sm"
-            disabled={pending}
+            disabled={pending || milestone.locked}
             onClick={() =>
               startTransition(async () => {
                 const result = await actions
@@ -350,6 +438,7 @@ export function BillingSection({
             <MilestoneCard
               key={milestone.id}
               milestone={milestone}
+              phases={billing.approvalPhases}
               writable={writable}
               actions={actions}
               onFeedback={setFeedback}

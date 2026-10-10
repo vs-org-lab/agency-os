@@ -5,6 +5,7 @@ import {
   type BillingMilestoneStatus,
   type DbTransaction,
   type InvoiceIssuer,
+  type MilestoneTrigger,
   type PaymentMethod,
   type PaymentRequestStatus,
   type PaymentStatus,
@@ -14,7 +15,8 @@ import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { daysBetween } from './domain/plan';
 import { BILLING_URL_TTL_SECONDS, type BillingStorage } from './storage';
 
-const { billingMilestones, legalInvoices, paymentRequests, payments } = schema;
+const { billingMilestones, legalInvoices, paymentRequests, payments, projectPhases, projects } =
+  schema;
 
 export type PaymentView = {
   id: string;
@@ -53,10 +55,17 @@ export type MilestoneView = {
   amount: string;
   currency: Currency;
   status: BillingMilestoneStatus;
+  trigger: MilestoneTrigger;
+  /** The approval phase that releases a phase milestone, when linked. */
+  phase: { id: string; name: string } | null;
+  /** RN-32: the linked phase is not approved yet, or the project is not delivered yet. */
+  locked: boolean;
   request: PaymentRequestView | null;
 };
 
-export type DealBilling = { milestones: MilestoneView[] };
+export type ApprovalPhaseView = { id: string; name: string; done: boolean };
+
+export type DealBilling = { milestones: MilestoneView[]; approvalPhases: ApprovalPhaseView[] };
 
 /** The deal's payment plan as the caller may read it (row level security), or null without one. */
 export async function getDealBilling(
@@ -70,6 +79,22 @@ export async function getDealBilling(
     .where(eq(billingMilestones.dealId, dealId))
     .orderBy(asc(billingMilestones.position));
   if (milestones.length === 0) return null;
+
+  const [project] = await tx
+    .select({ id: projects.id, status: projects.status })
+    .from(projects)
+    .where(eq(projects.dealId, dealId));
+  const approvalPhases = project
+    ? (
+        await tx
+          .select({ id: projectPhases.id, name: projectPhases.name, status: projectPhases.status })
+          .from(projectPhases)
+          .where(
+            and(eq(projectPhases.projectId, project.id), eq(projectPhases.requiresApproval, true)),
+          )
+          .orderBy(asc(projectPhases.position))
+      ).map((phase) => ({ id: phase.id, name: phase.name, done: phase.status === 'done' }))
+    : [];
 
   const requests = await tx
     .select()
@@ -119,9 +144,18 @@ export async function getDealBilling(
     };
   };
 
+  // An approval phase completes only once approved, so a done phase is an approved one.
+  const lockedNow = (milestone: (typeof milestones)[number]): boolean => {
+    if (milestone.trigger === 'delivery') return project?.status !== 'delivered';
+    if (milestone.trigger !== 'phase_approval' || !milestone.phaseId) return false;
+    return !approvalPhases.some((phase) => phase.id === milestone.phaseId && phase.done);
+  };
+
   return {
+    approvalPhases,
     milestones: milestones.map((milestone) => {
       const request = requests.find((row) => row.milestoneId === milestone.id);
+      const phase = approvalPhases.find((row) => row.id === milestone.phaseId);
       return {
         id: milestone.id,
         position: milestone.position,
@@ -130,6 +164,9 @@ export async function getDealBilling(
         amount: milestone.amount,
         currency: milestone.currency,
         status: milestone.status,
+        trigger: milestone.trigger,
+        phase: phase ? { id: phase.id, name: phase.name } : null,
+        locked: milestone.status === 'pending' && lockedNow(milestone),
         request: request ? requestView(request) : null,
       };
     }),

@@ -1726,7 +1726,8 @@
         "void": "Pedido anulado.",
         "record": "Pagamento registado.",
         "settle": "Pagamento conciliado.",
-        "registerInvoice": "Fatura legal registada."
+        "registerInvoice": "Fatura legal registada.",
+        "linkPhase": "Fase do marco guardada."
       },
       "errors": {
         "not_found": "Não encontrado ou sem permissão.",
@@ -1734,8 +1735,22 @@
         "invalid_state": "O estado mudou entretanto. Atualize a página.",
         "too_soon": "O cliente já foi lembrado nas últimas 24 horas.",
         "missing_file": "Carregue o PDF da fatura (até 10 MB).",
-        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
-      }
+        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo.",
+        "milestone_locked": "Este marco só pode ser pedido quando a fase ligada for aprovada ou o projeto for entregue.",
+        "invalid_phase": "Escolha uma fase do projeto que peça aprovação e ainda não esteja concluída."
+      },
+      "releases": {
+        "signature": "Liberta na assinatura",
+        "phase": "Liberta na aprovação de {phase}",
+        "delivery": "Liberta na entrega final",
+        "manual": "Sem fase ligada: pedido à mão"
+      },
+      "locked": {
+        "phase": "Só pode ser pedido quando a fase {phase} for aprovada.",
+        "delivery": "Só pode ser pedido depois da aprovação final."
+      },
+      "phaseLabel": "Fase que liberta {label}",
+      "noPhase": "Sem fase (pedido à mão)"
     }
   },
   "rooms": {

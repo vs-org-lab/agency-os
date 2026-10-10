@@ -41,6 +41,7 @@ export type {
   SeenArea,
   SignatureParty,
   BillingMilestoneStatus,
+  MilestoneTrigger,
   InvoiceIssuer,
   ApprovalStatus,
   ApprovalSubject,

@@ -1726,7 +1726,8 @@
         "void": "Request voided.",
         "record": "Payment recorded.",
         "settle": "Payment reconciled.",
-        "registerInvoice": "Legal invoice recorded."
+        "registerInvoice": "Legal invoice recorded.",
+        "linkPhase": "Milestone phase saved."
       },
       "errors": {
         "not_found": "Not found or not allowed.",
@@ -1734,8 +1735,22 @@
         "invalid_state": "The status has changed. Refresh the page.",
         "too_soon": "The client was already reminded in the last 24 hours.",
         "missing_file": "Upload the invoice PDF (up to 10 MB).",
-        "upload_failed": "The file could not be uploaded. Try again."
-      }
+        "upload_failed": "The file could not be uploaded. Try again.",
+        "milestone_locked": "This milestone can only be requested once its linked phase is approved or the project is delivered.",
+        "invalid_phase": "Choose a project phase that requires approval and is not done yet."
+      },
+      "releases": {
+        "signature": "Released at signature",
+        "phase": "Released when {phase} is approved",
+        "delivery": "Released at final delivery",
+        "manual": "No linked phase: requested manually"
+      },
+      "locked": {
+        "phase": "Can only be requested once the {phase} phase is approved.",
+        "delivery": "Can only be requested after the final approval."
+      },
+      "phaseLabel": "Phase that releases {label}",
+      "noPhase": "No phase (manual request)"
     }
   },
   "rooms": {

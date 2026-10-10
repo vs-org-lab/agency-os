@@ -3,6 +3,16 @@ import { splitAmount, toMinorUnits } from '@/modules/contracts';
 
 export type MilestoneDraft = { position: number; label: string; percent: number; amount: string };
 
+export type MilestoneTrigger = 'signature' | 'phase_approval' | 'delivery';
+
+/** The first milestone is paid at signature, the last at delivery and the rest on phase approvals. */
+export function milestoneTriggers(count: number): MilestoneTrigger[] {
+  return Array.from({ length: count }, (_, index) => {
+    if (index === 0) return 'signature';
+    return index === count - 1 ? 'delivery' : 'phase_approval';
+  });
+}
+
 export const BILLING_TIME_ZONE = 'Europe/Lisbon';
 
 const DAY_MS = 24 * 60 * 60 * 1000;

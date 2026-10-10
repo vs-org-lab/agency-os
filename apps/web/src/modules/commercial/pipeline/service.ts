@@ -193,6 +193,7 @@ export async function applyStageChange(
         ? await contractFacts(tx, deal)
         : { contractSigned: false, coreDeliveredWithinYear: false, firstPaymentReceived: false }),
       coreReadiness: stageOf(input.to) === 'core' ? await loadCoreReadiness(tx, deal.id) : null,
+      deliveryReady: false,
     },
   });
   if (!decision.allowed) {

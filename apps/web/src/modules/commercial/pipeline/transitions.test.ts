@@ -67,6 +67,7 @@ function input(
       contractSigned: true,
       coreDeliveredWithinYear: true,
       firstPaymentReceived: true,
+      deliveryReady: true,
     },
     ...overrides,
   };
@@ -101,6 +102,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -120,6 +122,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -141,6 +144,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -160,6 +164,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -180,6 +185,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -200,6 +206,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -216,6 +223,7 @@ describe('evaluateTransition', () => {
             contractSigned: false,
             coreDeliveredWithinYear: false,
             firstPaymentReceived: false,
+            deliveryReady: false,
           },
         }),
       ),
@@ -272,12 +280,22 @@ describe('evaluateTransition', () => {
     ).toEqual({ allowed: true });
   });
 
-  it('2.10 waits for approvals', () => {
+  it('only the system delivers and only when ready', () => {
     expect(evaluateTransition(input({ from: '2.9', to: '2.10' }))).toEqual({
       allowed: false,
-      rule: 'module_pending',
-      module: 'approvals',
+      rule: 'process_driven',
     });
+    expect(evaluateTransition(input({ from: '2.9', to: '2.10', actor: 'staff' }))).toEqual({
+      allowed: false,
+      rule: 'process_driven',
+    });
+    const system = { from: '2.9', to: '2.10', actor: 'system', reason: null } as const;
+    expect(
+      evaluateTransition(
+        input({ ...system, facts: { ...input(system).facts, deliveryReady: false } }),
+      ),
+    ).toEqual({ allowed: false, rule: 'delivery_pending' });
+    expect(evaluateTransition(input(system))).toEqual({ allowed: true });
   });
 
   it('refuses impossible jumps as not allowed rather than pending', () => {

@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                               |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-09                                                                                                          |
-| Estado                  | Aprovado (luz verde permanente do fundador, 2026-10-09)                                                             |
+| Estado                  | Implementado (2026-10-10)                                                                                           |
 | Vaga                    | 2 (2A Projetos, salas e processo → **2B Tarefas, Início e atualizações** → 2C Equipa e convites → 2D … 2G)          |
 | Módulos                 | M06 (RF-050), M07 (RF-065)                                                                                          |
 | Documentação de produto | `01` (RF-050, RF-065), `02` (S-01, S-02, S-03, C-03), `03` (US-11), `07` (AUT-13), `08` (matriz "Salas e processo") |
@@ -27,7 +27,7 @@ A equipa abre o Início e vê o que precisa dela. As tarefas internas vivem numa
    - projetos ativos;
    - "à espera de si" (itens do Hoje);
    - "por receber", com o total dos pedidos de pagamento em aberto por moeda, só para quem lê faturação.
-4. **Feed de atualizações (S-02)** lido dos eventos de domínio que vêm dos clientes, filtrado pelos clientes que a pessoa pode ler. Não há tabela nova: o OS já guarda estes eventos. Tipos:
+4. **Feed de atualizações (S-02)** lido dos eventos de domínio que vêm dos clientes, filtrado pelos clientes que a pessoa pode ler e pelo que a matriz de acesso do `08` lhe permite ver: o freelancer não vê propostas, contratos nem pagamentos, só aprovações. Não há tabela nova: o OS já guarda estes eventos. Tipos:
    - proposta aceite;
    - contrato assinado pelo cliente;
    - pagamento recebido;

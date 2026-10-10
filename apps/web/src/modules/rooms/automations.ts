@@ -1,5 +1,4 @@
 import 'server-only';
-import { issueDeliveryRequests } from '@/modules/billing/server';
 import { isPipelineCode } from '@/modules/commercial';
 import {
   alertClientTeam,
@@ -12,10 +11,11 @@ import {
   sendClientPortalNotice,
 } from '@/modules/commercial/server';
 import { nextAllowedSendTime } from '@/modules/email';
+import type { DbTransaction } from '@agency-os/db';
 import { inngest, type DomainEventType } from '@/modules/events';
 import type { EmailTemplateKey } from '@/modules/email';
 import { withSystemContext } from '@/platform/db';
-import { completeDelivery } from './delivery';
+import { completeDelivery, completeDeliveryForDeal } from './delivery';
 import { approvalNotice } from './notices';
 import { createProjectForDeal } from './projects';
 import { sweepApprovalReminders } from './reminders';
@@ -96,9 +96,28 @@ const approvalReminders = inngest.createFunction(
     ),
 );
 
+/** Moves the deal as the system for the delivery; a refused move resolves false. */
+function deliveryDeps() {
+  return {
+    contexts: { withSystemContext },
+    moveDeal: async (tx: DbTransaction, dealId: string, code: string) => {
+      if (!isPipelineCode(code)) return false;
+      const change = await applyStageChange(tx, {
+        dealId,
+        to: code,
+        reason: null,
+        actor: 'system',
+      });
+      return change.ok;
+    },
+  };
+}
+
 /**
- * AUT-21: a delivered project gets its final invoice, the deal moves to 2.10, the founder gets the
- * celebration box and activation proposal tasks and the decision maker is asked for a testimonial.
+ * AUT-21: a delivered project moves the deal to 2.10 when nothing is left to request, the founder
+ * gets the celebration box and activation proposal tasks and the decision maker is asked for a
+ * testimonial. The final invoice runs in billing on the same event, so a billing failure never
+ * holds these back.
  */
 const projectDelivered = inngest.createFunction(
   {
@@ -112,21 +131,8 @@ const projectDelivered = inngest.createFunction(
     const { projectId } = data.payload;
     if (!projectId || !data.clientId) return { delivered: false };
     const clientId = data.clientId;
-    await step.run('request-delivery-milestones', () => issueDeliveryRequests(projectId));
     const completed = await step.run('complete-delivery', () =>
-      completeDelivery(projectId, {
-        contexts: { withSystemContext },
-        moveDeal: async (tx, dealId, code) => {
-          if (!isPipelineCode(code)) return false;
-          const change = await applyStageChange(tx, {
-            dealId,
-            to: code,
-            reason: null,
-            actor: 'system',
-          });
-          return change.ok;
-        },
-      }),
+      completeDelivery(projectId, deliveryDeps()),
     );
     const sendAt = await step.run('quiet-hours-send-time', async () =>
       nextAllowedSendTime(
@@ -144,9 +150,28 @@ const projectDelivered = inngest.createFunction(
   },
 );
 
+/**
+ * RN-04: a request issued for a deal whose project is already delivered (the final invoice, or a
+ * milestone requested by hand afterwards) may now let the deal reach 2.10.
+ */
+const deliveryOnRequestSent = inngest.createFunction(
+  {
+    id: 'rooms-delivery-on-request-sent',
+    triggers: [{ event: 'billing.request.sent' }],
+    retries: RETRIES,
+    onFailure: failureHandler('rooms-delivery-on-request-sent'),
+  },
+  async ({ event, step }) => {
+    const { dealId } = (event.data as { payload: { dealId?: string } }).payload;
+    if (!dealId) return { moved: false, tasks: 0 };
+    return step.run('complete-delivery', () => completeDeliveryForDeal(dealId, deliveryDeps()));
+  },
+);
+
 export const ROOM_FUNCTIONS = [
   projectOnKickoff,
   projectDelivered,
+  deliveryOnRequestSent,
   approvalReminders,
   clientPortalNoticeFunction(
     'rooms-update-published',

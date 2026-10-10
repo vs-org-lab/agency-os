@@ -91,3 +91,22 @@ export async function completeDelivery(
     return { moved, tasks: drafts.length };
   });
 }
+
+/**
+ * Retries the end of a delivery from the deal: when a milestone of a deal whose project is already
+ * delivered gets its request, the move to 2.10 may now be allowed (RN-04). Projects not delivered
+ * are left alone.
+ */
+export async function completeDeliveryForDeal(
+  dealId: string,
+  deps: DeliveryDeps,
+): Promise<{ moved: boolean; tasks: number }> {
+  if (!z.uuid().safeParse(dealId).success) return { moved: false, tasks: 0 };
+  const [project] = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .select({ id: projects.id })
+      .from(projects)
+      .where(and(eq(projects.dealId, dealId), eq(projects.status, 'delivered'))),
+  );
+  return project ? completeDelivery(project.id, deps) : { moved: false, tasks: 0 };
+}

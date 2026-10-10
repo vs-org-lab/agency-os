@@ -103,7 +103,7 @@ export async function getClientRoom(
     }>(sql`
       select id, subject_id, status::text as status, requested_at, decided_at, comment
       from public.portal_approvals
-      where project_id = ${selected.id}::uuid
+      where project_id = ${selected.id}::uuid and subject_type = 'phase'
       order by requested_at desc, id
     `),
   ]);

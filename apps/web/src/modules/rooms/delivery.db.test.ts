@@ -8,7 +8,7 @@ import {
 } from '@agency-os/db/testing';
 import { decideApproval, requestFinalApproval } from './approvals';
 import { approvalNotice } from './notices';
-import { getClientApprovals } from './portal';
+import { getClientApprovals, getClientRoom } from './portal';
 import { roomClaims, roomDeps } from './testing';
 
 afterAll(async () => {
@@ -167,6 +167,28 @@ describe('final approval', () => {
         subject: 'delivery',
         roomUrl: `https://os.example.com/c/${world.clients.a}`,
       });
+    });
+  });
+
+  it('the client room lists phase approvals only, never the final approval', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const delivery = await createDeliveryFixture(sql, world);
+      const { deps } = roomDeps(sql);
+      const requested = await requestFinalApproval(
+        roomClaims(world.users.manager),
+        { projectId: delivery.projectId },
+        deps,
+      );
+      if (!requested.ok) throw new Error('Final approval was not requested');
+
+      const room = await deps.contexts.withUserContext(
+        roomClaims(world.users.decisionMakerA, 'client'),
+        (tx) => getClientRoom(tx, world.clients.a, delivery.projectId),
+      );
+      expect(room?.project?.approvals.map((approval) => approval.id)).toEqual([
+        delivery.phaseApprovalId,
+      ]);
     });
   });
 

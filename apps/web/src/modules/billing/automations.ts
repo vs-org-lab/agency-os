@@ -10,7 +10,12 @@ import { inngest, type DomainEventType } from '@/modules/events';
 import type { EmailTemplateKey } from '@/modules/email';
 import { withSystemContext } from '@/platform/db';
 import { lisbonDate } from './domain/plan';
-import { approvedPhaseOf, linkProjectPhases, requestMilestonesForPhase } from './links';
+import {
+  approvedPhaseOf,
+  linkProjectPhases,
+  requestDeliveryMilestones,
+  requestMilestonesForPhase,
+} from './links';
 import { dealNotice } from './notices';
 import { sweepPaymentReminders } from './reminders';
 import { createPlanForContract } from './requests';
@@ -105,6 +110,23 @@ const milestonesOnPhaseApproved = inngest.createFunction(
   },
 );
 
+/** AUT-21: the final invoice of a delivered project, with its own retries. */
+const finalInvoiceOnDelivery = inngest.createFunction(
+  {
+    id: 'billing-final-invoice-on-delivery',
+    triggers: [{ event: 'rooms.project.delivered' }],
+    retries: RETRIES,
+    onFailure: failureHandler('billing-final-invoice-on-delivery'),
+  },
+  async ({ event, step }) => {
+    const { projectId } = (event.data as { payload: { projectId?: string } }).payload;
+    if (!projectId) return { requested: [] };
+    return step.run('request-delivery-milestones', () =>
+      requestDeliveryMilestones(projectId, billingDeps()),
+    );
+  },
+);
+
 /** AUT-19: daily reminders before and after the due date. */
 const remindersSweep = inngest.createFunction(
   {
@@ -125,6 +147,7 @@ export const BILLING_FUNCTIONS = [
   planOnContractSigned,
   linkPhasesOnProjectCreated,
   milestonesOnPhaseApproved,
+  finalInvoiceOnDelivery,
   remindersSweep,
   portalNoticeFunction('billing-request-sent', 'billing.request.sent', 'lead.payment_requested'),
   portalNoticeFunction(

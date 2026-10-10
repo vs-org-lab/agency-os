@@ -10,7 +10,7 @@ import {
 } from '@agency-os/db/testing';
 import { applyStageChange } from '@/modules/commercial/server';
 import { createDbContexts } from '@/platform/db';
-import { completeDelivery, type DeliveryDeps } from './delivery';
+import { completeDelivery, completeDeliveryForDeal, type DeliveryDeps } from './delivery';
 import { ROOMS_TEST_NOW } from './testing';
 
 afterAll(async () => {
@@ -88,6 +88,43 @@ describe('delivery', () => {
         tasks: 2,
       });
       expect(await dealCode(sql, delivery.dealId)).toBe('X.1');
+    });
+  });
+
+  it('a milestone requested after delivery moves the deal to 2.10', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const delivery = await createDeliveryFixture(sql, world);
+      const deps = deliveryDeps(sql);
+      await sql`update public.projects set status = 'delivered' where id = ${delivery.projectId}`;
+      await sql`
+        update public.billing_milestones set status = 'requested'
+        where id = ${delivery.milestoneIds.delivery}
+      `;
+
+      expect((await completeDelivery(delivery.projectId, deps)).moved).toBe(false);
+      await sql`
+        update public.billing_milestones set status = 'requested'
+        where id = ${delivery.milestoneIds.phase}
+      `;
+      expect(await completeDeliveryForDeal(delivery.dealId, deps)).toEqual({
+        moved: true,
+        tasks: 0,
+      });
+      expect(await dealCode(sql, delivery.dealId)).toBe('2.10');
+    });
+  });
+
+  it('a deal whose project is not delivered is left alone', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const delivery = await createDeliveryFixture(sql, world);
+
+      expect(await completeDeliveryForDeal(delivery.dealId, deliveryDeps(sql))).toEqual({
+        moved: false,
+        tasks: 0,
+      });
+      expect(await dealCode(sql, delivery.dealId)).toBe('2.9');
     });
   });
 

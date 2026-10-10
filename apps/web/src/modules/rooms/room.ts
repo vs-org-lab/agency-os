@@ -148,15 +148,18 @@ async function buildProject(
       createdAt: update.createdAt.toISOString(),
       visibility: update.visibility,
     })),
-    approvals: approvalRows.map((approval) => ({
-      id: approval.id,
-      phaseId: approval.subjectId,
-      phaseName: phases.find((phase) => phase.id === approval.subjectId)?.name ?? '',
-      status: approval.status,
-      requestedAt: approval.requestedAt.toISOString(),
-      decidedAt: isoOrNull(approval.decidedAt),
-      comment: approval.comment,
-    })),
+    // File versions and the final approval have their own screens; the room lists phase approvals.
+    approvals: approvalRows
+      .filter((approval) => approval.subjectType === 'phase')
+      .map((approval) => ({
+        id: approval.id,
+        phaseId: approval.subjectId,
+        phaseName: phases.find((phase) => phase.id === approval.subjectId)?.name ?? '',
+        status: approval.status,
+        requestedAt: approval.requestedAt.toISOString(),
+        decidedAt: isoOrNull(approval.decidedAt),
+        comment: approval.comment,
+      })),
   };
   return { summaries, project };
 }

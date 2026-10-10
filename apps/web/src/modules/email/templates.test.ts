@@ -139,6 +139,14 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     role: 'freelancer',
     inviteUrl: 'https://os.example.com/accept-invitation?token_hash=hash&type=invite',
   },
+  'team.task_assigned': {
+    fullName: 'Rui Costa',
+    title: 'Exportar o logótipo',
+    scope: 'client',
+    clientName: 'Empresa Exemplo',
+    due: '16 de outubro',
+    taskUrl: 'https://os.example.com/c/client/tasks',
+  },
   'client.invitation': {
     fullName: 'Marta Lopes',
     agencyName: 'Aurion',

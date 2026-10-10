@@ -39,6 +39,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.approval_overdue',
   'team.invitation',
   'client.invitation',
+  'team.task_assigned',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -107,6 +108,14 @@ export type EmailParams = {
     role: 'decision_maker' | 'operational' | 'client_finance';
     inviteUrl: string;
   };
+  'team.task_assigned': {
+    fullName: string;
+    title: string;
+    scope: 'client' | 'studio';
+    clientName: string;
+    due: string;
+    taskUrl: string;
+  };
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -147,6 +156,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.approval_overdue': 'roomUrl',
   'team.invitation': 'inviteUrl',
   'client.invitation': 'inviteUrl',
+  'team.task_assigned': 'taskUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

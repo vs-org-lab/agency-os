@@ -250,9 +250,10 @@ describe('process', () => {
         update public.client_staff_assignments set archived_at = now()
         where client_id = ${world.clients.a} and user_id = ${world.users.manager}
       `;
-      expect(
-        await updateStep(founder, { stepId, assigneeId: world.users.manager }, deps),
-      ).toEqual({ ok: false, rule: 'invalid_input' });
+      expect(await updateStep(founder, { stepId, assigneeId: world.users.manager }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
       expect(await startPhase(freelancer, { phaseId: phaseOf(started, 2) }, deps)).toEqual({
         ok: false,
         rule: 'not_found',

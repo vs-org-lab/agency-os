@@ -924,6 +924,12 @@
         "heading": "Welcome to the {agencyName} team",
         "body": "Hello {fullName}, you have been invited to the {agencyName} team as {role, select, project_manager {project manager} freelancer {freelancer} finance {finance} other {team member}}.\n\nSet your password and two-step verification to sign in. The link works once.",
         "action": "Accept the invitation"
+      },
+      "task_assigned": {
+        "subject": "New task: {title}",
+        "heading": "You have a new task",
+        "body": "Hello {fullName}, you are now responsible for the task \"{title}\" {scope, select, client {for {clientName}} other {for the studio}}, {due, select, none {with no date set} other {due {due}}}.",
+        "action": "Open the task"
       }
     },
     "client": {

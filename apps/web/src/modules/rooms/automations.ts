@@ -1,6 +1,6 @@
 import 'server-only';
 import {
-  alertFounders,
+  alertClientTeam,
   clientPortalNoticeFunction,
   failureHandler,
   notificationDeps,
@@ -50,7 +50,9 @@ function approvalAlertFunction(id: string, trigger: DomainEventType, template: A
       const data = event.data as RoomEventData;
       const approvalId = data.payload.approvalId;
       if (!approvalId) return { sent: 0 };
-      const sent = await step.run('alert-founders', async () => {
+      const clientId = data.clientId;
+      if (!clientId) return { sent: 0 };
+      const sent = await step.run('alert-client-team', async () => {
         const deps = notificationDeps();
         const notice = await approvalNotice(approvalId, {
           contexts: { withSystemContext },
@@ -65,7 +67,7 @@ function approvalAlertFunction(id: string, trigger: DomainEventType, template: A
                 roomUrl: notice.roomUrl,
               }
             : notice;
-        return alertFounders(data.organizationId, template, params as never, deps);
+        return alertClientTeam(data.organizationId, clientId, template, params as never, deps);
       });
       return { sent };
     },

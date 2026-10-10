@@ -10,6 +10,7 @@ describe('inngest functions', () => {
         expect.stringContaining('outbox'),
         expect.stringContaining('rooms-project-on-kickoff'),
         expect.stringContaining('tasks-kickoff'),
+        expect.stringContaining('tasks-assigned-notice'),
       ]),
     );
     expect(new Set(ids).size).toBe(ids.length);

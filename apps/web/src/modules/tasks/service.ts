@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { schema, type DbTransaction, type TaskStatus } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
+import { emit } from '@/modules/events';
 import { isRoomStaff, roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
@@ -168,7 +169,26 @@ export async function createTask(
       clientId,
       metadata: { source: 'manual' },
     });
+    if (data.assigneeId && data.assigneeId !== actor.userId) {
+      await emitAssigned(tx, actor.organizationId, clientId, task.id, data.assigneeId);
+    }
     return { ok: true as const, taskId: task.id };
+  });
+}
+
+/** Someone other than the caller now has the task; they are told by email. */
+function emitAssigned(
+  tx: DbTransaction,
+  organizationId: string,
+  clientId: string | null,
+  taskId: string,
+  assigneeId: string,
+): Promise<string> {
+  return emit(tx, {
+    type: 'tasks.task.assigned',
+    organizationId,
+    clientId: clientId ?? undefined,
+    payload: { taskId, assigneeId },
   });
 }
 
@@ -227,6 +247,13 @@ export async function updateTask(
       clientId: task.clientId,
       metadata: patch,
     });
+    if (
+      patch.assigneeId &&
+      patch.assigneeId !== task.assigneeId &&
+      patch.assigneeId !== actor.userId
+    ) {
+      await emitAssigned(tx, actor.organizationId, task.clientId, task.id, patch.assigneeId);
+    }
     return { ok: true as const };
   });
 }

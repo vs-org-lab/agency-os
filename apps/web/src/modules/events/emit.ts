@@ -32,6 +32,7 @@ export const DOMAIN_EVENTS = [
   'rooms.approval.decided',
   'rooms.approval.reminded',
   'rooms.approval.overdue',
+  'tasks.task.assigned',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

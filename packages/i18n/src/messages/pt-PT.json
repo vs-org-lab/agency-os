@@ -924,6 +924,12 @@
         "heading": "Bem-vindo à equipa da {agencyName}",
         "body": "Olá {fullName}, foi convidado para a equipa da {agencyName} como {role, select, project_manager {gestor de projeto} freelancer {freelancer} finance {finanças} other {membro da equipa}}.\n\nDefina a sua palavra-passe e a verificação em dois passos para entrar. O link só funciona uma vez.",
         "action": "Aceitar o convite"
+      },
+      "task_assigned": {
+        "subject": "Nova tarefa: {title}",
+        "heading": "Tem uma tarefa nova",
+        "body": "Olá {fullName}, ficou responsável pela tarefa «{title}» {scope, select, client {do cliente {clientName}} other {do estúdio}}, {due, select, none {sem data definida} other {para {due}}}.",
+        "action": "Abrir a tarefa"
       }
     },
     "client": {

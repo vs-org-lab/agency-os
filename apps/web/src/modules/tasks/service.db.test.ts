@@ -261,4 +261,53 @@ describe('tasks', () => {
       expect(row?.count).toBe(0);
     });
   });
+
+  it('assigning a task to someone else emits the event', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const created = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Rever', clientId: world.clients.a, assigneeId: world.users.freelancer },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await updateTask(
+        taskClaims(world.users.founder),
+        { taskId: created.taskId, assigneeId: world.users.manager },
+        deps,
+      );
+
+      const events = await sql<{ assignee: string }[]>`
+        select payload ->> 'assigneeId' as assignee from public.domain_events
+        where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
+          and payload ->> 'taskId' = ${created.taskId}
+        order by created_at, id
+      `;
+      expect(events.map((event) => event.assignee).sort()).toEqual(
+        [world.users.freelancer, world.users.manager].sort(),
+      );
+    });
+  });
+
+  it('self assignment emits nothing', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const manager = taskClaims(world.users.manager);
+      const created = await createTask(
+        manager,
+        { title: 'Ligar', clientId: world.clients.a, assigneeId: world.users.manager },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await updateTask(manager, { taskId: created.taskId, title: 'Ligar ao cliente' }, deps);
+
+      const events = await sql`
+        select 1 from public.domain_events
+        where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
+      `;
+      expect(events).toHaveLength(0);
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { schema, type CallKind, type DbTransaction } from '@agency-os/db';
 import { isLocale, type Locale } from '@agency-os/i18n';
 import {
@@ -117,6 +117,45 @@ export async function alertFounders<K extends FounderTemplate>(
     });
   }
   return founders.length;
+}
+
+/** Founders plus the project managers assigned to the client, each once. */
+export async function alertClientTeam<K extends FounderTemplate>(
+  organizationId: string,
+  clientId: string,
+  template: K,
+  params: EmailParams[K],
+  deps: NotificationDeps,
+): Promise<number> {
+  const { sender, recipients } = await deps.contexts.withSystemContext(async (tx) => {
+    const founders = await activeFounders(tx, organizationId);
+    const managers = await tx.execute<{ email: string }>(sql`
+      select u.email
+      from public.client_staff_assignments a
+      join public.organization_memberships m
+        on m.organization_id = a.organization_id and m.user_id = a.user_id
+      join public.profiles p on p.id = a.user_id
+      join auth.users u on u.id = a.user_id
+      where a.organization_id = ${organizationId}::uuid and a.client_id = ${clientId}::uuid
+        and a.archived_at is null and m.role = 'project_manager' and m.status = 'active'
+        and m.archived_at is null and p.archived_at is null and u.email is not null
+    `);
+    return {
+      sender: await organizationSender(tx, organizationId),
+      recipients: [...new Set([...founders, ...managers].map((person) => person.email))],
+    };
+  });
+  for (const to of recipients) {
+    await send(deps, {
+      to,
+      template,
+      locale: sender.defaultLocale,
+      params,
+      sender,
+      organizationId,
+    });
+  }
+  return recipients.length;
 }
 
 export async function sendBookingLinkEmail(

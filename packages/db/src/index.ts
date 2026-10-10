@@ -44,6 +44,8 @@ export type {
   InvoiceIssuer,
   ApprovalStatus,
   ApprovalSubject,
+  ProofKind,
+  ProofVersionStatus,
   PhaseStatus,
   ProjectStatus,
   StepStatus,

@@ -718,3 +718,74 @@ export async function createTeamFixture(sql: TransactionSql, world: World): Prom
   `;
   return { rooms, other, assignedTaskId, otherTaskId };
 }
+
+export type ProofFixture = {
+  rooms: RoomFixture;
+  fileId: string;
+  /** Ready, never sent for approval. */
+  versionOneId: string;
+  /** Ready, with a pending approval. */
+  versionTwoId: string;
+  approvalId: string;
+  clientCommentId: string;
+  internalCommentId: string;
+};
+
+/** A proof in client A's project with two image versions, the second sent for approval. */
+export async function createProofFixture(sql: TransactionSql, world: World): Promise<ProofFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const { projectId } = rooms.a;
+  const [file] = await sql<{ id: string }[]>`
+    insert into public.proof_files (organization_id, client_id, project_id, title, created_by)
+    values (${world.organizationId}, ${world.clients.a}, ${projectId}, 'Logótipo',
+            ${world.users.founder})
+    returning id
+  `;
+  if (!file) throw new Error('Proof fixture file was not created');
+  const version = async (number: number) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.proof_versions (organization_id, client_id, project_id, file_id, number,
+                                         storage_path, kind, mime_type, size_bytes, status,
+                                         uploaded_by)
+      values (${world.organizationId}, ${world.clients.a}, ${projectId}, ${file.id}, ${number},
+              ${`fixture/${file.id}/${number}`}, 'image', 'image/png', 1024, 'ready',
+              ${world.users.founder})
+      returning id
+    `;
+    if (!row) throw new Error('Proof fixture version was not created');
+    return row.id;
+  };
+  const versionOneId = await version(1);
+  const versionTwoId = await version(2);
+  const [approval] = await sql<{ id: string }[]>`
+    insert into public.approvals (organization_id, client_id, project_id, subject_type, subject_id,
+                                  requested_by)
+    values (${world.organizationId}, ${world.clients.a}, ${projectId}, 'file_version',
+            ${versionTwoId}, ${world.users.founder})
+    returning id
+  `;
+  if (!approval) throw new Error('Proof fixture approval was not created');
+  const comment = async (authorId: string, body: string, internal: boolean, number: number) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.proof_comments (organization_id, client_id, project_id, version_id,
+                                         author_id, body, anchor, number, internal)
+      values (${world.organizationId}, ${world.clients.a}, ${projectId}, ${versionTwoId},
+              ${authorId}, ${body}, ${JSON.stringify({ type: 'point', x: 40, y: 60 })}::jsonb,
+              ${number}, ${internal})
+      returning id
+    `;
+    if (!row) throw new Error('Proof fixture comment was not created');
+    return row.id;
+  };
+  const clientCommentId = await comment(world.users.decisionMakerA, 'Mais contraste', false, 1);
+  const internalCommentId = await comment(world.users.founder, 'Rever com o designer', true, 2);
+  return {
+    rooms,
+    fileId: file.id,
+    versionOneId,
+    versionTwoId,
+    approvalId: approval.id,
+    clientCommentId,
+    internalCommentId,
+  };
+}

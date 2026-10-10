@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                    |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-10                                                                                                                               |
-| Estado                  | Aprovado (luz verde permanente do fundador, 2026-10-09)                                                                                  |
+| Estado                  | Implementado (2026-10-10)                                                                                                                |
 | Vaga                    | 2 (2A → 2B → 2C → **2D.1 Proofing de ficheiros** → 2D.2 Marcos e entrega → 2E … 2G)                                                      |
 | Módulos                 | M08 (RF-070 a RF-073)                                                                                                                    |
 | Documentação de produto | `01` (RF-070 a RF-073), `02` (P-02, F5), `03` (US-14, US-15 e o pedido extra), `04` (RN-41, RN-42), `07` (AUT-17), `08` (SEC-30, SEC-31) |

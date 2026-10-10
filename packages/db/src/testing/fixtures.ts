@@ -793,6 +793,129 @@ export async function createProofFixture(sql: TransactionSql, world: World): Pro
   };
 }
 
+export type LibraryRecords = {
+  projectId: string;
+  /** Visible root "Marca". */
+  rootId: string;
+  /** "Logótipos", inside "Marca". */
+  subfolderId: string;
+  /** Internal root "Interno". */
+  internalId: string;
+  rootFileId: string;
+  subfolderFileId: string;
+  internalFileId: string;
+  /** A file under "Marca" still uploading. */
+  uploadingFileId: string;
+};
+
+export type LibraryFixture = {
+  rooms: RoomFixture;
+  a: LibraryRecords;
+  b: Pick<LibraryRecords, 'projectId' | 'rootId' | 'rootFileId'>;
+};
+
+async function seedLibraryFolder(
+  sql: TransactionSql,
+  world: World,
+  scope: { clientId: string; projectId: string },
+  input: { name: string; parent: { id: string; rootId: string; depth: number } | null },
+): Promise<string> {
+  const folderId = randomUUID();
+  await sql`
+    insert into public.library_folders (id, organization_id, client_id, project_id, parent_id,
+                                        root_id, depth, name, visibility, created_by)
+    values (${folderId}, ${world.organizationId}, ${scope.clientId}, ${scope.projectId},
+            ${input.parent?.id ?? null}, ${input.parent?.rootId ?? folderId},
+            ${input.parent ? input.parent.depth + 1 : 0}, ${input.name},
+            ${input.parent ? null : 'internal'}, ${world.users.founder})
+  `;
+  return folderId;
+}
+
+async function seedLibraryFile(
+  sql: TransactionSql,
+  world: World,
+  scope: { clientId: string; projectId: string },
+  input: { folderId: string; rootId: string; name: string; status?: 'ready' | 'uploading' },
+): Promise<string> {
+  const fileId = randomUUID();
+  const ready = (input.status ?? 'ready') === 'ready';
+  await sql`
+    insert into public.library_files (id, organization_id, client_id, project_id, folder_id,
+                                      root_id, name, storage_path, kind, mime_type, size_bytes,
+                                      status, uploaded_by)
+    values (${fileId}, ${world.organizationId}, ${scope.clientId}, ${scope.projectId},
+            ${input.folderId}, ${input.rootId}, ${input.name},
+            ${`${world.organizationId}/${scope.clientId}/${scope.projectId}/${fileId}`},
+            ${ready ? 'image' : null}, ${ready ? 'image/png' : null}, ${ready ? 2048 : null},
+            ${input.status ?? 'ready'}, ${world.users.founder})
+  `;
+  return fileId;
+}
+
+/**
+ * Client A's project library: the visible root "Marca" with the subfolder "Logótipos", a file in
+ * each and one still uploading, and the internal root "Interno" with a file; client B has a
+ * visible root with a file.
+ */
+export async function createLibraryFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<LibraryFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const scopeA = { clientId: world.clients.a, projectId: rooms.a.projectId };
+  const scopeB = { clientId: world.clients.b, projectId: rooms.b.projectId };
+  const rootId = await seedLibraryFolder(sql, world, scopeA, { name: 'Marca', parent: null });
+  const subfolderId = await seedLibraryFolder(sql, world, scopeA, {
+    name: 'Logótipos',
+    parent: { id: rootId, rootId, depth: 0 },
+  });
+  const internalId = await seedLibraryFolder(sql, world, scopeA, { name: 'Interno', parent: null });
+  const rootB = await seedLibraryFolder(sql, world, scopeB, { name: 'Marca', parent: null });
+  await sql`
+    update public.library_folders set visibility = 'client' where id in (${rootId}, ${rootB})
+  `;
+  return {
+    rooms,
+    a: {
+      projectId: rooms.a.projectId,
+      rootId,
+      subfolderId,
+      internalId,
+      rootFileId: await seedLibraryFile(sql, world, scopeA, {
+        folderId: rootId,
+        rootId,
+        name: 'manual.png',
+      }),
+      subfolderFileId: await seedLibraryFile(sql, world, scopeA, {
+        folderId: subfolderId,
+        rootId,
+        name: 'logo.png',
+      }),
+      internalFileId: await seedLibraryFile(sql, world, scopeA, {
+        folderId: internalId,
+        rootId: internalId,
+        name: 'notas.png',
+      }),
+      uploadingFileId: await seedLibraryFile(sql, world, scopeA, {
+        folderId: rootId,
+        rootId,
+        name: 'pendente.png',
+        status: 'uploading',
+      }),
+    },
+    b: {
+      projectId: rooms.b.projectId,
+      rootId: rootB,
+      rootFileId: await seedLibraryFile(sql, world, scopeB, {
+        folderId: rootB,
+        rootId: rootB,
+        name: 'marca-b.png',
+      }),
+    },
+  };
+}
+
 export type DeliveryFixture = {
   contracts: ContractFixture;
   dealId: string;

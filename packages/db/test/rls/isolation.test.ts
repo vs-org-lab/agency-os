@@ -60,6 +60,9 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'proof_versions', clientColumn: 'client_id' },
   { table: 'proof_comments', clientColumn: 'client_id' },
   { table: 'testimonials', clientColumn: 'client_id' },
+  { table: 'library_folders', clientColumn: 'client_id' },
+  { table: 'library_files', clientColumn: 'client_id' },
+  { table: 'project_update_files', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -100,6 +103,26 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
                                        author_role)
       values (${world.organizationId}, ${clientId}, ${records.projectId}, 'Excelente', 'Cliente',
               'Diretora')
+    `;
+    const [folder] = await sql<{ id: string }[]>`
+      insert into public.library_folders (id, organization_id, client_id, project_id, root_id,
+                                          name, visibility)
+      select id, ${world.organizationId}, ${clientId}, ${records.projectId}, id, 'Marca', 'client'
+      from (select gen_random_uuid() as id) as generated
+      returning id
+    `;
+    const [libraryFile] = await sql<{ id: string }[]>`
+      insert into public.library_files (organization_id, client_id, project_id, folder_id, root_id,
+                                        name, storage_path)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, ${folder?.id ?? ''},
+              ${folder?.id ?? ''}, 'logo.png', 'isolation/library')
+      returning id
+    `;
+    await sql`
+      insert into public.project_update_files (update_id, file_id, organization_id, client_id,
+                                               project_id)
+      values (${records.clientUpdateId}, ${libraryFile?.id ?? ''}, ${world.organizationId},
+              ${clientId}, ${records.projectId})
     `;
   }
   await createTaskFixture(sql, world);

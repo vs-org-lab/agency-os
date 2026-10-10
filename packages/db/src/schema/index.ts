@@ -15,3 +15,4 @@ export * from './documents';
 export * from './contracts';
 export * from './billing';
 export * from './rooms';
+export * from './tasks';

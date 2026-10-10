@@ -197,6 +197,20 @@
       "when": 1791567091772,
       "tag": "20261009173131_rooms_access",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1791582982135,
+      "tag": "20261009215622_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791582983767,
+      "tag": "20261009215623_tasks_access",
+      "breakpoints": true
     }
   ]
 }

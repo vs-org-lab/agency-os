@@ -247,6 +247,10 @@ export const approvalStatusEnum = appSchema.enum('approval_status', [
   'withdrawn',
 ]);
 
+export const taskStatusEnum = appSchema.enum('task_status', ['open', 'done']);
+
+export const taskSourceEnum = appSchema.enum('task_source', ['manual', 'kickoff', 'welcome_kit']);
+
 export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
@@ -293,6 +297,8 @@ export type UpdateVisibility = (typeof updateVisibilityEnum.enumValues)[number];
 export type UpdateKind = (typeof updateKindEnum.enumValues)[number];
 export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
 export type ApprovalStatus = (typeof approvalStatusEnum.enumValues)[number];
+export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
+export type TaskSource = (typeof taskSourceEnum.enumValues)[number];
 export type SeenArea = (typeof seenAreaEnum.enumValues)[number];
 export type MessageTemplateKind = (typeof messageTemplateKindEnum.enumValues)[number];
 export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number];

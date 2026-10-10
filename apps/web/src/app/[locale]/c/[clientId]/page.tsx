@@ -4,6 +4,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
 import {
   completePhaseAction,
@@ -15,10 +16,19 @@ import {
   updateStepAction,
   withdrawApprovalAction,
 } from './actions';
+import {
+  finishProofUploadAction,
+  requestProofApprovalAction,
+  saveRevisionLimitAction,
+  startProofAction,
+  startProofVersionAction,
+  withdrawProofApprovalAction,
+} from './proof-actions';
 import { NewProjectForm } from './room/new-project-form';
 import { PlanView } from './room/plan-view';
 import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
+import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +54,13 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
       })
     : [];
   const t = await getTranslations('rooms');
+  const tp = await getTranslations('proofing.section');
+  const [proofs, rounds] = room.project
+    ? await Promise.all([
+        loadProjectProofs(session.claims, clientId, room.project.id),
+        loadProjectRounds(session.claims, room.project.id),
+      ])
+    : [null, null];
 
   return (
     <div className="flex flex-col gap-6">
@@ -61,6 +78,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             <TabsList>
               <TabsTrigger value="steps">{t('tabs.steps')}</TabsTrigger>
               <TabsTrigger value="plan">{t('tabs.plan')}</TabsTrigger>
+              <TabsTrigger value="proofs">{tp('title')}</TabsTrigger>
             </TabsList>
             <TabsContent value="steps" className="pt-4">
               <ProcessBoard
@@ -81,6 +99,23 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             </TabsContent>
             <TabsContent value="plan" className="pt-4">
               <PlanView phases={room.project.phases} startsOn={room.project.startsOn} />
+            </TabsContent>
+            <TabsContent value="proofs" className="pt-4">
+              <ProofsSection
+                clientId={clientId}
+                projectId={room.project.id}
+                files={proofs ?? []}
+                rounds={rounds ?? { used: 0, limit: 3, warning: false, extra: false }}
+                writable={writable}
+                actions={{
+                  start: startProofAction,
+                  newVersion: startProofVersionAction,
+                  finish: finishProofUploadAction,
+                  request: requestProofApprovalAction,
+                  withdraw: withdrawProofApprovalAction,
+                  saveLimit: saveRevisionLimitAction,
+                }}
+              />
             </TabsContent>
           </Tabs>
           <ProjectCard project={room.project} team={room.team} />

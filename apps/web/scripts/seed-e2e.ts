@@ -116,6 +116,11 @@ async function main(): Promise<void> {
       update public.calls set status = 'cancelled'
       where organization_id = ${organizationId} and status = 'scheduled' and starts_at > now()
     `;
+    // An interrupted run leaves approvals waiting, which later runs and global sweeps would see.
+    await sql`
+      update public.approvals set status = 'withdrawn'
+      where organization_id = ${organizationId} and status = 'pending'
+    `;
   } finally {
     await sql.end();
   }

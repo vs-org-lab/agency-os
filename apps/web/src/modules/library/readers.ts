@@ -213,3 +213,41 @@ export async function loadLibrary(
     canCreateRoot: team,
   };
 }
+
+export type AttachableFile = {
+  id: string;
+  name: string;
+  folderName: string;
+  visibility: 'internal' | 'client';
+};
+
+/** The ready files of a project the team may attach to an update (RF-055), with their root's visibility. */
+export async function attachableFiles(
+  claims: VerifiedClaims,
+  projectId: string,
+  deps: LibraryDeps,
+): Promise<AttachableFile[]> {
+  const writer = await libraryWriter(claims, projectId, deps);
+  if (writer?.role !== 'team') return [];
+  const rows = await deps.contexts.withSystemContext((tx) =>
+    tx.execute<{
+      id: string;
+      name: string;
+      folder_name: string;
+      visibility: 'internal' | 'client';
+    }>(sql`
+      select fi.id, fi.name, fo.name as folder_name, r.visibility::text as visibility
+      from public.library_files fi
+      join public.library_folders fo on fo.id = fi.folder_id
+      join public.library_folders r on r.id = fi.root_id
+      where fi.project_id = ${projectId}::uuid and fi.status = 'ready'
+      order by lower(fi.name), fi.id
+    `),
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    folderName: row.folder_name,
+    visibility: row.visibility,
+  }));
+}

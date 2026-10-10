@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import type {
   ApprovalStatus,
   DbTransaction,
+  LibraryFileKind,
   PhaseStatus,
   ProjectStatus,
   StepStatus,
@@ -13,6 +14,7 @@ import {
   pickProject,
   type ClientPhaseView,
   type ClientRoomView,
+  type UpdateFileView,
 } from './views';
 
 type Timestamp = string | Date;
@@ -108,6 +110,35 @@ export async function getClientRoom(
     `),
   ]);
 
+  const attachments = new Map<string, UpdateFileView[]>();
+  if (updates.length > 0) {
+    const rows = await tx.execute<{
+      update_id: string;
+      file_id: string;
+      name: string;
+      kind: LibraryFileKind;
+      size_bytes: string;
+    }>(sql`
+      select update_id, file_id, name, kind::text as kind, size_bytes::text as size_bytes
+      from public.portal_update_files
+      where update_id in (${sql.join(
+        updates.map((update) => sql`${update.id}::uuid`),
+        sql`, `,
+      )})
+      order by lower(name), file_id
+    `);
+    for (const row of rows) {
+      const files = attachments.get(row.update_id) ?? [];
+      files.push({
+        id: row.file_id,
+        name: row.name,
+        kind: row.kind,
+        sizeBytes: Number(row.size_bytes),
+      });
+      attachments.set(row.update_id, files);
+    }
+  }
+
   const phaseViews: ClientPhaseView[] = phases.map((phase) => ({
     id: phase.id,
     position: phase.position,
@@ -145,6 +176,7 @@ export async function getClientRoom(
         milestone: update.milestone,
         authorName: update.author_name,
         createdAt: new Date(update.created_at).toISOString(),
+        files: attachments.get(update.id) ?? [],
       })),
       approvals: approvals.map((approval) => ({
         id: approval.id,

@@ -6,7 +6,7 @@ import {
   createLibraryFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
-import { loadLibrary } from './readers';
+import { attachableFiles, loadLibrary } from './readers';
 import { libraryClaims, libraryDeps } from './testing';
 import { zipManifest } from './zip';
 
@@ -181,6 +181,35 @@ describe('library readers', () => {
       expect(await order('name')).toEqual([extraId, library.a.rootFileId]);
       expect(await order('size')).toEqual([library.a.rootFileId, extraId]);
       expect(await order('date')).toEqual([extraId, library.a.rootFileId]);
+    });
+  });
+
+  it('attachable files list the ready files of the project with their visibility', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = libraryDeps(sql);
+
+      expect(
+        await attachableFiles(libraryClaims(world.users.manager), library.a.projectId, deps),
+      ).toEqual([
+        {
+          id: library.a.subfolderFileId,
+          name: 'logo.png',
+          folderName: 'Logótipos',
+          visibility: 'client',
+        },
+        { id: library.a.rootFileId, name: 'manual.png', folderName: 'Marca', visibility: 'client' },
+        {
+          id: library.a.internalFileId,
+          name: 'notas.png',
+          folderName: 'Interno',
+          visibility: 'internal',
+        },
+      ]);
+      expect(
+        await attachableFiles(libraryClaims(world.users.freelancer), library.a.projectId, deps),
+      ).toEqual([]);
     });
   });
 

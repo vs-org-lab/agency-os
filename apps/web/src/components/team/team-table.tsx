@@ -56,6 +56,7 @@ export function TeamTable({
               </Badge>
             </span>
             <span className="flex flex-col text-caption text-text-secondary">
+              <span>{t('table.clientCount', { count: member.clientCount })}</span>
               <span>
                 {t('table.loadValue', {
                   tasks: member.load.tasksThisWeek,

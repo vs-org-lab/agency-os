@@ -19,7 +19,11 @@ export type ColleagueView = {
 };
 
 export type ColleagueResult =
-  { ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' | 'last_decision_maker' };
+  | { ok: true }
+  | {
+      ok: false;
+      rule: 'not_found' | 'invalid_input' | 'last_decision_maker' | 'already_member';
+    };
 
 const CLIENT_ROLES = ['decision_maker', 'operational', 'client_finance'] as const;
 const uuid = z.uuid();
@@ -87,7 +91,9 @@ export async function inviteColleague(
   if (!actor) return { ok: false, rule: 'not_found' };
   const result = await inviteClientUser({ claims, actor }, input, deps);
   if ('membershipId' in result) return { ok: true };
-  return { ok: false, rule: result.error === 'forbidden' ? 'not_found' : 'invalid_input' };
+  if (result.error === 'forbidden') return { ok: false, rule: 'not_found' };
+  if (result.error === 'already_member') return { ok: false, rule: 'already_member' };
+  return { ok: false, rule: 'invalid_input' };
 }
 
 type Target = { actor: Actor; clientId: string; userId: string; role: ClientRole };

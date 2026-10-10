@@ -1893,13 +1893,6 @@
     },
     "table": {
       "label": "Pessoas da equipa",
-      "person": "Pessoa",
-      "role": "Papel",
-      "status": "Estado",
-      "clients": "Clientes",
-      "load": "Carga",
-      "availability": "Disponibilidade",
-      "rate": "Custo",
       "loadValue": "{tasks, plural, one {# tarefa} other {# tarefas}} esta semana · {projects, plural, one {# projeto} other {# projetos}}",
       "hours": "{hours} h por semana",
       "noHours": "Sem horas definidas",
@@ -1907,7 +1900,8 @@
       "noRate": "Sem custo definido",
       "resend": "Reenviar convite",
       "resendLabel": "Reenviar o convite a {name}",
-      "resent": "Convite reenviado."
+      "resent": "Convite reenviado.",
+      "clientCount": "{count, plural, one {# cliente} other {# clientes}}"
     },
     "invite": {
       "heading": "Convidar",
@@ -1960,7 +1954,10 @@
       "invalid_input": "Verifique os campos e tente de novo.",
       "invalid_state": "Esta ação já não se aplica.",
       "last_founder": "A organização precisa de pelo menos um fundador ativo.",
-      "last_decision_maker": "A empresa precisa de pelo menos um decisor ativo."
+      "last_decision_maker": "A empresa precisa de pelo menos um decisor ativo.",
+      "client_account": "Este email pertence a uma conta de cliente e não pode entrar na equipa.",
+      "already_member": "Esta pessoa já tem acesso.",
+      "revoked_member": "Esta pessoa está sem acesso. Reponha o acesso na ficha dela."
     }
   }
 }

@@ -3,7 +3,7 @@ import { desc, eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import type { Locale } from '@agency-os/i18n';
 import type { Actor } from '@/modules/access';
-import { createInvitationDeps, inviteClientUser } from '@/modules/identity';
+import { createInvitationDeps, inviteClientUser, lookupUserIdByEmail } from '@/modules/identity';
 import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import { buildPrompt } from './assistant/prompts';
 import {
@@ -212,6 +212,10 @@ export async function grantCorePortalAccess(
       contexts,
       invite: async (input) => {
         const result = await inviteClientUser(session, input, invitationDeps);
+        if ('error' in result && result.error === 'already_member') {
+          const userId = await lookupUserIdByEmail(invitationDeps.contexts, input.email);
+          return userId ? { userId } : { error: 'forbidden' };
+        }
         if ('error' in result) return result;
         const [membership] = await withUserContext(session.claims, (tx) =>
           tx

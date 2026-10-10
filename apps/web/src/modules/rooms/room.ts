@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
 import { readableProjectIds, roomActor } from './authorize';
+import { isRoomStaff } from './process';
 import type { RoomsDeps } from './runtime-types';
 import {
   FEED_LIMIT,
@@ -157,12 +158,15 @@ async function buildProject(
 
 /**
  * Who works in the room: the organisation's founders and the staff assigned to the client
- * (spec decision 6). `team` is the assigned staff only, shown on the project card.
+ * (spec decision 6), filtered by the same rule that accepts an assignee (`isRoomStaff`), so a
+ * freelancer appears only in the projects they are on. `team` is the assigned staff only, shown on
+ * the project card.
  */
 async function roomPeople(
   tx: DbTransaction,
   organizationId: string,
   clientId: string,
+  projectId: string | null,
 ): Promise<{ people: Person[]; team: Person[] }> {
   const founders = await tx
     .selectDistinct({ id: profiles.id, name: profiles.fullName })
@@ -173,9 +177,10 @@ async function roomPeople(
         eq(organizationMemberships.organizationId, organizationId),
         eq(organizationMemberships.status, 'active'),
         eq(organizationMemberships.role, 'founder'),
+        isNull(organizationMemberships.archivedAt),
       ),
     );
-  const team = await tx
+  const candidates = await tx
     .selectDistinct({ id: profiles.id, name: profiles.fullName })
     .from(clientStaffAssignments)
     .innerJoin(profiles, eq(profiles.id, clientStaffAssignments.userId))
@@ -189,10 +194,16 @@ async function roomPeople(
     .where(
       and(
         eq(clientStaffAssignments.clientId, clientId),
+        isNull(clientStaffAssignments.archivedAt),
         eq(organizationMemberships.status, 'active'),
+        isNull(organizationMemberships.archivedAt),
         inArray(organizationMemberships.role, ['project_manager', 'freelancer']),
       ),
     );
+  const team: Person[] = [];
+  for (const person of candidates) {
+    if (await isRoomStaff(tx, organizationId, clientId, person.id, projectId)) team.push(person);
+  }
   const byName = (left: Person, right: Person) => left.name.localeCompare(right.name);
   const people = [
     ...founders,
@@ -226,7 +237,7 @@ export async function loadRoom(
       clientName: client.name,
       projects: summaries,
       project,
-      ...(await roomPeople(tx, actor.organizationId, input.clientId)),
+      ...(await roomPeople(tx, actor.organizationId, input.clientId, project?.id ?? null)),
     };
   });
 }

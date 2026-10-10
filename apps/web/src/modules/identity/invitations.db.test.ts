@@ -369,6 +369,79 @@ describe('invitations sent by the OS', () => {
     });
   });
 
+  it('a client account cannot join the team', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = depsFor(sql);
+      const founder = await sessionFor(deps.contexts, world.users.founder);
+      await sql`reset role`;
+      const [client] = await sql<{ email: string }[]>`
+        select email from auth.users where id = ${world.users.decisionMakerA}
+      `;
+
+      expect(
+        await inviteTeamMember(
+          founder,
+          { email: client?.email ?? '', role: 'freelancer', fullName: 'Client Person' },
+          deps,
+        ),
+      ).toEqual({ error: 'client_account' });
+      expect(deps.links.invited).toEqual([]);
+      expect(deps.email.sent).toEqual([]);
+    });
+  });
+
+  it('inviting again resends to pending members and refuses active or revoked ones', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = depsFor(sql);
+      const founder = await sessionFor(deps.contexts, world.users.founder);
+      const input = {
+        email: 'again@agency.example',
+        role: 'freelancer' as const,
+        fullName: 'Again',
+      };
+      const first = await inviteTeamMember(founder, input, deps);
+      if (!('membershipId' in first)) throw new Error('Invitation failed');
+
+      expect(await inviteTeamMember(founder, input, deps)).toEqual(first);
+      expect(deps.email.sent).toHaveLength(2);
+
+      await sql`reset role`;
+      await sql`update public.organization_memberships set status = 'active' where id = ${first.membershipId}`;
+      expect(await inviteTeamMember(founder, input, deps)).toEqual({ error: 'already_member' });
+      await sql`update public.organization_memberships set status = 'revoked' where id = ${first.membershipId}`;
+      expect(await inviteTeamMember(founder, input, deps)).toEqual({ error: 'revoked_member' });
+      expect(deps.email.sent).toHaveLength(2);
+    });
+  });
+
+  it('a revoked client user can be invited again', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = depsFor(sql);
+      const decisionMaker = await sessionFor(deps.contexts, world.users.decisionMakerA);
+      const input = {
+        clientId: world.clients.a,
+        email: 'returning@client-a.example',
+        role: 'operational' as const,
+        fullName: 'Returning',
+      };
+      const first = await inviteClientUser(decisionMaker, input, deps);
+      if (!('membershipId' in first)) throw new Error('Invitation failed');
+      await sql`reset role`;
+      await sql`update public.client_memberships set status = 'revoked' where id = ${first.membershipId}`;
+
+      expect(await inviteClientUser(decisionMaker, input, deps)).toEqual(first);
+      await sql`reset role`;
+      const [row] = await sql<{ status: string }[]>`
+        select status::text from public.client_memberships where id = ${first.membershipId}
+      `;
+      expect(row?.status).toBe('invited');
+      expect(deps.email.sent).toHaveLength(2);
+    });
+  });
+
   it('resend only for pending invitations', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

@@ -6,6 +6,9 @@ export const TEAM_ERRORS = [
   'invalid_state',
   'last_founder',
   'last_decision_maker',
+  'client_account',
+  'already_member',
+  'revoked_member',
 ] as const;
 
 export type TeamError = (typeof TEAM_ERRORS)[number];

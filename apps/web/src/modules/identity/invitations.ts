@@ -41,6 +41,54 @@ export type BootstrapDeps = {
 
 type StoredInvitation = { membershipId: string; created: boolean } | { error: 'forbidden' };
 
+type ExistingAccount = {
+  profileKind: UserKind | null;
+  membership: { id: string; status: 'invited' | 'active' | 'revoked' } | null;
+};
+
+/**
+ * The account already registered for this email, its profile kind and its membership in the
+ * organisation (team invitations) or in the client (client invitations), so a repeat invitation
+ * resends, refuses or reopens instead of reporting success while changing nothing.
+ */
+async function existingAccount(
+  deps: Pick<InvitationDeps, 'contexts'>,
+  address: string,
+  scope: { organizationId: string } | { clientId: string },
+): Promise<ExistingAccount | null> {
+  const userId = await lookupUserIdByEmail(deps.contexts, address);
+  if (!userId) return null;
+  return deps.contexts.withSystemContext(async (tx) => {
+    const [profile] = await tx
+      .select({ kind: profiles.kind })
+      .from(profiles)
+      .where(eq(profiles.id, userId));
+    const [membership] =
+      'organizationId' in scope
+        ? await tx
+            .select({ id: organizationMemberships.id, status: organizationMemberships.status })
+            .from(organizationMemberships)
+            .where(
+              and(
+                eq(organizationMemberships.organizationId, scope.organizationId),
+                eq(organizationMemberships.userId, userId),
+                isNull(organizationMemberships.archivedAt),
+              ),
+            )
+        : await tx
+            .select({ id: clientMemberships.id, status: clientMemberships.status })
+            .from(clientMemberships)
+            .where(
+              and(
+                eq(clientMemberships.clientId, scope.clientId),
+                eq(clientMemberships.userId, userId),
+                isNull(clientMemberships.archivedAt),
+              ),
+            );
+    return { profileKind: profile?.kind ?? null, membership: membership ?? null };
+  });
+}
+
 type TeamRole = 'project_manager' | 'freelancer' | 'finance';
 type ClientRole = 'decision_maker' | 'operational' | 'client_finance';
 
@@ -97,7 +145,11 @@ async function sendInvitationEmail(
   });
 }
 
-export type InvitationResult = { membershipId: string } | { error: 'forbidden' | 'invalid_input' };
+export type InvitationResult =
+  | { membershipId: string }
+  | {
+      error: 'forbidden' | 'invalid_input' | 'client_account' | 'already_member' | 'revoked_member';
+    };
 
 const fullName = z.string().trim().min(1).max(200);
 const email = z.email().max(320);
@@ -146,6 +198,12 @@ export async function inviteTeamMember(
   const parsed = teamInvitationSchema.safeParse({ ...input, email: normalizeEmail(input.email) });
   if (!parsed.success) return { error: 'invalid_input' };
   if (!(await canInvite(session, deps))) return { error: 'forbidden' };
+  const organizationId = session.actor.organizationId;
+
+  const existing = await existingAccount(deps, parsed.data.email, { organizationId });
+  if (existing?.profileKind === 'client') return { error: 'client_account' };
+  if (existing?.membership?.status === 'active') return { error: 'already_member' };
+  if (existing?.membership?.status === 'revoked') return { error: 'revoked_member' };
 
   const { userId, link } = await deps.links.createInvitationLink(parsed.data.email, {
     data: { full_name: parsed.data.fullName },
@@ -154,7 +212,6 @@ export async function inviteTeamMember(
     ensureProfile(tx, userId, parsed.data.fullName, 'internal'),
   );
 
-  const organizationId = session.actor.organizationId;
   const result = await deps.contexts.withUserContext(
     session.claims,
     async (tx): Promise<StoredInvitation> => {
@@ -196,21 +253,19 @@ export async function inviteTeamMember(
     },
   );
 
-  if ('created' in result && result.created) {
-    await sendInvitationEmail(
-      organizationId,
-      {
-        kind: 'internal',
-        to: parsed.data.email,
-        fullName: parsed.data.fullName,
-        role: parsed.data.role,
-        link,
-      },
-      deps,
-    );
-    return { membershipId: result.membershipId };
-  }
-  return 'membershipId' in result ? { membershipId: result.membershipId } : result;
+  if ('error' in result) return result;
+  await sendInvitationEmail(
+    organizationId,
+    {
+      kind: 'internal',
+      to: parsed.data.email,
+      fullName: parsed.data.fullName,
+      role: parsed.data.role,
+      link,
+    },
+    deps,
+  );
+  return { membershipId: result.membershipId };
 }
 
 export async function inviteClientUser(
@@ -221,16 +276,25 @@ export async function inviteClientUser(
   const parsed = clientInvitationSchema.safeParse({ ...input, email: normalizeEmail(input.email) });
   if (!parsed.success) return { error: 'invalid_input' };
   if (!(await canInvite(session, deps, parsed.data.clientId))) return { error: 'forbidden' };
+  const organizationId = session.actor.organizationId;
+  const { clientId, role } = parsed.data;
+
+  const existing = await existingAccount(deps, parsed.data.email, { clientId });
+  if (existing?.membership?.status === 'active') return { error: 'already_member' };
 
   const { userId, link } = await deps.links.createInvitationLink(parsed.data.email, {
     data: { full_name: parsed.data.fullName },
   });
-  await deps.contexts.withSystemContext((tx) =>
-    ensureProfile(tx, userId, parsed.data.fullName, 'client'),
-  );
+  await deps.contexts.withSystemContext(async (tx) => {
+    await ensureProfile(tx, userId, parsed.data.fullName, 'client');
+    if (existing?.membership?.status === 'revoked') {
+      await tx
+        .update(clientMemberships)
+        .set({ status: 'invited', role })
+        .where(eq(clientMemberships.id, existing.membership.id));
+    }
+  });
 
-  const organizationId = session.actor.organizationId;
-  const { clientId, role } = parsed.data;
   const result = await deps.contexts.withUserContext(
     session.claims,
     async (tx): Promise<StoredInvitation> => {
@@ -269,22 +333,13 @@ export async function inviteClientUser(
     },
   );
 
-  if ('created' in result && result.created) {
-    await sendInvitationEmail(
-      organizationId,
-      {
-        kind: 'client',
-        to: parsed.data.email,
-        fullName: parsed.data.fullName,
-        role,
-        clientId,
-        link,
-      },
-      deps,
-    );
-    return { membershipId: result.membershipId };
-  }
-  return 'membershipId' in result ? { membershipId: result.membershipId } : result;
+  if ('error' in result) return result;
+  await sendInvitationEmail(
+    organizationId,
+    { kind: 'client', to: parsed.data.email, fullName: parsed.data.fullName, role, clientId, link },
+    deps,
+  );
+  return { membershipId: result.membershipId };
 }
 
 /**

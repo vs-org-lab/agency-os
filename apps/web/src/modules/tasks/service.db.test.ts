@@ -177,6 +177,22 @@ describe('tasks', () => {
     });
   });
 
+  it('unassigned staff are not offered as assignees', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      await sql`
+        update public.client_staff_assignments set archived_at = now()
+        where client_id = ${world.clients.a} and user_id = ${world.users.manager}
+      `;
+
+      const options = await listTaskOptions(taskClaims(world.users.founder), world.clients.a, deps);
+
+      expect(options?.people.map((person) => person.id)).not.toContain(world.users.manager);
+      expect(options?.people.map((person) => person.id)).toContain(world.users.freelancer);
+    });
+  });
+
   it('a task stays editable after its assignee leaves the client', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

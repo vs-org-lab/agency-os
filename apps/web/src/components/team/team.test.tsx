@@ -94,6 +94,8 @@ describe('team components', () => {
     expect(screen.getByText('Convidado')).toBeTruthy();
     expect(screen.getByText('2 tarefas esta semana · 1 projeto')).toBeTruthy();
     expect(screen.getByText('20 h por semana')).toBeTruthy();
+    expect(screen.getByText('1 cliente')).toBeTruthy();
+    expect(screen.getByText('0 clientes')).toBeTruthy();
     expect(screen.getByText(/35,00\s€\/h/)).toBeTruthy();
     expect(screen.getByText('Sem custo definido')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Rui Costa' }).getAttribute('href')).toBe(

@@ -1893,13 +1893,6 @@
     },
     "table": {
       "label": "Team members",
-      "person": "Person",
-      "role": "Role",
-      "status": "Status",
-      "clients": "Clients",
-      "load": "Load",
-      "availability": "Availability",
-      "rate": "Cost",
       "loadValue": "{tasks, plural, one {# task} other {# tasks}} this week · {projects, plural, one {# project} other {# projects}}",
       "hours": "{hours} h per week",
       "noHours": "No hours set",
@@ -1907,7 +1900,8 @@
       "noRate": "No cost set",
       "resend": "Resend invitation",
       "resendLabel": "Resend the invitation to {name}",
-      "resent": "Invitation sent again."
+      "resent": "Invitation sent again.",
+      "clientCount": "{count, plural, one {# client} other {# clients}}"
     },
     "invite": {
       "heading": "Invite",
@@ -1960,7 +1954,10 @@
       "invalid_input": "Check the fields and try again.",
       "invalid_state": "This action no longer applies.",
       "last_founder": "The organisation needs at least one active founder.",
-      "last_decision_maker": "The company needs at least one active decision maker."
+      "last_decision_maker": "The company needs at least one active decision maker.",
+      "client_account": "This email belongs to a client account and cannot join the team.",
+      "already_member": "This person already has access.",
+      "revoked_member": "This person has no access. Restore it from their page."
     }
   }
 }

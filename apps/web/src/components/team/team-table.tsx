@@ -5,12 +5,11 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { formatMoney, type Locale } from '@agency-os/i18n';
 import { FormMessage } from '@/components/forms/form-message';
+import { ActionButton } from '@/components/ui/action-button';
 import { Link } from '@/i18n/navigation';
 import { toMinorUnits } from '@/modules/contracts';
 import type { TeamMemberView } from '@/modules/team';
-import type { TeamActionResult } from './team-errors';
-import { ActionButton } from '@/components/ui/action-button';
-import { teamError, type TeamError } from './team-errors';
+import { teamError, type TeamActionResult, type TeamError } from './team-errors';
 
 const STATUS_STYLE = {
   active: 'bg-success-bg text-success',

@@ -22,7 +22,9 @@ describe('proof file route', () => {
 
   it('redirects readers to a fresh signed link that is never cached', async () => {
     getVerifiedClaims.mockResolvedValue({ sub: 'user-1' });
-    proofLink.mockResolvedValue('https://project.supabase.co/storage/v1/object/sign/proofs/a?token=t');
+    proofLink.mockResolvedValue(
+      'https://project.supabase.co/storage/v1/object/sign/proofs/a?token=t',
+    );
 
     const response = await call(VERSION_ID);
 

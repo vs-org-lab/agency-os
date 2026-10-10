@@ -19,6 +19,7 @@ import {
   sendBookingLinkEmail,
   sendCallConfirmation,
   sendCallReminder,
+  sendClientPortalNotice,
   sendPortalNotice,
   type NotificationDeps,
 } from './notifications';
@@ -154,6 +155,28 @@ describe('notifications', () => {
       });
       expect(email.sent[0]?.text).toContain('https://os.example.com/en/portal');
       expect(email.sent[0]?.text).toContain('Hello Ana,');
+    });
+  });
+
+  it('portal notices can open a page of the portal', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await bookedCall(sql, world);
+      const email = recordingEmail();
+      const deps = depsFor(sql, email);
+      await sql`
+        update public.contacts set portal_user_id = ${world.users.decisionMakerA}
+        where client_id = ${world.clients.a} and email = 'ana@empresa.pt'
+      `;
+
+      expect(
+        await sendClientPortalNotice(world.clients.a, 'lead.testimonial_request', deps, {
+          path: '/testimonial/project-1',
+        }),
+      ).toBe(true);
+      expect(email.sent[0]?.text).toContain(
+        'https://os.example.com/en/portal/testimonial/project-1',
+      );
     });
   });
 

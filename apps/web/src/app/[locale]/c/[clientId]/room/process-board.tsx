@@ -55,12 +55,16 @@ export function ProcessBoard({
   project,
   people,
   writable,
+  editable = writable,
   currentUserId,
   actions,
 }: {
   project: ProjectView;
   people: readonly Person[];
+  /** Phases and approvals: the founder and the client's managers. */
   writable: boolean;
+  /** Steps: also the project's freelancer (RN-51, "L E (próprio)"). */
+  editable?: boolean;
   currentUserId: string;
   actions: ProcessActions;
 }) {
@@ -234,7 +238,7 @@ export function ProcessBoard({
           <ol aria-label={t('stepsOf', { name: selected.name })} className="flex flex-col gap-2">
             {selected.steps.map((step) => {
               const canChangeStatus =
-                (writable || step.assigneeId === currentUserId) &&
+                (editable || step.assigneeId === currentUserId) &&
                 selected.status === 'in_progress';
               return (
                 <li
@@ -271,7 +275,7 @@ export function ProcessBoard({
                         {t(`step.nextShort.${step.status}`)}
                       </Button>
                     ) : null}
-                    {writable ? (
+                    {editable ? (
                       <>
                         <select
                           aria-label={t('step.assignee', { name: step.name })}

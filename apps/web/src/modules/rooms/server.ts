@@ -3,11 +3,12 @@ import type { StepStatus, UpdateVisibility } from '@agency-os/db';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import {
   decideApproval,
+  requestFinalApproval,
   requestPhaseApproval,
   withdrawApproval,
   type ApprovalDecision,
 } from './approvals';
-import { roomActor } from './authorize';
+import { projectEditor, roomActor } from './authorize';
 import { getClientApprovals, getClientRoom } from './portal';
 import { completePhase, setStepStatus, startPhase, updatePhase, updateStep } from './process';
 import { loadRoom, loadRoomPreview } from './room';
@@ -55,7 +56,11 @@ export async function loadStaffRoom(
     loadRoom(session.claims, input, deps),
     roomActor(deps.contexts, session.claims, input.clientId, 'write'),
   ]);
-  return room ? { room, writable: writer !== null } : null;
+  if (!room) return null;
+  const editor = room.project
+    ? await projectEditor(deps.contexts, session.claims, input.clientId, room.project.id)
+    : null;
+  return { room, writable: writer !== null, editable: editor !== null };
 }
 
 export function loadStaffPreview(
@@ -101,6 +106,10 @@ export function requestRoomApproval(session: RoomSession, phaseId: string) {
   return requestPhaseApproval(session.claims, { phaseId }, roomsDeps());
 }
 
+export function requestRoomFinalApproval(session: RoomSession, projectId: string) {
+  return requestFinalApproval(session.claims, { projectId }, roomsDeps());
+}
+
 export function withdrawRoomApproval(session: RoomSession, approvalId: string) {
   return withdrawApproval(session.claims, { approvalId }, roomsDeps());
 }
@@ -129,4 +138,5 @@ export function loadPortalApprovals(claims: VerifiedClaims, clientId: string) {
   return withUserContext(claims, (tx) => getClientApprovals(tx, clientId));
 }
 export { roomActor } from './authorize';
+export { soleClientManager } from './managers';
 export { isRoomStaff } from './process';

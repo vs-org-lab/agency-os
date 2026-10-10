@@ -265,9 +265,13 @@ async function leadCallMessage(
   });
 }
 
-function portalUrl(appBaseUrl: string, locale: Locale): string {
-  return new URL(locale === 'pt-PT' ? '/portal' : `/${locale}/portal`, appBaseUrl).toString();
+/** The portal, or a page of it (for example `/testimonial/<project>`), in the reader's locale. */
+function portalUrl(appBaseUrl: string, locale: Locale, path = ''): string {
+  const base = locale === 'pt-PT' ? '/portal' : `/${locale}/portal`;
+  return new URL(`${base}${path}`, appBaseUrl).toString();
 }
+
+export type PortalNoticeOptions = { path?: string };
 
 /**
  * The booking management page only serves the discovery call, so proposal session emails
@@ -308,13 +312,15 @@ export type PortalNoticeTemplate =
   | 'lead.room_update'
   | 'lead.step_shared'
   | 'lead.approval_requested'
-  | 'lead.approval_reminder';
+  | 'lead.approval_reminder'
+  | 'lead.testimonial_request';
 
 /** Tells the decision maker with portal access that something new was shared with them. */
 export async function sendPortalNotice(
   dealId: string,
   template: PortalNoticeTemplate,
   deps: NotificationDeps,
+  options: PortalNoticeOptions = {},
 ): Promise<boolean> {
   const context = await deps.contexts.withSystemContext(async (tx) => {
     const [deal] = await tx
@@ -355,7 +361,7 @@ export async function sendPortalNotice(
     params: {
       firstName: context.firstName,
       agencyName: context.sender.agencyName,
-      portalUrl: portalUrl(deps.appBaseUrl, locale),
+      portalUrl: portalUrl(deps.appBaseUrl, locale, options.path),
     },
   });
   return true;
@@ -379,9 +385,10 @@ export async function sendClientPortalNotice(
   clientId: string,
   template: PortalNoticeTemplate,
   deps: NotificationDeps,
+  options: PortalNoticeOptions = {},
 ): Promise<boolean> {
   const dealId = await deps.contexts.withSystemContext((tx) => latestDealOf(tx, clientId));
-  if (dealId) return sendPortalNotice(dealId, template, deps);
+  if (dealId) return sendPortalNotice(dealId, template, deps, options);
   const context = await deps.contexts.withSystemContext(async (tx) => {
     const [client] = await tx
       .select({ organizationId: clients.organizationId })
@@ -419,7 +426,7 @@ export async function sendClientPortalNotice(
     params: {
       firstName: context.firstName,
       agencyName: context.sender.agencyName,
-      portalUrl: portalUrl(deps.appBaseUrl, locale),
+      portalUrl: portalUrl(deps.appBaseUrl, locale, options.path),
     },
   });
   return true;

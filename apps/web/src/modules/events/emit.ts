@@ -26,6 +26,7 @@ export const DOMAIN_EVENTS = [
   'billing.payment.received',
   'billing.payment.review',
   'rooms.project.created',
+  'rooms.project.delivered',
   'rooms.step.shared',
   'rooms.update.published',
   'rooms.approval.requested',
@@ -35,6 +36,7 @@ export const DOMAIN_EVENTS = [
   'tasks.task.assigned',
   'proofing.comment.added',
   'proofing.round.extra',
+  'testimonials.received',
   'proofing.rounds.warning',
 ] as const;
 

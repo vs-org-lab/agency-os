@@ -211,7 +211,8 @@
         "proposal_accepted": "Proposta aceite",
         "contract_signed": "Contrato assinado pelo cliente",
         "payment_received": "Pagamento recebido",
-        "approval_decided": "{decision, select, approved {Aprovação concedida} changes_requested {Alterações pedidas numa aprovação} other {Aprovação decidida}}"
+        "approval_decided": "{decision, select, approved {Aprovação concedida} changes_requested {Alterações pedidas numa aprovação} other {Aprovação decidida}}",
+        "proof_comment": "Comentário em {file}"
       }
     }
   },
@@ -411,7 +412,8 @@
         "contract_required": "Sem contrato assinado, o negócio não entra em 2.1.",
         "core_required": "Só entra em 2.1 sem Core quem teve um Core entregue nos últimos 12 meses.",
         "payment_required": "Sem o primeiro pagamento conciliado, o negócio não passa a 2.2.",
-        "process_driven": "De 2.3 a 2.9 o negócio acompanha as fases do projeto; avance a fase na sala do cliente."
+        "process_driven": "De 2.3 a 2.10 o negócio acompanha o projeto: avance as fases e peça a aprovação final na sala do cliente.",
+        "delivery_pending": "O negócio só passa a 2.10 com o projeto entregue e todos os marcos pedidos."
       },
       "codeOption": "{code} · {name}",
       "gaps": {
@@ -844,6 +846,12 @@
         "heading": "Perto do limite de rondas",
         "body": "Olá {firstName}, o projeto está perto do limite de rondas de revisão previsto. Pedidos de alterações acima do limite são orçamentados à parte.",
         "action": "Abrir o portal"
+      },
+      "testimonial_request": {
+        "subject": "Como correu o projeto com a {agencyName}?",
+        "heading": "Conte-nos como correu",
+        "body": "Olá {firstName}, o projeto com a {agencyName} está entregue. Obrigado pela confiança.\n\nSe quiser deixar um testemunho curto sobre o trabalho, demora um minuto. Só o publicamos com a sua autorização.",
+        "action": "Deixar testemunho"
       }
     },
     "founder": {
@@ -920,15 +928,15 @@
         "action": "Abrir o negócio"
       },
       "approval_decided": {
-        "subject": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
-        "heading": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} other {na fase}} {phaseName}}}",
-        "body": "{decision, select, approved {{subject, select, file {O ficheiro ficou aprovado.} other {A fase ficou concluída e o projeto pode seguir para a próxima.}}} other {{subject, select, file {O pedido de alterações e os comentários estão na sala.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}}}",
+        "subject": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} delivery {a entrega final de} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} delivery {na entrega final de} other {na fase}} {phaseName}}}",
+        "heading": "{decision, select, approved {{companyName} aprovou {subject, select, file {o ficheiro} delivery {a entrega final de} other {a fase}} {phaseName}} other {{companyName} pediu alterações {subject, select, file {no ficheiro} delivery {na entrega final de} other {na fase}} {phaseName}}}",
+        "body": "{decision, select, approved {{subject, select, file {O ficheiro ficou aprovado.} delivery {O projeto ficou entregue. O OS emite a fatura final, pede o testemunho e cria as tarefas da caixa de celebração e da proposta de ativação.} other {A fase ficou concluída e o projeto pode seguir para a próxima.}}} other {{subject, select, file {O pedido de alterações e os comentários estão na sala.} delivery {O comentário do cliente está na sala e a tarefa \"Rever entrega final\" ficou com o gestor do cliente.} other {A fase voltou a estar em curso. O comentário do cliente está na sala.}}}}",
         "action": "Abrir a sala"
       },
       "approval_overdue": {
         "subject": "Aprovação de {companyName} sem resposta há 5 dias",
         "heading": "Aprovação de {companyName} sem resposta há 5 dias",
-        "body": "{subject, select, file {O ficheiro} other {A fase}} {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
+        "body": "{subject, select, file {O ficheiro} delivery {A entrega final de} other {A fase}} {phaseName} espera a decisão do cliente há 5 dias. Vale a pena um contacto direto.",
         "action": "Abrir a sala"
       },
       "proof_comment": {
@@ -947,6 +955,12 @@
         "subject": "Ronda extra em {companyName}",
         "heading": "Ronda extra em {companyName}",
         "body": "O cliente pediu alterações acima do limite de {limit} rondas ({used} usadas). Ficou criada a tarefa para orçamentar a ronda extra.",
+        "action": "Abrir a sala"
+      },
+      "testimonial_received": {
+        "subject": "Testemunho de {companyName}",
+        "heading": "Novo testemunho de {companyName}",
+        "body": "{authorName} escreveu:\n\n{body}",
         "action": "Abrir a sala"
       }
     },
@@ -1712,7 +1726,8 @@
         "void": "Pedido anulado.",
         "record": "Pagamento registado.",
         "settle": "Pagamento conciliado.",
-        "registerInvoice": "Fatura legal registada."
+        "registerInvoice": "Fatura legal registada.",
+        "linkPhase": "Fase do marco guardada."
       },
       "errors": {
         "not_found": "Não encontrado ou sem permissão.",
@@ -1720,8 +1735,22 @@
         "invalid_state": "O estado mudou entretanto. Atualize a página.",
         "too_soon": "O cliente já foi lembrado nas últimas 24 horas.",
         "missing_file": "Carregue o PDF da fatura (até 10 MB).",
-        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo."
-      }
+        "upload_failed": "Não foi possível carregar o ficheiro. Tente de novo.",
+        "milestone_locked": "Este marco só pode ser pedido quando a fase ligada for aprovada ou o projeto for entregue.",
+        "invalid_phase": "Escolha uma fase do projeto que peça aprovação e ainda não esteja concluída."
+      },
+      "releases": {
+        "signature": "Liberta na assinatura",
+        "phase": "Liberta na aprovação de {phase}",
+        "delivery": "Liberta na entrega final",
+        "manual": "Sem fase ligada: pedido à mão"
+      },
+      "locked": {
+        "phase": "Só pode ser pedido quando a fase {phase} for aprovada.",
+        "delivery": "Só pode ser pedido depois da aprovação final."
+      },
+      "phaseLabel": "Fase que liberta {label}",
+      "noPhase": "Sem fase (pedido à mão)"
     }
   },
   "rooms": {
@@ -1743,6 +1772,7 @@
       "active": "Em curso",
       "paused": "Em pausa",
       "completed": "Concluído",
+      "delivered": "Entregue",
       "cancelled": "Cancelado"
     },
     "phaseStatus": {
@@ -1818,7 +1848,8 @@
         "project_started": "Projeto iniciado: {name}",
         "step_shared": "Novo passo: {name}",
         "phase_done": "Fase concluída: {name}",
-        "approval_decided": "Pedido de alterações na fase {name}"
+        "approval_decided": "Pedido de alterações na fase {name}",
+        "project_delivered": "Projeto entregue"
       }
     },
     "approval": {
@@ -1850,6 +1881,28 @@
       "pending": "À espera da sua decisão desde {date}",
       "approved": "Aprovou a {date}",
       "changes_requested": "Pediu alterações a {date}"
+    },
+    "delivery": {
+      "title": "Entrega final",
+      "ready": "Todas as fases estão feitas. Peça ao cliente a aprovação final para entregar o projeto.",
+      "waiting": "À espera da aprovação final do cliente.",
+      "changesRequested": "O cliente pediu alterações na entrega final:",
+      "request": "Pedir aprovação final",
+      "withdraw": "Retirar o pedido",
+      "delivered": "Projeto entregue a {date}.",
+      "done": {
+        "requested": "Pedido de aprovação final enviado ao cliente.",
+        "withdrawn": "Pedido retirado."
+      },
+      "errors": {
+        "not_found": "Não encontrado ou sem permissão.",
+        "invalid_state": "O estado mudou entretanto. Atualize a página.",
+        "invalid_input": "Confirme os campos.",
+        "previous_phase_open": "A fase anterior ainda não está concluída (ou aprovada).",
+        "steps_open": "Ainda há passos por fazer nesta fase.",
+        "approval_required": "Esta fase só termina com a aprovação do cliente.",
+        "deal_has_project": "Este negócio já tem um projeto."
+      }
     }
   },
   "tasks": {
@@ -2077,7 +2130,8 @@
       "phases": "Fases",
       "files": "Ficheiros",
       "waiting": "À espera desde {date}",
-      "openFile": "Abrir {name}"
+      "openFile": "Abrir {name}",
+      "delivery": "Entrega final"
     },
     "clientList": {
       "title": "Provas",
@@ -2098,5 +2152,22 @@
     "confirmed": "Confirmado.",
     "confirmAction": "Confirmar: {label}",
     "cancel": "Cancelar"
+  },
+  "testimonials": {
+    "title": "Testemunho",
+    "unavailable": "Este projeto ainda não está entregue ou não tem acesso ao testemunho.",
+    "form": {
+      "intro": "O projeto {project} está entregue. Conte-nos, em poucas linhas, como foi trabalhar connosco.",
+      "body": "O seu testemunho",
+      "count": "{used} de {max} caracteres",
+      "name": "Nome",
+      "role": "Função",
+      "consent": "Autorizo a publicação deste testemunho, com o meu nome e função, no site e em apresentações da agência.",
+      "submit": "Enviar testemunho",
+      "update": "Atualizar testemunho",
+      "sent": "Obrigado pelo seu testemunho.",
+      "required": "Escreva o testemunho e o seu nome.",
+      "failed": "Não foi possível guardar. Tente de novo."
+    }
   }
 }

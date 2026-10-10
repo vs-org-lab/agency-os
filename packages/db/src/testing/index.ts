@@ -15,6 +15,8 @@ export {
   createTaskFixture,
   createTeamFixture,
   createProofFixture,
+  createDeliveryFixture,
+  type DeliveryFixture,
   type BillingFixture,
   type BillingRecords,
   type CommercialFixture,

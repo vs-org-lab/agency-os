@@ -34,6 +34,7 @@ import {
   createPlanAction,
   invoiceUploadAction,
   recordPaymentAction,
+  linkMilestonePhaseAction,
   registerInvoiceAction,
   requestPaymentAction,
   settlePaymentAction,
@@ -225,6 +226,7 @@ export default async function DealPage({ params }: PageProps) {
                   settle: settlePaymentAction,
                   invoiceUpload: invoiceUploadAction,
                   registerInvoice: registerInvoiceAction,
+                  linkPhase: linkMilestonePhaseAction,
                 }}
               />
             </TabsContent>

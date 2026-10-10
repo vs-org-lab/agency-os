@@ -25,6 +25,8 @@ export const BILLING_ERRORS = [
   'too_soon',
   'missing_file',
   'upload_failed',
+  'milestone_locked',
+  'invalid_phase',
 ] as const;
 
 export type BillingError = (typeof BILLING_ERRORS)[number];

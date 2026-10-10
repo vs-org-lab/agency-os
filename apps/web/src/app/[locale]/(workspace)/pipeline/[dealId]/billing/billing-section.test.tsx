@@ -39,6 +39,9 @@ function billing(request: Partial<PaymentRequestView> | null): DealBilling {
         amount: '6000.00',
         currency: 'EUR',
         status: request?.status === 'paid' ? 'paid' : 'requested',
+        trigger: 'signature',
+        phase: null,
+        locked: false,
         request: request ? { ...REQUEST, ...request } : null,
       },
       {
@@ -49,9 +52,42 @@ function billing(request: Partial<PaymentRequestView> | null): DealBilling {
         amount: '6000.00',
         currency: 'EUR',
         status: 'pending',
+        trigger: 'delivery',
+        phase: null,
+        locked: false,
         request: null,
       },
     ],
+    approvalPhases: [],
+  };
+}
+
+const DISCOVERY = { id: '33333333-3333-4333-8333-333333333333', name: 'Descoberta', done: false };
+const PRESENTATION = {
+  id: '44444444-4444-4444-8444-444444444444',
+  name: 'Apresentação',
+  done: false,
+};
+
+function phasedBilling(locked: boolean): DealBilling {
+  const [signature, delivery] = billing(REQUEST).milestones;
+  if (!signature || !delivery) throw new Error('Billing fixture changed');
+  return {
+    milestones: [
+      signature,
+      {
+        ...delivery,
+        id: '55555555-5555-4555-8555-555555555555',
+        position: 2,
+        label: 'Arquitetura',
+        percent: 30,
+        trigger: 'phase_approval',
+        phase: { id: DISCOVERY.id, name: DISCOVERY.name },
+        locked,
+      },
+      { ...delivery, position: 3, percent: 20, locked: true },
+    ],
+    approvalPhases: [DISCOVERY, PRESENTATION],
   };
 }
 
@@ -73,6 +109,7 @@ function actionsMock(overrides: Partial<BillingActions> = {}): BillingActions {
         }) as const,
     ),
     registerInvoice: vi.fn(ok),
+    linkPhase: vi.fn(ok),
     ...overrides,
   };
 }
@@ -98,6 +135,40 @@ function renderSection(
 }
 
 describe('BillingSection', () => {
+  it('milestones show what releases them and why they are locked', () => {
+    renderSection(phasedBilling(true), true);
+
+    expect(screen.getByText('Liberta na assinatura')).toBeDefined();
+    expect(screen.getByText('Liberta na aprovação de Descoberta')).toBeDefined();
+    expect(screen.getByText('Liberta na entrega final')).toBeDefined();
+    expect(
+      screen.getByText('Só pode ser pedido quando a fase Descoberta for aprovada.'),
+    ).toBeDefined();
+    expect(screen.getByText('Só pode ser pedido depois da aprovação final.')).toBeDefined();
+    const requests = screen.getAllByRole('button', { name: 'Pedir pagamento' });
+    expect(requests.map((button) => button.hasAttribute('disabled'))).toEqual([true, true]);
+  });
+
+  it('billing writers pick the phase of a pending milestone', async () => {
+    const actions = renderSection(phasedBilling(false), true);
+
+    const select = screen.getByLabelText('Fase que liberta Arquitetura');
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['Sem fase (pedido à mão)', 'Descoberta', 'Apresentação']);
+    await act(async () => {
+      fireEvent.change(select, { target: { value: PRESENTATION.id } });
+    });
+
+    expect(actions.linkPhase).toHaveBeenCalledWith(
+      '55555555-5555-4555-8555-555555555555',
+      PRESENTATION.id,
+    );
+    expect(screen.getByText('Fase do marco guardada.')).toBeDefined();
+  });
+
   it('shows the overdue badge and the request pdf', () => {
     renderSection(billing({}), true);
 

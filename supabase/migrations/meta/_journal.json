@@ -253,6 +253,20 @@
       "when": 1791635808821,
       "tag": "20261010123648_proofing_internal_replies",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791653573707,
+      "tag": "20261010173253_milestones_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1791653593493,
+      "tag": "20261010173313_milestones_delivery_access",
+      "breakpoints": true
     }
   ]
 }

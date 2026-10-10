@@ -17,7 +17,16 @@ import {
   type TransitionRefusal,
 } from './transitions';
 
-const { calls, contracts, dealStageChanges, deals, paymentRequests, payments } = schema;
+const {
+  billingMilestones,
+  calls,
+  contracts,
+  dealStageChanges,
+  deals,
+  paymentRequests,
+  payments,
+  projects,
+} = schema;
 
 export type StageActor = 'system' | { userId: string; isFounder: boolean };
 
@@ -101,6 +110,22 @@ async function contractFacts(tx: DbTransaction, deal: { id: string; clientId: st
     coreDeliveredWithinYear: delivered !== undefined,
     firstPaymentReceived: paid !== undefined,
   };
+}
+
+/** RN-04, exit from 2.9: the deal's project is delivered and no milestone waits to be requested. */
+async function deliveryReady(tx: DbTransaction, dealId: string): Promise<boolean> {
+  const [delivered] = await tx
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.dealId, dealId), eq(projects.status, 'delivered')))
+    .limit(1);
+  if (!delivered) return false;
+  const [pending] = await tx
+    .select({ id: billingMilestones.id })
+    .from(billingMilestones)
+    .where(and(eq(billingMilestones.dealId, dealId), eq(billingMilestones.status, 'pending')))
+    .limit(1);
+  return !pending;
 }
 
 async function callFacts(tx: DbTransaction, dealId: string) {
@@ -193,6 +218,7 @@ export async function applyStageChange(
         ? await contractFacts(tx, deal)
         : { contractSigned: false, coreDeliveredWithinYear: false, firstPaymentReceived: false }),
       coreReadiness: stageOf(input.to) === 'core' ? await loadCoreReadiness(tx, deal.id) : null,
+      deliveryReady: input.to === '2.10' ? await deliveryReady(tx, deal.id) : false,
     },
   });
   if (!decision.allowed) {

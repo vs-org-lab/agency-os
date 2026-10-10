@@ -22,6 +22,7 @@ export type TransitionRefusal =
   | 'core_required'
   | 'payment_required'
   | 'process_driven'
+  | 'delivery_pending'
   | 'module_pending';
 
 export type TransitionFacts = {
@@ -34,6 +35,8 @@ export type TransitionFacts = {
   coreDeliveredWithinYear: boolean;
   /** A reconciled payment exists on one of the deal's payment requests (RN-04, exit from 2.1). */
   firstPaymentReceived: boolean;
+  /** The deal's project is delivered and none of its milestones waits to be requested (RN-04, exit from 2.9). */
+  deliveryReady: boolean;
 };
 
 export type TransitionActor = 'system' | 'founder' | 'staff';
@@ -84,7 +87,7 @@ const KICKOFF: PipelineCode = '2.2';
 /** The project's process moves the deal through these codes as its phases start and end. */
 const PROCESS_CODES: readonly PipelineCode[] = ['2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9'];
 
-/** Leaving 2.9 needs the final approval and the final invoice (RN-04), built with approvals. */
+/** Leaving 2.9 needs the final approval and the final invoice (RN-04); only the delivery moves it. */
 const PROJECT_DELIVERED: PipelineCode = '2.10';
 
 const MISSING_CORE: CoreReadiness = {
@@ -145,7 +148,10 @@ export function evaluateTransition(input: TransitionInput): TransitionDecision {
 
   const targetStage = stageOf(to);
   if (!ENABLED_STAGES.has(targetStage)) return refuse('module_pending', STAGE_MODULE[targetStage]);
-  if (to === PROJECT_DELIVERED) return refuse('module_pending', 'approvals');
+  if (to === PROJECT_DELIVERED) {
+    if (actor !== 'system') return refuse('process_driven');
+    return facts.deliveryReady ? { allowed: true } : refuse('delivery_pending');
+  }
 
   if (movement === 'back') {
     if (actor === 'staff') return refuse('founder_only');

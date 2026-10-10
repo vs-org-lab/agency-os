@@ -7,6 +7,7 @@ import {
   createRoomProject,
   publishRoomUpdate,
   requestRoomApproval,
+  requestRoomFinalApproval,
   setRoomStepStatus,
   startRoomPhase,
   updateRoomPhase,
@@ -43,6 +44,13 @@ export async function startPhaseAction(phaseId: string) {
 
 export async function completePhaseAction(phaseId: string) {
   return run((current) => completeRoomPhase(current, phaseId));
+}
+
+export async function requestFinalApprovalAction(projectId: string) {
+  return run(async (current) => {
+    const result = await requestRoomFinalApproval(current, projectId);
+    return result.ok ? { ok: true as const } : result;
+  });
 }
 
 export async function requestApprovalAction(phaseId: string) {

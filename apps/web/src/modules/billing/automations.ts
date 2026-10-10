@@ -10,6 +10,12 @@ import { inngest, type DomainEventType } from '@/modules/events';
 import type { EmailTemplateKey } from '@/modules/email';
 import { withSystemContext } from '@/platform/db';
 import { lisbonDate } from './domain/plan';
+import {
+  approvedPhaseOf,
+  linkProjectPhases,
+  requestDeliveryMilestones,
+  requestMilestonesForPhase,
+} from './links';
 import { dealNotice } from './notices';
 import { sweepPaymentReminders } from './reminders';
 import { createPlanForContract } from './requests';
@@ -68,6 +74,59 @@ const planOnContractSigned = inngest.createFunction(
   },
 );
 
+/** Spec 2D.2, decision 2: a new project's approval phases take the deal's middle milestones. */
+const linkPhasesOnProjectCreated = inngest.createFunction(
+  {
+    id: 'billing-link-phases',
+    triggers: [{ event: 'rooms.project.created' }],
+    retries: RETRIES,
+    onFailure: failureHandler('billing-link-phases'),
+  },
+  async ({ event, step }) => {
+    const { projectId } = (event.data as { payload: { projectId?: string } }).payload;
+    if (!projectId) return { linked: 0 };
+    return step.run('link-phases', () => linkProjectPhases(projectId, billingDeps()));
+  },
+);
+
+/** AUT-16: an approved phase releases the milestones linked to it. */
+const milestonesOnPhaseApproved = inngest.createFunction(
+  {
+    id: 'billing-milestones-on-phase-approved',
+    triggers: [{ event: 'rooms.approval.decided' }],
+    retries: RETRIES,
+    onFailure: failureHandler('billing-milestones-on-phase-approved'),
+  },
+  async ({ event, step }) => {
+    const { approvalId, decision } = (
+      event.data as { payload: { approvalId?: string; decision?: string } }
+    ).payload;
+    if (!approvalId || decision !== 'approved') return { requested: [] };
+    const phaseId = await step.run('read-phase', () =>
+      approvedPhaseOf(approvalId, { contexts: { withSystemContext } }),
+    );
+    if (!phaseId) return { requested: [] };
+    return step.run('request-milestones', () => requestMilestonesForPhase(phaseId, billingDeps()));
+  },
+);
+
+/** AUT-21: the final invoice of a delivered project, with its own retries. */
+const finalInvoiceOnDelivery = inngest.createFunction(
+  {
+    id: 'billing-final-invoice-on-delivery',
+    triggers: [{ event: 'rooms.project.delivered' }],
+    retries: RETRIES,
+    onFailure: failureHandler('billing-final-invoice-on-delivery'),
+  },
+  async ({ event, step }) => {
+    const { projectId } = (event.data as { payload: { projectId?: string } }).payload;
+    if (!projectId) return { requested: [] };
+    return step.run('request-delivery-milestones', () =>
+      requestDeliveryMilestones(projectId, billingDeps()),
+    );
+  },
+);
+
 /** AUT-19: daily reminders before and after the due date. */
 const remindersSweep = inngest.createFunction(
   {
@@ -86,6 +145,9 @@ const remindersSweep = inngest.createFunction(
 
 export const BILLING_FUNCTIONS = [
   planOnContractSigned,
+  linkPhasesOnProjectCreated,
+  milestonesOnPhaseApproved,
+  finalInvoiceOnDelivery,
   remindersSweep,
   portalNoticeFunction('billing-request-sent', 'billing.request.sent', 'lead.payment_requested'),
   portalNoticeFunction(

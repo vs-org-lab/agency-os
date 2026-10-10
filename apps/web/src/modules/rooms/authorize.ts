@@ -48,6 +48,35 @@ export function roomActor(
 }
 
 /**
+ * Who edits the steps and updates of a project: the room writers, and the freelancer assigned to
+ * that project ("L E (próprio, sem valores)" in the access matrix). Phases, approvals and the
+ * project itself stay with the room writers.
+ */
+export async function projectEditor(
+  contexts: Pick<DbContexts, 'withUserContext'>,
+  claims: VerifiedClaims,
+  clientId: string,
+  projectId: string,
+): Promise<Actor | null> {
+  const writer = await roomActor(contexts, claims, clientId, 'write');
+  if (writer || !z.uuid().safeParse(projectId).success) return writer;
+  return withActor(
+    contexts,
+    claims,
+    async (tx, actor) => {
+      if (actor.mfaVerifiedAt === null) return null;
+      const rows = await tx.execute<{ allowed: boolean }>(sql`
+        select app.has_org_role(${actor.organizationId}::uuid, array['freelancer']::app.org_role[])
+           and app.can_read_project(${actor.organizationId}::uuid, ${clientId}::uuid,
+                                    ${projectId}::uuid) as allowed
+      `);
+      return rows[0]?.allowed === true ? actor : null;
+    },
+    null,
+  );
+}
+
+/**
  * The client's projects the caller may read, resolved under their row level security, so loaders
  * that read in system context apply the same project-level rule (RN-51).
  */

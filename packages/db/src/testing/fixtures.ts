@@ -469,6 +469,8 @@ const FIXTURE_BILLED_CLIENT = {
   address: 'Rua do Cliente, Porto',
 };
 
+const MILESTONE_TRIGGERS = ['signature', 'phase_approval', 'delivery'] as const;
+
 /** Three milestones per client: one with a sent request, one with a voided request and one paid. */
 export async function createBillingFixture(
   sql: TransactionSql,
@@ -481,10 +483,11 @@ export async function createBillingFixture(
     const milestone = async (position: number, status: 'pending' | 'requested' | 'paid') => {
       const [row] = await sql<{ id: string }[]>`
         insert into public.billing_milestones (organization_id, client_id, deal_id, contract_id,
-                                               position, label, percent, amount, currency, status)
+                                               position, label, percent, amount, currency, status,
+                                               trigger)
         values (${world.organizationId}, ${clientId}, ${records.dealId}, ${records.contractId},
                 ${position}, ${`Prestação ${position}`}, ${position === 1 ? 50 : 25}, 3000, 'EUR',
-                ${status})
+                ${status}, ${MILESTONE_TRIGGERS[position - 1] ?? 'phase_approval'})
         returning id
       `;
       if (!row) throw new Error('Billing fixture milestone was not created');
@@ -787,5 +790,110 @@ export async function createProofFixture(sql: TransactionSql, world: World): Pro
     approvalId: approval.id,
     clientCommentId,
     internalCommentId,
+  };
+}
+
+export type DeliveryFixture = {
+  contracts: ContractFixture;
+  dealId: string;
+  contractId: string;
+  projectId: string;
+  /** Requires approval, done and approved. */
+  approvalPhaseId: string;
+  /** No approval, done. */
+  finalPhaseId: string;
+  phaseApprovalId: string;
+  /** 40% at signature (requested), 30% on the approval phase (pending), 30% at delivery (pending). */
+  milestoneIds: { signature: string; phase: string; delivery: string };
+};
+
+/**
+ * Client A's deal at 2.9 with a signed contract, its three milestones and a completed project
+ * whose two phases are done: the state right before the final approval.
+ */
+export async function createDeliveryFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<DeliveryFixture> {
+  const contracts = await createContractFixture(sql, world);
+  const { dealId, contractId } = contracts.a;
+  const clientId = world.clients.a;
+  await sql`
+    update public.legal_entities
+    set bank_name = 'Banco Exemplo', iban = 'PT50000201231234567890154', bic = 'BEXAPTPL'
+    where id = ${contracts.entityId}
+  `;
+  await sql`
+    update public.proposals
+    set status = 'accepted', accepted_at = now(), accepted_by = ${world.users.decisionMakerA},
+        accepted_option_id = ${contracts.a.optionId},
+        client_details = ${JSON.stringify(FIXTURE_BILLED_CLIENT)}::jsonb
+    where id = ${contracts.a.proposalId}
+  `;
+  await sql`
+    update public.contracts set status = 'signed', signed_at = now() where id = ${contractId}
+  `;
+  await sql`update public.deals set pipeline_code = '2.9' where id = ${dealId}`;
+  const [project] = await sql<{ id: string }[]>`
+    insert into public.projects (organization_id, client_id, deal_id, name, template_key,
+                                 template_version, starts_on, status)
+    values (${world.organizationId}, ${clientId}, ${dealId}, 'Website', 'orbit', 1, current_date,
+            'completed')
+    returning id
+  `;
+  if (!project) throw new Error('Delivery fixture project was not created');
+  const phase = async (position: number, requiresApproval: boolean) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.project_phases (organization_id, client_id, project_id, position, name,
+                                         requires_approval, status, completed_at)
+      values (${world.organizationId}, ${clientId}, ${project.id}, ${position},
+              ${`Fase ${position}`}, ${requiresApproval}, 'done', now())
+      returning id
+    `;
+    if (!row) throw new Error('Delivery fixture phase was not created');
+    return row.id;
+  };
+  const approvalPhaseId = await phase(1, true);
+  const finalPhaseId = await phase(2, false);
+  const [approval] = await sql<{ id: string }[]>`
+    insert into public.approvals (organization_id, client_id, project_id, subject_type, subject_id,
+                                  status, requested_by, decided_by, decided_at)
+    values (${world.organizationId}, ${clientId}, ${project.id}, 'phase', ${approvalPhaseId},
+            'approved', ${world.users.founder}, ${world.users.decisionMakerA}, now())
+    returning id
+  `;
+  if (!approval) throw new Error('Delivery fixture approval was not created');
+  const milestone = async (
+    position: number,
+    percent: number,
+    trigger: 'signature' | 'phase_approval' | 'delivery',
+    status: 'pending' | 'requested',
+    phaseId: string | null,
+  ) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.billing_milestones (organization_id, client_id, deal_id, contract_id,
+                                             position, label, percent, amount, currency, status,
+                                             trigger, phase_id)
+      values (${world.organizationId}, ${clientId}, ${dealId}, ${contractId}, ${position},
+              ${`Prestação ${position}`}, ${percent}, ${percent * 120}, 'EUR', ${status},
+              ${trigger}, ${phaseId})
+      returning id
+    `;
+    if (!row) throw new Error('Delivery fixture milestone was not created');
+    return row.id;
+  };
+  return {
+    contracts,
+    dealId,
+    contractId,
+    projectId: project.id,
+    approvalPhaseId,
+    finalPhaseId,
+    phaseApprovalId: approval.id,
+    milestoneIds: {
+      signature: await milestone(1, 40, 'signature', 'requested', null),
+      phase: await milestone(2, 30, 'phase_approval', 'pending', approvalPhaseId),
+      delivery: await milestone(3, 30, 'delivery', 'pending', null),
+    },
   };
 }

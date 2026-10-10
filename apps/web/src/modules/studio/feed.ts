@@ -6,13 +6,14 @@ import { canSeePipeline } from '@/modules/commercial';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { isStudioStaff } from './access';
 
-const { clients, domainEvents, projects } = schema;
+const { clients, domainEvents, projects, proofFiles, proofVersions } = schema;
 
 export const FEED_EVENT_TYPES = [
   'contracts.proposal.accepted',
   'contracts.contract.client_signed',
   'billing.payment.received',
   'rooms.approval.decided',
+  'proofing.comment.added',
 ] as const;
 
 export type FeedEventType = (typeof FEED_EVENT_TYPES)[number];
@@ -25,6 +26,8 @@ export type FeedEntry = {
   dealId: string | null;
   /** Approval decision, present on `rooms.approval.decided` only. */
   decision: string | null;
+  /** The commented file, present on `proofing.comment.added` only. */
+  subjectName: string | null;
   href: string;
   occurredAt: Date;
 };
@@ -45,7 +48,12 @@ const FEED_DAYS = 30;
 const FEED_LIMIT = 100;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-type FeedPayload = { dealId?: unknown; decision?: unknown; projectId?: unknown };
+type FeedPayload = {
+  dealId?: unknown;
+  decision?: unknown;
+  projectId?: unknown;
+  versionId?: unknown;
+};
 
 function text(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
@@ -106,10 +114,30 @@ export async function loadStudioFeed(
           inArray(domainEvents.clientId, [...scope.clients.keys()]),
           inArray(domainEvents.type, scope.types),
           gte(domainEvents.createdAt, new Date(now.getTime() - FEED_DAYS * DAY_MS)),
+          // Only the client's own proof comments are client activity; team replies are not.
+          sql`not (${domainEvents.type} = 'proofing.comment.added'
+                   and coalesce((${domainEvents.payload}->>'byClient')::boolean, false) = false)`,
         ),
       )
       .orderBy(desc(domainEvents.createdAt), desc(domainEvents.id))
       .limit(FEED_LIMIT),
+  );
+
+  const versionIds = [
+    ...new Set(rows.flatMap((row) => text((row.payload as FeedPayload | null)?.versionId) ?? [])),
+  ];
+  const fileTitles = new Map(
+    versionIds.length === 0
+      ? []
+      : (
+          await deps.contexts.withSystemContext((tx) =>
+            tx
+              .select({ id: proofVersions.id, title: proofFiles.title })
+              .from(proofVersions)
+              .innerJoin(proofFiles, eq(proofFiles.id, proofVersions.fileId))
+              .where(inArray(proofVersions.id, versionIds)),
+          )
+        ).map((version) => [version.id, version.title] as const),
   );
 
   return rows.flatMap((row) => {
@@ -119,6 +147,8 @@ export async function loadStudioFeed(
     const projectId = text(payload.projectId);
     if (projectId && !scope.projects.has(projectId)) return [];
     const dealId = text(payload.dealId);
+    const versionId = text(payload.versionId);
+    const comment = row.type === 'proofing.comment.added';
     return [
       {
         id: row.id,
@@ -127,10 +157,13 @@ export async function loadStudioFeed(
         clientName,
         dealId,
         decision: text(payload.decision),
+        subjectName: comment && versionId ? (fileTitles.get(versionId) ?? null) : null,
         href:
-          scope.pipeline && dealId && row.type !== 'rooms.approval.decided'
-            ? `/pipeline/${dealId}`
-            : `/c/${row.clientId}`,
+          comment && versionId
+            ? `/c/${row.clientId}/proofs/${versionId}`
+            : scope.pipeline && dealId && row.type !== 'rooms.approval.decided'
+              ? `/pipeline/${dealId}`
+              : `/c/${row.clientId}`,
         occurredAt: new Date(row.createdAt),
       },
     ];

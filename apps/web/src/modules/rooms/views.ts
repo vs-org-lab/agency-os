@@ -81,10 +81,15 @@ export type PhaseView = Omit<ClientPhaseView, 'steps'> & {
 
 export type UpdateView = ClientUpdateView & { visibility: UpdateVisibility };
 
+export type FinalApprovalView = { id: string; status: ApprovalStatus; comment: string | null };
+
 export type ProjectView = Omit<ClientProjectView, 'phases' | 'updates'> & {
   dealId: string | null;
   phases: PhaseView[];
   updates: UpdateView[];
+  /** The latest final approval request (spec 2D.2, decision 5), when one was made. */
+  finalApproval: FinalApprovalView | null;
+  deliveredAt: string | null;
 };
 
 export type Person = { id: string; name: string };

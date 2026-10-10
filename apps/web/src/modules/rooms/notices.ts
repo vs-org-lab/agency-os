@@ -2,18 +2,18 @@ import { eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import type { DbContexts } from '@/platform/db';
 
-const { approvals, clients, projectPhases, proofFiles, proofVersions } = schema;
+const { approvals, clients, projectPhases, projects, proofFiles, proofVersions } = schema;
 
 export type ApprovalNotice = {
   companyName: string;
-  /** The phase name or, for a file approval, the file title. */
+  /** The phase name, the file title or, for the final approval, the project name. */
   phaseName: string;
-  subject: 'phase' | 'file';
+  subject: 'phase' | 'file' | 'delivery';
   decision: 'approved' | 'changes_requested';
   roomUrl: string;
 };
 
-/** The client, the phase or file and the room link that approval alerts to the team mention. */
+/** The client, the phase, file or project and the room link that approval alerts mention. */
 export async function approvalNotice(
   approvalId: string,
   deps: { contexts: Pick<DbContexts, 'withSystemContext'>; appBaseUrl: string },
@@ -28,21 +28,24 @@ export async function approvalNotice(
         companyName: clients.name,
         phaseName: projectPhases.name,
         fileTitle: proofFiles.title,
+        projectName: projects.name,
       })
       .from(approvals)
       .innerJoin(clients, eq(clients.id, approvals.clientId))
       .leftJoin(projectPhases, eq(projectPhases.id, approvals.subjectId))
       .leftJoin(proofVersions, eq(proofVersions.id, approvals.subjectId))
       .leftJoin(proofFiles, eq(proofFiles.id, proofVersions.fileId))
+      .leftJoin(projects, eq(projects.id, approvals.subjectId))
       .where(eq(approvals.id, approvalId));
     if (!row) return null;
     const file = row.subjectType === 'file_version';
-    const name = file ? row.fileTitle : row.phaseName;
+    const subject = file ? 'file' : row.subjectType === 'project' ? 'delivery' : 'phase';
+    const name = { file: row.fileTitle, delivery: row.projectName, phase: row.phaseName }[subject];
     if (!name) return null;
     return {
       companyName: row.companyName,
       phaseName: name,
-      subject: file ? 'file' : 'phase',
+      subject,
       decision: row.status === 'approved' ? 'approved' : 'changes_requested',
       roomUrl: new URL(
         file ? `/c/${row.clientId}/proofs/${row.subjectId}` : `/c/${row.clientId}`,

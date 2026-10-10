@@ -74,6 +74,7 @@ export const projects = pgTable(
     revisionLimit: integer('revision_limit').notNull().default(3),
     /** The revision limit for which the 80% warning was last sent (AUT-17). */
     roundsWarnedLimit: integer('rounds_warned_limit'),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'restrict' }),
     ...timestamps,
   },

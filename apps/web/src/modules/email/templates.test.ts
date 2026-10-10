@@ -132,6 +132,17 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal',
   },
+  'lead.testimonial_request': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/testimonial/project',
+  },
+  'founder.testimonial_received': {
+    companyName: 'Empresa Exemplo',
+    authorName: 'Marta Lopes',
+    body: 'Trabalho excelente.',
+    roomUrl: 'https://os.example.com/c/client',
+  },
   'founder.approval_decided': {
     companyName: 'Empresa Exemplo',
     phaseName: 'Descoberta e arquitetura',
@@ -249,6 +260,37 @@ describe('renderEmail', () => {
     expect(rendered.subject).toBe('Empresa Exemplo aceitou a proposta');
     expect(rendered.text).toContain('Orbit com Gravity');
     expect(rendered.html).toContain('https://os.example.com/pipeline/deal');
+  });
+
+  it('names the final delivery in approval alerts', () => {
+    const decided = renderEmail('founder.approval_decided', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Website',
+      decision: 'approved',
+      subject: 'delivery',
+      roomUrl: 'https://os.example.com/c/client',
+    });
+    const overdue = renderEmail('founder.approval_overdue', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Website',
+      subject: 'delivery',
+      roomUrl: 'https://os.example.com/c/client',
+    });
+
+    expect(decided.subject).toBe('Empresa Exemplo aprovou a entrega final de Website');
+    expect(overdue.text).toContain('A entrega final de Website');
+  });
+
+  it('the testimonial alert quotes what the client wrote', () => {
+    const email = renderEmail('founder.testimonial_received', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      authorName: 'Marta Lopes',
+      body: 'Trabalho excelente.',
+      roomUrl: 'https://os.example.com/c/client',
+    });
+
+    expect(email.subject).toBe('Testemunho de Empresa Exemplo');
+    expect(email.text).toContain('Trabalho excelente.');
   });
 
   it('tells the founder how long a payment request is overdue', () => {

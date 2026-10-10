@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ORBIT_PROCESS } from '../../src/modules/rooms/templates/defaults';
 import { adminClient, database } from './admin';
+import { seedSignedContract } from './billing';
 
 export const ROOM_DECISION_MAKER = 'Marta Lopes';
 
@@ -73,6 +74,72 @@ export async function seedRoomProject(
       }
     }
     return { clientId, dealId: deal.id, company, decisionMakerEmail };
+  } finally {
+    await sql.end();
+  }
+}
+
+/**
+ * A deal at 2.9 with a signed contract and its two milestones (signature requested, delivery
+ * pending), whose project finished every Orbit phase: the state right before the final approval.
+ */
+export async function seedDeliveryProject(organizationId: string): Promise<{
+  clientId: string;
+  dealId: string;
+  projectId: string;
+  company: string;
+  decisionMakerEmail: string;
+}> {
+  const seeded = await seedSignedContract(organizationId);
+  const sql = database();
+  try {
+    const [deal] = await sql<{ clientId: string; contractId: string }[]>`
+      update public.deals d set pipeline_code = '2.9'
+      from public.contracts c
+      where d.id = ${seeded.dealId} and c.deal_id = d.id
+      returning d.client_id as "clientId", c.id as "contractId"
+    `;
+    if (!deal) throw new Error('Delivery deal was not found');
+    // A client in delivery is a client, and only clients have a room.
+    await sql`update public.clients set lifecycle = 'active' where id = ${deal.clientId}`;
+    for (const [position, trigger, status] of [
+      [1, 'signature', 'requested'],
+      [2, 'delivery', 'pending'],
+    ] as const) {
+      await sql`
+        insert into public.billing_milestones (organization_id, client_id, deal_id, contract_id,
+                                               position, label, percent, amount, currency, status,
+                                               trigger)
+        values (${organizationId}, ${deal.clientId}, ${seeded.dealId}, ${deal.contractId},
+                ${position}, ${position === 1 ? 'Assinatura' : 'Entrega'}, 50, 4000, 'EUR',
+                ${status}, ${trigger})
+      `;
+    }
+    const [project] = await sql<{ id: string }[]>`
+      insert into public.projects (organization_id, client_id, deal_id, name, template_key,
+                                   template_version, starts_on, status)
+      values (${organizationId}, ${deal.clientId}, ${seeded.dealId}, 'Website', 'orbit', 1,
+              current_date - 60, 'completed')
+      returning id
+    `;
+    if (!project) throw new Error('Delivery project was not created');
+    for (const [phaseIndex, phase] of ORBIT_PROCESS.phases.entries()) {
+      await sql`
+        insert into public.project_phases (organization_id, client_id, project_id, position, name,
+                                           requires_approval, code_on_start, code_on_done, status,
+                                           started_at, completed_at)
+        values (${organizationId}, ${deal.clientId}, ${project.id}, ${phaseIndex + 1}, ${phase.name},
+                ${phase.requiresApproval}, ${phase.codeOnStart}, ${phase.codeOnDone}, 'done',
+                now() - interval '30 days', now() - interval '1 day')
+      `;
+    }
+    return {
+      clientId: deal.clientId,
+      dealId: seeded.dealId,
+      projectId: project.id,
+      company: seeded.company,
+      decisionMakerEmail: seeded.signerEmail,
+    };
   } finally {
     await sql.end();
   }

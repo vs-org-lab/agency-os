@@ -24,7 +24,7 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
   const { project: projectId } = await searchParams;
   const data = await loadStaffRoom(session, { clientId, projectId });
   if (!data) notFound();
-  const { room, writable } = data;
+  const { room, editable } = data;
   const t = await getTranslations('rooms');
 
   return (
@@ -38,7 +38,7 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
       />
       {room.project ? (
         <>
-          {writable ? (
+          {editable ? (
             <UpdateComposer projectId={room.project.id} publish={publishUpdateAction} />
           ) : null}
           <section aria-labelledby="room-updates-title" className="flex flex-col gap-3">

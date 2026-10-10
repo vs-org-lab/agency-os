@@ -7,7 +7,13 @@ import {
   requestPayment,
   voidPaymentRequest,
 } from './requests';
-import { billingClaims, billingDeps, BILLING_TEST_NOW, signedContract } from './testing';
+import {
+  billingClaims,
+  billingDeps,
+  BILLING_TEST_NOW,
+  deliveredProject,
+  signedContract,
+} from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -129,6 +135,7 @@ describe('payment plans and requests', () => {
       const [second] = await sql<{ id: string }[]>`
         select id from public.billing_milestones where contract_id = ${contract.contractId} and position = 2
       `;
+      await deliveredProject(sql, world, contract);
 
       const result = await requestPayment(
         billingClaims(world.users.finance),

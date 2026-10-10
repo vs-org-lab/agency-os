@@ -1796,5 +1796,57 @@
       "approved": "Aprovou a {date}",
       "changes_requested": "Pediu alterações a {date}"
     }
+  },
+  "tasks": {
+    "title": "Tarefas",
+    "description": "O que há para fazer, no estúdio e nos clientes.",
+    "roomDescription": "As tarefas internas deste cliente. O cliente não as vê.",
+    "groups": {
+      "today": "Hoje",
+      "this_week": "Esta semana",
+      "later": "Mais tarde",
+      "done": "Concluídas"
+    },
+    "overdue": "Atrasado",
+    "noDate": "Sem data",
+    "studio": "Estúdio",
+    "unassigned": "Sem responsável",
+    "edit": "Editar",
+    "itemsLabel": "Subtarefas de {title}",
+    "empty": {
+      "title": "Sem tarefas",
+      "description": "As tarefas criadas aqui ou pelo processo aparecem nesta lista."
+    },
+    "filters": {
+      "label": "Filtros",
+      "client": "Cliente",
+      "assignee": "Responsável",
+      "status": "Estado",
+      "all": "Todos",
+      "studio": "Estúdio",
+      "open": "Por fazer",
+      "done": "Concluídas",
+      "submit": "Filtrar"
+    },
+    "form": {
+      "heading": "Nova tarefa",
+      "title": "Título",
+      "notes": "Notas",
+      "client": "Cliente",
+      "studio": "Estúdio (sem cliente)",
+      "assignee": "Responsável",
+      "none": "Sem responsável",
+      "dueOn": "Data",
+      "items": "Subtarefas",
+      "itemsHint": "Uma por linha.",
+      "submit": "Criar tarefa",
+      "save": "Guardar",
+      "created": "Tarefa criada.",
+      "saved": "Alterações guardadas."
+    },
+    "errors": {
+      "not_found": "Não tem permissão para esta ação.",
+      "invalid_input": "Verifique os campos e tente de novo."
+    }
   }
 }

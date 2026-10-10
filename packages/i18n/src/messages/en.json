@@ -1796,5 +1796,57 @@
       "approved": "You approved on {date}",
       "changes_requested": "You requested changes on {date}"
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "description": "What needs doing, for the studio and for clients.",
+    "roomDescription": "This client's internal tasks. The client does not see them.",
+    "groups": {
+      "today": "Today",
+      "this_week": "This week",
+      "later": "Later",
+      "done": "Done"
+    },
+    "overdue": "Overdue",
+    "noDate": "No date",
+    "studio": "Studio",
+    "unassigned": "Unassigned",
+    "edit": "Edit",
+    "itemsLabel": "Subtasks of {title}",
+    "empty": {
+      "title": "No tasks",
+      "description": "Tasks created here or by the process appear in this list."
+    },
+    "filters": {
+      "label": "Filters",
+      "client": "Client",
+      "assignee": "Assignee",
+      "status": "Status",
+      "all": "All",
+      "studio": "Studio",
+      "open": "To do",
+      "done": "Done",
+      "submit": "Filter"
+    },
+    "form": {
+      "heading": "New task",
+      "title": "Title",
+      "notes": "Notes",
+      "client": "Client",
+      "studio": "Studio (no client)",
+      "assignee": "Assignee",
+      "none": "Unassigned",
+      "dueOn": "Date",
+      "items": "Subtasks",
+      "itemsHint": "One per line.",
+      "submit": "Create task",
+      "save": "Save",
+      "created": "Task created.",
+      "saved": "Changes saved."
+    },
+    "errors": {
+      "not_found": "You are not allowed to do this.",
+      "invalid_input": "Check the fields and try again."
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'server-only';
 import type { TaskStatus } from '@agency-os/db';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import { listTaskOptions } from './options';
 import {
   createTask,
   deleteTask,
@@ -14,6 +15,10 @@ import {
 const deps = () => ({ contexts: { withUserContext, withSystemContext } });
 
 export type TaskSession = { claims: VerifiedClaims };
+
+export function loadTaskOptions(session: TaskSession, clientId: string | null) {
+  return listTaskOptions(session.claims, clientId, deps());
+}
 
 export function loadTasks(
   session: TaskSession,

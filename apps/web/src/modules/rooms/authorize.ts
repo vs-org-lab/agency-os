@@ -4,7 +4,7 @@ import { schema, type DbTransaction } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
-const { clients } = schema;
+const { clients, projects } = schema;
 
 export type RoomAccess = 'write' | 'read';
 
@@ -45,4 +45,19 @@ export function roomActor(
     async (tx, actor) => ((await grants(tx, actor, clientId, access)) ? actor : null),
     null,
   );
+}
+
+/**
+ * The client's projects the caller may read, resolved under their row level security, so loaders
+ * that read in system context apply the same project-level rule (RN-51).
+ */
+export async function readableProjectIds(
+  contexts: Pick<DbContexts, 'withUserContext'>,
+  claims: VerifiedClaims,
+  clientId: string,
+): Promise<string[]> {
+  const rows = await contexts.withUserContext(claims, (tx) =>
+    tx.select({ id: projects.id }).from(projects).where(eq(projects.clientId, clientId)),
+  );
+  return rows.map((row) => row.id);
 }

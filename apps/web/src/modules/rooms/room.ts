@@ -2,7 +2,7 @@ import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
-import { roomActor } from './authorize';
+import { readableProjectIds, roomActor } from './authorize';
 import type { RoomsDeps } from './runtime-types';
 import {
   FEED_LIMIT,
@@ -27,7 +27,8 @@ const {
   projects,
 } = schema;
 
-type BuildMode = { clientView: boolean };
+/** `projectIds` limits the projects to those the caller may read. */
+type BuildMode = { clientView: boolean; projectIds: readonly string[] };
 
 /**
  * Reads a project with its phases, steps, updates and approvals. In client view it applies the
@@ -40,6 +41,7 @@ async function buildProject(
   projectId: string | undefined,
   mode: BuildMode,
 ) {
+  if (mode.projectIds.length === 0) return { summaries: [], project: null };
   const projectRows = await tx
     .select()
     .from(projects)
@@ -47,6 +49,7 @@ async function buildProject(
       and(
         eq(projects.clientId, clientId),
         mode.clientView ? ne(projects.status, 'cancelled') : undefined,
+        inArray(projects.id, [...mode.projectIds]),
       ),
     )
     .orderBy(desc(projects.createdAt), asc(projects.id));
@@ -207,6 +210,7 @@ export async function loadRoom(
   if (input.projectId && !z.uuid().safeParse(input.projectId).success) return null;
   const actor = await roomActor(deps.contexts, claims, input.clientId, 'read');
   if (!actor) return null;
+  const projectIds = await readableProjectIds(deps.contexts, claims, input.clientId);
   return deps.contexts.withSystemContext(async (tx) => {
     const [client] = await tx
       .select({ name: clients.name })
@@ -215,6 +219,7 @@ export async function loadRoom(
     if (!client) return null;
     const { summaries, project } = await buildProject(tx, input.clientId, input.projectId, {
       clientView: false,
+      projectIds,
     });
     return {
       clientId: input.clientId,
@@ -235,9 +240,11 @@ export async function loadRoomPreview(
   if (input.projectId && !z.uuid().safeParse(input.projectId).success) return null;
   const actor = await roomActor(deps.contexts, claims, input.clientId, 'read');
   if (!actor) return null;
+  const projectIds = await readableProjectIds(deps.contexts, claims, input.clientId);
   return deps.contexts.withSystemContext(async (tx) => {
     const { summaries, project } = await buildProject(tx, input.clientId, input.projectId, {
       clientView: true,
+      projectIds,
     });
     if (summaries.length === 0) return null;
     if (!project) return { projects: summaries, project: null };

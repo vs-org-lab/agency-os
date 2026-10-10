@@ -234,10 +234,25 @@ describe('process', () => {
       });
       expect(
         await updateStep(founder, { stepId, assigneeId: world.users.freelancer }, deps),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
+      await sql`
+        insert into public.project_staff_assignments (organization_id, client_id, project_id, user_id)
+        values (${world.organizationId}, ${world.clients.a}, ${started.projectId},
+                ${world.users.freelancer})
+      `;
+      expect(
+        await updateStep(founder, { stepId, assigneeId: world.users.freelancer }, deps),
       ).toEqual({ ok: true });
       expect(await setStepStatus(freelancer, { stepId, status: 'done' }, deps)).toEqual({
         ok: true,
       });
+      await sql`
+        update public.client_staff_assignments set archived_at = now()
+        where client_id = ${world.clients.a} and user_id = ${world.users.manager}
+      `;
+      expect(
+        await updateStep(founder, { stepId, assigneeId: world.users.manager }, deps),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
       expect(await startPhase(freelancer, { phaseId: phaseOf(started, 2) }, deps)).toEqual({
         ok: false,
         rule: 'not_found',

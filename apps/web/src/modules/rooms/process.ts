@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, max } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type StepStatus } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
@@ -15,6 +15,7 @@ const {
   organizationMemberships,
   projectPhases,
   projectSteps,
+  projectStaffAssignments,
   projectUpdates,
   projects,
 } = schema;
@@ -331,14 +332,16 @@ const stepPatchSchema = z.object({
 });
 
 /**
- * The people who can take a step in a client's room: the organisation's founders and the staff
- * assigned to the client (spec decision 6).
+ * The people who can take work in a client's room: the organisation's founders and the staff
+ * assigned to the client (spec decision 6). For work inside a project, a freelancer must also be
+ * assigned to that project (RN-51).
  */
 export async function isRoomStaff(
   tx: DbTransaction,
   organizationId: string,
   clientId: string,
   userId: string,
+  projectId?: string | null,
 ): Promise<boolean> {
   const memberships = await tx
     .select({ role: organizationMemberships.role })
@@ -348,24 +351,37 @@ export async function isRoomStaff(
         eq(organizationMemberships.userId, userId),
         eq(organizationMemberships.organizationId, organizationId),
         eq(organizationMemberships.status, 'active'),
+        isNull(organizationMemberships.archivedAt),
       ),
     );
-  if (memberships.some((membership) => membership.role === 'founder')) return true;
-  if (
-    !memberships.some(
-      (membership) => membership.role === 'project_manager' || membership.role === 'freelancer',
-    )
-  ) {
-    return false;
-  }
+  const roles = memberships.map((membership) => membership.role);
+  if (roles.includes('founder')) return true;
+  if (!roles.includes('project_manager') && !roles.includes('freelancer')) return false;
   const [assignment] = await tx
     .select({ userId: clientStaffAssignments.userId })
     .from(clientStaffAssignments)
     .where(
-      and(eq(clientStaffAssignments.userId, userId), eq(clientStaffAssignments.clientId, clientId)),
+      and(
+        eq(clientStaffAssignments.userId, userId),
+        eq(clientStaffAssignments.clientId, clientId),
+        isNull(clientStaffAssignments.archivedAt),
+      ),
     )
     .limit(1);
-  return assignment !== undefined;
+  if (!assignment) return false;
+  if (!projectId || roles.includes('project_manager')) return true;
+  const [projectAssignment] = await tx
+    .select({ userId: projectStaffAssignments.userId })
+    .from(projectStaffAssignments)
+    .where(
+      and(
+        eq(projectStaffAssignments.userId, userId),
+        eq(projectStaffAssignments.projectId, projectId),
+        isNull(projectStaffAssignments.archivedAt),
+      ),
+    )
+    .limit(1);
+  return projectAssignment !== undefined;
 }
 
 /** Assignee, due date and client visibility of a step; making a step visible is audited (RN-50). */
@@ -387,11 +403,17 @@ export async function updateStep(
   const { stepId, ...patch } = parsed.data;
 
   return deps.contexts.withSystemContext(async (tx) => {
-    if (
-      patch.assigneeId &&
-      !(await isRoomStaff(tx, actor.organizationId, clientId, patch.assigneeId))
-    ) {
-      return { ok: false as const, rule: 'invalid_input' as const };
+    if (patch.assigneeId) {
+      const [step] = await tx
+        .select({ projectId: projectSteps.projectId })
+        .from(projectSteps)
+        .where(eq(projectSteps.id, stepId));
+      if (
+        !step ||
+        !(await isRoomStaff(tx, actor.organizationId, clientId, patch.assigneeId, step.projectId))
+      ) {
+        return { ok: false as const, rule: 'invalid_input' as const };
+      }
     }
     const changed = await tx
       .update(projectSteps)

@@ -3,6 +3,7 @@ import {
   closeTestSql,
   createFixtureWorld,
   createRoomFixture,
+  createTeamFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
 import {
@@ -112,6 +113,27 @@ describe('tasks', () => {
         where id = ${created.taskId}
       `;
       expect(row).toEqual({ status: 'done', completed: true });
+    });
+  });
+
+  it('a project task goes to a freelancer only when they are on the project', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const input = {
+        title: 'Rever',
+        clientId: world.clients.a,
+        assigneeId: world.users.freelancer,
+      };
+
+      expect(
+        await createTask(founder, { ...input, projectId: team.other.projectId }, deps),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
+      expect(
+        (await createTask(founder, { ...input, projectId: team.rooms.a.projectId }, deps)).ok,
+      ).toBe(true);
     });
   });
 

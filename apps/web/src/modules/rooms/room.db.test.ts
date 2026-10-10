@@ -3,6 +3,7 @@ import {
   closeTestSql,
   createFixtureWorld,
   createRoomFixture,
+  createTeamFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { createProjectAsStaff } from './projects';
@@ -142,6 +143,53 @@ describe('room reads', () => {
           [approval?.id, 'Campanha', 'Conceito'],
         ].sort(),
       );
+    });
+  });
+
+  it('freelancer room lists only assigned projects', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = roomDeps(sql);
+
+      const room = await loadRoom(
+        roomClaims(world.users.freelancer),
+        { clientId: world.clients.a },
+        deps,
+      );
+
+      expect(room?.projects.map((project) => project.id)).toEqual([team.rooms.a.projectId]);
+      expect(room?.project?.id).toBe(team.rooms.a.projectId);
+      const manager = await loadRoom(
+        roomClaims(world.users.manager),
+        { clientId: world.clients.a },
+        deps,
+      );
+      expect(manager?.projects).toHaveLength(2);
+    });
+  });
+
+  it('freelancer cannot open another project by id', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const team = await createTeamFixture(sql, world);
+      const { deps } = roomDeps(sql);
+      const claims = roomClaims(world.users.freelancer);
+
+      const room = await loadRoom(
+        claims,
+        { clientId: world.clients.a, projectId: team.other.projectId },
+        deps,
+      );
+      const preview = await loadRoomPreview(
+        claims,
+        { clientId: world.clients.a, projectId: team.other.projectId },
+        deps,
+      );
+
+      expect(room?.project?.id).not.toBe(team.other.projectId);
+      expect(JSON.stringify(room)).not.toContain(team.other.projectId);
+      expect(JSON.stringify(preview)).not.toContain(team.other.projectId);
     });
   });
 });

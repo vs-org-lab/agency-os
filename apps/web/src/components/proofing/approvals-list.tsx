@@ -5,7 +5,7 @@ import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approv
 import { Link } from '@/i18n/navigation';
 import type { ClientPendingApproval } from '@/modules/rooms';
 
-/** P-02: what waits for the client, grouped by type (phases, files, final delivery), with how long each has waited. */
+/** P-02: what waits for the client, grouped by type (phases, files, documents, final delivery), with how long each has waited. */
 export function ApprovalsList({
   approvals,
   decides,
@@ -20,6 +20,10 @@ export function ApprovalsList({
   const groups = [
     { key: 'phases' as const, items: approvals.filter((approval) => approval.kind === 'phase') },
     { key: 'files' as const, items: approvals.filter((approval) => approval.kind === 'file') },
+    {
+      key: 'documents' as const,
+      items: approvals.filter((approval) => approval.kind === 'document'),
+    },
     {
       key: 'delivery' as const,
       items: approvals.filter((approval) => approval.kind === 'delivery'),
@@ -62,6 +66,14 @@ export function ApprovalsList({
                     className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
                     {t('openFile', { name: approval.subjectName })}
+                  </Link>
+                ) : approval.kind === 'document' && approval.documentId ? (
+                  <Link
+                    href={`/portal/docs/${approval.documentId}`}
+                    aria-label={t('openDocument', { name: approval.subjectName })}
+                    className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    {t('openDocument', { name: approval.subjectName })}
                   </Link>
                 ) : decides ? (
                   <ApprovalDecision approvalId={approval.id} decide={decide} />

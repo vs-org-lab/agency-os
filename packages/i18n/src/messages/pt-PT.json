@@ -95,7 +95,8 @@
       "dashboard": "Dashboard",
       "updates": "Atualizações",
       "tasks": "Tarefas",
-      "library": "Biblioteca"
+      "library": "Biblioteca",
+      "documents": "Documentos"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -104,7 +105,8 @@
       "proofs": "Provas",
       "updates": "Atualizações",
       "team": "Colegas",
-      "library": "Biblioteca"
+      "library": "Biblioteca",
+      "documents": "Documentos"
     }
   },
   "states": {
@@ -2154,7 +2156,9 @@
       "files": "Ficheiros",
       "waiting": "À espera desde {date}",
       "openFile": "Abrir {name}",
-      "delivery": "Entrega final"
+      "delivery": "Entrega final",
+      "documents": "Documentos",
+      "openDocument": "Abrir {name}"
     },
     "clientList": {
       "title": "Provas",
@@ -2289,6 +2293,124 @@
       "internalWarning": "Há ficheiros de pastas internas selecionados. Uma atualização visível ao cliente só leva ficheiros de pastas visíveis.",
       "none": "A Biblioteca deste projeto ainda não tem ficheiros.",
       "download": "Descarregar {name}"
+    }
+  },
+  "projectDocuments": {
+    "title": "Documentos",
+    "newDocument": "Novo documento",
+    "documentTitle": "Título",
+    "kind": "Tipo",
+    "url": "Link",
+    "file": "Ficheiro",
+    "create": "Criar documento",
+    "creating": "A criar…",
+    "created": "Documento criado.",
+    "kinds": {
+      "figma": "Figma",
+      "pdf": "PDF",
+      "file": "Ficheiro",
+      "link": "Link externo"
+    },
+    "status": {
+      "draft": "Rascunho",
+      "with_client": "Com o cliente",
+      "approved": "Aprovado"
+    },
+    "version": "Versão {number}",
+    "uploadingFirst": "A carregar",
+    "empty": "Ainda não há documentos neste projeto.",
+    "noProject": "Ainda não há projetos com documentos.",
+    "cards": {
+      "projectDocuments": "Documentos do projeto",
+      "presentation": "Apresentação do Core",
+      "presentationStatus": {
+        "draft": "Rascunho",
+        "with_client": "Com o cliente"
+      },
+      "commercial": "Comercial",
+      "proposal": "Proposta",
+      "contract": "Contrato",
+      "invoices": "Faturas",
+      "none": "Ainda não existe",
+      "proposalStatus": {
+        "draft": "Rascunho",
+        "sent": "Com o cliente",
+        "accepted": "Aceite",
+        "withdrawn": "Retirada"
+      },
+      "contractStatus": {
+        "awaiting_signatures": "À espera de assinaturas",
+        "signed": "Assinado",
+        "void": "Anulado"
+      },
+      "invoicesState": {
+        "none": "Sem pedidos",
+        "open": "Por pagar",
+        "paid": "Tudo pago"
+      }
+    },
+    "viewer": {
+      "openFigma": "Abrir no Figma",
+      "download": "Descarregar {name}",
+      "openLink": "Abrir {host}",
+      "linkHint": "Abre num separador novo.",
+      "uploading": "O ficheiro ainda está a carregar.",
+      "noVersion": "Este documento ainda não tem versão pronta."
+    },
+    "actions": {
+      "share": "Partilhar com o cliente",
+      "withdraw": "Retirar para rascunho",
+      "requestApproval": "Pedir aprovação",
+      "remove": "Remover",
+      "confirmRemove": "Remover este documento e todas as versões? Não dá para desfazer.",
+      "replace": "Substituir ficheiro",
+      "changeLink": "Mudar link",
+      "newLink": "Novo link",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "done": {
+        "share": "Documento partilhado com o cliente.",
+        "withdraw": "Documento de volta a rascunho.",
+        "requestApproval": "Pedido de aprovação enviado ao cliente.",
+        "version": "Versão nova guardada."
+      }
+    },
+    "pendingApproval": "À espera da decisão do cliente.",
+    "lastDecision": {
+      "approved": "O cliente aprovou esta versão.",
+      "changes_requested": "O cliente pediu alterações: {comment}"
+    },
+    "versions": {
+      "title": "Versões",
+      "current": "Atual",
+      "shared": "Vista pelo cliente",
+      "uploading": "A carregar",
+      "item": "Versão {number} · {date}"
+    },
+    "comments": {
+      "title": "Comentários",
+      "empty": "Ainda não há comentários.",
+      "body": "Comentário",
+      "internal": "Comentário interno (nunca sai para o cliente)",
+      "internalBadge": "Interno",
+      "client": "Cliente",
+      "send": "Comentar",
+      "sent": "Comentário enviado.",
+      "onVersion": "Versão {number}"
+    },
+    "portal": {
+      "title": "Documentos",
+      "empty": "Ainda não há documentos partilhados consigo.",
+      "decideHint": "A equipa pediu a sua aprovação desta versão."
+    },
+    "errors": {
+      "not_found": "Não encontrado ou sem permissão.",
+      "invalid_input": "Confirme o título, o link ou o ficheiro.",
+      "invalid_state": "O estado do documento mudou entretanto. Atualize a página.",
+      "invalid_file": "O ficheiro foi recusado: o tipo não é aceite ou não corresponde ao conteúdo.",
+      "storage_full": "O espaço de armazenamento está quase cheio. Apague ficheiros antigos antes de carregar mais.",
+      "upload_failed": "O carregamento falhou. Verifique a ligação e tente outra vez.",
+      "comment_required": "Escreva o que deve mudar."
     }
   }
 }

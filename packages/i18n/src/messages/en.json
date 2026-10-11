@@ -95,7 +95,8 @@
       "dashboard": "Dashboard",
       "updates": "Updates",
       "tasks": "Tasks",
-      "library": "Library"
+      "library": "Library",
+      "documents": "Documents"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -104,7 +105,8 @@
       "proofs": "Proofs",
       "updates": "Updates",
       "team": "Colleagues",
-      "library": "Library"
+      "library": "Library",
+      "documents": "Documents"
     }
   },
   "states": {
@@ -2154,7 +2156,9 @@
       "files": "Files",
       "waiting": "Waiting since {date}",
       "openFile": "Open {name}",
-      "delivery": "Final delivery"
+      "delivery": "Final delivery",
+      "documents": "Documents",
+      "openDocument": "Open {name}"
     },
     "clientList": {
       "title": "Proofs",
@@ -2289,6 +2293,124 @@
       "internalWarning": "Files from internal folders are selected. A client-visible update only carries files from visible folders.",
       "none": "This project's library has no files yet.",
       "download": "Download {name}"
+    }
+  },
+  "projectDocuments": {
+    "title": "Documents",
+    "newDocument": "New document",
+    "documentTitle": "Title",
+    "kind": "Type",
+    "url": "Link",
+    "file": "File",
+    "create": "Create document",
+    "creating": "Creating…",
+    "created": "Document created.",
+    "kinds": {
+      "figma": "Figma",
+      "pdf": "PDF",
+      "file": "File",
+      "link": "External link"
+    },
+    "status": {
+      "draft": "Draft",
+      "with_client": "With the client",
+      "approved": "Approved"
+    },
+    "version": "Version {number}",
+    "uploadingFirst": "Uploading",
+    "empty": "There are no documents in this project yet.",
+    "noProject": "There are no projects with documents yet.",
+    "cards": {
+      "projectDocuments": "Project documents",
+      "presentation": "Core presentation",
+      "presentationStatus": {
+        "draft": "Draft",
+        "with_client": "With the client"
+      },
+      "commercial": "Commercial",
+      "proposal": "Proposal",
+      "contract": "Contract",
+      "invoices": "Invoices",
+      "none": "Not yet",
+      "proposalStatus": {
+        "draft": "Draft",
+        "sent": "With the client",
+        "accepted": "Accepted",
+        "withdrawn": "Withdrawn"
+      },
+      "contractStatus": {
+        "awaiting_signatures": "Awaiting signatures",
+        "signed": "Signed",
+        "void": "Void"
+      },
+      "invoicesState": {
+        "none": "No requests",
+        "open": "To pay",
+        "paid": "All paid"
+      }
+    },
+    "viewer": {
+      "openFigma": "Open in Figma",
+      "download": "Download {name}",
+      "openLink": "Open {host}",
+      "linkHint": "Opens in a new tab.",
+      "uploading": "The file is still uploading.",
+      "noVersion": "This document has no ready version yet."
+    },
+    "actions": {
+      "share": "Share with the client",
+      "withdraw": "Back to draft",
+      "requestApproval": "Ask for approval",
+      "remove": "Remove",
+      "confirmRemove": "Remove this document and every version? This cannot be undone.",
+      "replace": "Replace file",
+      "changeLink": "Change link",
+      "newLink": "New link",
+      "save": "Save",
+      "cancel": "Cancel",
+      "done": {
+        "share": "Document shared with the client.",
+        "withdraw": "Document back to draft.",
+        "requestApproval": "Approval request sent to the client.",
+        "version": "New version saved."
+      }
+    },
+    "pendingApproval": "Waiting for the client decision.",
+    "lastDecision": {
+      "approved": "The client approved this version.",
+      "changes_requested": "The client asked for changes: {comment}"
+    },
+    "versions": {
+      "title": "Versions",
+      "current": "Current",
+      "shared": "Seen by the client",
+      "uploading": "Uploading",
+      "item": "Version {number} · {date}"
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments yet.",
+      "body": "Comment",
+      "internal": "Internal comment (never leaves for the client)",
+      "internalBadge": "Internal",
+      "client": "Client",
+      "send": "Comment",
+      "sent": "Comment sent.",
+      "onVersion": "Version {number}"
+    },
+    "portal": {
+      "title": "Documents",
+      "empty": "No documents have been shared with you yet.",
+      "decideHint": "The team asked for your approval of this version."
+    },
+    "errors": {
+      "not_found": "Not found or not allowed.",
+      "invalid_input": "Check the title, the link or the file.",
+      "invalid_state": "The document changed in the meantime. Refresh the page.",
+      "invalid_file": "The file was refused: its type is not accepted or does not match its content.",
+      "storage_full": "Storage is almost full. Delete old files before uploading more.",
+      "upload_failed": "The upload failed. Check your connection and try again.",
+      "comment_required": "Write what should change."
     }
   }
 }

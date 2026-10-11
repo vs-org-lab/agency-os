@@ -1,6 +1,10 @@
+import { isUnsafeCharacter } from './paths';
+
 /** A path segment inside the archive that cannot climb out of it or split into more segments. */
 export function safeZipSegment(segment: string): string {
-  const cleaned = segment.trim().replace(/[/\\\u0000-\u001f\u007f]/g, '_');
+  const cleaned = Array.from(segment.trim())
+    .map((character) => (isUnsafeCharacter(character) ? '_' : character))
+    .join('');
   return cleaned === '' || cleaned === '.' || cleaned === '..' ? '_' : cleaned;
 }
 

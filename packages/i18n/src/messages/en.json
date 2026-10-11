@@ -2128,7 +2128,8 @@
       "invalid_input": "Check the fields and try again.",
       "invalid_state": "This action no longer applies to this version.",
       "invalid_file": "The file is not an accepted type or is over 50 MB.",
-      "upload_failed": "The upload failed. Try again."
+      "upload_failed": "The upload failed. Try again.",
+      "storage_full": "Storage is almost full. Delete old library files before uploading more."
     },
     "approvals": {
       "phases": "Phases",

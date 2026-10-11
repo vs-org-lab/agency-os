@@ -2128,7 +2128,8 @@
       "invalid_input": "Verifique os campos e tente de novo.",
       "invalid_state": "Esta ação já não se aplica a esta versão.",
       "invalid_file": "O ficheiro não é um tipo aceite ou ultrapassa 50 MB.",
-      "upload_failed": "O carregamento falhou. Tente de novo."
+      "upload_failed": "O carregamento falhou. Tente de novo.",
+      "storage_full": "O espaço de armazenamento está quase cheio. Apague ficheiros antigos da Biblioteca antes de carregar mais."
     },
     "approvals": {
       "phases": "Fases",

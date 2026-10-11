@@ -1,11 +1,14 @@
 import { MAX_FILE_NAME_LENGTH, MAX_FOLDER_NAME_LENGTH } from './limits';
 
 /** Separators and control characters never belong in a folder or file name. */
-const UNSAFE_CHARACTERS = /[/\\\u0000-\u001f\u007f]/;
+export function isUnsafeCharacter(character: string): boolean {
+  const code = character.charCodeAt(0);
+  return character === '/' || character === '\\' || code < 0x20 || code === 0x7f;
+}
 
 /** A folder or file name that cannot act as a path: no separators, control characters, `.` or `..`. */
 export function isSafeName(name: string): boolean {
-  return name !== '.' && name !== '..' && !UNSAFE_CHARACTERS.test(name);
+  return name !== '.' && name !== '..' && !Array.from(name).some(isUnsafeCharacter);
 }
 
 export type UploadPath = { segments: string[]; fileName: string };

@@ -419,6 +419,11 @@ export function BlockEditor({
 }) {
   const t = useTranslations('brandHub');
   const [content, setContent] = useState<unknown>(block.content);
+  const [stored, setStored] = useState(block.content);
+  if (stored !== block.content && JSON.stringify(stored) !== JSON.stringify(block.content)) {
+    setStored(block.content);
+    setContent(block.content);
+  }
   const [result, setResult] = useState<'saved' | HubError | null>(null);
   const [pending, startTransition] = useTransition();
   const ready = assets.filter((asset) => asset.status === 'ready');

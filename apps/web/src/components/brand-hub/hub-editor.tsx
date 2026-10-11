@@ -177,7 +177,7 @@ export function HubEditor({
                   ) : (
                     page.blocks.map((block, index) => (
                       <BlockEditor
-                        key={`${block.id}-${JSON.stringify(block.content)}`}
+                        key={block.id}
                         block={block}
                         assets={hub.assets}
                         first={index === 0}
@@ -239,7 +239,7 @@ export function HubEditor({
               </div>
               {sideTab === 'design' ? (
                 <DesignPanel
-                  key={JSON.stringify(hub.design)}
+                  key={hub.id}
                   hubId={hub.id}
                   design={hub.design}
                   save={async (hubId, design) => {

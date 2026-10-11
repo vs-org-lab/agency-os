@@ -29,6 +29,11 @@ export function DesignPanel({
 }) {
   const t = useTranslations('brandHub');
   const [draft, setDraft] = useState<HubDesign>(design);
+  const [stored, setStored] = useState(design);
+  if (stored !== design && JSON.stringify(stored) !== JSON.stringify(design)) {
+    setStored(design);
+    setDraft(design);
+  }
   const [result, setResult] = useState<'saved' | HubError | null>(null);
   const [pending, startTransition] = useTransition();
   const valid = COLOR_NAMES.every((name) => HEX.test(draft.colors[name]));

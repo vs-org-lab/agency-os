@@ -109,13 +109,13 @@ export type EmailParams = {
     companyName: string;
     phaseName: string;
     decision: 'approved' | 'changes_requested';
-    subject: 'phase' | 'file' | 'delivery' | 'document';
+    subject: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
     roomUrl: string;
   };
   'founder.approval_overdue': {
     companyName: string;
     phaseName: string;
-    subject: 'phase' | 'file' | 'delivery' | 'document';
+    subject: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
     roomUrl: string;
   };
   'founder.proof_comment': { companyName: string; fileTitle: string; roomUrl: string };

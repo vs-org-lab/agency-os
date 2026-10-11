@@ -321,6 +321,34 @@ describe('renderEmail', () => {
     expect(overdue.text).toContain('The document Estratégia');
   });
 
+  it('names the brand hub in approval alerts', () => {
+    const decided = renderEmail('founder.approval_decided', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      decision: 'changes_requested',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+    const approved = renderEmail('founder.approval_decided', 'en', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      decision: 'approved',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+    const overdue = renderEmail('founder.approval_overdue', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+
+    expect(decided.subject).toBe('Empresa Exemplo pediu alterações no Brand Hub');
+    expect(decided.text).toContain('Rever Brand Hub');
+    expect(approved.subject).toBe('Empresa Exemplo approved the Brand Hub');
+    expect(overdue.text).toContain('O Brand Hub espera');
+  });
+
   it('document notices name the document and open it', () => {
     const team = renderEmail('founder.document_comment', 'pt-PT', {
       companyName: 'Empresa Exemplo',

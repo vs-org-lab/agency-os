@@ -3,6 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 import { z } from 'zod';
 import { schema, type ProofKind } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
+import { fitsStorage } from '@/modules/library/server';
 import { roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { withdrawOlderRequests } from './approvals';
@@ -156,7 +157,9 @@ export async function confirmProofVersion(
   claims: VerifiedClaims,
   input: { versionId: string },
   deps: ProofingDeps,
-): Promise<{ ok: true; kind: ProofKind } | NotFound | { ok: false; rule: 'invalid_file' }> {
+): Promise<
+  { ok: true; kind: ProofKind } | NotFound | { ok: false; rule: 'invalid_file' | 'storage_full' }
+> {
   if (!uuid.safeParse(input.versionId).success) return NOT_FOUND;
   const [version] = await deps.contexts.withSystemContext((tx) =>
     tx
@@ -193,7 +196,22 @@ export async function confirmProofVersion(
     });
     return { ok: false, rule: 'invalid_file' };
   }
-  await deps.contexts.withSystemContext(async (tx) => {
+  const stored = await deps.contexts.withSystemContext(async (tx) => {
+    if (!(await fitsStorage(tx, scope.organizationId, bytes.length))) {
+      await tx
+        .update(proofVersions)
+        .set({ status: 'rejected' })
+        .where(eq(proofVersions.id, input.versionId));
+      await recordAudit(tx, {
+        organizationId: scope.organizationId,
+        action: 'proof.version_rejected',
+        resourceType: 'proof_version',
+        resourceId: input.versionId,
+        clientId: scope.clientId,
+        metadata: { reason: 'storage_full' },
+      });
+      return false;
+    }
     await tx
       .update(proofVersions)
       .set({
@@ -205,7 +223,12 @@ export async function confirmProofVersion(
       })
       .where(and(eq(proofVersions.id, input.versionId), eq(proofVersions.status, 'uploading')));
     await withdrawOlderRequests(tx, version.fileId, input.versionId);
+    return true;
   });
+  if (!stored) {
+    await deps.storage.remove(version.storagePath);
+    return { ok: false, rule: 'storage_full' };
+  }
   return { ok: true, kind: detected.kind };
 }
 

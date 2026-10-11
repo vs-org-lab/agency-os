@@ -6,6 +6,7 @@ export const PROOF_ERRORS = [
   'invalid_state',
   'invalid_file',
   'upload_failed',
+  'storage_full',
 ] as const;
 
 export type ProofError = (typeof PROOF_ERRORS)[number];

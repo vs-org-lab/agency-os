@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
@@ -14,11 +14,15 @@ import {
   type PhaseView,
   type ProjectView,
   type RoomView,
+  type UpdateFileView,
 } from './views';
 
 const {
   approvals,
   clientStaffAssignments,
+  libraryFiles,
+  libraryFolders,
+  projectUpdateFiles,
   clients,
   organizationMemberships,
   profiles,
@@ -36,6 +40,45 @@ type BuildMode = { clientView: boolean; projectIds: readonly string[] };
  * same filters as the portal views: only client-visible steps and updates, no withdrawn approvals
  * and no cancelled projects (RN-50, US-12).
  */
+/**
+ * The ready library files attached to each update; in client view only those under a root
+ * visible to the client, as the portal shows them.
+ */
+async function updateFiles(
+  tx: DbTransaction,
+  updateIds: string[],
+  clientView: boolean,
+): Promise<Map<string, UpdateFileView[]>> {
+  const byUpdate = new Map<string, UpdateFileView[]>();
+  if (updateIds.length === 0) return byUpdate;
+  const rows = await tx
+    .select({
+      updateId: projectUpdateFiles.updateId,
+      id: libraryFiles.id,
+      name: libraryFiles.name,
+      kind: libraryFiles.kind,
+      sizeBytes: libraryFiles.sizeBytes,
+    })
+    .from(projectUpdateFiles)
+    .innerJoin(libraryFiles, eq(libraryFiles.id, projectUpdateFiles.fileId))
+    .innerJoin(libraryFolders, eq(libraryFolders.id, libraryFiles.rootId))
+    .where(
+      and(
+        inArray(projectUpdateFiles.updateId, updateIds),
+        eq(libraryFiles.status, 'ready'),
+        clientView ? eq(libraryFolders.visibility, 'client') : undefined,
+      ),
+    )
+    .orderBy(sql`lower(${libraryFiles.name})`, asc(libraryFiles.id));
+  for (const row of rows) {
+    if (!row.kind || row.sizeBytes === null) continue;
+    const files = byUpdate.get(row.updateId) ?? [];
+    files.push({ id: row.id, name: row.name, kind: row.kind, sizeBytes: row.sizeBytes });
+    byUpdate.set(row.updateId, files);
+  }
+  return byUpdate;
+}
+
 async function buildProject(
   tx: DbTransaction,
   clientId: string,
@@ -93,6 +136,11 @@ async function buildProject(
     )
     .orderBy(desc(projectUpdates.createdAt), asc(projectUpdates.id))
     .limit(FEED_LIMIT);
+  const attachments = await updateFiles(
+    tx,
+    updateRows.map((update) => update.id),
+    mode.clientView,
+  );
   const approvalRows = await tx
     .select()
     .from(approvals)
@@ -147,6 +195,7 @@ async function buildProject(
       authorName: update.authorName,
       createdAt: update.createdAt.toISOString(),
       visibility: update.visibility,
+      files: attachments.get(update.id) ?? [],
     })),
     // File versions and the final approval have their own screens; the room lists phase approvals.
     approvals: approvalRows
@@ -300,6 +349,7 @@ export async function loadRoomPreview(
           milestone: update.milestone,
           authorName: update.authorName,
           createdAt: update.createdAt,
+          files: update.files,
         })),
         approvals: project.approvals,
       },

@@ -4,6 +4,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { UpdateFeed } from '@/components/rooms/update-feed';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadAttachableFiles } from '@/modules/library/server';
 import { loadStaffRoom } from '@/modules/rooms/server';
 import { publishUpdateAction } from '../actions';
 import { RoomHeader } from '../room/room-header';
@@ -26,6 +27,8 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
   if (!data) notFound();
   const { room, editable } = data;
   const t = await getTranslations('rooms');
+  const attachable =
+    room.project && editable ? await loadAttachableFiles(session.claims, room.project.id) : [];
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
@@ -39,7 +42,11 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
       {room.project ? (
         <>
           {editable ? (
-            <UpdateComposer projectId={room.project.id} publish={publishUpdateAction} />
+            <UpdateComposer
+              projectId={room.project.id}
+              publish={publishUpdateAction}
+              attachable={attachable}
+            />
           ) : null}
           <section aria-labelledby="room-updates-title" className="flex flex-col gap-3">
             <h2 id="room-updates-title" className="text-title-sm text-text">

@@ -8,6 +8,8 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { AttachmentPicker } from '@/components/library/attachment-picker';
+import type { AttachableFile } from '@/modules/library';
 import { roomError, type ActionResult, type RoomError } from './room-errors';
 
 export type PublishUpdate = (input: {
@@ -15,17 +17,20 @@ export type PublishUpdate = (input: {
   body: string;
   milestone: string | null;
   visibility: 'internal' | 'client';
+  fileIds: string[];
 }) => Promise<ActionResult>;
 
 const MAX_LENGTH = 5000;
 
-/** C-02: writes an update, internal unless the author makes it visible (RN-50). */
+/** C-02: writes an update, internal unless the author makes it visible (RN-50), with library files attached (RF-055). */
 export function UpdateComposer({
   projectId,
   publish,
+  attachable = [],
 }: {
   projectId: string;
   publish: PublishUpdate;
+  attachable?: readonly AttachableFile[];
 }) {
   const t = useTranslations('rooms.updates');
   const te = useTranslations('rooms.errors');
@@ -33,7 +38,10 @@ export function UpdateComposer({
   const [body, setBody] = useState('');
   const [milestone, setMilestone] = useState('');
   const [visibility, setVisibility] = useState<'internal' | 'client'>('internal');
-  const [result, setResult] = useState<{ ok: true } | { ok: false; error: RoomError } | null>(null);
+  const [fileIds, setFileIds] = useState<string[]>([]);
+  const [result, setResult] = useState<
+    { ok: true } | { ok: false; error: RoomError | 'attachment_hidden' } | null
+  >(null);
   const [pending, startTransition] = useTransition();
 
   return (
@@ -48,15 +56,23 @@ export function UpdateComposer({
             body,
             milestone: milestone.trim() || null,
             visibility,
+            fileIds,
           }).catch(() => ({ ok: false, code: 'not_found' }) as const);
           if (outcome.ok) {
             setBody('');
             setMilestone('');
             setVisibility('internal');
+            setFileIds([]);
             setResult({ ok: true });
             router.refresh();
           } else {
-            setResult({ ok: false, error: roomError(outcome.code) });
+            setResult({
+              ok: false,
+              error:
+                outcome.code === 'attachment_hidden'
+                  ? 'attachment_hidden'
+                  : roomError(outcome.code),
+            });
           }
         });
       }}
@@ -101,6 +117,14 @@ export function UpdateComposer({
           </label>
         ))}
       </fieldset>
+      {attachable.length > 0 ? (
+        <AttachmentPicker
+          files={attachable}
+          selected={fileIds}
+          onChange={setFileIds}
+          visibility={visibility}
+        />
+      ) : null}
       {result?.ok === false ? <FormMessage tone="danger">{te(result.error)}</FormMessage> : null}
       {result?.ok ? <FormMessage tone="success">{t('published')}</FormMessage> : null}
       <div className="md:w-48">

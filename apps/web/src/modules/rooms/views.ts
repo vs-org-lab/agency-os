@@ -1,5 +1,6 @@
 import type {
   ApprovalStatus,
+  LibraryFileKind,
   PhaseStatus,
   ProjectStatus,
   StepStatus,
@@ -33,6 +34,9 @@ export type ClientPhaseView = {
   steps: ClientStepView[];
 };
 
+/** A library file attached to an update (RF-055). */
+export type UpdateFileView = { id: string; name: string; kind: LibraryFileKind; sizeBytes: number };
+
 export type ClientUpdateView = {
   id: string;
   kind: UpdateKind;
@@ -40,6 +44,7 @@ export type ClientUpdateView = {
   milestone: string | null;
   authorName: string | null;
   createdAt: string;
+  files: UpdateFileView[];
 };
 
 export type ClientApprovalView = {

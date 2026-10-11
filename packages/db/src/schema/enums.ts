@@ -261,6 +261,19 @@ export const approvalStatusEnum = appSchema.enum('approval_status', [
 
 export const taskStatusEnum = appSchema.enum('task_status', ['open', 'done']);
 
+export const libraryFileKindEnum = appSchema.enum('library_file_kind', [
+  'image',
+  'video',
+  'document',
+  'other',
+]);
+
+export const libraryFileStatusEnum = appSchema.enum('library_file_status', [
+  'uploading',
+  'ready',
+  'rejected',
+]);
+
 export const proofKindEnum = appSchema.enum('proof_kind', ['image', 'pdf', 'video']);
 
 export const proofVersionStatusEnum = appSchema.enum('proof_version_status', [
@@ -317,6 +330,8 @@ export type StepStatus = (typeof stepStatusEnum.enumValues)[number];
 export type UpdateVisibility = (typeof updateVisibilityEnum.enumValues)[number];
 export type UpdateKind = (typeof updateKindEnum.enumValues)[number];
 export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
+export type LibraryFileKind = (typeof libraryFileKindEnum.enumValues)[number];
+export type LibraryFileStatus = (typeof libraryFileStatusEnum.enumValues)[number];
 export type ProofKind = (typeof proofKindEnum.enumValues)[number];
 export type ProofVersionStatus = (typeof proofVersionStatusEnum.enumValues)[number];
 export type ApprovalStatus = (typeof approvalStatusEnum.enumValues)[number];

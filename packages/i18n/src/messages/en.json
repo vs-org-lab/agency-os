@@ -94,7 +94,8 @@
     "room": {
       "dashboard": "Dashboard",
       "updates": "Updates",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "library": "Library"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -102,7 +103,8 @@
       "approvals": "Approvals",
       "proofs": "Proofs",
       "updates": "Updates",
-      "team": "Colleagues"
+      "team": "Colleagues",
+      "library": "Library"
     }
   },
   "states": {
@@ -1850,7 +1852,8 @@
         "phase_done": "Phase completed: {name}",
         "approval_decided": "Changes requested on phase {name}",
         "project_delivered": "Project delivered"
-      }
+      },
+      "attachments": "Attachments"
     },
     "approval": {
       "pending": "Waiting for the client since {date}",
@@ -1872,7 +1875,8 @@
       "previous_phase_open": "The previous phase is not done (or approved) yet.",
       "steps_open": "There are still steps to do in this phase.",
       "approval_required": "This phase only ends with the client approval.",
-      "deal_has_project": "This deal already has a project."
+      "deal_has_project": "This deal already has a project.",
+      "attachment_hidden": "Some attachments come from internal folders. A client-visible update only carries files from visible folders."
     },
     "stepsOf": "Steps of {name}",
     "phaseLabel": "{position}. {name}",
@@ -2124,7 +2128,8 @@
       "invalid_input": "Check the fields and try again.",
       "invalid_state": "This action no longer applies to this version.",
       "invalid_file": "The file is not an accepted type or is over 50 MB.",
-      "upload_failed": "The upload failed. Try again."
+      "upload_failed": "The upload failed. Try again.",
+      "storage_full": "Storage is almost full. Delete old library files before uploading more."
     },
     "approvals": {
       "phases": "Phases",
@@ -2168,6 +2173,104 @@
       "sent": "Thank you for your testimonial.",
       "required": "Write the testimonial and your name.",
       "failed": "It could not be saved. Try again."
+    }
+  },
+  "library": {
+    "title": "Library",
+    "breadcrumb": "Folder path",
+    "search": "Search files",
+    "searchSubmit": "Search",
+    "clearSearch": "Clear search",
+    "filters": {
+      "label": "Filter",
+      "all": "All",
+      "folders": "Folders",
+      "image": "Images",
+      "video": "Video",
+      "document": "Documents"
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name",
+      "date": "Newest",
+      "size": "Size"
+    },
+    "view": {
+      "label": "View",
+      "grid": "Grid",
+      "list": "List"
+    },
+    "newFolder": "New folder",
+    "folderName": "Folder name",
+    "create": "Create",
+    "upload": "Upload files",
+    "uploadFolder": "Upload folder",
+    "uploading": "Uploading {done} of {total}…",
+    "uploaded": "{count, plural, one {# file uploaded.} other {# files uploaded.}}",
+    "rejected": "{count, plural, one {# file refused: its type is not accepted or does not match its content.} other {# files refused: their type is not accepted or does not match their content.}}",
+    "uploadHint": "Images, videos, PDF, Word, Excel, PowerPoint, ZIP, PSD and fonts, up to 50 MB each.",
+    "openFolderToUpload": "Open or create a folder to upload files.",
+    "downloadAll": "Download all",
+    "downloadFolder": "Download folder",
+    "preparingZip": "Preparing the ZIP…",
+    "download": "Download {name}",
+    "delete": "Delete",
+    "deleteFile": "Delete {name}",
+    "deleteFolder": "Delete folder",
+    "confirmDeleteFolder": "Delete the folder \"{name}\" and everything in it? This cannot be undone.",
+    "confirmDeleteFile": "Delete \"{name}\"? This cannot be undone.",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
+    "visibility": {
+      "internal": "Internal",
+      "client": "Visible to the client",
+      "makeClient": "Show to the client",
+      "makeInternal": "Make internal",
+      "inherited": "Subfolders and files follow this visibility."
+    },
+    "fileCount": "{count, plural, =0 {Empty} one {# file} other {# files}}",
+    "empty": "This folder is empty.",
+    "emptyRoot": "There are no folders in this project yet.",
+    "emptyRootHint": "Create a folder to start organising files.",
+    "emptyPortal": "No files have been shared with you yet.",
+    "noResults": "No files match.",
+    "noProject": "There are no projects with a library yet.",
+    "columns": {
+      "name": "Name",
+      "folder": "Folder",
+      "size": "Size",
+      "date": "Date",
+      "uploadedBy": "Uploaded by",
+      "actions": "Actions"
+    },
+    "kinds": {
+      "image": "Image",
+      "video": "Video",
+      "document": "Document",
+      "other": "File"
+    },
+    "inFolder": "in {folder}",
+    "errors": {
+      "not_found": "Not found or not allowed.",
+      "invalid_input": "Check the name and the files.",
+      "name_taken": "A folder with that name already exists here.",
+      "too_deep": "Folders go at most four levels deep.",
+      "storage_full": "Storage is almost full. Delete old files before uploading more.",
+      "invalid_file": "The file was refused: its type is not accepted or does not match its content.",
+      "zip_too_large": "Too many files for one ZIP (at most 500 files and 500 MB). Download folder by folder.",
+      "upload_failed": "The upload failed. Check your connection and try again.",
+      "download_failed": "The download failed. Check your connection and try again."
+    },
+    "attachments": {
+      "label": "Attachments",
+      "choose": "Attach files from the library",
+      "filter": "Filter files",
+      "selected": "{count} of 10 selected",
+      "limit": "You can attach up to 10 files.",
+      "internalWarning": "Files from internal folders are selected. A client-visible update only carries files from visible folders.",
+      "none": "This project's library has no files yet.",
+      "download": "Download {name}"
     }
   }
 }

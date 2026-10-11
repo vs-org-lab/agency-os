@@ -251,6 +251,7 @@ describe('UpdateComposer', () => {
       body: 'Mapa pronto',
       milestone: null,
       visibility: 'internal',
+      fileIds: [],
     });
     expect((screen.getByLabelText('Texto') as HTMLTextAreaElement).value).toBe('Mapa pronto');
     expect(screen.getByRole('alert').textContent).toBe('Confirme os campos.');

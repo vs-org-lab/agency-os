@@ -1,0 +1,2 @@
+ALTER TABLE "library_files" ADD CONSTRAINT "library_files_name_safe" CHECK ("library_files"."name" !~ '[/\\[:cntrl:]]' and "library_files"."name" not in ('.', '..'));--> statement-breakpoint
+ALTER TABLE "library_folders" ADD CONSTRAINT "library_folders_name_safe" CHECK ("library_folders"."name" !~ '[/\\[:cntrl:]]' and "library_folders"."name" not in ('.', '..'));

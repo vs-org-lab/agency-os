@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createLibraryFixture,
   createProofFixture,
   createRoomFixture,
   withTestTransaction,
@@ -68,6 +69,36 @@ describe('proof files', () => {
       expect(await confirmProofVersion(founder, { versionId: created.versionId }, deps)).toEqual({
         ok: false,
         rule: 'invalid_file',
+      });
+      expect(storage.removed).toEqual([path]);
+      const [row] = await sql<{ status: string }[]>`
+        select status::text from public.proof_versions where id = ${created.versionId}
+      `;
+      expect(row?.status).toBe('rejected');
+    });
+  });
+
+  it('a proof that would pass the organisation storage ceiling is refused', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps, storage } = proofingDeps(sql);
+      const founder = proofClaims(world.users.founder);
+      await sql`
+        update public.library_files set size_bytes = 943712256 where id = ${library.b.rootFileId}
+      `;
+      const created = await createProofFile(
+        founder,
+        { projectId: library.a.projectId, title: 'Cartaz' },
+        deps,
+      );
+      if (!created.ok) throw new Error('Proof was not created');
+      const path = created.uploadUrl.replace('memory://upload/', '');
+      storage.files.set(path, PNG_BYTES);
+
+      expect(await confirmProofVersion(founder, { versionId: created.versionId }, deps)).toEqual({
+        ok: false,
+        rule: 'storage_full',
       });
       expect(storage.removed).toEqual([path]);
       const [row] = await sql<{ status: string }[]>`

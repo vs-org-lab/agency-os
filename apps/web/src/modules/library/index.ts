@@ -7,7 +7,7 @@ export {
   STALE_UPLOAD_MS,
 } from './domain/limits';
 export { isSafeName, normaliseUploadPath } from './domain/paths';
-export { zipEntryNames } from './domain/zip';
+export { safeZipSegment, zipEntryNames } from './domain/zip';
 export type { AttachableFile } from './readers';
 export type {
   FileView,

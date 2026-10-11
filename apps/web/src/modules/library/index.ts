@@ -5,7 +5,7 @@ export {
   MAX_UPDATE_ATTACHMENTS,
   MAX_UPLOAD_BATCH,
 } from './domain/limits';
-export { normaliseUploadPath } from './domain/paths';
+export { isSafeName, normaliseUploadPath } from './domain/paths';
 export { zipEntryNames } from './domain/zip';
 export type { AttachableFile } from './readers';
 export type {
@@ -17,3 +17,4 @@ export type {
   LibraryView,
 } from './views';
 export type { ZipManifest } from './zip';
+export type { LibraryStorage } from './storage';

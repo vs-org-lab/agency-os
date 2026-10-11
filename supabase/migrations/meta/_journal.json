@@ -323,6 +323,20 @@
       "when": 1791715134086,
       "tag": "20261011103854_project_documents_reopened",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1791723818537,
+      "tag": "20261011130338_brand_hub",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1791723820027,
+      "tag": "20261011130340_brand_hub_access",
+      "breakpoints": true
     }
   ]
 }

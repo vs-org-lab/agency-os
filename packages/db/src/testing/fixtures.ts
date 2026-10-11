@@ -1204,3 +1204,162 @@ export async function createDeliveryFixture(
     },
   };
 }
+
+export type BrandHubFixture = {
+  rooms: RoomFixture;
+  a: {
+    hubId: string;
+    pageIds: Record<string, string>;
+    strategyBlockId: string;
+    logoBlockId: string;
+    logoAssetId: string;
+    draftAssetId: string;
+    publicationId: string;
+  };
+  b: { hubId: string };
+};
+
+const BRAND_HUB_PAGES = [
+  ['strategy', 'Estratégia'],
+  ['gallery', 'Galeria'],
+  ['logo', 'Logótipo'],
+  ['typography', 'Tipografia'],
+  ['color', 'Cor'],
+  ['photography', 'Fotografia'],
+  ['layout', 'Layout'],
+  ['brand_objects', 'Objetos de marca'],
+  ['resources', 'Recursos'],
+] as const;
+
+async function seedBrandHub(
+  sql: TransactionSql,
+  world: World,
+  clientId: string,
+): Promise<{ hubId: string; pageIds: Record<string, string> }> {
+  const [hub] = await sql<{ id: string }[]>`
+    insert into public.brand_hubs (organization_id, client_id, created_by)
+    values (${world.organizationId}, ${clientId}, ${world.users.founder})
+    returning id
+  `;
+  if (!hub) throw new Error('Fixture brand hub was not created');
+  const pageIds: Record<string, string> = {};
+  for (const [index, [key, title]] of BRAND_HUB_PAGES.entries()) {
+    const [page] = await sql<{ id: string }[]>`
+      insert into public.brand_hub_pages (hub_id, organization_id, client_id, kind, standard_key,
+                                          title, position)
+      values (${hub.id}, ${world.organizationId}, ${clientId}, 'standard', ${key}, ${title},
+              ${index + 1})
+      returning id
+    `;
+    if (!page) throw new Error('Fixture brand hub page was not created');
+    pageIds[key] = page.id;
+  }
+  return { hubId: hub.id, pageIds };
+}
+
+/**
+ * Client A has a hub published once, with a filled strategy block and a logo, then edited: a new
+ * asset exists only in the draft. Client B has a hub that was never published.
+ */
+export async function createBrandHubFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<BrandHubFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const { hubId, pageIds } = await seedBrandHub(sql, world, world.clients.a);
+  const asset = async (name: string, mimeType: string) => {
+    const assetId = randomUUID();
+    await sql`
+      insert into public.brand_hub_assets (id, hub_id, organization_id, client_id, name, mime_type,
+                                           size_bytes, storage_path, upload_status, created_by)
+      values (${assetId}, ${hubId}, ${world.organizationId}, ${world.clients.a}, ${name},
+              ${mimeType}, 2048,
+              ${`brand-hub/${world.organizationId}/${world.clients.a}/${assetId}`}, 'ready',
+              ${world.users.founder})
+    `;
+    return assetId;
+  };
+  const block = async (pageId: string, type: string, content: unknown) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.brand_hub_blocks (page_id, hub_id, organization_id, client_id, type,
+                                           position, content)
+      values (${pageId}, ${hubId}, ${world.organizationId}, ${world.clients.a}, ${type}, 1,
+              ${sql.json(content as never)})
+      returning id
+    `;
+    if (!row) throw new Error('Fixture brand hub block was not created');
+    return row.id;
+  };
+  const strategy = {
+    story: 'Nasceu numa oficina.',
+    mission: 'Dar forma a marcas honestas.',
+    vision: '',
+    values: '',
+    voice: '',
+    positioning: '',
+  };
+  const strategyBlockId = await block(pageIds.strategy as string, 'strategy', strategy);
+  const logoAssetId = await asset('logo.svg', 'image/svg+xml');
+  const logo = { assetId: logoAssetId, variant: 'Principal', background: 'light' };
+  const logoBlockId = await block(pageIds.logo as string, 'logo', logo);
+  const snapshot = {
+    design: {
+      colors: {
+        surface: '#FFFFFF',
+        panel: '#F5F5F4',
+        text: '#1C1917',
+        textMuted: '#57534E',
+        accent: '#1C1917',
+        divider: '#E7E5E4',
+      },
+      corners: 'soft',
+      logoTiles: true,
+      layout: 'sidebar',
+    },
+    pages: [
+      {
+        id: pageIds.strategy,
+        number: '01',
+        title: 'Estratégia',
+        standardKey: 'strategy',
+        blocks: [{ id: strategyBlockId, type: 'strategy', content: strategy }],
+      },
+      {
+        id: pageIds.logo,
+        number: '02',
+        title: 'Logótipo',
+        standardKey: 'logo',
+        blocks: [{ id: logoBlockId, type: 'logo', content: logo }],
+      },
+    ],
+    assets: [{ id: logoAssetId, name: 'logo.svg', mimeType: 'image/svg+xml', sizeBytes: 2048 }],
+  };
+  const [publication] = await sql<{ id: string }[]>`
+    insert into public.brand_hub_publications (hub_id, organization_id, client_id, number,
+                                               revision, snapshot, published_by)
+    values (${hubId}, ${world.organizationId}, ${world.clients.a}, 1, 1,
+            ${sql.json(snapshot as never)}, ${world.users.founder})
+    returning id
+  `;
+  if (!publication) throw new Error('Fixture brand hub publication was not created');
+  const draftAssetId = await asset('draft.png', 'image/png');
+  await sql`
+    update public.brand_hubs
+    set published_publication_id = ${publication.id}, draft_revision = 2
+    where id = ${hubId}
+  `;
+  const hubB = await seedBrandHub(sql, world, world.clients.b);
+  return {
+    rooms,
+    a: {
+      hubId,
+      pageIds,
+      strategyBlockId,
+      logoBlockId,
+      logoAssetId,
+      draftAssetId,
+      publicationId: publication.id,
+    },
+    b: { hubId: hubB.hubId },
+  };
+}

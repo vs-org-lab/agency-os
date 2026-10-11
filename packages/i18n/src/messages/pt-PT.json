@@ -868,6 +868,12 @@
         "heading": "A equipa respondeu",
         "body": "Olá {firstName}, a equipa da {agencyName} deixou um comentário num documento. Pode lê-lo no portal.",
         "action": "Ver no portal"
+      },
+      "brand_hub_published": {
+        "subject": "O Brand Hub foi atualizado",
+        "heading": "O Brand Hub tem novidades",
+        "body": "Olá {firstName}, a equipa da {agencyName} publicou uma nova versão do Brand Hub. Pode vê-la e descarregar os ficheiros no portal.",
+        "action": "Abrir o Brand Hub"
       }
     },
     "founder": {

@@ -40,6 +40,7 @@ export const DOMAIN_EVENTS = [
   'proofing.rounds.warning',
   'rooms.document.shared',
   'rooms.document.commented',
+  'brand_hub.published',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

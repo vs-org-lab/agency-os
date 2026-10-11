@@ -147,6 +147,11 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal/docs/doc',
   },
+  'lead.brand_hub_published': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/hub',
+  },
   'founder.document_comment': {
     companyName: 'Empresa Exemplo',
     documentTitle: 'Estratégia',
@@ -331,6 +336,17 @@ describe('renderEmail', () => {
     expect(team.subject).toBe('Novo comentário de Empresa Exemplo em Estratégia');
     expect(team.html).toContain('https://os.example.com/c/client/docs/doc');
     expect(client.html).toContain('https://os.example.com/portal/docs/doc');
+  });
+
+  it('the brand hub notice says the hub was updated and opens it', () => {
+    const email = renderEmail('lead.brand_hub_published', 'pt-PT', {
+      firstName: 'Ana',
+      agencyName: 'Aurion',
+      portalUrl: 'https://os.example.com/portal/hub',
+    });
+
+    expect(email.subject).toBe('O Brand Hub foi atualizado');
+    expect(email.html).toContain('https://os.example.com/portal/hub');
   });
 
   it('the testimonial alert quotes what the client wrote', () => {

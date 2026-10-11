@@ -868,6 +868,12 @@
         "heading": "The team replied",
         "body": "Hi {firstName}, the {agencyName} team left a comment on a document. You can read it in the portal.",
         "action": "View in the portal"
+      },
+      "brand_hub_published": {
+        "subject": "The Brand Hub was updated",
+        "heading": "The Brand Hub has news",
+        "body": "Hi {firstName}, the {agencyName} team published a new version of the Brand Hub. You can see it and download the files in the portal.",
+        "action": "Open the Brand Hub"
       }
     },
     "founder": {

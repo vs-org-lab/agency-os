@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                                              |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Data                    | 2026-10-11                                                                                                                                                         |
-| Estado                  | Aprovado (aprovação permanente do fundador)                                                                                                                        |
+| Estado                  | Implementado (2026-10-11)                                                                                                                                          |
 | Vaga                    | 2 (… → 2E.1 Biblioteca → **2E.2 Documentos da sala** → 2F Brand Hub → 2G Agenda)                                                                                   |
 | Módulos                 | M04 (RF-030, RF-031 em parte, RF-033, RF-034), M06 (C-04, C-05), M08 (aprovação de documentos)                                                                     |
 | Documentação de produto | `01` (RF-030 a RF-034), `02` (C-04, C-05, P-02, P-03), `04` (RN-20, RN-21, RN-23, RN-41), `08` (matriz, SEC-30, SEC-31)                                            |

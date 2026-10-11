@@ -854,6 +854,18 @@
         "heading": "Conte-nos como correu",
         "body": "Olá {firstName}, o projeto com a {agencyName} está entregue. Obrigado pela confiança.\n\nSe quiser deixar um testemunho curto sobre o trabalho, demora um minuto. Só o publicamos com a sua autorização.",
         "action": "Deixar testemunho"
+      },
+      "document_shared": {
+        "subject": "Novo documento da {agencyName}",
+        "heading": "Há um documento para ler",
+        "body": "Olá {firstName}, a equipa da {agencyName} partilhou um documento consigo. Pode lê-lo e comentá-lo no portal.",
+        "action": "Abrir o documento"
+      },
+      "document_comment": {
+        "subject": "Resposta da equipa da {agencyName}",
+        "heading": "A equipa respondeu",
+        "body": "Olá {firstName}, a equipa da {agencyName} deixou um comentário num documento. Pode lê-lo no portal.",
+        "action": "Ver no portal"
       }
     },
     "founder": {
@@ -964,6 +976,12 @@
         "heading": "Novo testemunho de {companyName}",
         "body": "{authorName} escreveu:\n\n{body}",
         "action": "Abrir a sala"
+      },
+      "document_comment": {
+        "subject": "Novo comentário de {companyName} em {documentTitle}",
+        "heading": "Novo comentário de {companyName}",
+        "body": "O cliente deixou um comentário no documento {documentTitle}.",
+        "action": "Ver o comentário"
       }
     },
     "team": {

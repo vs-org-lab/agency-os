@@ -21,6 +21,9 @@ describe('inngest functions', () => {
         expect.stringContaining('billing-final-invoice-on-delivery'),
         expect.stringContaining('testimonials-received-notice'),
         expect.stringContaining('library-stale-uploads'),
+        expect.stringContaining('documents-shared-notice'),
+        expect.stringContaining('documents-comment-notice'),
+        expect.stringContaining('documents-stale-uploads'),
       ]),
     );
     expect(new Set(ids).size).toBe(ids.length);

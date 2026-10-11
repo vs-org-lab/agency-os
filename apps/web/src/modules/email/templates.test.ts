@@ -137,6 +137,21 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal/testimonial/project',
   },
+  'lead.document_shared': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/docs/doc',
+  },
+  'lead.document_comment': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/docs/doc',
+  },
+  'founder.document_comment': {
+    companyName: 'Empresa Exemplo',
+    documentTitle: 'Estratégia',
+    roomUrl: 'https://os.example.com/c/client/docs/doc',
+  },
   'founder.testimonial_received': {
     companyName: 'Empresa Exemplo',
     authorName: 'Marta Lopes',
@@ -299,6 +314,23 @@ describe('renderEmail', () => {
     expect(decided.subject).toBe('Empresa Exemplo pediu alterações no documento Estratégia');
     expect(decided.text).toContain('Rever documento');
     expect(overdue.text).toContain('The document Estratégia');
+  });
+
+  it('document notices name the document and open it', () => {
+    const team = renderEmail('founder.document_comment', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      documentTitle: 'Estratégia',
+      roomUrl: 'https://os.example.com/c/client/docs/doc',
+    });
+    const client = renderEmail('lead.document_shared', 'en', {
+      firstName: 'Ana',
+      agencyName: 'Aurion',
+      portalUrl: 'https://os.example.com/portal/docs/doc',
+    });
+
+    expect(team.subject).toBe('Novo comentário de Empresa Exemplo em Estratégia');
+    expect(team.html).toContain('https://os.example.com/c/client/docs/doc');
+    expect(client.html).toContain('https://os.example.com/portal/docs/doc');
   });
 
   it('the testimonial alert quotes what the client wrote', () => {

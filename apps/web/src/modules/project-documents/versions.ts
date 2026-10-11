@@ -1,10 +1,15 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, max } from 'drizzle-orm';
+import { and, eq, lt, max } from 'drizzle-orm';
 import { PDFDocument } from 'pdf-lib';
 import { z } from 'zod';
 import { schema, type DbTransaction, type ProjectDocumentKind } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
-import { detectLibraryType, isSafeName, MAX_LIBRARY_BYTES } from '@/modules/library';
+import {
+  detectLibraryType,
+  isSafeName,
+  MAX_LIBRARY_BYTES,
+  STALE_UPLOAD_MS,
+} from '@/modules/library';
 import { fitsStorage } from '@/modules/library/server';
 import type { VerifiedClaims } from '@/platform/db';
 import {
@@ -307,4 +312,28 @@ export async function confirmDocumentVersion(
     );
   });
   return { ok: true };
+}
+
+/**
+ * Closes document uploads whose signed link has expired without a confirmation: the versions are
+ * rejected and any bytes sent to them are removed, giving their reserved storage back.
+ */
+export async function sweepStaleDocumentUploads(deps: DocumentsDeps): Promise<{ removed: number }> {
+  const cutoff = new Date((deps.now?.() ?? new Date()).getTime() - STALE_UPLOAD_MS);
+  const stale = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .update(projectDocumentVersions)
+      .set({ uploadStatus: 'rejected' })
+      .where(
+        and(
+          eq(projectDocumentVersions.uploadStatus, 'uploading'),
+          lt(projectDocumentVersions.createdAt, cutoff),
+        ),
+      )
+      .returning({ storagePath: projectDocumentVersions.storagePath }),
+  );
+  await deps.storage.removeMany(
+    stale.flatMap((version) => (version.storagePath ? [version.storagePath] : [])),
+  );
+  return { removed: stale.length };
 }

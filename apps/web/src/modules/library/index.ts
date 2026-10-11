@@ -4,6 +4,7 @@ export {
   MAX_LIBRARY_BYTES,
   MAX_UPDATE_ATTACHMENTS,
   MAX_UPLOAD_BATCH,
+  STALE_UPLOAD_MS,
 } from './domain/limits';
 export { isSafeName, normaliseUploadPath } from './domain/paths';
 export { zipEntryNames } from './domain/zip';

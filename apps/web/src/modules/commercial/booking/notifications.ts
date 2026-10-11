@@ -299,6 +299,8 @@ async function sendSessionEmail(
 
 export type PortalNoticeTemplate =
   | 'lead.proof_comment'
+  | 'lead.document_shared'
+  | 'lead.document_comment'
   | 'lead.rounds_warning'
   | 'lead.briefing_shared'
   | 'lead.presentation_shared'

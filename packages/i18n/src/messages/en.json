@@ -854,6 +854,18 @@
         "heading": "Tell us how it went",
         "body": "Hello {firstName}, the project with {agencyName} is delivered. Thank you for your trust.\n\nIf you would like to leave a short testimonial about the work, it takes a minute. We only publish it with your permission.",
         "action": "Leave a testimonial"
+      },
+      "document_shared": {
+        "subject": "New document from {agencyName}",
+        "heading": "There is a document to read",
+        "body": "Hi {firstName}, the {agencyName} team shared a document with you. You can read and comment on it in the portal.",
+        "action": "Open the document"
+      },
+      "document_comment": {
+        "subject": "Reply from the {agencyName} team",
+        "heading": "The team replied",
+        "body": "Hi {firstName}, the {agencyName} team left a comment on a document. You can read it in the portal.",
+        "action": "View in the portal"
       }
     },
     "founder": {
@@ -964,6 +976,12 @@
         "heading": "New testimonial from {companyName}",
         "body": "{authorName} wrote:\n\n{body}",
         "action": "Open the room"
+      },
+      "document_comment": {
+        "subject": "New comment from {companyName} on {documentTitle}",
+        "heading": "New comment from {companyName}",
+        "body": "The client left a comment on the document {documentTitle}.",
+        "action": "View the comment"
       }
     },
     "team": {

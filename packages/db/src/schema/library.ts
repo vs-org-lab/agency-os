@@ -72,6 +72,10 @@ export const libraryFolders = pgTable(
     check('library_folders_root_depth', sql`(${table.parentId} is null) = (${table.depth} = 0)`),
     check('library_folders_depth_range', sql`${table.depth} between 0 and 3`),
     check('library_folders_name_length', sql`char_length(${table.name}) between 1 and 120`),
+    check(
+      'library_folders_name_safe',
+      sql`${table.name} !~ '[/\\\\[:cntrl:]]' and ${table.name} not in ('.', '..')`,
+    ),
   ],
 ).enableRLS();
 
@@ -118,6 +122,10 @@ export const libraryFiles = pgTable(
     index('library_files_folder_idx').on(table.folderId),
     index('library_files_project_status_idx').on(table.projectId, table.status),
     check('library_files_name_length', sql`char_length(${table.name}) between 1 and 200`),
+    check(
+      'library_files_name_safe',
+      sql`${table.name} !~ '[/\\\\[:cntrl:]]' and ${table.name} not in ('.', '..')`,
+    ),
     check(
       'library_files_ready_has_type',
       sql`${table.status} <> 'ready' or (${table.kind} is not null and ${table.mimeType} is not null and ${table.sizeBytes} is not null)`,

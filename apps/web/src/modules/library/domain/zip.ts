@@ -1,3 +1,9 @@
+/** A path segment inside the archive that cannot climb out of it or split into more segments. */
+export function safeZipSegment(segment: string): string {
+  const cleaned = segment.trim().replace(/[/\\\u0000-\u001f\u007f]/g, '_');
+  return cleaned === '' || cleaned === '.' || cleaned === '..' ? '_' : cleaned;
+}
+
 function withSuffix(path: string, count: number): string {
   const slash = path.lastIndexOf('/');
   const dot = path.lastIndexOf('.');

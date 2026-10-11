@@ -3,7 +3,7 @@ import { schema } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
 import { NOT_FOUND, uuid, type LibraryDeps, type NotFound } from './access';
 import { LIBRARY_LINK_TTL_SECONDS, MAX_ZIP_BYTES, MAX_ZIP_FILES } from './domain/limits';
-import { zipEntryNames } from './domain/zip';
+import { safeZipSegment, zipEntryNames } from './domain/zip';
 
 export type ZipManifest = {
   ok: true;
@@ -69,7 +69,10 @@ export async function zipManifest(
   const selected = read.files
     .map((file) => ({ file, segments: pathOf(file.folder_id) }))
     .filter((entry): entry is { file: FileRow; segments: string[] } => entry.segments !== null)
-    .map(({ file, segments }) => ({ file, path: [...segments, file.name].join('/') }))
+    .map(({ file, segments }) => ({
+      file,
+      path: [...segments, file.name].map(safeZipSegment).join('/'),
+    }))
     .sort((left, right) => left.path.localeCompare(right.path, 'pt'));
   const totalBytes = selected.reduce((total, entry) => total + Number(entry.file.size_bytes), 0);
   if (selected.length > MAX_ZIP_FILES || totalBytes > MAX_ZIP_BYTES) {

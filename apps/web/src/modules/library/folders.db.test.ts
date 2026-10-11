@@ -115,6 +115,35 @@ describe('library folders', () => {
     });
   });
 
+  it('folder names cannot carry path separators, dots or control characters', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = libraryDeps(sql);
+      const founder = libraryClaims(world.users.founder);
+
+      for (const name of ['..', '.', 'a/b', 'x\\y', 'linha\nnova', 'nulo\u0000']) {
+        expect(
+          await createFolder(
+            founder,
+            { projectId: library.a.projectId, parentId: null, name },
+            deps,
+          ),
+          name,
+        ).toEqual({ ok: false, rule: 'invalid_input' });
+        expect(
+          await renameFolder(founder, { folderId: library.a.internalId, name }, deps),
+          name,
+        ).toEqual({ ok: false, rule: 'invalid_input' });
+      }
+      await sql`reset role`;
+      const error = await sql`
+        update public.library_folders set name = '..' where id = ${library.a.internalId}
+      `.catch((caught: Error) => caught);
+      expect(String((error as Error).message)).toContain('library_folders_name_safe');
+    });
+  });
+
   it('only roots carry visibility', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

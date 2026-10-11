@@ -16,10 +16,11 @@ import {
   type NotFound,
 } from './access';
 import { MAX_FOLDER_DEPTH, MAX_FOLDER_NAME_LENGTH } from './domain/limits';
+import { isSafeName } from './domain/paths';
 
 const { libraryFolders, libraryFiles } = schema;
 
-const nameSchema = z.string().trim().min(1).max(MAX_FOLDER_NAME_LENGTH);
+const nameSchema = z.string().trim().min(1).max(MAX_FOLDER_NAME_LENGTH).refine(isSafeName);
 const visibilitySchema = z.enum(['internal', 'client']);
 
 type InvalidInput = { ok: false; rule: 'invalid_input' };

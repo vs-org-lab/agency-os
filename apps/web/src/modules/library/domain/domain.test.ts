@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { detectLibraryType } from './file-type';
 import { normaliseUploadPath } from './paths';
-import { zipEntryNames } from './zip';
+import { safeZipSegment, zipEntryNames } from './zip';
 
 function bytes(...values: Array<number | string>): Uint8Array {
   const out: number[] = [];
@@ -110,6 +110,8 @@ describe('normaliseUploadPath', () => {
     expect(normaliseUploadPath('')).toBeNull();
     expect(normaliseUploadPath(`${'a'.repeat(121)}/logo.png`)).toBeNull();
     expect(normaliseUploadPath(`${'a'.repeat(201)}.png`)).toBeNull();
+    expect(normaliseUploadPath('Marca/lo\u0007go.png')).toBeNull();
+    expect(normaliseUploadPath('Mar\u0000ca/logo.png')).toBeNull();
   });
 });
 
@@ -131,5 +133,18 @@ describe('zipEntryNames', () => {
       'Marca/leia (2)',
     ]);
     expect(zipEntryNames(['a/x.tar.gz', 'a/x.tar.gz'])).toEqual(['a/x.tar.gz', 'a/x.tar (2).gz']);
+  });
+});
+
+describe('safeZipSegment', () => {
+  it('zip path segments cannot escape the archive', () => {
+    expect(['..', '.', 'a/b', 'x\\y', 'ok', ' fim '].map(safeZipSegment)).toEqual([
+      '_',
+      '_',
+      'a_b',
+      'x_y',
+      'ok',
+      'fim',
+    ]);
   });
 });

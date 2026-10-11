@@ -1284,7 +1284,7 @@ export async function createBrandHubFixture(
       insert into public.brand_hub_blocks (page_id, hub_id, organization_id, client_id, type,
                                            position, content)
       values (${pageId}, ${hubId}, ${world.organizationId}, ${world.clients.a}, ${type}, 1,
-              ${sql.json(content as never)})
+              ${JSON.stringify(content)}::jsonb)
       returning id
     `;
     if (!row) throw new Error('Fixture brand hub block was not created');
@@ -1338,7 +1338,7 @@ export async function createBrandHubFixture(
     insert into public.brand_hub_publications (hub_id, organization_id, client_id, number,
                                                revision, snapshot, published_by)
     values (${hubId}, ${world.organizationId}, ${world.clients.a}, 1, 1,
-            ${sql.json(snapshot as never)}, ${world.users.founder})
+            ${JSON.stringify(snapshot)}::jsonb, ${world.users.founder})
     returning id
   `;
   if (!publication) throw new Error('Fixture brand hub publication was not created');

@@ -281,6 +281,26 @@ describe('renderEmail', () => {
     expect(overdue.text).toContain('A entrega final de Website');
   });
 
+  it('names documents in approval alerts', () => {
+    const decided = renderEmail('founder.approval_decided', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Estratégia',
+      decision: 'changes_requested',
+      subject: 'document',
+      roomUrl: 'https://os.example.com/c/client/docs/doc',
+    });
+    const overdue = renderEmail('founder.approval_overdue', 'en', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Estratégia',
+      subject: 'document',
+      roomUrl: 'https://os.example.com/c/client/docs/doc',
+    });
+
+    expect(decided.subject).toBe('Empresa Exemplo pediu alterações no documento Estratégia');
+    expect(decided.text).toContain('Rever documento');
+    expect(overdue.text).toContain('The document Estratégia');
+  });
+
   it('the testimonial alert quotes what the client wrote', () => {
     const email = renderEmail('founder.testimonial_received', 'pt-PT', {
       companyName: 'Empresa Exemplo',

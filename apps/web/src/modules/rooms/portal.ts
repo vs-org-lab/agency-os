@@ -193,13 +193,15 @@ export async function getClientRoom(
 
 export type ClientPendingApproval = {
   id: string;
-  kind: 'phase' | 'file' | 'delivery';
+  kind: 'phase' | 'file' | 'delivery' | 'document';
   projectId: string;
   projectName: string;
   /** The phase name, the file title or, for the final approval, the project name. */
   subjectName: string;
   /** The file version to open, for file approvals. */
   versionId: string | null;
+  /** The document to open, for document approvals. */
+  documentId: string | null;
   requestedAt: string;
 };
 
@@ -210,22 +212,25 @@ export async function getClientApprovals(
 ): Promise<ClientPendingApproval[]> {
   const rows = await tx.execute<{
     id: string;
-    kind: 'phase' | 'file' | 'delivery';
+    kind: 'phase' | 'file' | 'delivery' | 'document';
     project_id: string;
     project_name: string;
     subject_name: string;
     version_id: string | null;
+    document_id: string | null;
     requested_at: Timestamp;
   }>(sql`
     select a.id, 'phase' as kind, a.project_id, p.name as project_name,
-           ph.name as subject_name, null::uuid as version_id, a.requested_at
+           ph.name as subject_name, null::uuid as version_id, null::uuid as document_id,
+           a.requested_at
     from public.portal_approvals a
     join public.portal_projects p on p.id = a.project_id
     join public.portal_project_phases ph on ph.id = a.subject_id
     where a.client_id = ${clientId}::uuid and a.status = 'pending' and a.subject_type = 'phase'
     union all
     select a.id, 'file' as kind, a.project_id, p.name as project_name,
-           v.title as subject_name, v.id as version_id, a.requested_at
+           v.title as subject_name, v.id as version_id, null::uuid as document_id,
+           a.requested_at
     from public.portal_approvals a
     join public.portal_projects p on p.id = a.project_id
     join public.portal_proof_versions v on v.id = a.subject_id
@@ -233,10 +238,21 @@ export async function getClientApprovals(
       and a.subject_type = 'file_version'
     union all
     select a.id, 'delivery' as kind, a.project_id, p.name as project_name,
-           p.name as subject_name, null::uuid as version_id, a.requested_at
+           p.name as subject_name, null::uuid as version_id, null::uuid as document_id,
+           a.requested_at
     from public.portal_approvals a
     join public.portal_projects p on p.id = a.subject_id
     where a.client_id = ${clientId}::uuid and a.status = 'pending' and a.subject_type = 'project'
+    union all
+    select a.id, 'document' as kind, a.project_id, p.name as project_name,
+           d.title as subject_name, null::uuid as version_id, d.id as document_id,
+           a.requested_at
+    from public.portal_approvals a
+    join public.portal_projects p on p.id = a.project_id
+    join public.portal_project_document_versions v on v.id = a.subject_id
+    join public.portal_project_documents d on d.id = v.document_id
+    where a.client_id = ${clientId}::uuid and a.status = 'pending'
+      and a.subject_type = 'document_version'
     order by requested_at desc, id
   `);
   return rows.map((row) => ({
@@ -246,6 +262,7 @@ export async function getClientApprovals(
     projectName: row.project_name,
     subjectName: row.subject_name,
     versionId: row.version_id,
+    documentId: row.document_id,
     requestedAt: new Date(row.requested_at).toISOString(),
   }));
 }

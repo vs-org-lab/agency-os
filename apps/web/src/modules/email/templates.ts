@@ -102,13 +102,13 @@ export type EmailParams = {
     companyName: string;
     phaseName: string;
     decision: 'approved' | 'changes_requested';
-    subject: 'phase' | 'file' | 'delivery';
+    subject: 'phase' | 'file' | 'delivery' | 'document';
     roomUrl: string;
   };
   'founder.approval_overdue': {
     companyName: string;
     phaseName: string;
-    subject: 'phase' | 'file' | 'delivery';
+    subject: 'phase' | 'file' | 'delivery' | 'document';
     roomUrl: string;
   };
   'founder.proof_comment': { companyName: string; fileTitle: string; roomUrl: string };

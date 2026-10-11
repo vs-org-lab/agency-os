@@ -2,13 +2,22 @@ import { eq } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import type { DbContexts } from '@/platform/db';
 
-const { approvals, clients, projectPhases, projects, proofFiles, proofVersions } = schema;
+const {
+  approvals,
+  clients,
+  projectDocuments,
+  projectDocumentVersions,
+  projectPhases,
+  projects,
+  proofFiles,
+  proofVersions,
+} = schema;
 
 export type ApprovalNotice = {
   companyName: string;
   /** The phase name, the file title or, for the final approval, the project name. */
   phaseName: string;
-  subject: 'phase' | 'file' | 'delivery';
+  subject: 'phase' | 'file' | 'delivery' | 'document';
   decision: 'approved' | 'changes_requested';
   roomUrl: string;
 };
@@ -29,6 +38,8 @@ export async function approvalNotice(
         phaseName: projectPhases.name,
         fileTitle: proofFiles.title,
         projectName: projects.name,
+        documentId: projectDocuments.id,
+        documentTitle: projectDocuments.title,
       })
       .from(approvals)
       .innerJoin(clients, eq(clients.id, approvals.clientId))
@@ -36,11 +47,24 @@ export async function approvalNotice(
       .leftJoin(proofVersions, eq(proofVersions.id, approvals.subjectId))
       .leftJoin(proofFiles, eq(proofFiles.id, proofVersions.fileId))
       .leftJoin(projects, eq(projects.id, approvals.subjectId))
+      .leftJoin(projectDocumentVersions, eq(projectDocumentVersions.id, approvals.subjectId))
+      .leftJoin(projectDocuments, eq(projectDocuments.id, projectDocumentVersions.documentId))
       .where(eq(approvals.id, approvalId));
     if (!row) return null;
     const file = row.subjectType === 'file_version';
-    const subject = file ? 'file' : row.subjectType === 'project' ? 'delivery' : 'phase';
-    const name = { file: row.fileTitle, delivery: row.projectName, phase: row.phaseName }[subject];
+    const subject = file
+      ? 'file'
+      : row.subjectType === 'project'
+        ? 'delivery'
+        : row.subjectType === 'document_version'
+          ? 'document'
+          : 'phase';
+    const name = {
+      file: row.fileTitle,
+      delivery: row.projectName,
+      phase: row.phaseName,
+      document: row.documentTitle,
+    }[subject];
     if (!name) return null;
     return {
       companyName: row.companyName,
@@ -48,7 +72,11 @@ export async function approvalNotice(
       subject,
       decision: row.status === 'approved' ? 'approved' : 'changes_requested',
       roomUrl: new URL(
-        file ? `/c/${row.clientId}/proofs/${row.subjectId}` : `/c/${row.clientId}`,
+        file
+          ? `/c/${row.clientId}/proofs/${row.subjectId}`
+          : subject === 'document'
+            ? `/c/${row.clientId}/docs/${row.documentId}`
+            : `/c/${row.clientId}`,
         deps.appBaseUrl,
       ).toString(),
     };

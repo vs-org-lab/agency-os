@@ -140,4 +140,6 @@ export function loadPortalApprovals(claims: VerifiedClaims, clientId: string) {
 }
 export { projectEditor, roomActor } from './authorize';
 export { soleClientManager } from './managers';
+export { approvalNotice } from './notices';
+export { getClientApprovals } from './portal';
 export { isRoomStaff } from './process';

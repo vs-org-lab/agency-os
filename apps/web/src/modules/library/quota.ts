@@ -4,7 +4,8 @@ import { ORGANIZATION_STORAGE_LIMIT_BYTES } from './domain/limits';
 
 /**
  * Bytes the organisation keeps or has reserved: ready library files, library uploads still
- * waiting (by their declared size) and ready proof versions.
+ * waiting (by their declared size), ready proof versions and room document files (ready or
+ * waiting).
  */
 async function storageUsed(tx: DbTransaction, organizationId: string): Promise<number> {
   const rows = await tx.execute<{ used: string | null }>(sql`
@@ -14,6 +15,9 @@ async function storageUsed(tx: DbTransaction, organizationId: string): Promise<n
                   and status in ('ready', 'uploading')), 0)
       + coalesce((select sum(size_bytes) from public.proof_versions
                   where organization_id = ${organizationId}::uuid and status = 'ready'), 0)
+      + coalesce((select sum(size_bytes) from public.project_document_versions
+                  where organization_id = ${organizationId}::uuid
+                    and upload_status in ('ready', 'uploading')), 0)
     )::text as used
   `);
   return Number(rows[0]?.used ?? 0);

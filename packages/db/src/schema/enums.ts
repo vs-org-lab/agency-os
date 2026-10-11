@@ -250,6 +250,7 @@ export const approvalSubjectEnum = appSchema.enum('approval_subject', [
   'phase',
   'file_version',
   'project',
+  'document_version',
 ]);
 
 export const approvalStatusEnum = appSchema.enum('approval_status', [
@@ -260,6 +261,19 @@ export const approvalStatusEnum = appSchema.enum('approval_status', [
 ]);
 
 export const taskStatusEnum = appSchema.enum('task_status', ['open', 'done']);
+
+export const projectDocumentKindEnum = appSchema.enum('project_document_kind', [
+  'figma',
+  'pdf',
+  'file',
+  'link',
+]);
+
+export const projectDocumentStatusEnum = appSchema.enum('project_document_status', [
+  'draft',
+  'with_client',
+  'approved',
+]);
 
 export const libraryFileKindEnum = appSchema.enum('library_file_kind', [
   'image',
@@ -330,6 +344,8 @@ export type StepStatus = (typeof stepStatusEnum.enumValues)[number];
 export type UpdateVisibility = (typeof updateVisibilityEnum.enumValues)[number];
 export type UpdateKind = (typeof updateKindEnum.enumValues)[number];
 export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
+export type ProjectDocumentKind = (typeof projectDocumentKindEnum.enumValues)[number];
+export type ProjectDocumentStatus = (typeof projectDocumentStatusEnum.enumValues)[number];
 export type LibraryFileKind = (typeof libraryFileKindEnum.enumValues)[number];
 export type LibraryFileStatus = (typeof libraryFileStatusEnum.enumValues)[number];
 export type ProofKind = (typeof proofKindEnum.enumValues)[number];

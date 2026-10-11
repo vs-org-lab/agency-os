@@ -75,3 +75,4 @@ export function libraryZip(claims: VerifiedClaims, projectId: string, folderId: 
 
 export { LIBRARY_FUNCTIONS } from './automations';
 export { fitsStorage } from './quota';
+export { createSupabaseLibraryStorage } from './supabase-storage';

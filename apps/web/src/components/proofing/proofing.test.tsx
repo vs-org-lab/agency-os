@@ -240,6 +240,7 @@ describe('proofing components', () => {
             projectName: 'Website',
             subjectName: 'Descoberta',
             versionId: null,
+            documentId: null,
             requestedAt: '2026-10-10T09:00:00.000Z',
           },
           {
@@ -249,6 +250,7 @@ describe('proofing components', () => {
             projectName: 'Website',
             subjectName: 'Logótipo',
             versionId: 'v-2',
+            documentId: null,
             requestedAt: '2026-10-11T09:00:00.000Z',
           },
         ]}
@@ -275,6 +277,7 @@ describe('proofing components', () => {
             projectName: 'Website',
             subjectName: 'Website',
             versionId: null,
+            documentId: null,
             requestedAt: '2026-10-12T09:00:00.000Z',
           },
         ]}

@@ -38,6 +38,8 @@ export const DOMAIN_EVENTS = [
   'proofing.round.extra',
   'testimonials.received',
   'proofing.rounds.warning',
+  'rooms.document.shared',
+  'rooms.document.commented',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

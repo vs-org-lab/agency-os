@@ -916,6 +916,190 @@ export async function createLibraryFixture(
   };
 }
 
+export type DocumentRecords = {
+  projectId: string;
+  /** A link document in draft. */
+  draftId: string;
+  draftVersionId: string;
+  /** A PDF with the client: version 1 shared, version 2 ready but created after sharing. */
+  sharedId: string;
+  sharedV1Id: string;
+  sharedV2Id: string;
+  /** A Figma document approved on version 1. */
+  approvedId: string;
+  approvedVersionId: string;
+  publicCommentId: string;
+  internalCommentId: string;
+};
+
+export type DocumentFixture = {
+  rooms: RoomFixture;
+  a: DocumentRecords;
+  b: { projectId: string; documentId: string; versionId: string };
+};
+
+type DocumentScope = { clientId: string; projectId: string };
+
+async function seedDocument(
+  sql: TransactionSql,
+  world: World,
+  scope: DocumentScope,
+  input: {
+    title: string;
+    kind: 'figma' | 'pdf' | 'file' | 'link';
+    status: 'draft' | 'with_client' | 'approved';
+  },
+): Promise<string> {
+  const [row] = await sql<{ id: string }[]>`
+    insert into public.project_documents (organization_id, client_id, project_id, title, kind,
+                                          status, shared_at, approved_at, created_by)
+    values (${world.organizationId}, ${scope.clientId}, ${scope.projectId}, ${input.title},
+            ${input.kind}, ${input.status},
+            case when ${input.status} = 'draft' then null else now() end,
+            case when ${input.status} = 'approved' then now() end, ${world.users.founder})
+    returning id
+  `;
+  if (!row) throw new Error('Fixture document was not created');
+  return row.id;
+}
+
+async function seedDocumentVersion(
+  sql: TransactionSql,
+  world: World,
+  scope: DocumentScope,
+  input: { documentId: string; number: number; kind: 'figma' | 'pdf' | 'link'; shared: boolean },
+): Promise<string> {
+  const file = input.kind === 'pdf';
+  const url =
+    input.kind === 'figma'
+      ? 'https://www.figma.com/design/AbC123/Estrategia'
+      : input.kind === 'link'
+        ? 'https://example.com/briefing'
+        : null;
+  const [row] = await sql<{ id: string }[]>`
+    insert into public.project_document_versions (document_id, organization_id, client_id,
+                                                  project_id, number, kind, url, storage_path,
+                                                  file_name, mime_type, size_bytes, pages,
+                                                  shared_at, created_by)
+    values (${input.documentId}, ${world.organizationId}, ${scope.clientId}, ${scope.projectId},
+            ${input.number}, ${input.kind}, ${url},
+            ${file ? `documents/fixture/${input.documentId}/${input.number}` : null},
+            ${file ? `estrategia-v${input.number}.pdf` : null},
+            ${file ? 'application/pdf' : null}, ${file ? 4096 : null}, ${file ? 2 : null},
+            case when ${input.shared} then now() end, ${world.users.founder})
+    returning id
+  `;
+  if (!row) throw new Error('Fixture document version was not created');
+  await sql`
+    update public.project_documents set current_version_id = ${row.id}
+    where id = ${input.documentId}
+  `;
+  return row.id;
+}
+
+/**
+ * Client A's project documents: a link in draft, a PDF with the client whose second version was
+ * created after sharing, and an approved Figma document, with a public and an internal comment
+ * on the PDF; client B has one shared document.
+ */
+export async function createDocumentFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<DocumentFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const scopeA = { clientId: world.clients.a, projectId: rooms.a.projectId };
+  const scopeB = { clientId: world.clients.b, projectId: rooms.b.projectId };
+
+  const draftId = await seedDocument(sql, world, scopeA, {
+    title: 'Briefing',
+    kind: 'link',
+    status: 'draft',
+  });
+  const draftVersionId = await seedDocumentVersion(sql, world, scopeA, {
+    documentId: draftId,
+    number: 1,
+    kind: 'link',
+    shared: false,
+  });
+  const sharedId = await seedDocument(sql, world, scopeA, {
+    title: 'Estratégia',
+    kind: 'pdf',
+    status: 'with_client',
+  });
+  const sharedV1Id = await seedDocumentVersion(sql, world, scopeA, {
+    documentId: sharedId,
+    number: 1,
+    kind: 'pdf',
+    shared: true,
+  });
+  const sharedV2Id = await seedDocumentVersion(sql, world, scopeA, {
+    documentId: sharedId,
+    number: 2,
+    kind: 'pdf',
+    shared: false,
+  });
+  await sql`
+    update public.project_documents set current_version_id = ${sharedV1Id} where id = ${sharedId}
+  `;
+  const approvedId = await seedDocument(sql, world, scopeA, {
+    title: 'Apresentação',
+    kind: 'figma',
+    status: 'approved',
+  });
+  const approvedVersionId = await seedDocumentVersion(sql, world, scopeA, {
+    documentId: approvedId,
+    number: 1,
+    kind: 'figma',
+    shared: true,
+  });
+  await sql`
+    update public.project_documents set approved_version_id = ${approvedVersionId}
+    where id = ${approvedId}
+  `;
+  const comment = async (authorId: string, body: string, internal: boolean) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.project_document_comments (document_id, version_id, organization_id,
+                                                    client_id, project_id, author_id, body,
+                                                    internal)
+      values (${sharedId}, ${sharedV1Id}, ${world.organizationId}, ${world.clients.a},
+              ${rooms.a.projectId}, ${authorId}, ${body}, ${internal})
+      returning id
+    `;
+    if (!row) throw new Error('Fixture document comment was not created');
+    return row.id;
+  };
+  const publicCommentId = await comment(world.users.decisionMakerA, 'Falta a página 3', false);
+  const internalCommentId = await comment(world.users.founder, 'Rever antes de responder', true);
+
+  const documentB = await seedDocument(sql, world, scopeB, {
+    title: 'Estratégia B',
+    kind: 'link',
+    status: 'with_client',
+  });
+  const versionB = await seedDocumentVersion(sql, world, scopeB, {
+    documentId: documentB,
+    number: 1,
+    kind: 'link',
+    shared: true,
+  });
+  return {
+    rooms,
+    a: {
+      projectId: rooms.a.projectId,
+      draftId,
+      draftVersionId,
+      sharedId,
+      sharedV1Id,
+      sharedV2Id,
+      approvedId,
+      approvedVersionId,
+      publicCommentId,
+      internalCommentId,
+    },
+    b: { projectId: rooms.b.projectId, documentId: documentB, versionId: versionB },
+  };
+}
+
 export type DeliveryFixture = {
   contracts: ContractFixture;
   dealId: string;

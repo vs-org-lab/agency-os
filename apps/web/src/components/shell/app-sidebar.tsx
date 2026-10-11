@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   CircleCheck,
+  FileText,
   FolderOpen,
   Images,
   ListChecks,
@@ -87,6 +88,7 @@ const ICONS = {
   users: Users,
   proofs: Images,
   folder: FolderOpen,
+  documents: FileText,
 } as const;
 
 function NavigationItemLink({

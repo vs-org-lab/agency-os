@@ -96,7 +96,8 @@
       "updates": "Atualizações",
       "tasks": "Tarefas",
       "library": "Biblioteca",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "brandHub": "Brand Hub"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -106,7 +107,8 @@
       "updates": "Atualizações",
       "team": "Colegas",
       "library": "Biblioteca",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "brandHub": "Brand Hub"
     }
   },
   "states": {
@@ -2164,7 +2166,9 @@
       "openFile": "Abrir {name}",
       "delivery": "Entrega final",
       "documents": "Documentos",
-      "openDocument": "Abrir {name}"
+      "openDocument": "Abrir {name}",
+      "brandHub": "Brand Hub",
+      "openHub": "Abrir o Brand Hub"
     },
     "clientList": {
       "title": "Provas",
@@ -2417,6 +2421,183 @@
       "storage_full": "O espaço de armazenamento está quase cheio. Apague ficheiros antigos antes de carregar mais.",
       "upload_failed": "O carregamento falhou. Verifique a ligação e tente outra vez.",
       "comment_required": "Escreva o que deve mudar."
+    }
+  },
+  "brandHub": {
+    "title": "Brand Hub",
+    "empty": {
+      "title": "Ainda não há Brand Hub",
+      "description": "Crie o hub com as nove páginas padrão e preencha-o com a marca do cliente.",
+      "create": "Criar Brand Hub",
+      "noAccess": "O Brand Hub é editado pela equipa da sala."
+    },
+    "portalEmpty": {
+      "title": "O Brand Hub ainda não foi publicado",
+      "description": "Quando a equipa o publicar, aparece aqui com os ficheiros para descarregar."
+    },
+    "updatedAt": "Brand Hub · Atualizado em {date}",
+    "modes": {
+      "label": "Modo do editor",
+      "edit": "Editar",
+      "preview": "Pré-visualizar"
+    },
+    "publish": {
+      "publish": "Publicar",
+      "publishing": "A publicar…",
+      "published": "Publicado. O cliente já vê esta versão.",
+      "unpublished": "Alterações por publicar",
+      "upToDate": "Tudo publicado",
+      "neverPublished": "Ainda não publicado",
+      "lastPublished": "Publicado a {date}",
+      "share": "Partilhar",
+      "shared": "Link do portal copiado",
+      "askApproval": "Pedir aprovação",
+      "asked": "Pedido enviado ao decisor.",
+      "approval": {
+        "none": "Sem pedido de aprovação",
+        "pending": "À espera da aprovação do cliente",
+        "approved": "Aprovado pelo cliente",
+        "changes_requested": "O cliente pediu alterações"
+      }
+    },
+    "panels": {
+      "label": "Áreas do editor",
+      "pages": "Páginas",
+      "canvas": "Página",
+      "side": "Design e ficheiros"
+    },
+    "pages": {
+      "title": "Páginas",
+      "add": "Adicionar página",
+      "newTitle": "Título da nova página",
+      "titleField": "Título da página",
+      "save": "Guardar título",
+      "hide": "Ocultar {title}",
+      "show": "Mostrar {title}",
+      "hidden": "Oculta",
+      "up": "Subir {title}",
+      "down": "Descer {title}",
+      "remove": "Remover {title}"
+    },
+    "blocks": {
+      "add": "Adicionar bloco",
+      "type": "Tipo de bloco",
+      "save": "Guardar bloco",
+      "saved": "Bloco guardado.",
+      "up": "Subir bloco",
+      "down": "Descer bloco",
+      "remove": "Remover bloco",
+      "empty": "Esta página ainda não tem blocos.",
+      "types": {
+        "text": "Texto",
+        "strategy": "Estratégia",
+        "image": "Imagem",
+        "gallery": "Galeria",
+        "logo": "Logótipo",
+        "colors": "Cores",
+        "typeface": "Tipografia",
+        "downloads": "Downloads"
+      },
+      "fields": {
+        "title": "Título",
+        "body": "Texto",
+        "caption": "Legenda",
+        "asset": "Ficheiro",
+        "noAsset": "Sem ficheiro",
+        "variant": "Variante",
+        "background": "Fundo do mosaico",
+        "family": "Família",
+        "weights": "Pesos, separados por vírgulas",
+        "sample": "Texto de exemplo",
+        "fontFile": "Ficheiro da fonte",
+        "swatchName": "Nome",
+        "hex": "Hex",
+        "notes": "Notas",
+        "addSwatch": "Adicionar cor",
+        "removeSwatch": "Remover a cor {name}",
+        "images": "Imagens da galeria",
+        "files": "Ficheiros para descarregar"
+      },
+      "backgrounds": {
+        "light": "Claro",
+        "dark": "Escuro",
+        "accent": "Acento"
+      },
+      "strategy": {
+        "story": "História",
+        "mission": "Missão",
+        "vision": "Visão",
+        "values": "Valores",
+        "voice": "Voz",
+        "positioning": "Posicionamento"
+      }
+    },
+    "design": {
+      "title": "Design",
+      "colors": {
+        "surface": "Superfície",
+        "panel": "Painel",
+        "text": "Texto",
+        "textMuted": "Texto secundário",
+        "accent": "Acento",
+        "divider": "Divisor"
+      },
+      "corners": "Cantos",
+      "cornerOptions": {
+        "soft": "Suaves",
+        "square": "Retos"
+      },
+      "logoTiles": "Mosaicos de logótipo",
+      "layout": "Layout",
+      "layouts": {
+        "sidebar": "Barra lateral",
+        "topbar": "Topo",
+        "split": "Dividido",
+        "compact": "Compacto"
+      },
+      "contrast": "O texto e a superfície ficam abaixo do contraste AA. A marca é do cliente, por isso pode guardar na mesma.",
+      "save": "Guardar design",
+      "saved": "Design guardado."
+    },
+    "assets": {
+      "title": "Ficheiros",
+      "upload": "Carregar ficheiros",
+      "uploading": "A carregar {done} de {total}…",
+      "uploaded": "{count, plural, one {# ficheiro carregado} other {# ficheiros carregados}}",
+      "empty": "Ainda não há ficheiros.",
+      "remove": "Remover {name}",
+      "status": {
+        "uploading": "A carregar",
+        "ready": "Pronto",
+        "rejected": "Recusado"
+      },
+      "accepted": "PNG, JPEG, WebP, GIF, SVG, fontes, PDF e ZIP, até 50 MB cada.",
+      "meta": "{size} MB · {status}"
+    },
+    "downloads": {
+      "page": "Descarregar {page}",
+      "all": "Descarregar todos os ativos",
+      "preparing": "A preparar o ZIP…"
+    },
+    "view": {
+      "contents": "Secções do Brand Hub",
+      "empty": "Esta secção ainda não tem conteúdo."
+    },
+    "portal": {
+      "decideHint": "A equipa pediu a sua aprovação deste Brand Hub.",
+      "approved": "Aprovado"
+    },
+    "errors": {
+      "not_found": "Não encontrámos este Brand Hub ou já não tem acesso.",
+      "invalid_input": "Verifique os campos e tente de novo.",
+      "invalid_state": "Esta ação já não está disponível.",
+      "invalid_file": "O ficheiro não corresponde ao tipo indicado pelo nome.",
+      "storage_full": "O armazenamento da organização está cheio.",
+      "limit_reached": "Chegou ao limite permitido.",
+      "nothing_to_publish": "Não há alterações por publicar.",
+      "zip_too_large": "O ZIP é demasiado grande. Descarregue por secção.",
+      "upload_failed": "O carregamento falhou. Tente de novo.",
+      "download_failed": "O download falhou. Tente de novo."
     }
   }
 }

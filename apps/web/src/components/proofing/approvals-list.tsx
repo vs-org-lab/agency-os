@@ -5,7 +5,7 @@ import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approv
 import { Link } from '@/i18n/navigation';
 import type { ClientPendingApproval } from '@/modules/rooms';
 
-/** P-02: what waits for the client, grouped by type (phases, files, documents, final delivery), with how long each has waited. */
+/** P-02: what waits for the client, grouped by type (phases, files, documents, brand hub, final delivery), with how long each has waited. */
 export function ApprovalsList({
   approvals,
   decides,
@@ -23,6 +23,10 @@ export function ApprovalsList({
     {
       key: 'documents' as const,
       items: approvals.filter((approval) => approval.kind === 'document'),
+    },
+    {
+      key: 'brandHub' as const,
+      items: approvals.filter((approval) => approval.kind === 'brand_hub'),
     },
     {
       key: 'delivery' as const,
@@ -74,6 +78,13 @@ export function ApprovalsList({
                     className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
                     {t('openDocument', { name: approval.subjectName })}
+                  </Link>
+                ) : approval.kind === 'brand_hub' ? (
+                  <Link
+                    href="/portal/hub"
+                    className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    {t('openHub')}
                   </Link>
                 ) : decides ? (
                   <ApprovalDecision approvalId={approval.id} decide={decide} />

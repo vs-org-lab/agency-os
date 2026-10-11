@@ -96,7 +96,8 @@
       "updates": "Updates",
       "tasks": "Tasks",
       "library": "Library",
-      "documents": "Documents"
+      "documents": "Documents",
+      "brandHub": "Brand Hub"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -106,7 +107,8 @@
       "updates": "Updates",
       "team": "Colleagues",
       "library": "Library",
-      "documents": "Documents"
+      "documents": "Documents",
+      "brandHub": "Brand Hub"
     }
   },
   "states": {
@@ -2164,7 +2166,9 @@
       "openFile": "Open {name}",
       "delivery": "Final delivery",
       "documents": "Documents",
-      "openDocument": "Open {name}"
+      "openDocument": "Open {name}",
+      "brandHub": "Brand Hub",
+      "openHub": "Open the Brand Hub"
     },
     "clientList": {
       "title": "Proofs",
@@ -2417,6 +2421,183 @@
       "storage_full": "Storage is almost full. Delete old files before uploading more.",
       "upload_failed": "The upload failed. Check your connection and try again.",
       "comment_required": "Write what should change."
+    }
+  },
+  "brandHub": {
+    "title": "Brand Hub",
+    "empty": {
+      "title": "There is no Brand Hub yet",
+      "description": "Create the hub with the nine standard pages and fill it with the client brand.",
+      "create": "Create Brand Hub",
+      "noAccess": "The Brand Hub is edited by the room team."
+    },
+    "portalEmpty": {
+      "title": "The Brand Hub is not published yet",
+      "description": "Once the team publishes it, it shows here with the files to download."
+    },
+    "updatedAt": "Brand Hub · Updated on {date}",
+    "modes": {
+      "label": "Editor mode",
+      "edit": "Edit",
+      "preview": "Preview"
+    },
+    "publish": {
+      "publish": "Publish",
+      "publishing": "Publishing…",
+      "published": "Published. The client now sees this version.",
+      "unpublished": "Unpublished changes",
+      "upToDate": "Everything published",
+      "neverPublished": "Not published yet",
+      "lastPublished": "Published on {date}",
+      "share": "Share",
+      "shared": "Portal link copied",
+      "askApproval": "Ask for approval",
+      "asked": "Request sent to the decision maker.",
+      "approval": {
+        "none": "No approval request",
+        "pending": "Waiting for the client approval",
+        "approved": "Approved by the client",
+        "changes_requested": "The client asked for changes"
+      }
+    },
+    "panels": {
+      "label": "Editor areas",
+      "pages": "Pages",
+      "canvas": "Page",
+      "side": "Design and files"
+    },
+    "pages": {
+      "title": "Pages",
+      "add": "Add page",
+      "newTitle": "New page title",
+      "titleField": "Page title",
+      "save": "Save title",
+      "hide": "Hide {title}",
+      "show": "Show {title}",
+      "hidden": "Hidden",
+      "up": "Move {title} up",
+      "down": "Move {title} down",
+      "remove": "Remove {title}"
+    },
+    "blocks": {
+      "add": "Add block",
+      "type": "Block type",
+      "save": "Save block",
+      "saved": "Block saved.",
+      "up": "Move block up",
+      "down": "Move block down",
+      "remove": "Remove block",
+      "empty": "This page has no blocks yet.",
+      "types": {
+        "text": "Text",
+        "strategy": "Strategy",
+        "image": "Image",
+        "gallery": "Gallery",
+        "logo": "Logo",
+        "colors": "Colours",
+        "typeface": "Typography",
+        "downloads": "Downloads"
+      },
+      "fields": {
+        "title": "Title",
+        "body": "Text",
+        "caption": "Caption",
+        "asset": "File",
+        "noAsset": "No file",
+        "variant": "Variant",
+        "background": "Tile background",
+        "family": "Family",
+        "weights": "Weights, separated by commas",
+        "sample": "Sample text",
+        "fontFile": "Font file",
+        "swatchName": "Name",
+        "hex": "Hex",
+        "notes": "Notes",
+        "addSwatch": "Add colour",
+        "removeSwatch": "Remove the colour {name}",
+        "images": "Gallery images",
+        "files": "Files to download"
+      },
+      "backgrounds": {
+        "light": "Light",
+        "dark": "Dark",
+        "accent": "Accent"
+      },
+      "strategy": {
+        "story": "Story",
+        "mission": "Mission",
+        "vision": "Vision",
+        "values": "Values",
+        "voice": "Voice",
+        "positioning": "Positioning"
+      }
+    },
+    "design": {
+      "title": "Design",
+      "colors": {
+        "surface": "Surface",
+        "panel": "Panel",
+        "text": "Text",
+        "textMuted": "Secondary text",
+        "accent": "Accent",
+        "divider": "Divider"
+      },
+      "corners": "Corners",
+      "cornerOptions": {
+        "soft": "Soft",
+        "square": "Square"
+      },
+      "logoTiles": "Logo tiles",
+      "layout": "Layout",
+      "layouts": {
+        "sidebar": "Sidebar",
+        "topbar": "Top bar",
+        "split": "Split",
+        "compact": "Compact"
+      },
+      "contrast": "Text on the surface falls below AA contrast. The brand is the client’s, so you can still save.",
+      "save": "Save design",
+      "saved": "Design saved."
+    },
+    "assets": {
+      "title": "Files",
+      "upload": "Upload files",
+      "uploading": "Uploading {done} of {total}…",
+      "uploaded": "{count, plural, one {# file uploaded} other {# files uploaded}}",
+      "empty": "No files yet.",
+      "remove": "Remove {name}",
+      "status": {
+        "uploading": "Uploading",
+        "ready": "Ready",
+        "rejected": "Refused"
+      },
+      "accepted": "PNG, JPEG, WebP, GIF, SVG, fonts, PDF and ZIP, up to 50 MB each.",
+      "meta": "{size} MB · {status}"
+    },
+    "downloads": {
+      "page": "Download {page}",
+      "all": "Download all assets",
+      "preparing": "Preparing the ZIP…"
+    },
+    "view": {
+      "contents": "Brand Hub sections",
+      "empty": "This section has no content yet."
+    },
+    "portal": {
+      "decideHint": "The team asked for your approval of this Brand Hub.",
+      "approved": "Approved"
+    },
+    "errors": {
+      "not_found": "We could not find this Brand Hub or you no longer have access.",
+      "invalid_input": "Check the fields and try again.",
+      "invalid_state": "This action is no longer available.",
+      "invalid_file": "The file does not match the type its name says.",
+      "storage_full": "The organisation storage is full.",
+      "limit_reached": "You reached the allowed limit.",
+      "nothing_to_publish": "There are no changes to publish.",
+      "zip_too_large": "The ZIP is too large. Download by section.",
+      "upload_failed": "The upload failed. Try again.",
+      "download_failed": "The download failed. Try again."
     }
   }
 }

@@ -38,8 +38,9 @@ async function commentTarget(
   const rows = await deps.contexts.withUserContext(claims, (tx) =>
     tx.execute<{ id: string }>(sql`
       select v.id from public.portal_project_document_versions v
+      join public.portal_project_documents d on d.id = v.document_id
       where v.document_id = ${documentId}::uuid
-      order by v.number desc
+      order by (v.id = d.current_version_id) desc, v.number desc
       limit 1
     `),
   );

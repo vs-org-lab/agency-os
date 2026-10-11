@@ -32,6 +32,8 @@ export const projectDocuments = pgTable(
     kind: projectDocumentKindEnum('kind').notNull(),
     status: projectDocumentStatusEnum('status').notNull().default('draft'),
     currentVersionId: uuid('current_version_id'),
+    /** The version the client approved last; it stays visible while a newer version is drafted. */
+    approvedVersionId: uuid('approved_version_id'),
     sharedAt: timestamp('shared_at', { withTimezone: true }),
     approvedAt: timestamp('approved_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),

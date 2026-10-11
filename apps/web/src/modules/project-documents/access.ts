@@ -1,6 +1,11 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { schema, type ProjectDocumentKind, type ProjectDocumentStatus } from '@agency-os/db';
+import {
+  schema,
+  type DbTransaction,
+  type ProjectDocumentKind,
+  type ProjectDocumentStatus,
+} from '@agency-os/db';
 import type { LibraryStorage } from '@/modules/library';
 import { projectEditor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
@@ -103,4 +108,44 @@ export async function editableDocument(
   if (!document) return null;
   const editor = await documentEditor(claims, document.projectId, deps);
   return editor ? { document, editor } : null;
+}
+
+export type LockedDocument = {
+  status: ProjectDocumentStatus;
+  currentVersionId: string | null;
+  currentNumber: number | null;
+  approvedVersionId: string | null;
+  approvedAt: Date | null;
+};
+
+/**
+ * Locks the document row for the rest of the transaction and reads its state, so every change to a
+ * document decides on what is committed now, one request at a time.
+ */
+export async function lockDocument(
+  tx: DbTransaction,
+  documentId: string,
+): Promise<LockedDocument | null> {
+  const [row] = await tx.execute<{
+    status: ProjectDocumentStatus;
+    current_version_id: string | null;
+    current_number: number | null;
+    approved_version_id: string | null;
+    approved_at: Date | null;
+  }>(sql`
+    select d.status::text as status, d.current_version_id, v.number as current_number,
+           d.approved_version_id, d.approved_at
+    from public.project_documents d
+    left join public.project_document_versions v on v.id = d.current_version_id
+    where d.id = ${documentId}::uuid
+    for update of d
+  `);
+  if (!row) return null;
+  return {
+    status: row.status,
+    currentVersionId: row.current_version_id,
+    currentNumber: row.current_number === null ? null : Number(row.current_number),
+    approvedVersionId: row.approved_version_id,
+    approvedAt: row.approved_at,
+  };
 }

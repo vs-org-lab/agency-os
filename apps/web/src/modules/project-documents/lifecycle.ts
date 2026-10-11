@@ -3,8 +3,13 @@ import { schema, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
-import { editableDocument, NOT_FOUND, type DocumentsDeps, type NotFound } from './access';
-import { documentActions } from './domain/lifecycle';
+import {
+  editableDocument,
+  lockDocument,
+  NOT_FOUND,
+  type DocumentsDeps,
+  type NotFound,
+} from './access';
 
 const { approvals, projectDocuments, projectDocumentVersions } = schema;
 
@@ -107,12 +112,19 @@ export async function withdrawProjectDocument(
   const { document, editor } = access;
   const now = (deps.now ?? (() => new Date()))();
   const withdrawn = await deps.contexts.withSystemContext(async (tx) => {
-    const updated = await tx
+    const locked = await lockDocument(tx, document.id);
+    if (locked?.status !== 'with_client') return false;
+    await tx
       .update(projectDocuments)
       .set({ status: 'draft', updatedAt: now })
-      .where(and(eq(projectDocuments.id, document.id), eq(projectDocuments.status, 'with_client')))
-      .returning({ id: projectDocuments.id });
-    if (updated.length === 0) return false;
+      .where(eq(projectDocuments.id, document.id));
+    // The client stops seeing the withdrawn version; an approved one stays theirs to read.
+    if (locked.currentVersionId && locked.currentVersionId !== locked.approvedVersionId) {
+      await tx
+        .update(projectDocumentVersions)
+        .set({ sharedAt: null })
+        .where(eq(projectDocumentVersions.id, locked.currentVersionId));
+    }
     await withdrawPending(tx, document.id, now);
     await recordAudit(tx, {
       organizationId: editor.organizationId,
@@ -135,16 +147,9 @@ export async function removeProjectDocument(
   const access = await editableDocument(claims, input.documentId, deps);
   if (!access) return NOT_FOUND;
   const { document, editor } = access;
-  if (
-    !documentActions({
-      status: document.status,
-      everApproved: document.approvedAt !== null,
-      pendingApproval: false,
-    }).remove
-  ) {
-    return INVALID_STATE;
-  }
   const paths = await deps.contexts.withSystemContext(async (tx) => {
+    const locked = await lockDocument(tx, document.id);
+    if (!locked || locked.approvedAt !== null || locked.approvedVersionId !== null) return null;
     const versions = await tx
       .select({ storagePath: projectDocumentVersions.storagePath })
       .from(projectDocumentVersions)
@@ -161,6 +166,7 @@ export async function removeProjectDocument(
     });
     return versions.flatMap((version) => (version.storagePath ? [version.storagePath] : []));
   });
+  if (!paths) return INVALID_STATE;
   await deps.storage.removeMany(paths);
   return { ok: true };
 }

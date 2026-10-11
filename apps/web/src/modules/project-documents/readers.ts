@@ -305,8 +305,9 @@ export async function loadPortalDocument(
       title: string;
       kind: ProjectDocumentKind;
       status: ProjectDocumentStatus;
+      current_version_id: string | null;
     }>(sql`
-      select id, client_id, title, kind::text as kind, status::text as status
+      select id, client_id, title, kind::text as kind, status::text as status, current_version_id
       from public.portal_project_documents where id = ${documentId}::uuid
     `);
     if (!document) return null;
@@ -343,7 +344,10 @@ export async function loadPortalDocument(
       title: document.title,
       kind: document.kind,
       status: document.status,
-      version: versions[0] ?? null,
+      version:
+        versions.find((version) => version.id === document.current_version_id) ??
+        versions[0] ??
+        null,
       versions,
       comments,
       pendingApprovalId: pending?.id ?? null,

@@ -1052,6 +1052,10 @@ export async function createDocumentFixture(
     kind: 'figma',
     shared: true,
   });
+  await sql`
+    update public.project_documents set approved_version_id = ${approvedVersionId}
+    where id = ${approvedId}
+  `;
   const comment = async (authorId: string, body: string, internal: boolean) => {
     const [row] = await sql<{ id: string }[]>`
       insert into public.project_document_comments (document_id, version_id, organization_id,

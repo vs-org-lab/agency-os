@@ -4,7 +4,14 @@ import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import { soleClientManager } from '@/modules/rooms/server';
 import type { VerifiedClaims } from '@/platform/db';
-import { editableDocument, NOT_FOUND, uuid, type DocumentsDeps, type NotFound } from './access';
+import {
+  editableDocument,
+  lockDocument,
+  NOT_FOUND,
+  uuid,
+  type DocumentsDeps,
+  type NotFound,
+} from './access';
 import { hasPendingApproval } from './lifecycle';
 
 const { approvals, projectDocuments, projectDocumentVersions, tasks } = schema;
@@ -28,12 +35,9 @@ export async function requestDocumentApproval(
   const now = (deps.now ?? (() => new Date()))();
 
   const result = await deps.contexts.withSystemContext(async (tx) => {
-    const [current] = await tx
-      .select({ status: projectDocuments.status, versionId: projectDocuments.currentVersionId })
-      .from(projectDocuments)
-      .where(eq(projectDocuments.id, document.id))
-      .for('update');
-    if (current?.status !== 'with_client' || !current.versionId) return null;
+    const current = await lockDocument(tx, document.id);
+    if (current?.status !== 'with_client' || !current.currentVersionId) return null;
+    const versionId = current.currentVersionId;
     if (await hasPendingApproval(tx, document.id)) return null;
     const [approval] = await tx
       .insert(approvals)
@@ -42,7 +46,7 @@ export async function requestDocumentApproval(
         clientId: editor.clientId,
         projectId: editor.projectId,
         subjectType: 'document_version',
-        subjectId: current.versionId,
+        subjectId: versionId,
         requestedBy: editor.actorId,
         requestedAt: now,
       })
@@ -54,7 +58,7 @@ export async function requestDocumentApproval(
       resourceType: 'approval',
       resourceId: approval.id,
       clientId: editor.clientId,
-      metadata: { documentId: document.id, versionId: current.versionId },
+      metadata: { documentId: document.id, versionId },
     });
     await emit(tx, {
       type: 'rooms.approval.requested',
@@ -104,6 +108,15 @@ export async function decideDocumentApproval(
   const now = (deps.now ?? (() => new Date()))();
 
   const result = await deps.contexts.withSystemContext(async (tx) => {
+    const [document] = await tx
+      .select({ id: projectDocuments.id, title: projectDocuments.title })
+      .from(approvals)
+      .innerJoin(projectDocumentVersions, eq(projectDocumentVersions.id, approvals.subjectId))
+      .innerJoin(projectDocuments, eq(projectDocuments.id, projectDocumentVersions.documentId))
+      .where(eq(approvals.id, input.approvalId));
+    if (!document) return null;
+    // The document first, then the approval: the same order as new versions, so the two never deadlock.
+    await lockDocument(tx, document.id);
     const [approval] = await tx
       .select()
       .from(approvals)
@@ -111,12 +124,6 @@ export async function decideDocumentApproval(
       .for('update');
     if (!approval || approval.subjectType !== 'document_version') return null;
     if (approval.status !== 'pending') return { status: approval.status, decided: false };
-    const [document] = await tx
-      .select({ id: projectDocuments.id, title: projectDocuments.title })
-      .from(projectDocumentVersions)
-      .innerJoin(projectDocuments, eq(projectDocuments.id, projectDocumentVersions.documentId))
-      .where(eq(projectDocumentVersions.id, approval.subjectId));
-    if (!document) return null;
     await tx
       .update(approvals)
       .set({
@@ -129,7 +136,12 @@ export async function decideDocumentApproval(
     if (input.decision === 'approved') {
       await tx
         .update(projectDocuments)
-        .set({ status: 'approved', approvedAt: now, updatedAt: now })
+        .set({
+          status: 'approved',
+          approvedAt: now,
+          approvedVersionId: approval.subjectId,
+          updatedAt: now,
+        })
         .where(eq(projectDocuments.id, document.id));
     } else {
       await tx.insert(tasks).values({

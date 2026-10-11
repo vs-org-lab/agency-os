@@ -15,10 +15,10 @@ import type { VerifiedClaims } from '@/platform/db';
 import {
   documentEditor,
   editableDocument,
+  lockDocument,
   NOT_FOUND,
   uuid,
   type DocumentEditor,
-  type DocumentRecord,
   type DocumentsDeps,
   type NotFound,
 } from './access';
@@ -61,27 +61,31 @@ function versionContent(
 }
 
 /**
- * Makes a ready version the current one (RN-20): an approved document goes back to draft and keeps
- * its approved version in history; a shared document shows the new version to the client and its
- * pending approval request is withdrawn.
+ * Makes a ready version the current one (RN-20), deciding on the locked document: an approved
+ * document goes back to draft and keeps its approved version for the client; a shared document
+ * shows the new version to the client and its pending approval request is withdrawn. A version
+ * older than the current one, confirmed late, stays in history.
  */
 export async function applyNewVersion(
   tx: DbTransaction,
-  document: Pick<DocumentRecord, 'id' | 'status'>,
-  versionId: string,
+  documentId: string,
+  version: { id: string; number: number },
   now: Date,
 ): Promise<void> {
-  const status = statusAfterNewVersion(document.status);
+  const locked = await lockDocument(tx, documentId);
+  if (!locked) return;
+  if (locked.currentNumber !== null && version.number <= locked.currentNumber) return;
+  const status = statusAfterNewVersion(locked.status);
   await tx
     .update(projectDocuments)
-    .set({ currentVersionId: versionId, status, updatedAt: now })
-    .where(eq(projectDocuments.id, document.id));
+    .set({ currentVersionId: version.id, status, updatedAt: now })
+    .where(eq(projectDocuments.id, documentId));
   if (status === 'with_client') {
     await tx
       .update(projectDocumentVersions)
       .set({ sharedAt: now })
-      .where(eq(projectDocumentVersions.id, versionId));
-    await withdrawPending(tx, document.id, now);
+      .where(eq(projectDocumentVersions.id, version.id));
+    await withdrawPending(tx, documentId, now);
   }
 }
 
@@ -91,12 +95,13 @@ async function insertVersion(
   editor: DocumentEditor,
   documentId: string,
   content: VersionContent,
-): Promise<{ versionId: string; storagePath: string | null }> {
+): Promise<{ versionId: string; number: number; storagePath: string | null }> {
   const [latest] = await tx
     .select({ number: max(projectDocumentVersions.number) })
     .from(projectDocumentVersions)
     .where(eq(projectDocumentVersions.documentId, documentId));
   const versionId = randomUUID();
+  const number = (latest?.number ?? 0) + 1;
   const storagePath =
     'file' in content ? documentVersionPath({ ...editor, documentId, versionId }) : null;
   await tx.insert(projectDocumentVersions).values({
@@ -105,7 +110,7 @@ async function insertVersion(
     organizationId: editor.organizationId,
     clientId: editor.clientId,
     projectId: editor.projectId,
-    number: (latest?.number ?? 0) + 1,
+    number,
     kind: content.kind,
     url: 'url' in content ? content.url : null,
     storagePath,
@@ -121,7 +126,7 @@ async function insertVersion(
     resourceId: versionId,
     clientId: editor.clientId,
   });
-  return { versionId, storagePath };
+  return { versionId, number, storagePath };
 }
 
 async function uploadLink(deps: DocumentsDeps, storagePath: string | null) {
@@ -178,7 +183,7 @@ export async function createProjectDocument(
     });
     const version = await insertVersion(tx, editor, documentId, content);
     if (!version.storagePath) {
-      await applyNewVersion(tx, { id: documentId, status: 'draft' }, version.versionId, now);
+      await applyNewVersion(tx, documentId, { id: version.versionId, number: version.number }, now);
     }
     return { documentId, ...version };
   });
@@ -211,11 +216,20 @@ export async function addDocumentVersion(
     ) {
       return null;
     }
+    if (!(await lockDocument(tx, document.id))) return 'gone' as const;
     const version = await insertVersion(tx, editor, document.id, content);
-    if (!version.storagePath) await applyNewVersion(tx, document, version.versionId, now);
+    if (!version.storagePath) {
+      await applyNewVersion(
+        tx,
+        document.id,
+        { id: version.versionId, number: version.number },
+        now,
+      );
+    }
     return version;
   });
   if (!added) return { ok: false, rule: 'storage_full' };
+  if (added === 'gone') return NOT_FOUND;
   return {
     ok: true,
     versionId: added.versionId,
@@ -270,12 +284,18 @@ export async function confirmDocumentVersion(
   const accepted =
     bytes && detected && (version.kind === 'file' ? !pdf || pages !== null : pdf && pages !== null);
   if (!accepted || !bytes || !detected) {
-    await deps.storage.remove(storagePath);
-    await deps.contexts.withSystemContext(async (tx) => {
-      await tx
+    const rejected = await deps.contexts.withSystemContext(async (tx) => {
+      const updated = await tx
         .update(projectDocumentVersions)
         .set({ uploadStatus: 'rejected' })
-        .where(eq(projectDocumentVersions.id, input.versionId));
+        .where(
+          and(
+            eq(projectDocumentVersions.id, input.versionId),
+            eq(projectDocumentVersions.uploadStatus, 'uploading'),
+          ),
+        )
+        .returning({ id: projectDocumentVersions.id });
+      if (updated.length === 0) return false;
       await recordAudit(tx, {
         organizationId: editor.organizationId,
         action: 'document.version_rejected',
@@ -283,12 +303,16 @@ export async function confirmDocumentVersion(
         resourceId: input.versionId,
         clientId: editor.clientId,
       });
+      return true;
     });
+    // Another confirmation or the sweep settled this version first; its file is not ours to remove.
+    if (!rejected) return NOT_FOUND;
+    await deps.storage.remove(storagePath);
     return { ok: false, rule: 'invalid_file' };
   }
   const now = (deps.now ?? (() => new Date()))();
-  await deps.contexts.withSystemContext(async (tx) => {
-    const updated = await tx
+  const ready = await deps.contexts.withSystemContext(async (tx) => {
+    const [updated] = await tx
       .update(projectDocumentVersions)
       .set({ uploadStatus: 'ready', mimeType: detected.mimeType, sizeBytes: bytes.length, pages })
       .where(
@@ -297,21 +321,12 @@ export async function confirmDocumentVersion(
           eq(projectDocumentVersions.uploadStatus, 'uploading'),
         ),
       )
-      .returning({ id: projectDocumentVersions.id });
-    if (updated.length === 0) return;
-    const [current] = await tx
-      .select({ status: projectDocuments.status })
-      .from(projectDocuments)
-      .where(eq(projectDocuments.id, document.id))
-      .for('update');
-    await applyNewVersion(
-      tx,
-      { id: document.id, status: current?.status ?? document.status },
-      input.versionId,
-      now,
-    );
+      .returning({ number: projectDocumentVersions.number });
+    if (!updated) return false;
+    await applyNewVersion(tx, document.id, { id: input.versionId, number: updated.number }, now);
+    return true;
   });
-  return { ok: true };
+  return ready ? { ok: true } : NOT_FOUND;
 }
 
 /**

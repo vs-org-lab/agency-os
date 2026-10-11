@@ -6,8 +6,14 @@ import {
   createLibraryFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
-import { confirmUpload, deleteFile, libraryFileUrl, requestUploads } from './files';
-import { libraryClaims, libraryDeps, PNG_BYTES } from './testing';
+import {
+  confirmUpload,
+  deleteFile,
+  libraryFileUrl,
+  requestUploads,
+  sweepStaleUploads,
+} from './files';
+import { LIBRARY_TEST_NOW, libraryClaims, libraryDeps, PNG_BYTES } from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -168,6 +174,83 @@ describe('library files', () => {
           deps,
         ),
       ).toEqual({ ok: false, rule: 'invalid_input' });
+    });
+  });
+
+  it('a confirmed upload must match its declared size', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps, storage } = libraryDeps(sql);
+      const manager = libraryClaims(world.users.manager);
+      const requested = await requestUploads(
+        manager,
+        { folderId: library.a.rootId, files: [{ path: 'leve.png', sizeBytes: 1 }] },
+        deps,
+      );
+      if (!requested.ok || !requested.uploads[0]) throw new Error('Upload was not requested');
+      const { fileId, uploadUrl } = requested.uploads[0];
+      const path = storagePathOf(uploadUrl);
+      storage.files.set(path, PNG_BYTES);
+
+      expect(await confirmUpload(manager, { fileId }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_file',
+      });
+      expect((await file(sql, fileId))?.status).toBe('rejected');
+      expect(storage.removed).toEqual([path]);
+    });
+  });
+
+  it('uploads still waiting count against the quota', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = libraryDeps(sql);
+      const manager = libraryClaims(world.users.manager);
+      await sql`
+        update public.library_files set size_bytes = 943709256
+        where id = ${library.b.rootFileId}
+      `;
+      const upload = () =>
+        requestUploads(
+          manager,
+          { folderId: library.a.rootId, files: [{ path: 'capa.png', sizeBytes: 2048 }] },
+          deps,
+        );
+
+      expect((await upload()).ok).toBe(true);
+      expect(await upload()).toEqual({ ok: false, rule: 'storage_full' });
+    });
+  });
+
+  it('stale uploads are removed with their stored objects', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps, storage } = libraryDeps(sql);
+      const requested = await requestUploads(
+        libraryClaims(world.users.manager),
+        { folderId: library.a.rootId, files: [{ path: 'recente.png', sizeBytes: 16 }] },
+        deps,
+      );
+      if (!requested.ok || !requested.uploads[0]) throw new Error('Upload was not requested');
+      const recentId = requested.uploads[0].fileId;
+      await sql`
+        update public.library_files set created_at = ${LIBRARY_TEST_NOW.toISOString()}::timestamptz - interval '4 hours'
+        where id = ${library.a.uploadingFileId}
+      `;
+      await sql`
+        update public.library_files set created_at = ${LIBRARY_TEST_NOW.toISOString()}::timestamptz - interval '1 hour'
+        where id = ${recentId}
+      `;
+
+      expect(await sweepStaleUploads(deps)).toEqual({ removed: 1 });
+      expect((await file(sql, library.a.uploadingFileId))?.status).toBe('rejected');
+      expect((await file(sql, recentId))?.status).toBe('uploading');
+      expect(storage.removed).toEqual([
+        `${world.organizationId}/${world.clients.a}/${library.a.projectId}/${library.a.uploadingFileId}`,
+      ]);
     });
   });
 

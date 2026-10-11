@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type LibraryFileKind } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
@@ -20,13 +20,14 @@ import {
   MAX_FOLDER_DEPTH,
   MAX_LIBRARY_BYTES,
   MAX_UPLOAD_BATCH,
-  ORGANIZATION_STORAGE_LIMIT_BYTES,
+  STALE_UPLOAD_MS,
 } from './domain/limits';
 import { normaliseUploadPath, type UploadPath } from './domain/paths';
 import { childFolder, writesUnder } from './folders';
+import { fitsStorage } from './quota';
 import { libraryPath } from './storage';
 
-const { libraryFiles, libraryFolders, proofVersions } = schema;
+const { libraryFiles, libraryFolders } = schema;
 
 const uploadSchema = z
   .array(
@@ -39,19 +40,6 @@ const uploadSchema = z
   .max(MAX_UPLOAD_BATCH);
 
 type Upload = { fileId: string; path: string; uploadUrl: string };
-
-/** Bytes the organisation already keeps in the library and in proofs. */
-async function storageUsed(tx: DbTransaction, organizationId: string): Promise<number> {
-  const rows = await tx.execute<{ used: string | null }>(sql`
-    select (
-      coalesce((select sum(size_bytes) from ${libraryFiles}
-                where organization_id = ${organizationId}::uuid and status = 'ready'), 0)
-      + coalesce((select sum(size_bytes) from ${proofVersions}
-                  where organization_id = ${organizationId}::uuid and status = 'ready'), 0)
-    )::text as used
-  `);
-  return Number(rows[0]?.used ?? 0);
-}
 
 /** The folder for a path's segments under the target, created or reused one level at a time. */
 async function folderFor(
@@ -120,15 +108,10 @@ export async function requestUploads(
   const declared = files.data.reduce((total, file) => total + file.sizeBytes, 0);
 
   const created = await deps.contexts.withSystemContext(async (tx) => {
-    if (
-      (await storageUsed(tx, writer.organizationId)) + declared >
-      ORGANIZATION_STORAGE_LIMIT_BYTES
-    ) {
-      return null;
-    }
+    if (!(await fitsStorage(tx, writer.organizationId, declared))) return null;
     const cache = new Map<string, { id: string; rootId: string; depth: number }>();
     const rows: { fileId: string; path: string; storagePath: string }[] = [];
-    for (const path of paths) {
+    for (const [index, path] of paths.entries()) {
       const folderId = await folderFor(tx, writer, target, path.segments, cache);
       const fileId = randomUUID();
       const storagePath = libraryPath({ ...writer, fileId });
@@ -141,6 +124,7 @@ export async function requestUploads(
         rootId: target.rootId,
         name: path.fileName,
         storagePath,
+        sizeBytes: files.data[index]?.sizeBytes ?? null,
         uploadedBy: writer.actorId,
       });
       rows.push({ fileId, path: [...path.segments, path.fileName].join('/'), storagePath });
@@ -167,6 +151,7 @@ type FileRecord = {
   name: string;
   storagePath: string;
   status: string;
+  sizeBytes: number | null;
   uploadedBy: string | null;
   rootVisibility: string | null;
 };
@@ -183,6 +168,7 @@ async function loadFile(fileId: string, deps: LibraryDeps): Promise<FileRecord |
         name: libraryFiles.name,
         storagePath: libraryFiles.storagePath,
         status: libraryFiles.status,
+        sizeBytes: libraryFiles.sizeBytes,
         uploadedBy: libraryFiles.uploadedBy,
         rootVisibility: libraryFolders.visibility,
       })
@@ -214,10 +200,13 @@ export async function confirmUpload(
   if (!writer || !ownsFile(writer, file)) return NOT_FOUND;
 
   const bytes = await deps.storage.download(file.storagePath);
+  const declaredSize = bytes !== null && bytes.length === file.sizeBytes;
   const detected =
-    bytes && bytes.length <= MAX_LIBRARY_BYTES ? detectLibraryType(bytes, file.name) : null;
+    bytes && declaredSize && bytes.length <= MAX_LIBRARY_BYTES
+      ? detectLibraryType(bytes, file.name)
+      : null;
   if (!bytes || !detected) {
-    if (bytes) await deps.storage.remove(file.storagePath);
+    await deps.storage.remove(file.storagePath);
     await deps.contexts.withSystemContext(async (tx) => {
       await tx.update(libraryFiles).set({ status: 'rejected' }).where(eq(libraryFiles.id, file.id));
       await recordAudit(tx, {
@@ -309,4 +298,21 @@ export async function libraryFileUrl(
   const file = await loadFile(fileId, deps);
   if (!file) return null;
   return deps.storage.signedDownloadUrl(file.storagePath, LIBRARY_LINK_TTL_SECONDS, file.name);
+}
+
+/**
+ * Closes uploads whose signed link has expired without a confirmation: the rows are rejected and
+ * any bytes sent to them are removed, so an unconfirmed upload never keeps storage.
+ */
+export async function sweepStaleUploads(deps: LibraryDeps): Promise<{ removed: number }> {
+  const cutoff = new Date((deps.now?.() ?? new Date()).getTime() - STALE_UPLOAD_MS);
+  const stale = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .update(libraryFiles)
+      .set({ status: 'rejected' })
+      .where(and(eq(libraryFiles.status, 'uploading'), lt(libraryFiles.createdAt, cutoff)))
+      .returning({ storagePath: libraryFiles.storagePath }),
+  );
+  await deps.storage.removeMany(stale.map((file) => file.storagePath));
+  return { removed: stale.length };
 }

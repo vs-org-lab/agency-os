@@ -21,3 +21,6 @@ export const MAX_UPDATE_ATTACHMENTS = 10;
 
 /** SEC-31: files are served by links that expire in 15 minutes. */
 export const LIBRARY_LINK_TTL_SECONDS = 900;
+
+/** Signed upload links last two hours; an upload still waiting after three is abandoned. */
+export const STALE_UPLOAD_MS = 3 * 60 * 60 * 1000;

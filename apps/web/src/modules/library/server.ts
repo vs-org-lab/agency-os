@@ -72,3 +72,5 @@ export function libraryFileLink(claims: VerifiedClaims, fileId: string) {
 export function libraryZip(claims: VerifiedClaims, projectId: string, folderId: string | null) {
   return zipManifest(claims, { projectId, folderId }, deps());
 }
+
+export { LIBRARY_FUNCTIONS } from './automations';

@@ -42,6 +42,8 @@ export type {
   SignatureParty,
   BillingMilestoneStatus,
   LibraryFileKind,
+  ProjectDocumentKind,
+  ProjectDocumentStatus,
   LibraryFileStatus,
   MilestoneTrigger,
   InvoiceIssuer,

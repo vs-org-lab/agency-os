@@ -63,6 +63,9 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'library_folders', clientColumn: 'client_id' },
   { table: 'library_files', clientColumn: 'client_id' },
   { table: 'project_update_files', clientColumn: 'client_id' },
+  { table: 'project_documents', clientColumn: 'client_id' },
+  { table: 'project_document_versions', clientColumn: 'client_id' },
+  { table: 'project_document_comments', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -123,6 +126,26 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
                                                project_id)
       values (${records.clientUpdateId}, ${libraryFile?.id ?? ''}, ${world.organizationId},
               ${clientId}, ${records.projectId})
+    `;
+    const [document] = await sql<{ id: string }[]>`
+      insert into public.project_documents (organization_id, client_id, project_id, title, kind,
+                                            status, shared_at)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, 'Estratégia', 'link',
+              'with_client', now())
+      returning id
+    `;
+    const [documentVersion] = await sql<{ id: string }[]>`
+      insert into public.project_document_versions (document_id, organization_id, client_id,
+                                                    project_id, number, kind, url, shared_at)
+      values (${document?.id ?? ''}, ${world.organizationId}, ${clientId}, ${records.projectId},
+              1, 'link', 'https://example.com/estrategia', now())
+      returning id
+    `;
+    await sql`
+      insert into public.project_document_comments (document_id, version_id, organization_id,
+                                                    client_id, project_id, body)
+      values (${document?.id ?? ''}, ${documentVersion?.id ?? ''}, ${world.organizationId},
+              ${clientId}, ${records.projectId}, 'Nota')
     `;
   }
   await createTaskFixture(sql, world);

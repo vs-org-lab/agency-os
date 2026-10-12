@@ -276,6 +276,18 @@ export const projectDocumentStatusEnum = appSchema.enum('project_document_status
   'approved',
 ]);
 
+export const agendaEventKindEnum = appSchema.enum('agenda_event_kind', [
+  'kickoff',
+  'meeting',
+  'review',
+  'internal',
+]);
+
+export const agendaEventStatusEnum = appSchema.enum('agenda_event_status', [
+  'scheduled',
+  'cancelled',
+]);
+
 export const brandHubPageKindEnum = appSchema.enum('brand_hub_page_kind', ['standard', 'custom']);
 
 export const brandHubStandardKeyEnum = appSchema.enum('brand_hub_standard_key', [
@@ -373,6 +385,8 @@ export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
 export type ProjectDocumentKind = (typeof projectDocumentKindEnum.enumValues)[number];
 export type ProjectDocumentStatus = (typeof projectDocumentStatusEnum.enumValues)[number];
 export type LibraryFileKind = (typeof libraryFileKindEnum.enumValues)[number];
+export type AgendaEventKind = (typeof agendaEventKindEnum.enumValues)[number];
+export type AgendaEventStatus = (typeof agendaEventStatusEnum.enumValues)[number];
 export type BrandHubPageKind = (typeof brandHubPageKindEnum.enumValues)[number];
 export type BrandHubStandardKey = (typeof brandHubStandardKeyEnum.enumValues)[number];
 export type BrandHubBlockType = (typeof brandHubBlockTypeEnum.enumValues)[number];

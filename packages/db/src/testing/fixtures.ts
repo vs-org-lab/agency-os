@@ -1363,3 +1363,79 @@ export async function createBrandHubFixture(
     b: { hubId: hubB.hubId },
   };
 }
+
+/** The instant agenda fixtures and tests are written against. */
+export const AGENDA_TEST_NOW = new Date('2026-10-12T09:00:00Z');
+
+export type AgendaFixture = {
+  rooms: RoomFixture;
+  internalId: string;
+  kickoffAId: string;
+  meetingBId: string;
+  cancelledAId: string;
+};
+
+/**
+ * An internal meeting, a kickoff on client A's project, a meeting with client B and a cancelled
+ * meeting with client A, all a day after AGENDA_TEST_NOW.
+ */
+export async function createAgendaFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<AgendaFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const tomorrow = new Date(AGENDA_TEST_NOW.getTime() + 24 * 60 * 60 * 1000);
+  const meeting = async (input: {
+    kind: string;
+    clientId: string | null;
+    projectId: string | null;
+    title: string;
+    hour: number;
+    status?: string;
+  }) => {
+    const startsAt = new Date(tomorrow.getTime() + input.hour * 60 * 60 * 1000);
+    const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000);
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.agenda_events (organization_id, client_id, project_id, kind, title,
+                                        starts_at, ends_at, status, created_by)
+      values (${world.organizationId}, ${input.clientId}, ${input.projectId}, ${input.kind},
+              ${input.title}, ${startsAt.toISOString()}, ${endsAt.toISOString()},
+              ${input.status ?? 'scheduled'}, ${world.users.founder})
+      returning id
+    `;
+    if (!row) throw new Error('Fixture agenda event was not created');
+    return row.id;
+  };
+  return {
+    rooms,
+    internalId: await meeting({
+      kind: 'internal',
+      clientId: null,
+      projectId: null,
+      title: 'Planeamento',
+      hour: 0,
+    }),
+    kickoffAId: await meeting({
+      kind: 'kickoff',
+      clientId: world.clients.a,
+      projectId: rooms.a.projectId,
+      title: 'Kickoff',
+      hour: 2,
+    }),
+    meetingBId: await meeting({
+      kind: 'meeting',
+      clientId: world.clients.b,
+      projectId: null,
+      title: 'Reunião B',
+      hour: 4,
+    }),
+    cancelledAId: await meeting({
+      kind: 'meeting',
+      clientId: world.clients.a,
+      projectId: null,
+      title: 'Cancelada',
+      hour: 6,
+      status: 'cancelled',
+    }),
+  };
+}

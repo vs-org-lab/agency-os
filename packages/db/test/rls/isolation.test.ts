@@ -71,6 +71,7 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'brand_hub_blocks', clientColumn: 'client_id' },
   { table: 'brand_hub_assets', clientColumn: 'client_id' },
   { table: 'brand_hub_publications', clientColumn: 'client_id' },
+  { table: 'agenda_events', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -181,6 +182,12 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
                                                  revision, snapshot)
       values (${hub?.id ?? ''}, ${world.organizationId}, ${clientId}, 1, 1,
               '{"design":{},"pages":[],"assets":[]}'::jsonb)
+    `;
+    await sql`
+      insert into public.agenda_events (organization_id, client_id, project_id, kind, title,
+                                        starts_at, ends_at)
+      values (${world.organizationId}, ${clientId}, ${records.projectId}, 'meeting', 'Reunião',
+              now() + interval '1 day', now() + interval '1 day 1 hour')
     `;
   }
   await createTaskFixture(sql, world);

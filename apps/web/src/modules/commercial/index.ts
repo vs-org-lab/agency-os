@@ -51,3 +51,4 @@ export type { DealAnswer, DealDetail } from './deal-detail';
 export type { ApplicationRow } from './applications/list';
 export type { AcquisitionTarget, AcquisitionTemplate } from './acquisition/service';
 export type { TodayItem } from './today';
+export type { CalendarEventInput, CalendarPort } from './calendar/port';

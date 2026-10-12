@@ -24,6 +24,8 @@ describe('inngest functions', () => {
         expect.stringContaining('documents-shared-notice'),
         expect.stringContaining('documents-comment-notice'),
         expect.stringContaining('documents-stale-uploads'),
+        expect.stringContaining('brand-hub-published-notice'),
+        expect.stringContaining('brand-hub-asset-sweep'),
       ]),
     );
     expect(new Set(ids).size).toBe(ids.length);

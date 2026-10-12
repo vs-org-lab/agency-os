@@ -300,6 +300,7 @@ async function sendSessionEmail(
 export type PortalNoticeTemplate =
   | 'lead.proof_comment'
   | 'lead.document_shared'
+  | 'lead.brand_hub_published'
   | 'lead.document_comment'
   | 'lead.rounds_warning'
   | 'lead.briefing_shared'

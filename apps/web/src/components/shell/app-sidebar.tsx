@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LogOut,
   Newspaper,
+  Palette,
   ReceiptText,
   Settings,
   Target,
@@ -89,6 +90,7 @@ const ICONS = {
   proofs: Images,
   folder: FolderOpen,
   documents: FileText,
+  brand: Palette,
 } as const;
 
 function NavigationItemLink({

@@ -66,6 +66,11 @@ const clientScopedTables: ClientScopedTable[] = [
   { table: 'project_documents', clientColumn: 'client_id' },
   { table: 'project_document_versions', clientColumn: 'client_id' },
   { table: 'project_document_comments', clientColumn: 'client_id' },
+  { table: 'brand_hubs', clientColumn: 'client_id' },
+  { table: 'brand_hub_pages', clientColumn: 'client_id' },
+  { table: 'brand_hub_blocks', clientColumn: 'client_id' },
+  { table: 'brand_hub_assets', clientColumn: 'client_id' },
+  { table: 'brand_hub_publications', clientColumn: 'client_id' },
 ];
 
 async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<void> {
@@ -146,6 +151,36 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
                                                     client_id, project_id, body)
       values (${document?.id ?? ''}, ${documentVersion?.id ?? ''}, ${world.organizationId},
               ${clientId}, ${records.projectId}, 'Nota')
+    `;
+    const [hub] = await sql<{ id: string }[]>`
+      insert into public.brand_hubs (organization_id, client_id)
+      values (${world.organizationId}, ${clientId})
+      returning id
+    `;
+    const [hubPage] = await sql<{ id: string }[]>`
+      insert into public.brand_hub_pages (hub_id, organization_id, client_id, kind, standard_key,
+                                          title, position)
+      values (${hub?.id ?? ''}, ${world.organizationId}, ${clientId}, 'standard', 'strategy',
+              'Estratégia', 1)
+      returning id
+    `;
+    await sql`
+      insert into public.brand_hub_blocks (page_id, hub_id, organization_id, client_id, type,
+                                           position, content)
+      values (${hubPage?.id ?? ''}, ${hub?.id ?? ''}, ${world.organizationId}, ${clientId},
+              'text', 1, '{"title":"","body":""}'::jsonb)
+    `;
+    await sql`
+      insert into public.brand_hub_assets (hub_id, organization_id, client_id, name, size_bytes,
+                                           storage_path)
+      values (${hub?.id ?? ''}, ${world.organizationId}, ${clientId}, 'logo.svg', 10,
+              'isolation/brand-hub')
+    `;
+    await sql`
+      insert into public.brand_hub_publications (hub_id, organization_id, client_id, number,
+                                                 revision, snapshot)
+      values (${hub?.id ?? ''}, ${world.organizationId}, ${clientId}, 1, 1,
+              '{"design":{},"pages":[],"assets":[]}'::jsonb)
     `;
   }
   await createTaskFixture(sql, world);

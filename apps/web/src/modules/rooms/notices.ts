@@ -17,7 +17,7 @@ export type ApprovalNotice = {
   companyName: string;
   /** The phase name, the file title or, for the final approval, the project name. */
   phaseName: string;
-  subject: 'phase' | 'file' | 'delivery' | 'document';
+  subject: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
   decision: 'approved' | 'changes_requested';
   roomUrl: string;
 };
@@ -58,12 +58,15 @@ export async function approvalNotice(
         ? 'delivery'
         : row.subjectType === 'document_version'
           ? 'document'
-          : 'phase';
+          : row.subjectType === 'brand_hub_publication'
+            ? 'brand_hub'
+            : 'phase';
     const name = {
       file: row.fileTitle,
       delivery: row.projectName,
       phase: row.phaseName,
       document: row.documentTitle,
+      brand_hub: 'Brand Hub',
     }[subject];
     if (!name) return null;
     return {
@@ -76,7 +79,9 @@ export async function approvalNotice(
           ? `/c/${row.clientId}/proofs/${row.subjectId}`
           : subject === 'document'
             ? `/c/${row.clientId}/docs/${row.documentId}`
-            : `/c/${row.clientId}`,
+            : subject === 'brand_hub'
+              ? `/c/${row.clientId}/hub`
+              : `/c/${row.clientId}`,
         deps.appBaseUrl,
       ).toString(),
     };

@@ -12,7 +12,8 @@ export type NavigationIcon =
   | 'users'
   | 'proofs'
   | 'folder'
-  | 'documents';
+  | 'documents'
+  | 'brand';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -27,6 +28,7 @@ export type NavigationLabelKey =
   | 'shell.room.tasks'
   | 'shell.room.library'
   | 'shell.room.documents'
+  | 'shell.room.brandHub'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -34,6 +36,7 @@ export type NavigationLabelKey =
   | 'shell.portalNav.updates'
   | 'shell.portalNav.library'
   | 'shell.portalNav.documents'
+  | 'shell.portalNav.brandHub'
   | 'shell.portalNav.team';
 
 export type NavigationCounter = 'unseenApplications';
@@ -109,6 +112,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             labelKey: 'shell.room.library',
             icon: 'folder',
           },
+          {
+            href: `/c/${input.clientId}/hub`,
+            labelKey: 'shell.room.brandHub',
+            icon: 'brand',
+          },
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
       };
@@ -124,6 +132,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
                 { href: '/portal/updates', labelKey: 'shell.portalNav.updates', icon: 'feed' },
                 { href: '/portal/docs', labelKey: 'shell.portalNav.documents', icon: 'documents' },
                 { href: '/portal/library', labelKey: 'shell.portalNav.library', icon: 'folder' },
+                { href: '/portal/hub', labelKey: 'shell.portalNav.brandHub', icon: 'brand' },
               ] as const)
             : []),
           ...(input.permissions.invoices

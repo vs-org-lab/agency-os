@@ -18,6 +18,8 @@ export {
   createDeliveryFixture,
   createLibraryFixture,
   createDocumentFixture,
+  createBrandHubFixture,
+  type BrandHubFixture,
   type DocumentFixture,
   type DocumentRecords,
   type LibraryFixture,

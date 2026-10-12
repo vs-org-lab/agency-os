@@ -251,6 +251,7 @@ export const approvalSubjectEnum = appSchema.enum('approval_subject', [
   'file_version',
   'project',
   'document_version',
+  'brand_hub_publication',
 ]);
 
 export const approvalStatusEnum = appSchema.enum('approval_status', [
@@ -273,6 +274,31 @@ export const projectDocumentStatusEnum = appSchema.enum('project_document_status
   'draft',
   'with_client',
   'approved',
+]);
+
+export const brandHubPageKindEnum = appSchema.enum('brand_hub_page_kind', ['standard', 'custom']);
+
+export const brandHubStandardKeyEnum = appSchema.enum('brand_hub_standard_key', [
+  'strategy',
+  'gallery',
+  'logo',
+  'typography',
+  'color',
+  'photography',
+  'layout',
+  'brand_objects',
+  'resources',
+]);
+
+export const brandHubBlockTypeEnum = appSchema.enum('brand_hub_block_type', [
+  'text',
+  'strategy',
+  'image',
+  'gallery',
+  'logo',
+  'colors',
+  'typeface',
+  'downloads',
 ]);
 
 export const libraryFileKindEnum = appSchema.enum('library_file_kind', [
@@ -347,6 +373,9 @@ export type ApprovalSubject = (typeof approvalSubjectEnum.enumValues)[number];
 export type ProjectDocumentKind = (typeof projectDocumentKindEnum.enumValues)[number];
 export type ProjectDocumentStatus = (typeof projectDocumentStatusEnum.enumValues)[number];
 export type LibraryFileKind = (typeof libraryFileKindEnum.enumValues)[number];
+export type BrandHubPageKind = (typeof brandHubPageKindEnum.enumValues)[number];
+export type BrandHubStandardKey = (typeof brandHubStandardKeyEnum.enumValues)[number];
+export type BrandHubBlockType = (typeof brandHubBlockTypeEnum.enumValues)[number];
 export type LibraryFileStatus = (typeof libraryFileStatusEnum.enumValues)[number];
 export type ProofKind = (typeof proofKindEnum.enumValues)[number];
 export type ProofVersionStatus = (typeof proofVersionStatusEnum.enumValues)[number];

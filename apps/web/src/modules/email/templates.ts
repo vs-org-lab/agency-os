@@ -28,6 +28,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'lead.testimonial_request',
   'lead.document_shared',
   'lead.document_comment',
+  'lead.brand_hub_published',
   'founder.application_received',
   'founder.queue_b_pending',
   'founder.call_outcome_missing',
@@ -84,6 +85,7 @@ export type EmailParams = {
   'lead.testimonial_request': PortalNotice;
   'lead.document_shared': PortalNotice;
   'lead.document_comment': PortalNotice;
+  'lead.brand_hub_published': PortalNotice;
   'founder.application_received': {
     companyName: string;
     contactName: string;
@@ -107,13 +109,13 @@ export type EmailParams = {
     companyName: string;
     phaseName: string;
     decision: 'approved' | 'changes_requested';
-    subject: 'phase' | 'file' | 'delivery' | 'document';
+    subject: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
     roomUrl: string;
   };
   'founder.approval_overdue': {
     companyName: string;
     phaseName: string;
-    subject: 'phase' | 'file' | 'delivery' | 'document';
+    subject: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
     roomUrl: string;
   };
   'founder.proof_comment': { companyName: string; fileTitle: string; roomUrl: string };
@@ -176,6 +178,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'lead.testimonial_request': 'portalUrl',
   'lead.document_shared': 'portalUrl',
   'lead.document_comment': 'portalUrl',
+  'lead.brand_hub_published': 'portalUrl',
   'founder.application_received': 'dealUrl',
   'founder.queue_b_pending': 'queueUrl',
   'founder.call_outcome_missing': 'dealUrl',

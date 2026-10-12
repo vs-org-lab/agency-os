@@ -21,3 +21,4 @@ export * from './proofing';
 export * from './testimonials';
 export * from './library';
 export * from './project-documents';
+export * from './brand-hub';

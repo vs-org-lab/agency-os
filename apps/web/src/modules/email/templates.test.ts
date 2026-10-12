@@ -147,6 +147,11 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     agencyName: 'Aurion',
     portalUrl: 'https://os.example.com/portal/docs/doc',
   },
+  'lead.brand_hub_published': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/portal/hub',
+  },
   'founder.document_comment': {
     companyName: 'Empresa Exemplo',
     documentTitle: 'Estratégia',
@@ -316,6 +321,34 @@ describe('renderEmail', () => {
     expect(overdue.text).toContain('The document Estratégia');
   });
 
+  it('names the brand hub in approval alerts', () => {
+    const decided = renderEmail('founder.approval_decided', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      decision: 'changes_requested',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+    const approved = renderEmail('founder.approval_decided', 'en', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      decision: 'approved',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+    const overdue = renderEmail('founder.approval_overdue', 'pt-PT', {
+      companyName: 'Empresa Exemplo',
+      phaseName: 'Brand Hub',
+      subject: 'brand_hub',
+      roomUrl: 'https://os.example.com/c/client/hub',
+    });
+
+    expect(decided.subject).toBe('Empresa Exemplo pediu alterações no Brand Hub');
+    expect(decided.text).toContain('Rever Brand Hub');
+    expect(approved.subject).toBe('Empresa Exemplo approved the Brand Hub');
+    expect(overdue.text).toContain('O Brand Hub espera');
+  });
+
   it('document notices name the document and open it', () => {
     const team = renderEmail('founder.document_comment', 'pt-PT', {
       companyName: 'Empresa Exemplo',
@@ -331,6 +364,17 @@ describe('renderEmail', () => {
     expect(team.subject).toBe('Novo comentário de Empresa Exemplo em Estratégia');
     expect(team.html).toContain('https://os.example.com/c/client/docs/doc');
     expect(client.html).toContain('https://os.example.com/portal/docs/doc');
+  });
+
+  it('the brand hub notice says the hub was updated and opens it', () => {
+    const email = renderEmail('lead.brand_hub_published', 'pt-PT', {
+      firstName: 'Ana',
+      agencyName: 'Aurion',
+      portalUrl: 'https://os.example.com/portal/hub',
+    });
+
+    expect(email.subject).toBe('O Brand Hub foi atualizado');
+    expect(email.html).toContain('https://os.example.com/portal/hub');
   });
 
   it('the testimonial alert quotes what the client wrote', () => {

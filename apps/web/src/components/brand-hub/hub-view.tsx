@@ -7,6 +7,11 @@ type AssetUrl = (assetId: string) => string;
 
 const STRATEGY_FIELDS = ['story', 'mission', 'vision', 'values', 'voice', 'positioning'] as const;
 
+/** Keeps only the characters a typeface name uses, so a published value cannot escape the declaration. */
+function cssFamily(family: string): string {
+  return family.replace(/[^\p{L}\p{N} ._-]/gu, '');
+}
+
 function hubStyle(snapshot: HubSnapshot): CSSProperties {
   const { colors, corners } = snapshot.design;
   return {
@@ -199,7 +204,10 @@ function Block({
             <span className="text-caption text-[var(--hub-text-muted)]">{weights.join(' · ')}</span>
           ) : null}
           {sample ? (
-            <p className="text-title text-[var(--hub-text)]" style={{ fontFamily: `"${family}"` }}>
+            <p
+              className="text-title text-[var(--hub-text)]"
+              style={{ fontFamily: `"${cssFamily(family)}"` }}
+            >
               {sample}
             </p>
           ) : null}

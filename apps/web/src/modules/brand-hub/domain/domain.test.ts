@@ -57,6 +57,15 @@ describe('brand hub domain', () => {
     }
   });
 
+  it('typeface families are plain names that cannot carry css', () => {
+    const typeface = (family: string) => ({ family, weights: [], sample: '', assetId: null });
+    expect(blockContentSchema('typeface').safeParse(typeface('Inter Display')).success).toBe(true);
+    expect(blockContentSchema('typeface').safeParse(typeface('Söhne Breit-2')).success).toBe(true);
+    for (const family of ['x";position:fixed;inset:0', 'a;b', 'url(//evil.tld)', 'a\b']) {
+      expect(blockContentSchema('typeface').safeParse(typeface(family)).success).toBe(false);
+    }
+  });
+
   it('blocks report the assets they reference and whether they must be images', () => {
     expect(blockAssetIds('logo', { assetId: ASSET, variant: '', background: 'light' })).toEqual([
       { assetId: ASSET, image: false },

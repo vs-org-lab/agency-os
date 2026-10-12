@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import { ApprovalsList } from '@/components/proofing/approvals-list';
@@ -176,6 +177,16 @@ describe('brand hub', () => {
               type: 'text',
               content: { title: 'javascript:alert(1)', body: '<script>alert(1)</script>' },
             },
+            {
+              id: 'b-font',
+              type: 'typeface',
+              content: {
+                family: 'x";position:fixed;inset:0;background:url(//evil.tld/p.png)',
+                weights: [],
+                sample: 'Amostra',
+                assetId: null,
+              },
+            },
           ],
         },
       ],
@@ -189,6 +200,13 @@ describe('brand hub', () => {
       />,
     );
     expect(container.querySelector('script')).toBeNull();
+    const serverHtml = renderToStaticMarkup(
+      <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
+        <HubView snapshot={hostile} clientName="Bloom" updatedAt={null} assetUrl={assetUrl} />
+      </NextIntlClientProvider>,
+    );
+    const styles = [...serverHtml.matchAll(/style="([^"]*)"/g)].map((match) => match[1]);
+    expect(styles.join(' ')).not.toMatch(/position\s*:|url\(/);
     expect(container.querySelector('img')).toBeNull();
     expect(screen.getByText('<script>alert(1)</script>')).toBeTruthy();
     expect(screen.queryByRole('link', { name: 'javascript:alert(1)' })).toBeNull();

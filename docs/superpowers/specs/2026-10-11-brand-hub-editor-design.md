@@ -131,7 +131,7 @@ Cada cliente tem um Brand Hub: a fonte única da sua marca, com estratégia, log
 - FKs compostas com `client_id`; `unique (hub_id, standard_key)`; `unique (hub_id, number)`. Uma página `standard` tem `standard_key` e uma `custom` não.
 - O conteúdo dos blocos e do design é validado no serviço por esquemas zod e nunca é confiado ao navegador.
 - **RLS forçado; escrita só por serviços.**
-  - A equipa lê pelas políticas `app.can_read_rooms`, e o freelancer pelo seu projeto no cliente.
+  - A equipa que escreve na sala e o freelancer de um projeto do cliente leem pela política `app.can_edit_brand_hub`; o financeiro não lê.
   - O cliente lê só pelas vistas:
     - `portal_brand_hub_publications`: a publicação atual de cada hub, para o decisor e o operacional de um cliente ativo;
     - `portal_brand_hub_assets`: os ficheiros que constam dessa publicação.

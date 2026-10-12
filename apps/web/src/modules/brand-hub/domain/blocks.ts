@@ -6,6 +6,9 @@ const text = (max: number) => z.string().max(max);
 
 const strategyField = text(2000);
 
+/** A typeface name only: it ends up in a CSS font-family, so it cannot carry quotes or punctuation. */
+const FONT_FAMILY = /^[\p{L}\p{N} ._-]{0,80}$/u;
+
 const schemas = {
   text: z.strictObject({ title: text(120), body: text(5000) }),
   strategy: z.strictObject({
@@ -37,7 +40,7 @@ const schemas = {
       .max(24),
   }),
   typeface: z.strictObject({
-    family: text(80),
+    family: z.string().regex(FONT_FAMILY),
     weights: z.array(z.string().min(1).max(40)).max(10),
     sample: text(200),
     assetId: assetRef,

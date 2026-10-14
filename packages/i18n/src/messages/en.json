@@ -89,7 +89,8 @@
       "applications": "Applications",
       "acquisition": "Acquisition",
       "updates": "Updates",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "calendar": "Calendar"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -97,7 +98,8 @@
       "tasks": "Tasks",
       "library": "Library",
       "documents": "Documents",
-      "brandHub": "Brand Hub"
+      "brandHub": "Brand Hub",
+      "agenda": "Agenda"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -175,8 +177,16 @@
       },
       "upcoming": {
         "title": "Upcoming events",
-        "empty": "No calls booked in the next 7 days.",
-        "call": "Call with {client}"
+        "empty": "No events in the next 7 days.",
+        "call": "Call with {client}",
+        "viewCalendar": "View calendar",
+        "deadline": "{kind} · {title}",
+        "kinds": {
+          "phase_due": "Phase due",
+          "step_due": "Step due",
+          "task_due": "Task",
+          "delivery": "Delivery"
+        }
       },
       "clients": {
         "title": "Clients",
@@ -2599,5 +2609,82 @@
       "upload_failed": "The upload failed. Try again.",
       "download_failed": "The download failed. Try again."
     }
+  },
+  "agenda": {
+    "title": "Calendar",
+    "roomTitle": "Agenda",
+    "views": {
+      "label": "View",
+      "month": "Month",
+      "week": "Week",
+      "list": "Agenda"
+    },
+    "nav": {
+      "label": "Period",
+      "today": "Today",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "filters": {
+      "label": "Show",
+      "meeting": "Meetings",
+      "call": "Calls",
+      "deadlines": "Deadlines",
+      "delivery": "Deliveries"
+    },
+    "kinds": {
+      "meeting": "Meeting",
+      "call": "Call",
+      "phase_due": "Phase due",
+      "step_due": "Step due",
+      "task_due": "Task",
+      "delivery": "Delivery"
+    },
+    "meetingKinds": {
+      "kickoff": "Kickoff",
+      "meeting": "Client meeting",
+      "review": "Review",
+      "internal": "Internal"
+    },
+    "busy": "Busy",
+    "busyRange": "Busy, {start}–{end}",
+    "allDay": "All day",
+    "more": "+{count} more",
+    "newOn": "New meeting on {date}",
+    "empty": {
+      "title": "No events",
+      "description": "Nothing is scheduled in this period."
+    },
+    "dialog": {
+      "newTitle": "New meeting",
+      "editTitle": "Edit meeting",
+      "viewTitle": "Meeting",
+      "kind": "Type",
+      "client": "Client",
+      "chooseClient": "Choose a client",
+      "project": "Project",
+      "noProject": "No project",
+      "title": "Title",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "location": "Place or link",
+      "notes": "Notes",
+      "invite": "Invite the decision maker",
+      "save": "Save",
+      "cancelMeeting": "Cancel meeting",
+      "close": "Close",
+      "openMeet": "Open Meet",
+      "scheduled": "Meeting scheduled.",
+      "updated": "Meeting updated.",
+      "cancelled": "Meeting cancelled.",
+      "notSynced": "It is not in Google Calendar yet. Save again to retry."
+    },
+    "errors": {
+      "not_found": "We could not find this meeting or you no longer have access.",
+      "invalid_input": "Check the fields: the end must be after the start and at most 12 hours later.",
+      "invalid_state": "This meeting is over or was cancelled."
+    },
+    "periodRange": "{start} – {end}"
   }
 }

@@ -7,7 +7,10 @@ describe('domain provider', () => {
     expect(await fake.txtRecords('_agency-os.marca.verified.test')).toEqual([[FAKE_TXT]]);
     expect(await fake.txtRecords('_agency-os.marca.cliente.com')).toBeNull();
     expect(await fake.addDomain('marca.cliente.com')).toEqual({ ok: true });
-    expect(await fake.domainConfigured('marca.cliente.com')).toBe(true);
+    expect(await fake.domainStatus('marca.cliente.com')).toEqual({
+      configured: true,
+      challenges: [],
+    });
     await expect(fake.removeDomain('marca.cliente.com')).resolves.toBeUndefined();
   });
 

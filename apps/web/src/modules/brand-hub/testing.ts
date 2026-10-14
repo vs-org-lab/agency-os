@@ -4,6 +4,7 @@ import { testDatabase } from '@agency-os/db/testing';
 import type { LibraryStorage } from '@/modules/library';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
 import type { DomainProvider } from '@/platform/domain-provider';
+import type { DomainStatus } from '@/platform/vercel-domains';
 import type { BrandHubDeps } from './access';
 
 export const HUB_TEST_NOW = new Date('2026-10-12T09:00:00Z');
@@ -96,26 +97,33 @@ export function memoryDomainProvider() {
     txt: Map<string, string[][]>;
     calls: [string, string][];
     refuse: string | null;
-    configured: boolean;
+    failRemoval: boolean;
+    status: DomainStatus;
+    /** Runs while the hosting call is in flight, to reproduce concurrent changes. */
+    duringAdd: (() => Promise<void>) | null;
   } = {
     kind: 'fake',
     txt,
     calls,
     refuse: null,
-    configured: true,
+    failRemoval: false,
+    status: { configured: true, challenges: [] },
+    duringAdd: null,
     async txtRecords(name) {
       return txt.get(name) ?? null;
     },
     async addDomain(host) {
       if (provider.refuse) return { ok: false, message: provider.refuse };
       calls.push(['add', host]);
+      await provider.duringAdd?.();
       return { ok: true };
     },
     async removeDomain(host) {
       calls.push(['remove', host]);
+      if (provider.failRemoval) throw new Error('Vercel domain removal failed with 500');
     },
-    async domainConfigured() {
-      return provider.configured;
+    async domainStatus() {
+      return provider.status;
     },
   };
   return provider;

@@ -26,6 +26,7 @@ const DOMAIN: HubDomainView = {
   verificationCode: 'codigo-de-verificacao-1234567890ab',
   cnameTarget: 'cname.vercel-dns.com',
   configured: null,
+  challenges: [],
 };
 
 const PENDING: HubDomainState = { available: true, approved: true, domain: DOMAIN };
@@ -123,6 +124,31 @@ describe('DomainPanel', () => {
     expect(screen.getByText('O site está disponível em https://marca.cliente.com.')).toBeTruthy();
     expect(screen.queryByText('_agency-os.marca.cliente.com')).toBeNull();
     expect(screen.getByRole('button', { name: 'Remover domínio' })).toBeTruthy();
+  });
+
+  it('a connected domain shows the record vercel still asks for', () => {
+    withIntl(
+      <DomainPanel
+        hubId="hub-1"
+        approved
+        state={{
+          available: true,
+          approved: true,
+          domain: {
+            ...DOMAIN,
+            status: 'connected',
+            configured: false,
+            challenges: [
+              { type: 'TXT', name: '_vercel.cliente.com', value: 'vc-domain-verify=abc' },
+            ],
+          },
+        }}
+        actions={actions()}
+      />,
+    );
+    expect(screen.getByText('_vercel.cliente.com')).toBeTruthy();
+    expect(screen.getByText('vc-domain-verify=abc')).toBeTruthy();
+    expect(screen.queryByText(/O site está disponível/)).toBeNull();
   });
 
   it('unavailable without configuration', () => {

@@ -33,8 +33,8 @@ export function createFakeDomainProvider(): DomainProvider {
       return { ok: true };
     },
     async removeDomain() {},
-    async domainConfigured() {
-      return true;
+    async domainStatus() {
+      return { configured: true, challenges: [] };
     },
   };
 }

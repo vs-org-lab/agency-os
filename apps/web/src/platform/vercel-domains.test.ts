@@ -17,9 +17,13 @@ function recorder(responses: Response[]) {
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
+const PROJECT_DOMAIN =
+  'https://api.vercel.com/v9/projects/prj_site/domains/marca.cliente.com?teamId=team_aurion';
+
 describe('createVercelDomains', () => {
   it('vercel requests carry the team, the token and the domain', async () => {
     const { calls, fetcher } = recorder([
+      json(200, { name: 'marca.cliente.com', verified: true }),
       json(200, { name: 'marca.cliente.com', verified: true }),
       json(200, { misconfigured: false }),
       json(200, {}),
@@ -27,16 +31,17 @@ describe('createVercelDomains', () => {
     const vercel = createVercelDomains(CONFIG, fetcher);
 
     expect(await vercel.addDomain('marca.cliente.com')).toEqual({ ok: true });
-    expect(await vercel.domainConfigured('marca.cliente.com')).toBe(true);
+    expect(await vercel.domainStatus('marca.cliente.com')).toEqual({
+      configured: true,
+      challenges: [],
+    });
     await vercel.removeDomain('marca.cliente.com');
 
     expect(calls.map((call) => [call.init?.method ?? 'GET', call.url])).toEqual([
       ['POST', 'https://api.vercel.com/v10/projects/prj_site/domains?teamId=team_aurion'],
+      ['GET', PROJECT_DOMAIN],
       ['GET', 'https://api.vercel.com/v6/domains/marca.cliente.com/config?teamId=team_aurion'],
-      [
-        'DELETE',
-        'https://api.vercel.com/v9/projects/prj_site/domains/marca.cliente.com?teamId=team_aurion',
-      ],
+      ['DELETE', PROJECT_DOMAIN],
     ]);
     expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({ name: 'marca.cliente.com' });
     for (const call of calls) {
@@ -49,7 +54,7 @@ describe('createVercelDomains', () => {
       json(409, {
         error: { code: 'domain_taken', message: 'Domain is in use by another project' },
       }),
-      json(200, { misconfigured: true }),
+      json(404, { error: { code: 'not_found', message: 'Domain not found' } }),
       json(404, { error: { code: 'not_found', message: 'Domain not found' } }),
       json(500, { error: { message: 'boom' } }),
     ]);
@@ -59,8 +64,52 @@ describe('createVercelDomains', () => {
       ok: false,
       message: 'Domain is in use by another project',
     });
-    expect(await vercel.domainConfigured('marca.cliente.com')).toBe(false);
     await expect(vercel.removeDomain('marca.cliente.com')).resolves.toBeUndefined();
     await expect(vercel.removeDomain('marca.cliente.com')).rejects.toThrow(/500/);
+  });
+
+  it('a domain already on the project counts as added', async () => {
+    const { fetcher } = recorder([
+      json(409, { error: { code: 'domain_already_in_use', message: 'Already added' } }),
+      json(200, { name: 'marca.cliente.com', verified: true }),
+    ]);
+    const vercel = createVercelDomains(CONFIG, fetcher);
+    expect(await vercel.addDomain('marca.cliente.com')).toEqual({ ok: true });
+  });
+
+  it('vercel verification challenges are returned until the domain is verified', async () => {
+    const { fetcher } = recorder([
+      json(200, {
+        name: 'marca.cliente.com',
+        verified: false,
+        verification: [
+          {
+            type: 'TXT',
+            domain: '_vercel.cliente.com',
+            value: 'vc-domain-verify=marca.cliente.com,abc123',
+            reason: 'pending_domain_verification',
+          },
+        ],
+      }),
+      json(200, { misconfigured: false }),
+      json(200, { name: 'marca.cliente.com', verified: true }),
+      json(200, { misconfigured: true }),
+    ]);
+    const vercel = createVercelDomains(CONFIG, fetcher);
+
+    expect(await vercel.domainStatus('marca.cliente.com')).toEqual({
+      configured: false,
+      challenges: [
+        {
+          type: 'TXT',
+          name: '_vercel.cliente.com',
+          value: 'vc-domain-verify=marca.cliente.com,abc123',
+        },
+      ],
+    });
+    expect(await vercel.domainStatus('marca.cliente.com')).toEqual({
+      configured: false,
+      challenges: [],
+    });
   });
 });

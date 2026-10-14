@@ -45,7 +45,7 @@ function DnsRecord({
   value,
   onCopied,
 }: {
-  type: 'TXT' | 'CNAME';
+  type: string;
   name: string;
   value: string;
   onCopied: () => void;
@@ -206,6 +206,15 @@ export function DomainPanel({
                   value={domain.cnameTarget}
                   onCopied={() => setOutcome({ tone: 'success', key: 'copied' })}
                 />
+                {domain.challenges.map((challenge) => (
+                  <DnsRecord
+                    key={`${challenge.type}-${challenge.name}-${challenge.value}`}
+                    type={challenge.type}
+                    name={challenge.name}
+                    value={challenge.value}
+                    onCopied={() => setOutcome({ tone: 'success', key: 'copied' })}
+                  />
+                ))}
               </dl>
             </div>
           ) : null}

@@ -80,6 +80,7 @@ describe('brand hub domains', () => {
             verificationCode: row?.verification_code,
             cnameTarget: 'cname.vercel-dns.com',
             configured: null,
+            challenges: [],
           },
         });
 
@@ -261,6 +262,82 @@ describe('brand hub domains', () => {
         expect(await removeHubDomain(manager, hubId, deps)).toEqual({ ok: true });
         expect(await domainRow(sql, hubId)).toBeUndefined();
         expect(provider.calls.filter((call) => call[0] === 'remove')).toHaveLength(1);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a connected domain shows the records vercel still asks for',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { hubs, deps, provider, manager } = await setup(sql);
+        const hubId = hubs.a.hubId;
+        await approve(sql, hubId);
+        await setHubDomain(manager, { hubId, hostname: 'marca.cliente.com' }, deps);
+        provider.txt.set('_agency-os.marca.cliente.com', [
+          [(await domainRow(sql, hubId))?.verification_code ?? ''],
+        ]);
+        await verifyHubDomain(manager, hubId, deps);
+        await connectHubDomain(manager, hubId, deps);
+        const challenge = { type: 'TXT', name: '_vercel.cliente.com', value: 'vc-domain-verify=x' };
+        provider.status = { configured: false, challenges: [challenge] };
+
+        expect(await loadHubDomain(manager, hubId, deps)).toMatchObject({
+          domain: { status: 'connected', configured: false, challenges: [challenge] },
+        });
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a removal that fails on vercel still removes the domain',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { hubs, deps, provider, manager } = await setup(sql);
+        const hubId = hubs.a.hubId;
+        await approve(sql, hubId);
+        await setHubDomain(manager, { hubId, hostname: 'marca.cliente.com' }, deps);
+        provider.txt.set('_agency-os.marca.cliente.com', [
+          [(await domainRow(sql, hubId))?.verification_code ?? ''],
+        ]);
+        await verifyHubDomain(manager, hubId, deps);
+        await connectHubDomain(manager, hubId, deps);
+        provider.failRemoval = true;
+
+        expect(await removeHubDomain(manager, hubId, deps)).toEqual({ ok: true });
+        expect(await domainRow(sql, hubId)).toBeUndefined();
+        expect(provider.calls).toContainEqual(['remove', 'marca.cliente.com']);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a domain removed while connecting is taken off vercel again',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { hubs, deps, provider, manager } = await setup(sql);
+        const hubId = hubs.a.hubId;
+        await approve(sql, hubId);
+        await setHubDomain(manager, { hubId, hostname: 'marca.cliente.com' }, deps);
+        provider.txt.set('_agency-os.marca.cliente.com', [
+          [(await domainRow(sql, hubId))?.verification_code ?? ''],
+        ]);
+        await verifyHubDomain(manager, hubId, deps);
+        provider.duringAdd = async () => {
+          await sql`delete from public.brand_hub_domains where hub_id = ${hubId}`;
+        };
+
+        expect(await connectHubDomain(manager, hubId, deps)).toEqual({
+          ok: false,
+          rule: 'invalid_state',
+        });
+        expect(provider.calls).toEqual([
+          ['add', 'marca.cliente.com'],
+          ['remove', 'marca.cliente.com'],
+        ]);
       });
     },
     SLOW,

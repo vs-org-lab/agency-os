@@ -5,6 +5,8 @@ import { recordAudit, type AuditAction } from '@/modules/audit';
 import { consumeThrottle } from '@/modules/commercial/server';
 import type { VerifiedClaims } from '@/platform/db';
 import { FAKE_TXT, type DomainProvider } from '@/platform/domain-provider';
+import { logger } from '@/platform/logger';
+import type { DomainChallenge } from '@/platform/vercel-domains';
 import {
   editableHub,
   INVALID_INPUT,
@@ -36,8 +38,10 @@ export type HubDomainView = {
   verificationName: string;
   verificationCode: string;
   cnameTarget: string;
-  /** Whether the CNAME reaches the site; read only once the domain is connected. */
+  /** Whether Vercel serves the domain; read only once the domain is connected. */
   configured: boolean | null;
+  /** Records Vercel asks for before serving a domain another account already holds. */
+  challenges: DomainChallenge[];
 };
 
 export type HubDomainState = {
@@ -90,6 +94,16 @@ async function audit(
 
 const now = (deps: BrandHubDeps) => (deps.now ?? (() => new Date()))();
 
+/**
+ * Takes a domain off the site's hosting after the database no longer holds it. The database
+ * outcome stands either way; a hosting failure is logged so the domain can be removed by hand.
+ */
+async function releaseDomain(provider: DomainProvider, hostname: string): Promise<void> {
+  await provider.removeDomain(hostname).catch((error: unknown) => {
+    logger.error('brand_hub.domain_release_failed', { hostname, error });
+  });
+}
+
 /** The domain section of the painel Partilha, for whoever publishes the hub. */
 export async function loadHubDomain(
   claims: VerifiedClaims,
@@ -107,10 +121,12 @@ export async function loadHubDomain(
   });
   const available = deps.domains !== undefined;
   if (!row) return { available, approved, domain: null };
-  const configured =
+  const status =
     row.status === 'connected' && deps.domains
-      ? await deps.domains.domainConfigured(row.hostname).catch(() => false)
-      : null;
+      ? await deps.domains
+          .domainStatus(row.hostname)
+          .catch(() => ({ configured: false, challenges: [] }))
+      : { configured: null, challenges: [] };
   return {
     available,
     approved,
@@ -120,7 +136,8 @@ export async function loadHubDomain(
       verificationName: `${VERIFICATION_PREFIX}${row.hostname}`,
       verificationCode: row.verificationCode,
       cnameTarget: CNAME_TARGET,
-      configured,
+      configured: status.configured,
+      challenges: status.challenges,
     },
   };
 }
@@ -166,7 +183,7 @@ export async function setHubDomain(
     };
   });
   if ('rule' in result) return result;
-  if (result.released) await provider.removeDomain(result.released);
+  if (result.released) await releaseDomain(provider, result.released);
   return result.outcome;
 }
 
@@ -257,10 +274,14 @@ export async function connectHubDomain(
   });
   if (!ready.ok) return ready;
 
-  const added = await provider.addDomain(ready.domain.hostname);
+  const hostname = ready.domain.hostname;
+  const added = await provider.addDomain(hostname);
   if (!added.ok) return { ok: false, rule: 'provider_error', message: added.message };
-  return withHubDomain(id, deps, async (tx, hub, current) => {
-    if (current?.id !== ready.domain.id || current.status !== 'verified') return INVALID_STATE;
+  const outcome = await withHubDomain(id, deps, async (tx, hub, current) => {
+    if (current?.hostname === hostname && current.status === 'connected') return INVALID_STATE;
+    if (current?.id !== ready.domain.id || current.status !== 'verified') {
+      return { ...INVALID_STATE, release: true };
+    }
     await tx
       .update(brandHubDomains)
       .set({ status: 'connected', connectedAt: now(deps), updatedAt: now(deps) })
@@ -268,6 +289,12 @@ export async function connectHubDomain(
     await audit(tx, hub, 'brand_hub.domain_connected', { hostname: current.hostname });
     return OK;
   });
+  // The domain changed while it was being added; the hosting no longer matches the hub.
+  if ('release' in outcome) {
+    await releaseDomain(provider, hostname);
+    return INVALID_STATE;
+  }
+  return outcome;
 }
 
 /** Removes the address from the hub and, when connected, from the site's hosting. */
@@ -287,6 +314,6 @@ export async function removeHubDomain(
     return domain;
   });
   if (removed && 'rule' in removed) return removed;
-  if (removed?.status === 'connected') await provider.removeDomain(removed.hostname);
+  if (removed?.status === 'connected') await releaseDomain(provider, removed.hostname);
   return OK;
 }

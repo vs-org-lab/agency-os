@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                     |
 | ----------------------- | --------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-14                                                                                                |
-| Estado                  | Aprovado (luz verde permanente do fundador)                                                               |
+| Estado                  | Implementado (2026-10-14)                                                                                 |
 | Vaga                    | 2 (… → 2F.2 Brand Hub: site publicado e acessos → **2F.3 Brand Hub: domínio do cliente e manual em PDF**) |
 | Módulos                 | M10 (RF-093, RF-095), H-03                                                                                |
 | Documentação de produto | `02` (H-03, F6), `03` (US-18), `04` (RN-81, RN-82), `06` (Publicação do Brand Hub), `08` (SEC-43)         |

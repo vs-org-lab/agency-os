@@ -2,19 +2,23 @@ import 'server-only';
 import type { BrandHubBlockType } from '@agency-os/db';
 import { createSupabaseLibraryStorage } from '@/modules/library/server';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import { brandHubSiteEnv } from '@/platform/env';
 import type { BrandHubDeps } from './access';
 import { decideHubApproval, requestHubApproval } from './approvals';
 import { confirmHubAsset, removeHubAsset, requestHubAssetUpload } from './assets';
 import { addHubBlock, moveHubBlock, removeHubBlock, updateHubBlock } from './blocks';
 import { createBrandHub, updateHubDesign } from './hubs';
 import { addHubPage, moveHubPage, removeHubPage, renameHubPage, setHubPageHidden } from './pages';
+import { issueRestrictedToken, publicHubZip, readPublicHub, unlockHub } from './public';
 import { publishBrandHub } from './publish';
+import { loadHubSharing, updateHubSharing } from './sharing';
 import { hubAssetUrl, loadHubEditor, loadHubPreview, loadPortalHub } from './readers';
 import { hubZipManifest } from './zip';
 
 const deps = (): BrandHubDeps => ({
   contexts: { withUserContext, withSystemContext },
   storage: createSupabaseLibraryStorage(),
+  site: brandHubSiteEnv() ?? undefined,
 });
 
 type Direction = 'up' | 'down';
@@ -74,5 +78,21 @@ export const hubAssetLink = (claims: VerifiedClaims, assetId: string) =>
   hubAssetUrl(claims, assetId, deps());
 export const brandHubZip = (claims: VerifiedClaims, clientId: string, pageId: string | null) =>
   hubZipManifest(claims, { clientId, pageId }, deps());
+
+export const loadBrandHubSharing = (claims: VerifiedClaims, clientId: string) =>
+  loadHubSharing(claims, clientId, deps());
+export const saveHubSharing = (
+  claims: VerifiedClaims,
+  input: { hubId: string; slug: string; mode: string; password?: string },
+) => updateHubSharing(claims, input, deps());
+
+export const publicBrandHub = (slug: string, token: string | null) =>
+  readPublicHub(slug, token, deps());
+export const publicBrandHubZip = (slug: string, token: string | null, pageId: string | null) =>
+  publicHubZip(slug, token, pageId, deps());
+export const unlockPublicBrandHub = (slug: string, password: string, ip: string) =>
+  unlockHub(slug, password, ip, deps());
+export const restrictedHubAccess = (claims: VerifiedClaims, slug: string, returnTo: string) =>
+  issueRestrictedToken(claims, slug, returnTo, deps());
 
 export { BRAND_HUB_FUNCTIONS } from './automations';

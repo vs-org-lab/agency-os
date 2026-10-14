@@ -2608,6 +2608,15 @@
       "zip_too_large": "The ZIP is too large. Download by section.",
       "upload_failed": "The upload failed. Try again.",
       "download_failed": "The download failed. Try again."
+    },
+    "access": {
+      "signInTitle": "Sign in to see the Brand Hub",
+      "signInDescription": "This Brand Hub opens only to the company team. Sign in to the OS and go back to the Brand Hub.",
+      "signIn": "Sign in",
+      "magicLink": "Get a link by email",
+      "deniedTitle": "No access to this Brand Hub",
+      "deniedDescription": "Your account has no access to this Brand Hub, or the address is no longer valid. Ask the agency team for access.",
+      "home": "Go to the start page"
     }
   },
   "agenda": {

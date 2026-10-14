@@ -2608,6 +2608,15 @@
       "zip_too_large": "O ZIP é demasiado grande. Descarregue por secção.",
       "upload_failed": "O carregamento falhou. Tente de novo.",
       "download_failed": "O download falhou. Tente de novo."
+    },
+    "access": {
+      "signInTitle": "Entre para ver o Brand Hub",
+      "signInDescription": "Este Brand Hub só abre para a equipa da empresa. Entre no OS e volte ao Brand Hub.",
+      "signIn": "Entrar",
+      "magicLink": "Receber um link por email",
+      "deniedTitle": "Sem acesso a este Brand Hub",
+      "deniedDescription": "A sua conta não tem acesso a este Brand Hub, ou o endereço já não é válido. Peça acesso à equipa da agência.",
+      "home": "Ir para o início"
     }
   },
   "agenda": {

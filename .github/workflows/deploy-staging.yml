@@ -129,7 +129,7 @@ jobs:
             --env BRAND_HUB_TOKEN_SECRET="${{ secrets.STAGING_BRAND_HUB_TOKEN_SECRET }}" \
             --env BRAND_HUB_VERCEL_PROJECT_ID="${{ secrets.BRAND_HUB_VERCEL_PROJECT_ID }}" \
             --env BRAND_HUB_VERCEL_TEAM_ID="${{ secrets.VERCEL_ORG_ID }}" \
-            --env BRAND_HUB_VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}")
+            --env BRAND_HUB_VERCEL_TOKEN="${{ secrets.STAGING_BRAND_HUB_VERCEL_TOKEN }}")
           host="${url#https://}"
           curl --fail-with-body -sS -o /dev/null -X POST \
             "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \

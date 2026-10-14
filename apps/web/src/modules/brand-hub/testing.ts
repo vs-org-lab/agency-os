@@ -3,6 +3,7 @@ import type { TransactionSql } from 'postgres';
 import { testDatabase } from '@agency-os/db/testing';
 import type { LibraryStorage } from '@/modules/library';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
+import type { DomainProvider } from '@/platform/domain-provider';
 import type { BrandHubDeps } from './access';
 
 export const HUB_TEST_NOW = new Date('2026-10-12T09:00:00Z');
@@ -84,4 +85,37 @@ export function hubDeps(sql: TransactionSql) {
     site: HUB_TEST_SITE,
   };
   return { deps, storage, flushes };
+}
+
+/** DNS and hosting held in memory: TXT records by name, and every hosting call in order. */
+export function memoryDomainProvider() {
+  const txt = new Map<string, string[][]>();
+  const calls: [string, string][] = [];
+  const provider: DomainProvider & {
+    txt: Map<string, string[][]>;
+    calls: [string, string][];
+    refuse: string | null;
+    configured: boolean;
+  } = {
+    kind: 'fake',
+    txt,
+    calls,
+    refuse: null,
+    configured: true,
+    async txtRecords(name) {
+      return txt.get(name) ?? null;
+    },
+    async addDomain(host) {
+      if (provider.refuse) return { ok: false, message: provider.refuse };
+      calls.push(['add', host]);
+      return { ok: true };
+    },
+    async removeDomain(host) {
+      calls.push(['remove', host]);
+    },
+    async domainConfigured() {
+      return provider.configured;
+    },
+  };
+  return provider;
 }

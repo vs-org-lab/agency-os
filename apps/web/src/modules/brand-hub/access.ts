@@ -5,6 +5,7 @@ import { withActor } from '@/modules/access';
 import type { LibraryStorage } from '@/modules/library';
 import { roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import type { DomainProvider } from '@/platform/domain-provider';
 
 export type BrandHubDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
@@ -13,6 +14,8 @@ export type BrandHubDeps = {
   now?: () => Date;
   /** The published site: its base address, the origins it calls from and the token secret. */
   site?: BrandHubSite;
+  /** DNS lookups and the site's hosting for client domains; absent when not configured. */
+  domains?: DomainProvider;
 };
 
 export type BrandHubSite = { url: string; origins: string[]; tokenSecret: string };

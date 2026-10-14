@@ -2,11 +2,19 @@ import 'server-only';
 import type { BrandHubBlockType } from '@agency-os/db';
 import { createSupabaseLibraryStorage } from '@/modules/library/server';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import { domainProvider } from '@/platform/domain-provider';
 import { brandHubSiteEnv } from '@/platform/env';
 import type { BrandHubDeps } from './access';
 import { decideHubApproval, requestHubApproval } from './approvals';
 import { confirmHubAsset, removeHubAsset, requestHubAssetUpload } from './assets';
 import { addHubBlock, moveHubBlock, removeHubBlock, updateHubBlock } from './blocks';
+import {
+  connectHubDomain,
+  loadHubDomain,
+  removeHubDomain,
+  setHubDomain,
+  verifyHubDomain,
+} from './domains';
 import { createBrandHub, updateHubDesign } from './hubs';
 import { addHubPage, moveHubPage, removeHubPage, renameHubPage, setHubPageHidden } from './pages';
 import { issueRestrictedToken, publicHubZip, readPublicHub, unlockHub } from './public';
@@ -19,6 +27,7 @@ const deps = (): BrandHubDeps => ({
   contexts: { withUserContext, withSystemContext },
   storage: createSupabaseLibraryStorage(),
   site: brandHubSiteEnv() ?? undefined,
+  domains: domainProvider() ?? undefined,
 });
 
 type Direction = 'up' | 'down';
@@ -96,3 +105,14 @@ export const restrictedHubAccess = (claims: VerifiedClaims, slug: string, return
   issueRestrictedToken(claims, slug, returnTo, deps());
 
 export { BRAND_HUB_FUNCTIONS } from './automations';
+
+export const loadBrandHubDomain = (claims: VerifiedClaims, hubId: string) =>
+  loadHubDomain(claims, hubId, deps());
+export const saveHubDomain = (claims: VerifiedClaims, hubId: string, hostname: string) =>
+  setHubDomain(claims, { hubId, hostname }, deps());
+export const checkHubDomain = (claims: VerifiedClaims, hubId: string) =>
+  verifyHubDomain(claims, hubId, deps());
+export const linkHubDomain = (claims: VerifiedClaims, hubId: string) =>
+  connectHubDomain(claims, hubId, deps());
+export const unlinkHubDomain = (claims: VerifiedClaims, hubId: string) =>
+  removeHubDomain(claims, hubId, deps());

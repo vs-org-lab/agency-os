@@ -45,6 +45,9 @@ function memoryStorage(): LibraryStorage & { files: Map<string, Uint8Array>; rem
     signedDownloadUrl: async (path, ttlSeconds, fileName) =>
       `memory://file/${path}?ttl=${ttlSeconds}&download=${encodeURIComponent(fileName)}`,
     signedUrl: async (path, ttlSeconds) => `memory://file/${path}?ttl=${ttlSeconds}`,
+    upload: async (path, bytes) => {
+      files.set(path, bytes);
+    },
     remove,
     removeMany: async (paths) => {
       for (const path of paths) await remove(path);

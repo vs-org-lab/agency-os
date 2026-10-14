@@ -7,7 +7,7 @@ import {
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { confirmHubAsset, removeHubAsset, requestHubAssetUpload, sweepHubAssets } from './assets';
-import { hubClaims, hubDeps, HUB_TEST_NOW, PDF_BYTES, PNG_BYTES } from './testing';
+import { hubClaims, hubDeps, HUB_TEST_NOW, JPEG_WITH_GPS, PDF_BYTES, PNG_BYTES } from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -220,6 +220,61 @@ describe('brand hub assets', () => {
       });
       expect(storage.removed).not.toContain(path);
       expect((await asset(sql, upload.assetId))?.upload_status).toBe('ready');
+    });
+  });
+
+  it('confirmed hub images are stored without metadata', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const hubs = await createBrandHubFixture(sql, world);
+      const { deps, storage } = hubDeps(sql);
+      const manager = hubClaims(world.users.manager);
+
+      const upload = await requestHubAssetUpload(
+        manager,
+        { hubId: hubs.a.hubId, name: 'foto.jpg', sizeBytes: JPEG_WITH_GPS.length },
+        deps,
+      );
+      if (!upload.ok) throw new Error('Upload was not requested');
+      const path = upload.uploadUrl.slice(UPLOAD_PREFIX.length);
+      storage.files.set(path, JPEG_WITH_GPS);
+      expect(await confirmHubAsset(manager, { assetId: upload.assetId }, deps)).toEqual({
+        ok: true,
+      });
+
+      const stored = storage.files.get(path);
+      expect(stored && Buffer.from(stored).includes(Buffer.from('GPS'))).toBe(false);
+      await sql`reset role`;
+      const [row] = await sql<{ size_bytes: number; stripped: boolean }[]>`
+        select size_bytes::int as size_bytes, metadata_stripped_at is not null as stripped
+        from public.brand_hub_assets where id = ${upload.assetId}
+      `;
+      expect(row).toEqual({ size_bytes: stored?.length, stripped: true });
+    });
+  });
+
+  it('the sweep strips images uploaded before this change', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const hubs = await createBrandHubFixture(sql, world);
+      const { deps, storage } = hubDeps(sql);
+      const path = `brand-hub/${world.organizationId}/${world.clients.a}/${hubs.a.logoAssetId}`;
+      await sql`reset role`;
+      await sql`
+        update public.brand_hub_assets set mime_type = 'image/jpeg', size_bytes = ${JPEG_WITH_GPS.length}
+        where id = ${hubs.a.logoAssetId}
+      `;
+      storage.files.set(path, JPEG_WITH_GPS);
+
+      const swept = await sweepHubAssets(deps);
+      expect(swept.stripped).toBeGreaterThanOrEqual(1);
+      const stored = storage.files.get(path);
+      expect(stored && Buffer.from(stored).includes(Buffer.from('GPS'))).toBe(false);
+      const [row] = await sql<{ stripped: boolean }[]>`
+        select metadata_stripped_at is not null as stripped from public.brand_hub_assets
+        where id = ${hubs.a.logoAssetId}
+      `;
+      expect(row?.stripped).toBe(true);
     });
   });
 });

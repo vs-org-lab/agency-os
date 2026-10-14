@@ -31,6 +31,10 @@ export function createSupabaseLibraryStorage(): LibraryStorage {
     },
     signedDownloadUrl: (path, ttlSeconds, fileName) => signed(path, ttlSeconds, fileName),
     signedUrl: (path, ttlSeconds) => signed(path, ttlSeconds),
+    async upload(path, bytes, contentType) {
+      const { error } = await bucket().upload(path, bytes, { contentType, upsert: true });
+      if (error) throw new Error(`Library upload failed: ${error.message}`);
+    },
     async remove(path) {
       const { error } = await bucket().remove([path]);
       if (error) throw new Error(`Library removal failed: ${error.message}`);

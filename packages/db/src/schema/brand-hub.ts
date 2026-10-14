@@ -16,6 +16,7 @@ import {
 import { clients } from './clients';
 import { id, timestamps } from './columns';
 import {
+  brandHubAccessModeEnum,
   brandHubBlockTypeEnum,
   brandHubPageKindEnum,
   brandHubStandardKeyEnum,
@@ -46,6 +47,13 @@ export const brandHubs = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'restrict' }),
     clientId: uuid('client_id').notNull(),
+    /** The hub's address on the published site. */
+    slug: text('slug').notNull(),
+    accessMode: brandHubAccessModeEnum('access_mode').notNull().default('restricted'),
+    /** scrypt hash of the site password; present only in password mode. */
+    passwordHash: text('password_hash'),
+    /** Raised whenever the mode or the password changes, so earlier site tokens stop working. */
+    accessVersion: integer('access_version').notNull().default(1),
     design: jsonb('design').notNull().default(DEFAULT_BRAND_HUB_DESIGN),
     draftRevision: integer('draft_revision').notNull().default(1),
     draftUpdatedAt: timestamp('draft_updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -63,6 +71,12 @@ export const brandHubs = pgTable(
       name: 'brand_hubs_client_organization_fk',
     }).onDelete('cascade'),
     unique('brand_hubs_client_key').on(table.clientId),
+    unique('brand_hubs_slug_key').on(table.slug),
+    check('brand_hubs_slug_format', sql`${table.slug} ~ '^[a-z0-9-]{3,60}$'`),
+    check(
+      'brand_hubs_password_by_mode',
+      sql`(${table.accessMode} = 'password') = (${table.passwordHash} is not null)`,
+    ),
     unique('brand_hubs_id_client_key').on(table.id, table.clientId),
     check('brand_hubs_draft_revision_positive', sql`${table.draftRevision} > 0`),
   ],
@@ -140,6 +154,8 @@ export const brandHubAssets = pgTable(
     storagePath: text('storage_path').notNull(),
     uploadStatus: libraryFileStatusEnum('upload_status').notNull().default('uploading'),
     removedAt: timestamp('removed_at', { withTimezone: true }),
+    /** When the file's metadata was removed (SEC-33); null for files not yet processed. */
+    metadataStrippedAt: timestamp('metadata_stripped_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

@@ -154,8 +154,8 @@ async function seedClientScopedRows(sql: TransactionSql, world: World): Promise<
               ${clientId}, ${records.projectId}, 'Nota')
     `;
     const [hub] = await sql<{ id: string }[]>`
-      insert into public.brand_hubs (organization_id, client_id)
-      values (${world.organizationId}, ${clientId})
+      insert into public.brand_hubs (organization_id, client_id, slug)
+      values (${world.organizationId}, ${clientId}, ${`iso-${clientId}`})
       returning id
     `;
     const [hubPage] = await sql<{ id: string }[]>`

@@ -15,6 +15,7 @@ import {
 } from './access';
 import { hubDesignSchema } from './domain/design';
 import { STANDARD_PAGES, starterBlocks } from './domain/pages';
+import { slugForClient } from './slugs';
 
 const { brandHubBlocks, brandHubPages, brandHubs } = schema;
 
@@ -32,6 +33,7 @@ export async function createBrandHub(
       .values({
         organizationId: editor.organizationId,
         clientId: editor.clientId,
+        slug: await slugForClient(tx, editor.clientId),
         createdBy: editor.actorId,
       })
       .onConflictDoNothing({ target: brandHubs.clientId })

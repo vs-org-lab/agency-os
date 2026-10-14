@@ -1237,8 +1237,9 @@ async function seedBrandHub(
   clientId: string,
 ): Promise<{ hubId: string; pageIds: Record<string, string> }> {
   const [hub] = await sql<{ id: string }[]>`
-    insert into public.brand_hubs (organization_id, client_id, created_by)
-    values (${world.organizationId}, ${clientId}, ${world.users.founder})
+    insert into public.brand_hubs (organization_id, client_id, slug, created_by)
+    values (${world.organizationId}, ${clientId},
+            ${clientId === world.clients.a ? 'cliente-a' : 'cliente-b'}, ${world.users.founder})
     returning id
   `;
   if (!hub) throw new Error('Fixture brand hub was not created');

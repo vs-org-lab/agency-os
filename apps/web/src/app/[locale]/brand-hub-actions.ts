@@ -4,6 +4,7 @@ import type { BrandHubBlockType } from '@agency-os/db';
 import type { ActionResult } from '@/components/brand-hub/hub-errors';
 import {
   askHubApproval,
+  brandHubManual,
   brandHubZip,
   createHubBlock,
   createHubPage,
@@ -154,4 +155,13 @@ export async function saveHubSharingAction(input: {
   return withClaims((claims) =>
     saveHubSharing(claims, { ...input, password: input.password || undefined }),
   );
+}
+
+export async function hubManualAction(
+  clientId: string,
+): Promise<{ ok: true; url: string; fileName: string } | { ok: false; code: string }> {
+  const claims = await getVerifiedClaims();
+  if (!claims) return NOT_FOUND;
+  const result = await brandHubManual(claims, clientId);
+  return result.ok ? result : { ok: false, code: result.rule };
 }

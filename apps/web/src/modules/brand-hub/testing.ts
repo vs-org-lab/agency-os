@@ -59,6 +59,7 @@ function memoryStorage(): LibraryStorage & { files: Map<string, Uint8Array>; rem
     removed,
     createUploadUrl: async (path) => `memory://upload/${path}`,
     download: async (path) => files.get(path) ?? null,
+    exists: async (path) => files.has(path),
     signedDownloadUrl: async (path, ttlSeconds, fileName) =>
       `memory://file/${path}?ttl=${ttlSeconds}&download=${encodeURIComponent(fileName)}`,
     signedUrl: async (path, ttlSeconds) => `memory://file/${path}?ttl=${ttlSeconds}`,

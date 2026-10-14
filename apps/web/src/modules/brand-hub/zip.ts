@@ -15,12 +15,15 @@ import { clientName } from './readers';
 
 const { brandHubAssets } = schema;
 
+export type CurrentPublication = { id: string; snapshot: HubSnapshot; publishedAt: Date };
+
 /** The current publication the caller may download: through the portal view for clients. */
-async function currentSnapshot(
+export async function currentPublication(
   claims: VerifiedClaims,
   clientId: string,
   deps: BrandHubDeps,
-): Promise<HubSnapshot | null> {
+): Promise<CurrentPublication | null> {
+  if (!uuid.safeParse(clientId).success) return null;
   if (claims.user_kind !== 'client' && !(await hubEditor(claims, clientId, deps))) return null;
   const relation =
     claims.user_kind === 'client'
@@ -29,9 +32,13 @@ async function currentSnapshot(
             join public.brand_hub_publications pub on pub.id = h.published_publication_id
             where h.client_id = ${clientId}::uuid`;
   const [row] = await deps.contexts.withUserContext(claims, (tx) =>
-    tx.execute<{ snapshot: HubSnapshot }>(sql`select pub.snapshot from ${relation}`),
+    tx.execute<{ id: string; snapshot: HubSnapshot; published_at: string | Date }>(
+      sql`select pub.id, pub.snapshot, pub.published_at from ${relation}`,
+    ),
   );
-  return row?.snapshot ?? null;
+  return row
+    ? { id: row.id, snapshot: row.snapshot, publishedAt: new Date(row.published_at) }
+    : null;
 }
 
 /**
@@ -45,9 +52,9 @@ export async function hubZipManifest(
 ): Promise<ZipManifest | NotFound | { ok: false; rule: 'zip_too_large' }> {
   if (!uuid.safeParse(input.clientId).success) return NOT_FOUND;
   if (input.pageId !== null && !uuid.safeParse(input.pageId).success) return NOT_FOUND;
-  const snapshot = await currentSnapshot(claims, input.clientId, deps);
-  if (!snapshot) return NOT_FOUND;
-  return buildHubManifest(snapshot, input.clientId, input.pageId, deps);
+  const current = await currentPublication(claims, input.clientId, deps);
+  if (!current) return NOT_FOUND;
+  return buildHubManifest(current.snapshot, input.clientId, input.pageId, deps);
 }
 
 /** The archive of a publication the caller was already allowed to read. */

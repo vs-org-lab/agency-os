@@ -11,6 +11,7 @@ import {
   type NotFound,
 } from './access';
 import { normaliseHostname } from './domain/hostname';
+import { hubManual, type HubManual } from './manual';
 import { verifyPassword } from './domain/passwords';
 import type { HubSnapshot } from './domain/snapshot';
 import { signHubToken, verifyHubToken, type HubTokenMode } from './domain/tokens';
@@ -210,6 +211,29 @@ export async function publicHubZip(
   const manifest = await buildHubManifest(published.snapshot, hub.clientId, pageId, deps);
   if (manifest.ok) return { status: 200, manifest };
   return { status: manifest.rule === 'zip_too_large' ? 413 : 404 };
+}
+
+/** The brand manual of the current publication (RF-093), under the same rule as the hub itself. */
+export async function publicHubManual(
+  slug: string,
+  token: string | null,
+  deps: BrandHubDeps,
+): Promise<({ status: 200 } & HubManual) | { status: 401 | 404 }> {
+  const hub = await hubBySlug(slug, deps);
+  if (!hub?.publicationId) return { status: 404 };
+  if (!admitted(hub, token, deps)) return { status: 401 };
+  const published = await publication(hub.publicationId, deps);
+  if (!published) return { status: 404 };
+  const manual = await hubManual(
+    {
+      clientId: hub.clientId,
+      publicationId: hub.publicationId,
+      snapshot: published.snapshot,
+      publishedAt: published.publishedAt,
+    },
+    deps,
+  );
+  return { status: 200, ...manual };
 }
 
 function issue(hub: SiteHub, mode: HubTokenMode, lifetimeMs: number, deps: BrandHubDeps): string {

@@ -1,6 +1,7 @@
 export type LibraryStorage = {
   createUploadUrl(path: string): Promise<string>;
   download(path: string): Promise<Uint8Array | null>;
+  exists(path: string): Promise<boolean>;
   /** A link that downloads the object under its original name. */
   signedDownloadUrl(path: string, ttlSeconds: number, fileName: string): Promise<string>;
   /** A link that opens the object in the browser, for previews. */

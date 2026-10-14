@@ -19,6 +19,7 @@ import { createBrandHub, updateHubDesign } from './hubs';
 import { addHubPage, moveHubPage, removeHubPage, renameHubPage, setHubPageHidden } from './pages';
 import {
   isSiteOrigin,
+  publicHubManual,
   issueRestrictedToken,
   publicHubZip,
   readPublicHub,
@@ -28,6 +29,7 @@ import {
 import { publishBrandHub } from './publish';
 import { loadHubSharing, updateHubSharing } from './sharing';
 import { hubAssetUrl, loadHubEditor, loadHubPreview, loadPortalHub } from './readers';
+import { portalHubManual } from './manual';
 import { hubZipManifest } from './zip';
 
 const deps = (): BrandHubDeps => ({
@@ -107,6 +109,10 @@ export const publicBrandHub = (slug: string, token: string | null) =>
 export const publicBrandHubByDomain = (host: string, token: string | null) =>
   readPublicHubByDomain(host, token, deps());
 export const isBrandHubSiteOrigin = (origin: string) => isSiteOrigin(origin, deps());
+export const publicBrandHubManual = (slug: string, token: string | null) =>
+  publicHubManual(slug, token, deps());
+export const brandHubManual = (claims: VerifiedClaims, clientId: string) =>
+  portalHubManual(claims, clientId, deps());
 export const publicBrandHubZip = (slug: string, token: string | null, pageId: string | null) =>
   publicHubZip(slug, token, pageId, deps());
 export const unlockPublicBrandHub = (slug: string, password: string, ip: string) =>

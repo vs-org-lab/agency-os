@@ -205,6 +205,45 @@ describe('S-09 money', () => {
     ).toBeNull();
   });
 
+  it('subscriptions can be edited', async () => {
+    const subscriptionActions = actions();
+    withIntl(
+      <SubscriptionsList
+        canWrite
+        actions={subscriptionActions}
+        subscriptions={[
+          {
+            id: 's1',
+            name: 'Figma',
+            vendor: 'Figma Inc',
+            category: 'software',
+            amount: '45.00',
+            currency: 'EUR',
+            cycle: 'monthly',
+            nextRenewalOn: '2026-11-01',
+            status: 'active',
+            renewal: 'later',
+          },
+        ]}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Editar' }));
+    expect((screen.getByLabelText('Nome') as HTMLInputElement).value).toBe('Figma');
+    fireEvent.change(screen.getByLabelText('Valor'), { target: { value: '55,00' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar subscrição' }));
+    await screen.findByText('Subscrição guardada.');
+    expect(subscriptionActions.saveSubscription).toHaveBeenCalledWith({
+      id: 's1',
+      name: 'Figma',
+      vendor: 'Figma Inc',
+      category: 'software',
+      amount: '55.00',
+      currency: 'EUR',
+      cycle: 'monthly',
+      nextRenewalOn: '2026-11-01',
+    });
+  });
+
   it('managers see no write actions', () => {
     const view: MoneyYearView = {
       canWrite: false,

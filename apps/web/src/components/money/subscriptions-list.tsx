@@ -12,6 +12,7 @@ import { moneyError, type MoneyResult } from './expense-form';
 import { DETAIL_SEPARATOR, SELECT, useMoneyFormat } from './money-summary';
 
 export type SubscriptionFormInput = {
+  id?: string;
   name: string;
   vendor: string;
   category: string;
@@ -41,9 +42,12 @@ function SubscriptionItem({
   const format = useFormatter();
   const money = useMoneyFormat();
   const [message, setMessage] = useState<
-    { tone: 'success'; key: 'renewed' | 'cancelledDone' } | { tone: 'danger'; key: string } | null
+    | { tone: 'success'; key: 'renewed' | 'cancelledDone' | 'saved' }
+    | { tone: 'danger'; key: string }
+    | null
   >(null);
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
   const active = subscription.status === 'active';
 
   const run = (action: () => Promise<MoneyResult>, success: 'renewed' | 'cancelledDone') =>
@@ -109,11 +113,33 @@ function SubscriptionItem({
           >
             {t('cancel')}
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setEditing((open) => !open)}
+          >
+            {tm('expenses.edit')}
+          </Button>
         </div>
+      ) : null}
+      {canWrite && editing ? (
+        <SubscriptionForm
+          initial={subscription}
+          save={actions.saveSubscription}
+          onDone={() => {
+            setEditing(false);
+            setMessage({ tone: 'success', key: 'saved' });
+          }}
+        />
       ) : null}
       {message ? (
         <FormMessage tone={message.tone}>
-          {message.tone === 'success' ? t(message.key) : tm(`errors.${moneyError(message.key)}`)}
+          {message.tone === 'danger'
+            ? tm(`errors.${moneyError(message.key)}`)
+            : message.key === 'saved'
+              ? tm('subscriptionForm.saved')
+              : t(message.key)}
         </FormMessage>
       ) : null}
     </li>
@@ -151,20 +177,22 @@ export function SubscriptionsList({
 export function SubscriptionForm({
   save,
   onDone,
+  initial = null,
 }: {
   save: SubscriptionActions['saveSubscription'];
   onDone: () => void;
+  initial?: MoneySubscriptionRow | null;
 }) {
   const t = useTranslations('money');
   const id = useId();
   const [fields, setFields] = useState<SubscriptionFormInput>({
-    name: '',
-    vendor: '',
-    category: 'software',
-    amount: '',
-    currency: 'EUR',
-    cycle: 'monthly',
-    nextRenewalOn: '',
+    name: initial?.name ?? '',
+    vendor: initial?.vendor ?? '',
+    category: initial?.category ?? 'software',
+    amount: initial?.amount ?? '',
+    currency: initial?.currency ?? 'EUR',
+    cycle: initial?.cycle ?? 'monthly',
+    nextRenewalOn: initial?.nextRenewalOn ?? '',
   });
   const [message, setMessage] = useState<
     { tone: 'success' } | { tone: 'danger'; error: ReturnType<typeof moneyError> } | null
@@ -180,9 +208,11 @@ export function SubscriptionForm({
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
-          const result = await save({ ...fields, amount: fields.amount.replace(',', '.') }).catch(
-            () => ({ ok: false as const, code: 'not_found' }),
-          );
+          const result = await save({
+            ...(initial ? { id: initial.id } : {}),
+            ...fields,
+            amount: fields.amount.replace(',', '.'),
+          }).catch(() => ({ ok: false as const, code: 'not_found' }));
           if (result.ok) {
             setMessage({ tone: 'success' });
             onDone();

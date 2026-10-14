@@ -1,5 +1,5 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
-import { createServer, request as httpRequest } from 'node:http';
+import { createServer, request as httpRequest, type OutgoingHttpHeaders } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import path from 'node:path';
 
@@ -29,7 +29,7 @@ createServer((request, response) => {
   if (url.pathname.startsWith('/os/')) {
     const target = new URL(url.pathname.slice('/os'.length) + url.search, osUrl);
     const send = target.protocol === 'https:' ? httpsRequest : httpRequest;
-    const headers = { ...request.headers, host: target.host };
+    const headers: OutgoingHttpHeaders = { ...request.headers, host: target.host };
     if (bypass) headers['x-vercel-protection-bypass'] = bypass;
     const upstream = send(target, { method: request.method, headers }, (answer) => {
       response.writeHead(answer.statusCode ?? 502, answer.headers);

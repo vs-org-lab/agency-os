@@ -3,6 +3,7 @@ import {
   createGroqReceiptReader,
   EMPTY_PROPOSAL,
   FAKE_PROPOSAL,
+  MAX_READABLE_IMAGE_BYTES,
   parseProposal,
   receiptReaderFrom,
 } from './receipt-reader';
@@ -97,6 +98,31 @@ describe('receipt reader', () => {
     const garbled = createGroqReceiptReader('groq-key', (async () =>
       groqAnswer('{not json')) as unknown as typeof fetch);
     expect(await garbled.read(PNG, 'image/png')).toEqual(EMPTY_PROPOSAL);
+  });
+
+  it('a reader that does not answer gives an empty proposal', async () => {
+    const hanging = createGroqReceiptReader(
+      'groq-key',
+      ((_url: string, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+        })) as unknown as typeof fetch,
+      'qwen/qwen3.8-27b',
+      20,
+    );
+    expect(await hanging.read(PNG, 'image/png')).toEqual(EMPTY_PROPOSAL);
+  });
+
+  it('images too large for the model are not sent', async () => {
+    let calls = 0;
+    const reader = createGroqReceiptReader('groq-key', (async () => {
+      calls += 1;
+      return groqAnswer({ total: '1' });
+    }) as unknown as typeof fetch);
+    expect(await reader.read(new Uint8Array(MAX_READABLE_IMAGE_BYTES + 1), 'image/jpeg')).toEqual(
+      EMPTY_PROPOSAL,
+    );
+    expect(calls).toBe(0);
   });
 
   it('the reader follows the configuration', async () => {

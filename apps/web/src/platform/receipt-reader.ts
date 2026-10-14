@@ -1,6 +1,10 @@
 const GROQ_CHAT_URL = 'https://api.groq.com/openai/v1/chat/completions';
 /** Groq's vision models change; RECEIPT_READER_MODEL replaces this one without a release. */
 const GROQ_VISION_MODEL = 'qwen/qwen3.8-27b';
+/** How long the person waits for a proposal before filling the fields by hand. */
+const READ_TIMEOUT_MS = 20_000;
+/** Groq refuses base64 images above 4 MB; larger photos are left for the person to fill in. */
+export const MAX_READABLE_IMAGE_BYTES = 3_000_000;
 
 const CURRENCIES = ['EUR', 'GBP', 'USD', 'AOA'] as const;
 type ReceiptCurrency = (typeof CURRENCIES)[number];
@@ -104,13 +108,16 @@ export function createGroqReceiptReader(
   apiKey: string,
   fetcher: typeof fetch = fetch,
   model: string = GROQ_VISION_MODEL,
+  timeoutMs: number = READ_TIMEOUT_MS,
 ): ReceiptReader {
   return {
     async read(image, mimeType) {
+      if (image.length > MAX_READABLE_IMAGE_BYTES) return { ...EMPTY_PROPOSAL };
       const dataUrl = `data:${mimeType};base64,${Buffer.from(image).toString('base64')}`;
       try {
         const response = await fetcher(GROQ_CHAT_URL, {
           method: 'POST',
+          signal: AbortSignal.timeout(timeoutMs),
           headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
           body: JSON.stringify({
             model,

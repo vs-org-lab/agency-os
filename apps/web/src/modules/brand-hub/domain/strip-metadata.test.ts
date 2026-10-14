@@ -130,4 +130,77 @@ describe('stripImageMetadata', () => {
     const svg = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
     expect(stripImageMetadata(svg, 'image/svg+xml')).toEqual(svg);
   });
+
+  it('a JPEG keeps its orientation and loses everything else in EXIF', () => {
+    // TIFF, big endian: IFD0 with Orientation = 6 and a Make string, then GPS text further on.
+    const tiff = [
+      ...ascii('MM'),
+      0x00,
+      0x2a,
+      0x00,
+      0x00,
+      0x00,
+      0x08,
+      0x00,
+      0x02,
+      0x01,
+      0x12,
+      0x00,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x06,
+      0x00,
+      0x00,
+      0x01,
+      0x0f,
+      0x00,
+      0x02,
+      0x00,
+      0x00,
+      0x00,
+      0x06,
+      0x00,
+      0x00,
+      0x00,
+      0x26,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      ...ascii('Apple\0'),
+      ...ascii('GPS 38.7223N'),
+    ];
+    const rotated = bytes(
+      [0xff, 0xd8],
+      jpegSegment(0xe1, [...ascii('Exif\0\0'), ...tiff]),
+      [0xff, 0xda, 0x00, 0x08, 1, 2, 3, 4, 5, 6],
+      [0x11, 0xff, 0xd9],
+    );
+    const clean = stripImageMetadata(rotated, 'image/jpeg');
+    expect(contains(clean, 'GPS')).toBe(false);
+    expect(contains(clean, 'Apple')).toBe(false);
+    expect(contains(clean, 'Exif')).toBe(true);
+    const app1 = Buffer.from(clean).indexOf(Buffer.from([0xff, 0xe1]));
+    const view = Buffer.from(clean);
+    const tiffStart = app1 + 4 + 6;
+    expect(view.toString('latin1', tiffStart, tiffStart + 2)).toBe('MM');
+    const entry = tiffStart + 8 + 2;
+    expect(view.readUInt16BE(entry)).toBe(0x0112);
+    expect(view.readUInt16BE(entry + 8)).toBe(6);
+
+    const upright = bytes(
+      [0xff, 0xd8],
+      jpegSegment(0xe1, [
+        ...ascii('Exif\0\0'),
+        ...tiff.map((value, index) => (index === 19 ? 1 : value)),
+      ]),
+      [0xff, 0xda, 0x00, 0x08, 1, 2, 3, 4, 5, 6],
+      [0x11, 0xff, 0xd9],
+    );
+    expect(contains(stripImageMetadata(upright, 'image/jpeg'), 'Exif')).toBe(false);
+  });
 });

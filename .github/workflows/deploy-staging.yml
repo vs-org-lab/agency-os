@@ -144,9 +144,6 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.BRAND_HUB_VERCEL_PROJECT_ID }}
       NEXT_PUBLIC_OS_URL: https://${{ vars.STAGING_DOMAIN }}
       CI: true
-    defaults:
-      run:
-        working-directory: apps/brand-hub
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

@@ -253,7 +253,7 @@ describe('brand hub assets', () => {
     });
   });
 
-  it('the sweep strips images uploaded before this change', async () => {
+  it('the sweep strips images uploaded before this change, removed but still published ones included', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);
       const hubs = await createBrandHubFixture(sql, world);
@@ -261,7 +261,8 @@ describe('brand hub assets', () => {
       const path = `brand-hub/${world.organizationId}/${world.clients.a}/${hubs.a.logoAssetId}`;
       await sql`reset role`;
       await sql`
-        update public.brand_hub_assets set mime_type = 'image/jpeg', size_bytes = ${JPEG_WITH_GPS.length}
+        update public.brand_hub_assets set mime_type = 'image/jpeg', size_bytes = ${JPEG_WITH_GPS.length},
+               removed_at = now()
         where id = ${hubs.a.logoAssetId}
       `;
       storage.files.set(path, JPEG_WITH_GPS);

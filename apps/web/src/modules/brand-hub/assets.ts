@@ -261,7 +261,10 @@ export async function sweepHubAssets(
   return { closed: stale.length, deleted: unused.length, stripped: await stripPending(deps) };
 }
 
-/** Ready assets uploaded before metadata removal existed are cleaned a batch at a time. */
+/**
+ * Ready assets uploaded before metadata removal existed are cleaned a batch at a time, removed ones
+ * included: the current publication may still serve them.
+ */
 async function stripPending(deps: BrandHubDeps): Promise<number> {
   const now = (deps.now ?? (() => new Date()))();
   const pendingAssets = await deps.contexts.withSystemContext((tx) =>
@@ -273,11 +276,7 @@ async function stripPending(deps: BrandHubDeps): Promise<number> {
       })
       .from(brandHubAssets)
       .where(
-        and(
-          eq(brandHubAssets.uploadStatus, 'ready'),
-          isNull(brandHubAssets.removedAt),
-          isNull(brandHubAssets.metadataStrippedAt),
-        ),
+        and(eq(brandHubAssets.uploadStatus, 'ready'), isNull(brandHubAssets.metadataStrippedAt)),
       )
       .limit(STRIP_BATCH),
   );

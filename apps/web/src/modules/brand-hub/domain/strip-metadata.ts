@@ -1,4 +1,4 @@
-/** JPEG segments that carry EXIF and XMP (APP1), IPTC (APP13) and comments (COM). */
+/** JPEG segments that carry EXIF and XMP (APP1), IPTC (APP13) and comments (COM); only the EXIF Orientation survives. */
 const JPEG_DROPPED = new Set([0xe1, 0xed, 0xfe]);
 const JPEG_START_OF_SCAN = 0xda;
 
@@ -24,9 +24,56 @@ function concat(parts: Uint8Array[]): Uint8Array {
 const text = (data: Uint8Array, start: number, length: number) =>
   String.fromCharCode(...data.subarray(start, start + length));
 
+const EXIF_HEADER = [0x45, 0x78, 0x69, 0x66, 0x00, 0x00];
+const ORIENTATION_TAG = 0x0112;
+
+/** The EXIF Orientation of an APP1 payload (1 to 8), or null when it has none or does not parse. */
+function exifOrientation(payload: Uint8Array): { value: number; littleEndian: boolean } | null {
+  if (!EXIF_HEADER.every((value, index) => payload[index] === value)) return null;
+  const tiff = payload.subarray(EXIF_HEADER.length);
+  if (tiff.length < 8) return null;
+  const order = text(tiff, 0, 2);
+  if (order !== 'II' && order !== 'MM') return null;
+  const littleEndian = order === 'II';
+  const view = new DataView(tiff.buffer, tiff.byteOffset, tiff.byteLength);
+  const ifd = view.getUint32(4, littleEndian);
+  if (ifd + 2 > tiff.length) return null;
+  const entries = view.getUint16(ifd, littleEndian);
+  for (let index = 0; index < entries; index += 1) {
+    const entry = ifd + 2 + index * 12;
+    if (entry + 12 > tiff.length) return null;
+    if (view.getUint16(entry, littleEndian) === ORIENTATION_TAG) {
+      const value = view.getUint16(entry + 8, littleEndian);
+      return value >= 1 && value <= 8 ? { value, littleEndian } : null;
+    }
+  }
+  return null;
+}
+
+/** An APP1 segment holding only the Orientation tag, so a rotated photo still shows upright. */
+function orientationSegment(orientation: { value: number; littleEndian: boolean }): Uint8Array {
+  const segment = new Uint8Array(36);
+  const view = new DataView(segment.buffer);
+  const le = orientation.littleEndian;
+  segment.set([0xff, 0xe1], 0);
+  view.setUint16(2, 34);
+  segment.set(EXIF_HEADER, 4);
+  segment.set(le ? [0x49, 0x49] : [0x4d, 0x4d], 10);
+  view.setUint16(12, 0x2a, le);
+  view.setUint32(14, 8, le);
+  view.setUint16(18, 1, le);
+  view.setUint16(20, ORIENTATION_TAG, le);
+  view.setUint16(22, 3, le);
+  view.setUint32(24, 1, le);
+  view.setUint16(28, orientation.value, le);
+  view.setUint32(32, 0, le);
+  return segment;
+}
+
 function stripJpeg(data: Uint8Array): Uint8Array | null {
   if (data[0] !== 0xff || data[1] !== 0xd8) return null;
   const parts: Uint8Array[] = [data.subarray(0, 2)];
+  let keptOrientation = false;
   let offset = 2;
   while (offset < data.length) {
     if (data[offset] !== 0xff) return null;
@@ -48,7 +95,15 @@ function stripJpeg(data: Uint8Array): Uint8Array | null {
     if (high === undefined || low === undefined) return null;
     const end = markerAt + 2 + ((high << 8) | low);
     if (end > data.length || end < markerAt + 4) return null;
-    if (!JPEG_DROPPED.has(marker)) parts.push(data.subarray(markerAt, end));
+    if (!JPEG_DROPPED.has(marker)) {
+      parts.push(data.subarray(markerAt, end));
+    } else if (marker === 0xe1 && !keptOrientation) {
+      const orientation = exifOrientation(data.subarray(markerAt + 4, end));
+      if (orientation && orientation.value !== 1) {
+        parts.push(orientationSegment(orientation));
+        keptOrientation = true;
+      }
+    }
     offset = end;
   }
   return null;

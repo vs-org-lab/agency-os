@@ -294,6 +294,12 @@ export const brandHubAccessModeEnum = appSchema.enum('brand_hub_access_mode', [
   'restricted',
 ]);
 
+export const brandHubDomainStatusEnum = appSchema.enum('brand_hub_domain_status', [
+  'pending',
+  'verified',
+  'connected',
+]);
+
 export const brandHubPageKindEnum = appSchema.enum('brand_hub_page_kind', ['standard', 'custom']);
 
 export const brandHubStandardKeyEnum = appSchema.enum('brand_hub_standard_key', [
@@ -349,6 +355,7 @@ export const throttleKindEnum = appSchema.enum('throttle_kind', [
   'application_email',
   'booking_ip',
   'hub_unlock',
+  'hub_domain_check',
 ]);
 
 export type OrgRole = (typeof orgRoleEnum.enumValues)[number];
@@ -395,6 +402,7 @@ export type LibraryFileKind = (typeof libraryFileKindEnum.enumValues)[number];
 export type AgendaEventKind = (typeof agendaEventKindEnum.enumValues)[number];
 export type AgendaEventStatus = (typeof agendaEventStatusEnum.enumValues)[number];
 export type BrandHubAccessMode = (typeof brandHubAccessModeEnum.enumValues)[number];
+export type BrandHubDomainStatus = (typeof brandHubDomainStatusEnum.enumValues)[number];
 export type BrandHubPageKind = (typeof brandHubPageKindEnum.enumValues)[number];
 export type BrandHubStandardKey = (typeof brandHubStandardKeyEnum.enumValues)[number];
 export type BrandHubBlockType = (typeof brandHubBlockTypeEnum.enumValues)[number];

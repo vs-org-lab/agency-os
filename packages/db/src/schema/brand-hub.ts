@@ -18,6 +18,7 @@ import { id, timestamps } from './columns';
 import {
   brandHubAccessModeEnum,
   brandHubBlockTypeEnum,
+  brandHubDomainStatusEnum,
   brandHubPageKindEnum,
   brandHubStandardKeyEnum,
   libraryFileStatusEnum,
@@ -200,5 +201,37 @@ export const brandHubPublications = pgTable(
     }).onDelete('cascade'),
     unique('brand_hub_publications_hub_number_key').on(table.hubId, table.number),
     check('brand_hub_publications_number_positive', sql`${table.number} > 0`),
+  ],
+).enableRLS();
+
+/** The client's own address for the published site (RF-095), verified by DNS before use (SEC-43). */
+export const brandHubDomains = pgTable(
+  'brand_hub_domains',
+  {
+    id: id(),
+    organizationId: uuid('organization_id').notNull(),
+    clientId: uuid('client_id').notNull(),
+    hubId: uuid('hub_id').notNull(),
+    hostname: text('hostname').notNull(),
+    /** Published by the client in a TXT record to prove control of the hostname. */
+    verificationCode: text('verification_code').notNull(),
+    status: brandHubDomainStatusEnum('status').notNull().default('pending'),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    connectedAt: timestamp('connected_at', { withTimezone: true }),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.hubId, table.clientId],
+      foreignColumns: [brandHubs.id, brandHubs.clientId],
+      name: 'brand_hub_domains_hub_fk',
+    }).onDelete('cascade'),
+    unique('brand_hub_domains_hub_key').on(table.hubId),
+    unique('brand_hub_domains_hostname_key').on(table.hostname),
+    check(
+      'brand_hub_domains_hostname_format',
+      sql`char_length(${table.hostname}) <= 253 and ${table.hostname} ~ '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.){2,}[a-z]{2,63}$'`,
+    ),
   ],
 ).enableRLS();

@@ -118,7 +118,7 @@ describe('stripImageMetadata', () => {
     expect(contains(cleanWebp, 'xmpmeta')).toBe(false);
     const view = Buffer.from(cleanWebp);
     expect(view.readUInt32LE(4)).toBe(cleanWebp.length - 8);
-    expect(view[20]! & 0x0c).toBe(0);
+    expect((view[20] ?? 0xff) & 0x0c).toBe(0);
     expect(contains(cleanWebp, 'VP8 ')).toBe(true);
 
     const truncated = jpeg().subarray(0, 30);

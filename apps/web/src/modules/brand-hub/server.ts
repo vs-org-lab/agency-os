@@ -17,7 +17,14 @@ import {
 } from './domains';
 import { createBrandHub, updateHubDesign } from './hubs';
 import { addHubPage, moveHubPage, removeHubPage, renameHubPage, setHubPageHidden } from './pages';
-import { issueRestrictedToken, publicHubZip, readPublicHub, unlockHub } from './public';
+import {
+  isSiteOrigin,
+  issueRestrictedToken,
+  publicHubZip,
+  readPublicHub,
+  readPublicHubByDomain,
+  unlockHub,
+} from './public';
 import { publishBrandHub } from './publish';
 import { loadHubSharing, updateHubSharing } from './sharing';
 import { hubAssetUrl, loadHubEditor, loadHubPreview, loadPortalHub } from './readers';
@@ -97,6 +104,9 @@ export const saveHubSharing = (
 
 export const publicBrandHub = (slug: string, token: string | null) =>
   readPublicHub(slug, token, deps());
+export const publicBrandHubByDomain = (host: string, token: string | null) =>
+  readPublicHubByDomain(host, token, deps());
+export const isBrandHubSiteOrigin = (origin: string) => isSiteOrigin(origin, deps());
 export const publicBrandHubZip = (slug: string, token: string | null, pageId: string | null) =>
   publicHubZip(slug, token, pageId, deps());
 export const unlockPublicBrandHub = (slug: string, password: string, ip: string) =>

@@ -2643,6 +2643,21 @@
         "invalid_state": "That address is already used by another hub.",
         "not_found": "The sharing could not be saved."
       }
+    },
+    "site": {
+      "loading": "Loading the Brand Hub…",
+      "notFoundTitle": "Brand Hub not found",
+      "notFoundDescription": "This Brand Hub does not exist or is not published yet.",
+      "passwordTitle": "This Brand Hub has a password",
+      "passwordDescription": "Ask {client} or the agency for the password.",
+      "password": "Password",
+      "open": "Open",
+      "wrongPassword": "Wrong password.",
+      "tooMany": "Too many attempts. Try again in 15 minutes.",
+      "restrictedTitle": "This Brand Hub is private",
+      "restrictedDescription": "Only the {client} team can open it. Sign in with the company account.",
+      "restrictedAction": "Sign in with the company account",
+      "error": "The Brand Hub could not be loaded. Try again."
     }
   },
   "agenda": {

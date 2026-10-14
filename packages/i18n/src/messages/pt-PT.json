@@ -2643,6 +2643,21 @@
         "invalid_state": "Esse endereço já está a ser usado por outro hub.",
         "not_found": "Não foi possível guardar a partilha."
       }
+    },
+    "site": {
+      "loading": "A carregar o Brand Hub…",
+      "notFoundTitle": "Brand Hub não encontrado",
+      "notFoundDescription": "Este Brand Hub não existe ou ainda não foi publicado.",
+      "passwordTitle": "Este Brand Hub tem palavra-passe",
+      "passwordDescription": "Peça a palavra-passe a {client} ou à agência.",
+      "password": "Palavra-passe",
+      "open": "Abrir",
+      "wrongPassword": "Palavra-passe incorreta.",
+      "tooMany": "Demasiadas tentativas. Tente de novo daqui a 15 minutos.",
+      "restrictedTitle": "Este Brand Hub é privado",
+      "restrictedDescription": "Só a equipa de {client} pode abri-lo. Entre com a conta da empresa.",
+      "restrictedAction": "Entrar com a conta da empresa",
+      "error": "Não foi possível carregar o Brand Hub. Tente de novo."
     }
   },
   "agenda": {

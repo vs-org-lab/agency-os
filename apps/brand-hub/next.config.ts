@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: { unoptimized: true },
-  transpilePackages: ['@agency-os/ui'],
+  transpilePackages: ['@agency-os/ui', '@agency-os/brand-hub-view', '@agency-os/i18n'],
 };
 
 export default nextConfig;

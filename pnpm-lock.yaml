@@ -220,12 +220,27 @@ importers:
 
   apps/brand-hub:
     dependencies:
+      '@agency-os/brand-hub-view':
+        specifier: workspace:*
+        version: link:../../packages/brand-hub-view
+      '@agency-os/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@agency-os/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      client-zip:
+        specifier: 2.5.1
+        version: 2.5.1
+      lucide-react:
+        specifier: 1.52.0
+        version: 1.52.0(@types/react@19.3.0)(react@19.3.0)
       next:
         specifier: 16.3.8
         version: 16.3.8(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.20.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next-intl:
+        specifier: 4.14.9
+        version: 4.14.9(@swc/helpers@0.5.23)(@types/react@19.3.0)(next@16.3.8(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.20.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       react:
         specifier: 19.3.0
         version: 19.3.0

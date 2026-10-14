@@ -175,8 +175,16 @@
       },
       "upcoming": {
         "title": "Upcoming events",
-        "empty": "No calls booked in the next 7 days.",
-        "call": "Call with {client}"
+        "empty": "No events in the next 7 days.",
+        "call": "Call with {client}",
+        "viewCalendar": "View calendar",
+        "deadline": "{kind} · {title}",
+        "kinds": {
+          "phase_due": "Phase due",
+          "step_due": "Step due",
+          "task_due": "Task",
+          "delivery": "Delivery"
+        }
       },
       "clients": {
         "title": "Clients",

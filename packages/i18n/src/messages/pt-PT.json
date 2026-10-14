@@ -175,8 +175,16 @@
       },
       "upcoming": {
         "title": "Próximos eventos",
-        "empty": "Sem chamadas marcadas nos próximos 7 dias.",
-        "call": "Chamada com {client}"
+        "empty": "Sem eventos nos próximos 7 dias.",
+        "call": "Chamada com {client}",
+        "viewCalendar": "Ver calendário",
+        "deadline": "{kind} · {title}",
+        "kinds": {
+          "phase_due": "Prazo da fase",
+          "step_due": "Prazo do passo",
+          "task_due": "Tarefa",
+          "delivery": "Entrega"
+        }
       },
       "clients": {
         "title": "Clientes",

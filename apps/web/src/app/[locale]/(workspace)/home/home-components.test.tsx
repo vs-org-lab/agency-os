@@ -3,10 +3,12 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
+import type { AgendaItem } from '@/modules/agenda';
 import type { HomeItem, HomeView } from '@/modules/studio';
 import { ClientProgress } from './client-progress';
 import { HomeIndicators } from './indicators';
 import { TodayList } from './today-list';
+import { UpcomingEvents } from './upcoming-events';
 
 vi.mock('@/i18n/navigation', () => ({
   Link: ({
@@ -122,5 +124,66 @@ describe('home components', () => {
       '/c/client-1',
       '/c/client-2',
     ]);
+  });
+
+  it('the upcoming block lists meetings, calls and deadlines and links to the calendar', () => {
+    const upcoming: AgendaItem[] = [
+      {
+        kind: 'meeting',
+        id: 'meeting-1',
+        title: 'Kickoff do site',
+        clientId: 'client-1',
+        clientName: 'Atlas Lda',
+        projectId: 'project-1',
+        allDay: false,
+        day: '2026-10-13',
+        startsAt: '2026-10-13T09:00:00.000Z',
+        endsAt: '2026-10-13T10:00:00.000Z',
+        href: null,
+      },
+      {
+        kind: 'call',
+        id: 'call-1',
+        title: 'Bloom',
+        clientId: 'client-2',
+        clientName: 'Bloom',
+        projectId: null,
+        allDay: false,
+        day: '2026-10-14',
+        startsAt: '2026-10-14T10:00:00.000Z',
+        endsAt: '2026-10-14T10:45:00.000Z',
+        href: '/pipeline/deal-1',
+      },
+      {
+        kind: 'delivery',
+        id: 'project-1',
+        title: 'Website',
+        clientId: 'client-1',
+        clientName: 'Atlas Lda',
+        projectId: 'project-1',
+        allDay: true,
+        day: '2026-10-16',
+        startsAt: null,
+        endsAt: null,
+        href: '/c/client-1',
+      },
+    ];
+    renderWithIntl(<UpcomingEvents items={upcoming} />);
+
+    expect(screen.getByRole('link', { name: /Kickoff do site/ }).getAttribute('href')).toBe(
+      '/calendar?view=week&date=2026-10-13',
+    );
+    expect(screen.getByRole('link', { name: /Chamada com Bloom/ }).getAttribute('href')).toBe(
+      '/pipeline/deal-1',
+    );
+    expect(screen.getByRole('link', { name: /Entrega · Website/ }).getAttribute('href')).toBe(
+      '/c/client-1',
+    );
+    expect(screen.getByRole('link', { name: 'Ver calendário' }).getAttribute('href')).toBe(
+      '/calendar',
+    );
+    cleanup();
+    renderWithIntl(<UpcomingEvents items={[]} />);
+    expect(screen.getByText('Sem eventos nos próximos 7 dias.')).toBeTruthy();
   });
 });

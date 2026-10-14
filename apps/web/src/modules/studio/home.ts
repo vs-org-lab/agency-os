@@ -12,7 +12,6 @@ import { isStudioStaff } from './access';
 
 const {
   approvals,
-  calls,
   clients,
   commercialSettings,
   paymentRequests,
@@ -54,7 +53,6 @@ export type HomeView = {
     receivable: Array<{ currency: Currency; amountMinor: bigint }> | null;
   };
   today: HomeItem[];
-  upcomingCalls: Array<{ id: string; clientName: string; dealId: string; startsAt: Date }>;
   clients: HomeClient[];
   /** Whether the reader may open the commercial pipeline. */
   pipeline: boolean;
@@ -62,7 +60,6 @@ export type HomeView = {
 
 /** How long a change request stays in "Hoje" after the client sends it. */
 const CHANGE_REQUEST_DAYS = 7;
-const UPCOMING_CALL_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_TIME_ZONE = 'Europe/Lisbon';
 
@@ -273,7 +270,7 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
 }
 
 /**
- * S-01: indicators, "Hoje" (US-11) ordered by urgency, upcoming calls and the clients with their
+ * S-01: indicators, "Hoje" (US-11) ordered by urgency and the clients with their
  * progress, all read under the caller's row level security.
  */
 export async function loadHome(
@@ -293,28 +290,11 @@ export async function loadHome(
       const timeZone = settings?.timeZone ?? DEFAULT_TIME_ZONE;
       const today = localDate(now, timeZone);
 
-      const [commercial, rooms, billing, clientsView, upcoming, activeCount] = await Promise.all([
+      const [commercial, rooms, billing, clientsView, activeCount] = await Promise.all([
         commercialItems(tx, actor, now, timeZone),
         roomItems(tx, actor, now, today),
         billingFigures(tx, actor, today),
         clientProgress(tx),
-        tx
-          .select({
-            id: calls.id,
-            dealId: calls.dealId,
-            startsAt: calls.startsAt,
-            clientName: clients.name,
-          })
-          .from(calls)
-          .innerJoin(clients, eq(clients.id, calls.clientId))
-          .where(
-            and(
-              eq(calls.status, 'scheduled'),
-              gte(calls.startsAt, now),
-              lt(calls.startsAt, new Date(now.getTime() + UPCOMING_CALL_DAYS * DAY_MS)),
-            ),
-          )
-          .orderBy(asc(calls.startsAt)),
         tx
           .select({
             total: count(),
@@ -333,7 +313,6 @@ export async function loadHome(
           receivable: billing.receivable,
         },
         today: todayItems,
-        upcomingCalls: upcoming,
         clients: clientsView,
         pipeline: canSeePipeline(actor),
       };

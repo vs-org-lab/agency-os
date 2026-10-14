@@ -3,19 +3,23 @@ import { notFound } from 'next/navigation';
 import { Button } from '@agency-os/ui/components/button';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadUpcomingEvents } from '@/modules/agenda/server';
 import { loadStudioHome } from '@/modules/studio/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { ClientProgress } from './home/client-progress';
 import { HomeIndicators } from './home/indicators';
 import { TodayList } from './home/today-list';
+import { UpcomingEvents } from './home/upcoming-events';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
 export default async function StudioHomePage({ params }: PageProps) {
   setRequestLocale(requireLocale((await params).locale));
   const now = new Date();
-  const home = await loadStudioHome(await getVerifiedClaims(), now);
-  if (home === null) notFound();
+  const claims = await getVerifiedClaims();
+  const home = await loadStudioHome(claims, now);
+  if (home === null || !claims) notFound();
+  const upcoming = await loadUpcomingEvents(claims);
 
   const t = await getTranslations('studio.home');
   const today = await getTranslations('studio.today');
@@ -63,36 +67,7 @@ export default async function StudioHomePage({ params }: PageProps) {
             <h2 id="home-upcoming" className="text-heading text-text">
               {t('upcoming.title')}
             </h2>
-            {home.upcomingCalls.length === 0 ? (
-              <p className="text-body-sm text-text-secondary">{t('upcoming.empty')}</p>
-            ) : (
-              <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
-                {home.upcomingCalls.map((call) => (
-                  <li key={call.id}>
-                    <Link
-                      href={`/pipeline/${call.dealId}`}
-                      className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-surface-muted"
-                    >
-                      <span className="truncate text-body text-text">
-                        {t('upcoming.call', { client: call.clientName })}
-                      </span>
-                      <time
-                        dateTime={call.startsAt.toISOString()}
-                        className="shrink-0 text-caption text-text-secondary"
-                      >
-                        {format.dateTime(call.startsAt, {
-                          weekday: 'short',
-                          day: 'numeric',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </time>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <UpcomingEvents items={upcoming} />
           </section>
 
           <section aria-labelledby="home-clients" className="flex flex-col gap-3">

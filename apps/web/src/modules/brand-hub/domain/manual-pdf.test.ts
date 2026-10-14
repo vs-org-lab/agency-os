@@ -1,3 +1,4 @@
+import { crc32, deflateSync } from 'node:zlib';
 import { PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 import { pdfContainsText } from '@/platform/pdf-testing';
@@ -13,6 +14,29 @@ const JPEG_1X1 = Buffer.from(
   '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
   'base64',
 );
+
+/** A valid greyscale PNG of the given size; blank rows compress to a few kilobytes. */
+function blankPng(width: number, height: number): Uint8Array {
+  const chunk = (type: string, data: Buffer) => {
+    const body = Buffer.concat([Buffer.from(type, 'latin1'), data]);
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.length);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([length, body, crc]);
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header.set([8, 0, 0, 0, 0], 8);
+  const rows = Buffer.alloc((width + 1) * height);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(rows)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+}
 
 const LOGO = '00000000-0000-4000-8000-000000000001';
 const PHOTO = '00000000-0000-4000-8000-000000000002';
@@ -165,6 +189,23 @@ describe('buildManualPdf', () => {
     }
     expect(pdfContainsText(pdf, 'Incluído no pacote de downloads')).toBe(true);
     expect(pdfContainsText(pdf, 'logotipo.png')).toBe(false);
+  });
+
+  it('images with too many pixels are listed by name, however small the file', async () => {
+    const pdf = await buildManualPdf({
+      ...INPUT,
+      images: new Map([[LOGO, { bytes: blankPng(5000, 4000), mimeType: 'image/png' }]]),
+    });
+    expect(pdfContainsText(pdf, 'logotipo.png')).toBe(true);
+    const document = await PDFDocument.load(pdf);
+    const images = document.context
+      .enumerateIndirectObjects()
+      .filter(
+        ([, object]) =>
+          object instanceof PDFRawStream &&
+          object.dict.get(PDFName.of('Subtype')) === PDFName.of('Image'),
+      );
+    expect(images).toHaveLength(0);
   });
 
   it('portuguese text is kept', async () => {

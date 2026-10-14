@@ -6,7 +6,38 @@ import { slugify } from './slug';
 
 /** Images embedded in one manual, in bytes; beyond this they appear by name only. */
 export const MANUAL_IMAGE_BUDGET_BYTES = 40 * 1024 * 1024;
+/**
+ * Pixels one image may hold to be embedded. pdf-lib decodes PNGs to RGBA in memory, so a large
+ * logo that compresses to a few kilobytes could still exhaust the function; above this it is named.
+ */
+export const MANUAL_MAX_IMAGE_PIXELS = 16_000_000;
 const IMAGE_MAX_HEIGHT = 320;
+const JPEG_FRAME_MARKERS = new Set([
+  0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
+]);
+
+/** Width times height from the PNG header or the JPEG frame header, or null when unreadable. */
+export function imagePixels(bytes: Uint8Array, mimeType: string): number | null {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (mimeType === 'image/png') {
+    return bytes.length >= 24 ? view.getUint32(16) * view.getUint32(20) : null;
+  }
+  if (mimeType !== 'image/jpeg' || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+  let offset = 2;
+  while (offset + 9 <= bytes.length) {
+    if (bytes[offset] !== 0xff) return null;
+    const marker = bytes[offset + 1] ?? 0;
+    if (marker === 0xff) {
+      offset += 1;
+      continue;
+    }
+    if (JPEG_FRAME_MARKERS.has(marker)) {
+      return view.getUint16(offset + 5) * view.getUint16(offset + 7);
+    }
+    offset += 2 + view.getUint16(offset + 2);
+  }
+  return null;
+}
 const EMBEDDABLE = new Set(['image/jpeg', 'image/png']);
 const NOT_EMBEDDED_NOTE = 'Incluído no pacote de downloads';
 
@@ -62,7 +93,14 @@ class ImageShelf {
     if (this.embedded.has(assetId)) return this.embedded.get(assetId) ?? null;
     const image = this.images.get(assetId);
     let result: PDFImage | null = null;
-    if (image && EMBEDDABLE.has(image.mimeType) && this.spent + image.bytes.length <= this.budget) {
+    const pixels = image ? imagePixels(image.bytes, image.mimeType) : null;
+    if (
+      image &&
+      EMBEDDABLE.has(image.mimeType) &&
+      pixels !== null &&
+      pixels <= MANUAL_MAX_IMAGE_PIXELS &&
+      this.spent + image.bytes.length <= this.budget
+    ) {
       try {
         // pdf-lib reads JPEG markers from the start of the underlying buffer, so views into a
         // larger buffer are copied first.

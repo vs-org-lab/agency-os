@@ -1,6 +1,9 @@
 import { publicBrandHubManual } from '@/modules/brand-hub/server';
 import { bearerToken, siteResponse, sitePreflight } from '../../respond';
 
+/** The brand manual is generated on its first download. */
+export const maxDuration = 60;
+
 type Context = { params: Promise<{ slug: string }> };
 
 /** RF-093 on the site: a link to the brand manual of the current publication. */

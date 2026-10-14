@@ -10,6 +10,8 @@ import { decideHubApprovalAction, hubManualAction, hubZipAction } from '../../br
 import { portalRoomAccess } from '../room-session';
 
 export const dynamic = 'force-dynamic';
+/** The brand manual is generated on its first download (RF-093). */
+export const maxDuration = 60;
 
 type PageProps = { params: Promise<{ locale: string }> };
 

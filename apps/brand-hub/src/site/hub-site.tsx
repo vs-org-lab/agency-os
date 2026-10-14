@@ -132,6 +132,16 @@ export function HubSite({
     void load(slug ? (fromHash ?? tokenStore.get(slug)) : null);
   }, [load, location.hash, replaceHash, slug]);
 
+  const clientTitle =
+    state.kind === 'result' && (state.result.status === 200 || state.result.status === 401)
+      ? state.result.status === 200
+        ? state.result.hub.clientName
+        : state.result.clientName
+      : null;
+  useEffect(() => {
+    document.title = clientTitle ? `${clientTitle} · Brand Hub` : 'Brand Hub';
+  }, [clientTitle]);
+
   if (state.kind === 'loading') {
     return (
       <Centered>

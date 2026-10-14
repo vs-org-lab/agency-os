@@ -17,7 +17,10 @@ export default function BrandHubPage() {
     () => window.location.href,
     () => null,
   );
-  const api = useMemo(() => createSiteApi(process.env.NEXT_PUBLIC_OS_URL ?? ''), []);
+  const api = useMemo(() => {
+    const osUrl = process.env.NEXT_PUBLIC_OS_URL ?? '';
+    return createSiteApi(osUrl, fetch, process.env.NEXT_PUBLIC_OS_PAGES_URL || osUrl);
+  }, []);
   if (href === null) return null;
   return (
     <NextIntlClientProvider locale="pt-PT" messages={SITE_MESSAGES} timeZone="Europe/Lisbon">

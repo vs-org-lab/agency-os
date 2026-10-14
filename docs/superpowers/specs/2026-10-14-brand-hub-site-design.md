@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                 |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-14                                                                                                            |
-| Estado                  | Aprovado (aprovação permanente do fundador; segundo projeto Vercel e divisão em 2F.2 e 2F.3 aprovados a 2026-10-14)   |
+| Estado                  | Implementado (2026-10-14)                                                                                             |
 | Vaga                    | 2 (… → 2G Agenda → **2F.2 Brand Hub: site publicado e acessos** → 2F.3 Brand Hub: domínio do cliente e manual em PDF) |
 | Módulos                 | M10 (RF-093 em parte, RF-095 em parte, RF-096), H-03                                                                  |
 | Documentação de produto | `02` (H-03, F6), `06` (Brand Hubs, Publicação do Brand Hub), `08` (SEC-32, SEC-33, SEC-40, SEC-41, SEC-42)            |

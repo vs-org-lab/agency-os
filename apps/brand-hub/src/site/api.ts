@@ -33,8 +33,13 @@ const authorization = (token: string | null): HeadersInit =>
   token ? { authorization: `Bearer ${token}` } : {};
 
 /** The OS public Brand Hub API (2F.2), the only data source of this static site (SEC-40). */
-export function createSiteApi(osUrl: string, fetcher: typeof fetch = fetch): SiteApi {
+export function createSiteApi(
+  osUrl: string,
+  fetcher: typeof fetch = fetch,
+  pagesUrl: string = osUrl,
+): SiteApi {
   const base = osUrl.replace(/\/+$/, '');
+  const pages = pagesUrl.replace(/\/+$/, '');
   const hubPath = (slug: string) => `${base}/api/public/hubs/${encodeURIComponent(slug)}`;
 
   return {
@@ -81,7 +86,7 @@ export function createSiteApi(osUrl: string, fetcher: typeof fetch = fetch): Sit
         : { status: 'error' };
     },
     accessUrl(slug, returnTo) {
-      return `${base}/pt-PT/hub-access/${encodeURIComponent(slug)}?return=${encodeURIComponent(returnTo)}`;
+      return `${pages}/pt-PT/hub-access/${encodeURIComponent(slug)}?return=${encodeURIComponent(returnTo)}`;
     },
   };
 }

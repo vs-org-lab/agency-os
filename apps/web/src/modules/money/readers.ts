@@ -274,16 +274,22 @@ export async function receiptUrlFor(
 ): Promise<string | null> {
   if (!z.uuid().safeParse(expenseId).success) return null;
   if (claims.user_kind !== 'client') return expenseReceiptUrl(claims, expenseId, deps);
-  const [row] = await deps.contexts.withUserContext(claims, (tx) =>
-    tx.execute<{ receipt_path: string; receipt_name: string }>(sql`
-      select receipt_path, receipt_name from public.portal_payment_request_receipts
+  const [allowed] = await deps.contexts.withUserContext(claims, (tx) =>
+    tx.execute<{ expense_id: string }>(sql`
+      select expense_id from public.portal_payment_request_receipts
       where expense_id = ${expenseId}::uuid
     `),
   );
-  if (!row) return null;
+  if (!allowed) return null;
+  const [row] = await deps.contexts.withSystemContext((tx) =>
+    tx.execute<{ receipt_path: string | null; receipt_name: string | null }>(sql`
+      select receipt_path, receipt_name from public.expenses where id = ${expenseId}::uuid
+    `),
+  );
+  if (!row?.receipt_path) return null;
   return deps.storage.signedDownloadUrl(
     row.receipt_path,
     LIBRARY_LINK_TTL_SECONDS,
-    row.receipt_name,
+    row.receipt_name ?? 'recibo',
   );
 }

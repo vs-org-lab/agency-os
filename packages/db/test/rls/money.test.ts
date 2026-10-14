@@ -117,6 +117,34 @@ describe('money access', () => {
   );
 
   it(
+    'the portal view follows the request status and hides storage paths',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const money = await createMoneyFixture(sql, world);
+
+        await asUser(sql, world.users.decisionMakerA);
+        const [row] = await sql<Record<string, unknown>[]>`
+          select * from public.portal_payment_request_receipts
+        `;
+        expect(Object.keys(row ?? {}).sort()).toEqual(
+          ['client_id', 'expense_id', 'payment_request_id', 'receipt_name'].sort(),
+        );
+
+        await sql`reset role`;
+        await sql`
+          update public.payment_requests set status = 'void', voided_at = now(),
+                 void_reason = 'Valor errado'
+          where id = ${money.billing.a.sentRequestId}
+        `;
+        await asUser(sql, world.users.decisionMakerA);
+        expect(await visible(sql, 'portal_payment_request_receipts', 'expense_id')).toEqual([]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'authenticated users cannot write money',
     async () => {
       await withTestTransaction(async (sql) => {

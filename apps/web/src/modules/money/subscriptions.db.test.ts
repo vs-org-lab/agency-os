@@ -6,6 +6,7 @@ import {
   createMoneyFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
+import { saveExpense } from './expenses';
 import { cancelSubscription, renewSubscription, saveSubscription } from './subscriptions';
 import { moneyClaims, moneyDeps } from './testing';
 
@@ -73,6 +74,75 @@ describe('money subscriptions', () => {
           next_renewal_on: '2027-02-28',
           status: 'active',
         });
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'editing a renewal expense keeps its subscription',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const money = await createMoneyFixture(sql, world);
+        const { deps } = moneyDeps(sql);
+        const founder = moneyClaims(world.users.founder);
+        const renewed = await renewSubscription(founder, { id: money.subscriptionId }, deps);
+        if (!renewed.ok) throw new Error('not renewed');
+
+        expect(
+          await saveExpense(
+            founder,
+            {
+              id: renewed.expenseId,
+              spentOn: '2026-11-01',
+              vendor: 'Figma Inc',
+              category: 'software',
+              amount: '47.00',
+              currency: 'EUR',
+            },
+            deps,
+          ),
+        ).toEqual({ ok: true, id: renewed.expenseId });
+        await sql`reset role`;
+        const [row] = await sql<{ subscription_id: string | null; amount: string }[]>`
+          select subscription_id, amount::text from public.expenses where id = ${renewed.expenseId}
+        `;
+        expect(row).toEqual({ subscription_id: money.subscriptionId, amount: '47.00' });
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'subscriptions are edited',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const money = await createMoneyFixture(sql, world);
+        const { deps } = moneyDeps(sql);
+        expect(
+          await saveSubscription(
+            moneyClaims(world.users.finance),
+            {
+              id: money.subscriptionId,
+              name: 'Figma Pro',
+              vendor: 'Figma Inc',
+              category: 'software',
+              amount: '55.00',
+              currency: 'EUR',
+              cycle: 'annual',
+              nextRenewalOn: '2027-01-15',
+            },
+            deps,
+          ),
+        ).toEqual({ ok: true, id: money.subscriptionId });
+        await sql`reset role`;
+        const [row] = await sql<{ name: string; amount: string; cycle: string }[]>`
+          select name, amount::text, cycle::text from public.subscriptions
+          where id = ${money.subscriptionId}
+        `;
+        expect(row).toEqual({ name: 'Figma Pro', amount: '55.00', cycle: 'annual' });
       });
     },
     SLOW,

@@ -156,7 +156,6 @@ export async function saveExpense(
     amount: data.amount,
     currency: data.currency,
     clientId: data.clientId ?? null,
-    subscriptionId: data.subscriptionId ?? null,
     ...(receipt
       ? { receiptPath: receipt.path, receiptName: receipt.name, receiptMimeType: receipt.mimeType }
       : {}),
@@ -186,6 +185,8 @@ export async function saveExpense(
       .insert(expenses)
       .values({
         ...fields,
+        // The subscription is set when the expense is created and kept on later edits.
+        subscriptionId: data.subscriptionId ?? null,
         organizationId: actor.organizationId,
         createdBy: actor.userId,
         createdAt: now,

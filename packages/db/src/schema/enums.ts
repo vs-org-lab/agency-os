@@ -418,3 +418,24 @@ export type AcquisitionStatus = (typeof acquisitionStatusEnum.enumValues)[number
 export type CalendarConnectionStatus = (typeof calendarConnectionStatusEnum.enumValues)[number];
 export type TimelineKind = (typeof timelineKindEnum.enumValues)[number];
 export type ThrottleKind = (typeof throttleKindEnum.enumValues)[number];
+
+export const expenseCategoryEnum = appSchema.enum('expense_category', [
+  'software',
+  'advertising',
+  'freelancers',
+  'equipment',
+  'travel',
+  'training',
+  'other',
+]);
+
+export const subscriptionCycleEnum = appSchema.enum('subscription_cycle', ['monthly', 'annual']);
+
+export const subscriptionStatusEnum = appSchema.enum('subscription_status', [
+  'active',
+  'cancelled',
+]);
+
+export type ExpenseCategory = (typeof expenseCategoryEnum.enumValues)[number];
+export type SubscriptionCycle = (typeof subscriptionCycleEnum.enumValues)[number];
+export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];

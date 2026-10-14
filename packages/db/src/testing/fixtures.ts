@@ -1440,3 +1440,48 @@ export async function createAgendaFixture(
     }),
   };
 }
+
+export type MoneyFixture = {
+  billing: BillingFixture;
+  a: { expenseId: string };
+  b: { expenseId: string };
+  internalExpenseId: string;
+  subscriptionId: string;
+};
+
+/**
+ * One billable expense per client, linked to its sent request with a receipt, one internal expense
+ * without client and one subscription.
+ */
+export async function createMoneyFixture(sql: TransactionSql, world: World): Promise<MoneyFixture> {
+  const billing = await createBillingFixture(sql, world);
+  const [subscription] = await sql<{ id: string }[]>`
+    insert into public.subscriptions (organization_id, name, vendor, category, amount, currency,
+                                      cycle, next_renewal_on, created_by)
+    values (${world.organizationId}, 'Figma', 'Figma Inc', 'software', 45, 'EUR', 'monthly',
+            '2026-11-01', ${world.users.founder})
+    returning id
+  `;
+  const expense = async (clientId: string | null, requestId: string | null) => {
+    const receipt = clientId ? `money/${world.organizationId}/receipts/${randomUUID()}` : null;
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.expenses (organization_id, spent_on, vendor, description, category, amount,
+                                   currency, receipt_path, receipt_name, receipt_mime_type,
+                                   client_id, payment_request_id, created_by)
+      values (${world.organizationId}, '2026-10-01', 'Gráfica Lda', 'Impressão', 'other', 120, 'EUR',
+              ${receipt}, ${receipt ? 'recibo.png' : null}, ${receipt ? 'image/png' : null},
+              ${clientId}, ${requestId}, ${world.users.founder})
+      returning id
+    `;
+    if (!row) throw new Error('Money fixture expense was not created');
+    return row.id;
+  };
+  if (!subscription) throw new Error('Money fixture subscription was not created');
+  return {
+    billing,
+    a: { expenseId: await expense(world.clients.a, billing.a.sentRequestId) },
+    b: { expenseId: await expense(world.clients.b, billing.b.sentRequestId) },
+    internalExpenseId: await expense(null, null),
+    subscriptionId: subscription.id,
+  };
+}

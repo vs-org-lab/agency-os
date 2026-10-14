@@ -43,7 +43,7 @@ Cada sub-projeto tem spec, plano e execução próprios. A ordem segue o princí
 3. **Despesas (RF-151):**
    - Campos: data, fornecedor, descrição, categoria, valor, moeda, recibo (opcional), cliente (opcional, quando faturável) e subscrição de origem (opcional).
    - **Categorias fixas:** software, publicidade, freelancers, equipamento, deslocações, formação e outros.
-   - O recibo é JPEG, PNG, WebP ou PDF, até 10 MB. Fica no bucket `library` em `money/<organização>/receipts/<despesa>`, com o carregamento verificado como na Biblioteca (link assinado, confirmação pelo tamanho e tipo real).
+   - O recibo é JPEG, PNG, WebP ou PDF, até 10 MB. É carregado antes de a despesa existir, para poder ser lido, no bucket `library` em `money/<organização>/receipts/<id>`, com link assinado; o servidor confirma o tipo real e o tamanho, e a despesa guarda o caminho ao ser gravada.
    - Editar e apagar fica registado na auditoria (RNF-10). Uma despesa ligada a um pedido de pagamento não pode ser apagada; primeiro desliga-se.
 4. **Subscrições (RF-151):**
    - Campos: nome, fornecedor, categoria, valor, moeda, ciclo (mensal ou anual), próxima renovação e estado (ativa ou cancelada).
@@ -91,13 +91,13 @@ Cada sub-projeto tem spec, plano e execução próprios. A ordem segue o princí
 
 - `expenses`:
   - `id`, `organization_id`, `spent_on` (date), `vendor`, `description`, `category`, `amount` numeric(12,2) > 0, `currency`;
-  - `receipt_path`, `receipt_name`, `receipt_mime_type`, `receipt_status` (`pending`, `ready`);
+  - `receipt_path`, `receipt_name`, `receipt_mime_type` (todos nulos ou todos preenchidos);
   - `client_id` (opcional, FK com a organização), `payment_request_id` (opcional, FK com o mesmo cliente), `subscription_id` (opcional);
   - `created_by`, `created_at`, `updated_at`.
   - CHECK: há pedido só se houver cliente.
 - `subscriptions`: `id`, `organization_id`, `name`, `vendor`, `category`, `amount`, `currency`, `cycle` (`monthly`, `annual`), `next_renewal_on`, `status` (`active`, `cancelled`), `created_by`, carimbos.
 - RLS forçada: leitura com `app.can_read_billing`; sem escrita por `authenticated`; o serviço escreve em contexto de sistema depois de verificar `can_write_billing`.
-- **Portal:** uma vista `portal_payment_request_receipts` com o id do pedido, o nome do recibo e o caminho. Filtra por `app.is_client_member` com os papéis decisor e financeiro do cliente e só mostra recibos `ready`.
+- **Portal:** uma vista `portal_payment_request_receipts` com o id do pedido, o nome do recibo e o caminho. Filtra por `app.is_client_member` com os papéis decisor e financeiro do cliente e só mostra despesas com recibo.
 
 ## 6. Testes
 

@@ -157,3 +157,40 @@ export function emailEnv(): EmailEnv {
   });
   return cachedEmailEnv;
 }
+
+const brandHubSiteSchema = z.object({
+  BRAND_HUB_SITE_URL: z.url(),
+  BRAND_HUB_SITE_ORIGINS: z.string().min(1),
+  BRAND_HUB_TOKEN_SECRET: z.string().min(32),
+});
+
+export type BrandHubSiteEnv = { url: string; origins: string[]; tokenSecret: string };
+
+/** The published Brand Hub site (2F.2); null until its address, origins and secret are all set. */
+export function parseBrandHubSiteEnv(
+  source: Record<string, string | undefined>,
+): BrandHubSiteEnv | null {
+  if (
+    !source.BRAND_HUB_SITE_URL ||
+    !source.BRAND_HUB_SITE_ORIGINS ||
+    !source.BRAND_HUB_TOKEN_SECRET
+  ) {
+    return null;
+  }
+  const parsed = brandHubSiteSchema.parse(source);
+  return {
+    url: parsed.BRAND_HUB_SITE_URL.replace(/\/+$/, ''),
+    origins: parsed.BRAND_HUB_SITE_ORIGINS.split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+    tokenSecret: parsed.BRAND_HUB_TOKEN_SECRET,
+  };
+}
+
+export function brandHubSiteEnv(): BrandHubSiteEnv | null {
+  return parseBrandHubSiteEnv({
+    BRAND_HUB_SITE_URL: process.env.BRAND_HUB_SITE_URL,
+    BRAND_HUB_SITE_ORIGINS: process.env.BRAND_HUB_SITE_ORIGINS,
+    BRAND_HUB_TOKEN_SECRET: process.env.BRAND_HUB_TOKEN_SECRET,
+  });
+}

@@ -34,6 +34,7 @@ export const AUDIT_ACTIONS = [
   'brand_hub.approval_requested',
   'brand_hub.asset_rejected',
   'brand_hub.asset_removed',
+  'brand_hub.access_changed',
   'agenda.meeting_scheduled',
   'agenda.meeting_updated',
   'agenda.meeting_cancelled',

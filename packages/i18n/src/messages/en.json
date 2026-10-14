@@ -2608,6 +2608,56 @@
       "zip_too_large": "The ZIP is too large. Download by section.",
       "upload_failed": "The upload failed. Try again.",
       "download_failed": "The download failed. Try again."
+    },
+    "access": {
+      "signInTitle": "Sign in to see the Brand Hub",
+      "signInDescription": "This Brand Hub opens only to the company team. Sign in to the OS and go back to the Brand Hub.",
+      "signIn": "Sign in",
+      "magicLink": "Get a link by email",
+      "deniedTitle": "No access to this Brand Hub",
+      "deniedDescription": "Your account has no access to this Brand Hub, or the address is no longer valid. Ask the agency team for access.",
+      "home": "Go to the start page"
+    },
+    "sharing": {
+      "title": "Sharing",
+      "siteAddress": "Site address",
+      "copy": "Copy address",
+      "copied": "Address copied.",
+      "noSite": "The Brand Hub site is not configured in this environment yet.",
+      "unpublished": "Publish the Brand Hub for the site to be available.",
+      "slug": "Hub address",
+      "slugHint": "Lower case letters, numbers and hyphens, 3 to 60 characters.",
+      "access": "Who can open the site",
+      "modes": {
+        "public": "Public: anyone with the address.",
+        "password": "With a password: whoever knows the password.",
+        "restricted": "Restricted: only the client users signed in to the OS."
+      },
+      "password": "Site password",
+      "passwordHint": "From 10 to 128 characters.",
+      "passwordKeep": "Leave blank to keep the current password.",
+      "save": "Save sharing",
+      "saved": "Sharing saved.",
+      "errors": {
+        "invalid_input": "Check the address and the password.",
+        "invalid_state": "That address is already used by another hub.",
+        "not_found": "The sharing could not be saved."
+      }
+    },
+    "site": {
+      "loading": "Loading the Brand Hub…",
+      "notFoundTitle": "Brand Hub not found",
+      "notFoundDescription": "This Brand Hub does not exist or is not published yet.",
+      "passwordTitle": "This Brand Hub has a password",
+      "passwordDescription": "Ask {client} or the agency for the password.",
+      "password": "Password",
+      "open": "Open",
+      "wrongPassword": "Wrong password.",
+      "tooMany": "Too many attempts. Try again in 15 minutes.",
+      "restrictedTitle": "This Brand Hub is private",
+      "restrictedDescription": "Only the {client} team can open it. Sign in with the company account.",
+      "restrictedAction": "Sign in with the company account",
+      "error": "The Brand Hub could not be loaded. Try again."
     }
   },
   "agenda": {

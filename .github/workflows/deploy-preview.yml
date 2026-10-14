@@ -59,7 +59,10 @@ jobs:
             --env EMAIL_TRANSPORT=capture \
             --env CALENDAR_PROVIDER=fake \
             --env TRANSCRIPTION_PROVIDER=fake \
-            --env APPLY_IP_LIMIT_PER_HOUR=1000)
+            --env APPLY_IP_LIMIT_PER_HOUR=1000 \
+            --env BRAND_HUB_SITE_URL=http://localhost:3001 \
+            --env BRAND_HUB_SITE_ORIGINS=http://localhost:3001 \
+            --env BRAND_HUB_TOKEN_SECRET="${{ secrets.PREVIEW_BRAND_HUB_TOKEN_SECRET }}")
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Comment preview URL
         uses: actions/github-script@v8
@@ -106,6 +109,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: pnpm --filter web e2e:seed
+      - name: Build the Brand Hub site for the end-to-end tests
+        run: pnpm --filter brand-hub build
+        env:
+          NEXT_PUBLIC_OS_URL: http://localhost:3001/os
+          NEXT_PUBLIC_OS_PAGES_URL: ${{ needs.deploy.outputs.url }}
       - run: pnpm --filter web e2e
       - if: failure()
         uses: actions/upload-artifact@v7

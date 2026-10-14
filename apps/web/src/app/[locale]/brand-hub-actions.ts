@@ -18,6 +18,7 @@ import {
   retitleHubPage,
   saveHubBlock,
   saveHubDesign,
+  saveHubSharing,
   startBrandHub,
   startHubAssetUpload,
   toggleHubPage,
@@ -142,4 +143,15 @@ export async function hubZipAction(
   if (!claims) return NOT_FOUND;
   const result = await brandHubZip(claims, clientId, pageId);
   return result.ok ? result : { ok: false, code: result.rule };
+}
+
+export async function saveHubSharingAction(input: {
+  hubId: string;
+  slug: string;
+  mode: string;
+  password: string;
+}): Promise<ActionResult> {
+  return withClaims((claims) =>
+    saveHubSharing(claims, { ...input, password: input.password || undefined }),
+  );
 }

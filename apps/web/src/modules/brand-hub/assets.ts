@@ -23,12 +23,14 @@ import {
 } from './access';
 import { expectedAssetType, MAX_HUB_ASSETS } from './domain/asset-types';
 import { withoutAsset } from './domain/blocks';
+import { stripImageMetadata } from './domain/strip-metadata';
 import { hubAssetPath } from './storage';
 
 const { brandHubAssets, brandHubBlocks } = schema;
 
 const STORAGE_FULL = { ok: false, rule: 'storage_full' } as const;
 const INVALID_FILE = { ok: false, rule: 'invalid_file' } as const;
+const STRIP_BATCH = 20;
 
 /** Reserves an asset and returns a signed link to upload it straight to the bucket. */
 export async function requestHubAssetUpload(
@@ -128,7 +130,7 @@ export async function confirmHubAsset(
     eq(brandHubAssets.uploadStatus, 'uploading'),
   );
 
-  if (!accepted || !detected) {
+  if (!accepted || !detected || !bytes) {
     const rejected = await deps.contexts.withSystemContext(async (tx) => {
       const updated = await tx
         .update(brandHubAssets)
@@ -149,14 +151,33 @@ export async function confirmHubAsset(
     await deps.storage.remove(asset.storagePath);
     return INVALID_FILE;
   }
+  const clean = await withoutMetadata(asset.storagePath, bytes, detected.mimeType, deps);
+  const now = (deps.now ?? (() => new Date()))();
   const ready = await deps.contexts.withSystemContext((tx) =>
     tx
       .update(brandHubAssets)
-      .set({ uploadStatus: 'ready', mimeType: detected.mimeType })
+      .set({
+        uploadStatus: 'ready',
+        mimeType: detected.mimeType,
+        sizeBytes: clean.length,
+        metadataStrippedAt: now,
+      })
       .where(pending)
       .returning({ id: brandHubAssets.id }),
   );
   return ready.length > 0 ? OK : NOT_FOUND;
+}
+
+/** Rewrites a stored image without its metadata (SEC-33) and returns the bytes now stored. */
+async function withoutMetadata(
+  storagePath: string,
+  bytes: Uint8Array,
+  mimeType: string,
+  deps: BrandHubDeps,
+): Promise<Uint8Array> {
+  const clean = stripImageMetadata(bytes, mimeType);
+  if (clean !== bytes) await deps.storage.upload(storagePath, clean, mimeType);
+  return clean;
 }
 
 /**
@@ -210,7 +231,7 @@ export async function removeHubAsset(
  */
 export async function sweepHubAssets(
   deps: BrandHubDeps,
-): Promise<{ closed: number; deleted: number }> {
+): Promise<{ closed: number; deleted: number; stripped: number }> {
   const cutoff = new Date((deps.now?.() ?? new Date()).getTime() - STALE_UPLOAD_MS);
   const { stale, unused } = await deps.contexts.withSystemContext(async (tx) => {
     const closed = await tx
@@ -237,5 +258,40 @@ export async function sweepHubAssets(
     return { stale: closed, unused: deleted };
   });
   await deps.storage.removeMany([...stale, ...unused].map((asset) => asset.storagePath));
-  return { closed: stale.length, deleted: unused.length };
+  return { closed: stale.length, deleted: unused.length, stripped: await stripPending(deps) };
+}
+
+/**
+ * Ready assets uploaded before metadata removal existed are cleaned a batch at a time, removed ones
+ * included: the current publication may still serve them.
+ */
+async function stripPending(deps: BrandHubDeps): Promise<number> {
+  const now = (deps.now ?? (() => new Date()))();
+  const pendingAssets = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .select({
+        id: brandHubAssets.id,
+        storagePath: brandHubAssets.storagePath,
+        mimeType: brandHubAssets.mimeType,
+      })
+      .from(brandHubAssets)
+      .where(
+        and(eq(brandHubAssets.uploadStatus, 'ready'), isNull(brandHubAssets.metadataStrippedAt)),
+      )
+      .limit(STRIP_BATCH),
+  );
+  let stripped = 0;
+  for (const asset of pendingAssets) {
+    const bytes = await deps.storage.download(asset.storagePath);
+    if (!bytes) continue;
+    const clean = await withoutMetadata(asset.storagePath, bytes, asset.mimeType ?? '', deps);
+    await deps.contexts.withSystemContext((tx) =>
+      tx
+        .update(brandHubAssets)
+        .set({ sizeBytes: clean.length, metadataStrippedAt: now })
+        .where(eq(brandHubAssets.id, asset.id)),
+    );
+    stripped += 1;
+  }
+  return stripped;
 }

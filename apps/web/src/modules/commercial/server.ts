@@ -138,3 +138,4 @@ export {
   updateTracking,
   type CommercialSession,
 } from './pipeline/studio';
+export { consumeThrottle } from './protection/throttle';

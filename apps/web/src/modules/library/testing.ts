@@ -55,6 +55,9 @@ export function memoryLibraryStorage(): LibraryStorage & {
     async signedUrl(path, ttlSeconds) {
       return `memory://file/${path}?ttl=${ttlSeconds}`;
     },
+    upload: async (path, bytes) => {
+      files.set(path, bytes);
+    },
     remove,
     async removeMany(paths) {
       for (const path of paths) await remove(path);

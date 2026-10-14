@@ -123,13 +123,40 @@ jobs:
             --env GOOGLE_CLIENT_ID="${{ secrets.STAGING_GOOGLE_CLIENT_ID }}" \
             --env GOOGLE_CLIENT_SECRET="${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}" \
             --env TRANSCRIPTION_PROVIDER="${{ secrets.STAGING_GROQ_API_KEY != '' && 'groq' || 'fake' }}" \
-            --env GROQ_API_KEY="${{ secrets.STAGING_GROQ_API_KEY }}")
+            --env GROQ_API_KEY="${{ secrets.STAGING_GROQ_API_KEY }}" \
+            --env BRAND_HUB_SITE_URL="https://${{ vars.STAGING_BRAND_HUB_DOMAIN }}" \
+            --env BRAND_HUB_SITE_ORIGINS="https://${{ vars.STAGING_BRAND_HUB_DOMAIN }},http://localhost:3001" \
+            --env BRAND_HUB_TOKEN_SECRET="${{ secrets.STAGING_BRAND_HUB_TOKEN_SECRET }}")
           host="${url#https://}"
           curl --fail-with-body -sS -o /dev/null -X POST \
             "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
             -d "{\"alias\":\"${{ vars.STAGING_DOMAIN }}\"}"
           echo "url=https://${{ vars.STAGING_DOMAIN }}" >> "$GITHUB_OUTPUT"
+
+  brand-hub-site:
+    name: Brand Hub site staging
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.BRAND_HUB_VERCEL_PROJECT_ID }}
+      NEXT_PUBLIC_OS_URL: https://${{ vars.STAGING_DOMAIN }}
+      CI: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add --global vercel@62.4.0
+      - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy the static site as the project's production
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   e2e:
     name: End-to-end and accessibility
@@ -154,6 +181,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - run: pnpm --filter web e2e:seed
+      - name: Build the Brand Hub site for the end-to-end tests
+        run: pnpm --filter brand-hub build
+        env:
+          NEXT_PUBLIC_OS_URL: http://localhost:3001/os
+          NEXT_PUBLIC_OS_PAGES_URL: https://${{ vars.STAGING_DOMAIN }}
       - name: End-to-end tests without public application writes, fake transcription or captured emails
         run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email"
       - if: failure()

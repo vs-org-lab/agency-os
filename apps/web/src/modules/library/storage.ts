@@ -5,6 +5,8 @@ export type LibraryStorage = {
   signedDownloadUrl(path: string, ttlSeconds: number, fileName: string): Promise<string>;
   /** A link that opens the object in the browser, for previews. */
   signedUrl(path: string, ttlSeconds: number): Promise<string>;
+  /** Replaces the object with these bytes, for files rewritten after their upload. */
+  upload(path: string, bytes: Uint8Array, contentType: string): Promise<void>;
   remove(path: string): Promise<void>;
   removeMany(paths: string[]): Promise<void>;
 };

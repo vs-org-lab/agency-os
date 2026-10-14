@@ -47,11 +47,21 @@ export async function hubZipManifest(
   if (input.pageId !== null && !uuid.safeParse(input.pageId).success) return NOT_FOUND;
   const snapshot = await currentSnapshot(claims, input.clientId, deps);
   if (!snapshot) return NOT_FOUND;
-  const page = input.pageId === null ? null : snapshot.pages.find((p) => p.id === input.pageId);
-  if (input.pageId !== null && !page) return NOT_FOUND;
+  return buildHubManifest(snapshot, input.clientId, input.pageId, deps);
+}
 
-  const name = await clientName(input.clientId, deps);
-  const entries = downloadEntries(snapshot, { clientName: name, pageId: input.pageId });
+/** The archive of a publication the caller was already allowed to read. */
+export async function buildHubManifest(
+  snapshot: HubSnapshot,
+  clientId: string,
+  pageId: string | null,
+  deps: BrandHubDeps,
+): Promise<ZipManifest | NotFound | { ok: false; rule: 'zip_too_large' }> {
+  const page = pageId === null ? null : snapshot.pages.find((p) => p.id === pageId);
+  if (pageId !== null && !page) return NOT_FOUND;
+
+  const name = await clientName(clientId, deps);
+  const entries = downloadEntries(snapshot, { clientName: name, pageId });
   const sizes = new Map(snapshot.assets.map((asset) => [asset.id, asset.sizeBytes]));
   const totalBytes = entries.reduce((total, entry) => total + (sizes.get(entry.assetId) ?? 0), 0);
   if (entries.length > MAX_ZIP_FILES || totalBytes > MAX_ZIP_BYTES) {

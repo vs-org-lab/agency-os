@@ -21,6 +21,12 @@ export default defineConfig({
       ? { 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' }
       : undefined,
   },
+  webServer: {
+    command: 'pnpm exec tsx e2e/support/hub-site-server.ts',
+    url: 'http://localhost:3001/index.html',
+    reuseExistingServer: !process.env.CI,
+    timeout: 30_000,
+  },
   projects: [
     {
       name: 'desktop',

@@ -1,0 +1,26 @@
+{
+  "name": "@agency-os/brand-hub-view",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hub-view": "./src/hub-view.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@agency-os/ui": "workspace:*",
+    "next-intl": "4.14.9",
+    "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@agency-os/config": "workspace:*",
+    "@types/react": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

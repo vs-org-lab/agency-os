@@ -103,4 +103,31 @@ describe('brand hub access', () => {
       }
     });
   });
+
+  it('hubs carry a unique slug and a password hash only in password mode', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const hubs = await createBrandHubFixture(sql, world);
+      const [hub] = await sql<{ slug: string; access_mode: string; access_version: number }[]>`
+        select slug, access_mode::text, access_version from public.brand_hubs
+        where id = ${hubs.a.hubId}
+      `;
+      expect(hub).toEqual({ slug: 'cliente-a', access_mode: 'restricted', access_version: 1 });
+
+      for (const statement of [
+        sql`update public.brand_hubs set slug = 'cliente-a' where id = ${hubs.b.hubId}`,
+        sql`update public.brand_hubs set slug = 'Cliente A' where id = ${hubs.b.hubId}`,
+        sql`update public.brand_hubs set access_mode = 'password' where id = ${hubs.b.hubId}`,
+        sql`update public.brand_hubs set password_hash = 'scrypt$a$b' where id = ${hubs.b.hubId}`,
+      ]) {
+        await sql`savepoint probe`;
+        expect(await statement.catch((error: Error) => error)).toBeInstanceOf(Error);
+        await sql`rollback to savepoint probe`;
+      }
+      await sql`
+        update public.brand_hubs set access_mode = 'password', password_hash = 'scrypt$a$b'
+        where id = ${hubs.b.hubId}
+      `;
+    });
+  });
 });

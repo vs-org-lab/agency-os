@@ -11,8 +11,7 @@ import {
   type MoneyDeps,
   type NotFound,
 } from './access';
-
-export const MAX_RECEIPT_BYTES = 10_485_760;
+import { MAX_RECEIPT_BYTES } from './domain/limits';
 
 const IMAGE_TYPES = new Set<string>(['image/jpeg', 'image/png', 'image/webp']);
 const RECEIPT_TYPES = new Set<string>([...IMAGE_TYPES, 'application/pdf']);

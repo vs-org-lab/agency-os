@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Wallet,
   ArrowLeft,
   CalendarDays,
   CircleCheck,
@@ -93,6 +94,7 @@ const ICONS = {
   documents: FileText,
   brand: Palette,
   calendar: CalendarDays,
+  wallet: Wallet,
 } as const;
 
 function NavigationItemLink({

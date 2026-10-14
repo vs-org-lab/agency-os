@@ -14,7 +14,8 @@ export type NavigationIcon =
   | 'folder'
   | 'documents'
   | 'brand'
-  | 'calendar';
+  | 'calendar'
+  | 'wallet';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -24,6 +25,7 @@ export type NavigationLabelKey =
   | 'shell.studioNav.updates'
   | 'shell.studioNav.tasks'
   | 'shell.studioNav.calendar'
+  | 'shell.studioNav.money'
   | 'shell.settings'
   | 'shell.room.dashboard'
   | 'shell.room.updates'
@@ -58,7 +60,7 @@ export type Navigation = {
 };
 
 export type NavigationLevel =
-  | { level: 'studio'; permissions: { pipeline: boolean } }
+  | { level: 'studio'; permissions: { pipeline: boolean; money: boolean } }
   | { level: 'room'; clientId: string }
   | { level: 'portal'; permissions: { invoices: boolean; room: boolean; team: boolean } };
 
@@ -84,6 +86,15 @@ export function buildNavigation(input: NavigationLevel): Navigation {
           { href: '/tasks', labelKey: 'shell.studioNav.tasks', icon: 'tasks' },
           { href: '/calendar', labelKey: 'shell.studioNav.calendar', icon: 'calendar' },
           ...(input.permissions.pipeline ? COMMERCIAL_ITEMS : []),
+          ...(input.permissions.money
+            ? [
+                {
+                  href: '/money',
+                  labelKey: 'shell.studioNav.money' as const,
+                  icon: 'wallet' as const,
+                },
+              ]
+            : []),
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
       };

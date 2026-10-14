@@ -90,7 +90,8 @@
       "acquisition": "Acquisition",
       "updates": "Updates",
       "tasks": "Tasks",
-      "calendar": "Calendar"
+      "calendar": "Calendar",
+      "money": "Money"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -336,7 +337,8 @@
       "errors": {
         "unavailable": "Card payment is not available for this request.",
         "not_found": "This request is no longer available. Refresh the page."
-      }
+      },
+      "receipts": "Receipts"
     },
     "room": {
       "title": "Your project: {name}",
@@ -2779,5 +2781,103 @@
       "invalid_state": "This meeting is over or was cancelled."
     },
     "periodRange": "{start} – {end}"
+  },
+  "money": {
+    "title": "Money",
+    "description": "What came in, what is open and what went out, per year.",
+    "year": "Year",
+    "summary": {
+      "received": "Came in",
+      "open": "Open",
+      "spent": "Went out",
+      "none": "No amounts"
+    },
+    "requests": {
+      "title": "Invoices",
+      "empty": "No payment requests this year.",
+      "client": "Client",
+      "number": "Request",
+      "amount": "Amount",
+      "status": "Status",
+      "legalInvoice": "Legal invoice",
+      "statuses": {
+        "sent": "Sent",
+        "paid": "Paid",
+        "void": "Voided"
+      }
+    },
+    "expenses": {
+      "title": "Expenses",
+      "empty": "No expenses this year.",
+      "add": "New expense",
+      "edit": "Edit",
+      "delete": "Delete",
+      "receipt": "Receipt",
+      "noClient": "No client",
+      "link": "Link to a request",
+      "noRequest": "No request",
+      "deleted": "Expense deleted.",
+      "linked": "Link saved."
+    },
+    "expenseForm": {
+      "spentOn": "Date",
+      "vendor": "Vendor",
+      "description": "Description",
+      "category": "Category",
+      "amount": "Amount",
+      "currency": "Currency",
+      "client": "Client (billable expense)",
+      "receipt": "Receipt (JPEG, PNG, WebP or PDF, up to 10 MB)",
+      "reading": "Reading the receipt…",
+      "proposal": "Proposal read from the receipt. Confirm before saving.",
+      "noProposal": "Receipt attached. Fill in the fields.",
+      "save": "Save expense",
+      "cancel": "Cancel",
+      "saved": "Expense saved."
+    },
+    "categories": {
+      "software": "Software",
+      "advertising": "Advertising",
+      "freelancers": "Freelancers",
+      "equipment": "Equipment",
+      "travel": "Travel",
+      "training": "Training",
+      "other": "Other"
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "empty": "No subscriptions.",
+      "add": "New subscription",
+      "renew": "Record renewal",
+      "cancel": "Cancel subscription",
+      "nextRenewal": "Next renewal on {date}",
+      "cycles": {
+        "monthly": "Monthly",
+        "annual": "Annual"
+      },
+      "overdue": "Overdue",
+      "soon": "Soon",
+      "cancelled": "Cancelled",
+      "renewed": "Renewal recorded.",
+      "cancelledDone": "Subscription cancelled."
+    },
+    "subscriptionForm": {
+      "name": "Name",
+      "vendor": "Vendor",
+      "category": "Category",
+      "amount": "Amount",
+      "currency": "Currency",
+      "cycle": "Cycle",
+      "nextRenewalOn": "Next renewal",
+      "save": "Save subscription",
+      "saved": "Subscription saved."
+    },
+    "errors": {
+      "invalid_input": "Check the fields.",
+      "invalid_file": "The receipt must be a JPEG, PNG, WebP or PDF up to 10 MB.",
+      "invalid_state": "Not possible: unlink the expense from the request first.",
+      "not_found": "This could not be completed. Refresh the page.",
+      "upload_failed": "The receipt upload failed. Try again."
+    }
   }
 }

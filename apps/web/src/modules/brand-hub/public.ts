@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { schema, type BrandHubAccessMode } from '@agency-os/db';
 import { consumeThrottle } from '@/modules/commercial/server';
 import { LIBRARY_LINK_TTL_SECONDS, type ZipManifest } from '@/modules/library';
@@ -10,13 +10,15 @@ import {
   type BrandHubSite,
   type NotFound,
 } from './access';
+import { normaliseHostname } from './domain/hostname';
+import { hubManual, type HubManual } from './manual';
 import { verifyPassword } from './domain/passwords';
 import type { HubSnapshot } from './domain/snapshot';
 import { signHubToken, verifyHubToken, type HubTokenMode } from './domain/tokens';
 import { clientName } from './readers';
 import { buildHubManifest } from './zip';
 
-const { brandHubAssets, brandHubPublications, brandHubs } = schema;
+const { brandHubAssets, brandHubDomains, brandHubPublications, brandHubs } = schema;
 
 const PASSWORD_TOKEN_MS = 7 * 24 * 60 * 60 * 1000;
 const RESTRICTED_TOKEN_MS = 12 * 60 * 60 * 1000;
@@ -145,6 +147,53 @@ export async function readPublicHub(
   };
 }
 
+export type DomainHubResult =
+  | { status: 200; hub: PublicHub; slug: string }
+  | { status: 401; mode: 'password' | 'restricted'; clientName: string; slug: string }
+  | { status: 404 };
+
+/** The slug of the hub a connected client domain serves, or null. */
+async function slugByDomain(host: string, deps: BrandHubDeps): Promise<string | null> {
+  const hostname = normaliseHostname(host);
+  if (!hostname) return null;
+  const [row] = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .select({ slug: brandHubs.slug })
+      .from(brandHubDomains)
+      .innerJoin(brandHubs, eq(brandHubs.id, brandHubDomains.hubId))
+      .where(and(eq(brandHubDomains.hostname, hostname), eq(brandHubDomains.status, 'connected'))),
+  );
+  return row?.slug ?? null;
+}
+
+/**
+ * The hub on the client's own domain (RF-095): the same answer as by slug, with the slug so the
+ * site can unlock, download and keep its token. Domains not yet connected are not found.
+ */
+export async function readPublicHubByDomain(
+  host: string,
+  token: string | null,
+  deps: BrandHubDeps,
+): Promise<DomainHubResult> {
+  const slug = await slugByDomain(host, deps);
+  if (!slug) return { status: 404 };
+  const result = await readPublicHub(slug, token, deps);
+  return result.status === 404 ? result : { ...result, slug };
+}
+
+/** Whether an origin may call the public API: the site's configured origins or a connected domain. */
+export async function isSiteOrigin(origin: string, deps: BrandHubDeps): Promise<boolean> {
+  if (deps.site?.origins.includes(origin)) return true;
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:' || url.port !== '' || url.origin !== origin) return false;
+  return (await slugByDomain(url.hostname, deps)) !== null;
+}
+
 /** The ZIP manifest of one page or of every asset, under the same rule as the hub itself. */
 export async function publicHubZip(
   slug: string,
@@ -162,6 +211,29 @@ export async function publicHubZip(
   const manifest = await buildHubManifest(published.snapshot, hub.clientId, pageId, deps);
   if (manifest.ok) return { status: 200, manifest };
   return { status: manifest.rule === 'zip_too_large' ? 413 : 404 };
+}
+
+/** The brand manual of the current publication (RF-093), under the same rule as the hub itself. */
+export async function publicHubManual(
+  slug: string,
+  token: string | null,
+  deps: BrandHubDeps,
+): Promise<({ status: 200 } & HubManual) | { status: 401 | 404 }> {
+  const hub = await hubBySlug(slug, deps);
+  if (!hub?.publicationId) return { status: 404 };
+  if (!admitted(hub, token, deps)) return { status: 401 };
+  const published = await publication(hub.publicationId, deps);
+  if (!published) return { status: 404 };
+  const manual = await hubManual(
+    {
+      clientId: hub.clientId,
+      publicationId: hub.publicationId,
+      snapshot: published.snapshot,
+      publishedAt: published.publishedAt,
+    },
+    deps,
+  );
+  return { status: 200, ...manual };
 }
 
 function issue(hub: SiteHub, mode: HubTokenMode, lifetimeMs: number, deps: BrandHubDeps): string {
@@ -210,15 +282,31 @@ export async function unlockHub(
   return { ok: true, token: issue(hub, 'password', PASSWORD_TOKEN_MS, deps) };
 }
 
-/** Whether a return address belongs to one of the configured site origins. */
-function allowedReturn(returnTo: string, deps: BrandHubDeps): boolean {
+/** The connected client domain of a hub, as an origin, or null. */
+async function connectedOrigin(hubId: string, deps: BrandHubDeps): Promise<string | null> {
+  const [row] = await deps.contexts.withSystemContext((tx) =>
+    tx
+      .select({ hostname: brandHubDomains.hostname })
+      .from(brandHubDomains)
+      .where(and(eq(brandHubDomains.hubId, hubId), eq(brandHubDomains.status, 'connected'))),
+  );
+  return row ? `https://${row.hostname}` : null;
+}
+
+/** Whether a return address is the site's configured origin or the hub's own connected domain. */
+async function allowedReturn(
+  returnTo: string,
+  hubId: string | null,
+  deps: BrandHubDeps,
+): Promise<boolean> {
   let url: URL;
   try {
     url = new URL(returnTo);
   } catch {
     return false;
   }
-  return siteConfig(deps).origins.includes(url.origin);
+  if (siteConfig(deps).origins.includes(url.origin)) return true;
+  return hubId !== null && url.origin === (await connectedOrigin(hubId, deps));
 }
 
 /**
@@ -231,8 +319,10 @@ export async function issueRestrictedToken(
   returnTo: string,
   deps: BrandHubDeps,
 ): Promise<{ ok: true; redirect: string } | NotFound | { ok: false; rule: 'invalid_input' }> {
-  if (!allowedReturn(returnTo, deps)) return { ok: false, rule: 'invalid_input' };
   const hub = await hubBySlug(slug, deps);
+  if (!(await allowedReturn(returnTo, hub?.id ?? null, deps))) {
+    return { ok: false, rule: 'invalid_input' };
+  }
   if (!hub?.publicationId || hub.mode !== 'restricted') return NOT_FOUND;
   const member =
     claims.user_kind === 'client'

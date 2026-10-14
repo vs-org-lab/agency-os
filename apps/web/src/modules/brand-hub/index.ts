@@ -27,3 +27,4 @@ export type {
   PortalHubView,
 } from './views';
 export type { HubSharingView } from './sharing';
+export type { HubDomainState, HubDomainView } from './domains';

@@ -3,6 +3,8 @@ import type { TransactionSql } from 'postgres';
 import { testDatabase } from '@agency-os/db/testing';
 import type { LibraryStorage } from '@/modules/library';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
+import type { DomainProvider } from '@/platform/domain-provider';
+import type { DomainStatus } from '@/platform/vercel-domains';
 import type { BrandHubDeps } from './access';
 
 export const HUB_TEST_NOW = new Date('2026-10-12T09:00:00Z');
@@ -58,6 +60,7 @@ function memoryStorage(): LibraryStorage & { files: Map<string, Uint8Array>; rem
     removed,
     createUploadUrl: async (path) => `memory://upload/${path}`,
     download: async (path) => files.get(path) ?? null,
+    exists: async (path) => files.has(path),
     signedDownloadUrl: async (path, ttlSeconds, fileName) =>
       `memory://file/${path}?ttl=${ttlSeconds}&download=${encodeURIComponent(fileName)}`,
     signedUrl: async (path, ttlSeconds) => `memory://file/${path}?ttl=${ttlSeconds}`,
@@ -84,4 +87,44 @@ export function hubDeps(sql: TransactionSql) {
     site: HUB_TEST_SITE,
   };
   return { deps, storage, flushes };
+}
+
+/** DNS and hosting held in memory: TXT records by name, and every hosting call in order. */
+export function memoryDomainProvider() {
+  const txt = new Map<string, string[][]>();
+  const calls: [string, string][] = [];
+  const provider: DomainProvider & {
+    txt: Map<string, string[][]>;
+    calls: [string, string][];
+    refuse: string | null;
+    failRemoval: boolean;
+    status: DomainStatus;
+    /** Runs while the hosting call is in flight, to reproduce concurrent changes. */
+    duringAdd: (() => Promise<void>) | null;
+  } = {
+    kind: 'fake',
+    txt,
+    calls,
+    refuse: null,
+    failRemoval: false,
+    status: { configured: true, challenges: [] },
+    duringAdd: null,
+    async txtRecords(name) {
+      return txt.get(name) ?? null;
+    },
+    async addDomain(host) {
+      if (provider.refuse) return { ok: false, message: provider.refuse };
+      calls.push(['add', host]);
+      await provider.duringAdd?.();
+      return { ok: true };
+    },
+    async removeDomain(host) {
+      calls.push(['remove', host]);
+      if (provider.failRemoval) throw new Error('Vercel domain removal failed with 500');
+    },
+    async domainStatus() {
+      return provider.status;
+    },
+  };
+  return provider;
 }

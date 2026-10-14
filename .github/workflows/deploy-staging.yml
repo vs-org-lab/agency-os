@@ -126,7 +126,10 @@ jobs:
             --env GROQ_API_KEY="${{ secrets.STAGING_GROQ_API_KEY }}" \
             --env BRAND_HUB_SITE_URL="https://${{ vars.STAGING_BRAND_HUB_DOMAIN }}" \
             --env BRAND_HUB_SITE_ORIGINS="https://${{ vars.STAGING_BRAND_HUB_DOMAIN }},http://localhost:3001" \
-            --env BRAND_HUB_TOKEN_SECRET="${{ secrets.STAGING_BRAND_HUB_TOKEN_SECRET }}")
+            --env BRAND_HUB_TOKEN_SECRET="${{ secrets.STAGING_BRAND_HUB_TOKEN_SECRET }}" \
+            --env BRAND_HUB_VERCEL_PROJECT_ID="${{ secrets.BRAND_HUB_VERCEL_PROJECT_ID }}" \
+            --env BRAND_HUB_VERCEL_TEAM_ID="${{ secrets.VERCEL_ORG_ID }}" \
+            --env BRAND_HUB_VERCEL_TOKEN="${{ secrets.STAGING_BRAND_HUB_VERCEL_TOKEN }}")
           host="${url#https://}"
           curl --fail-with-body -sS -o /dev/null -X POST \
             "https://api.vercel.com/v2/deployments/${host}/aliases?teamId=${VERCEL_ORG_ID}" \
@@ -143,6 +146,7 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.BRAND_HUB_VERCEL_PROJECT_ID }}
       NEXT_PUBLIC_OS_URL: https://${{ vars.STAGING_DOMAIN }}
+      NEXT_PUBLIC_SITE_HOST: ${{ vars.STAGING_BRAND_HUB_DOMAIN }}
       CI: true
     steps:
       - uses: actions/checkout@v7
@@ -187,7 +191,7 @@ jobs:
           NEXT_PUBLIC_OS_URL: http://localhost:3001/os
           NEXT_PUBLIC_OS_PAGES_URL: https://${{ vars.STAGING_DOMAIN }}
       - name: End-to-end tests without public application writes, fake transcription or captured emails
-        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email"
+        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email|@fake-domains"
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

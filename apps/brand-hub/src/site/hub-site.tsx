@@ -9,15 +9,23 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import type { HubResult, SiteApi } from './api';
-import { SiteDownloads } from './site-downloads';
+import { SiteDownloads, SiteManualDownload } from './site-downloads';
 import { tokenStore } from './token-store';
 
-type State = { kind: 'loading' } | { kind: 'error' } | { kind: 'result'; result: HubResult };
+type State =
+  | { kind: 'loading' }
+  | { kind: 'error' }
+  | { kind: 'result'; result: HubResult; slug: string | null };
 
 /** The hub's slug, the first segment of the path. */
 function slugOf(location: URL): string | null {
   const segment = location.pathname.split('/').filter(Boolean)[0] ?? '';
   return /^[a-z0-9-]{3,60}$/.test(segment) ? segment : null;
+}
+
+/** Whether the page runs on the site's own host, where the slug is in the path. */
+function onSiteHost(location: URL, siteHost: string): boolean {
+  return !siteHost || location.host === siteHost || location.hostname === 'localhost';
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
@@ -92,45 +100,56 @@ function PasswordGate({
 }
 
 /**
- * H-03: the published hub at `/<slug>/`. A token in the address fragment, left by the OS after a
- * restricted sign-in, is kept and removed from the address; the visitor then sees the hub, the
- * password gate, the restricted entry or a not-found page.
+ * H-03: the published hub at `/<slug>/` on the site's host, or at the root of a client's own
+ * domain (RF-095). A token in the address fragment, left by the OS after a restricted sign-in, is
+ * kept and removed from the address; the visitor then sees the hub, the password gate, the
+ * restricted entry or a not-found page.
  */
 export function HubSite({
   api,
+  siteHost,
   location,
   replaceHash,
+  navigate = (url) => window.location.assign(url),
 }: {
   api: SiteApi;
+  /** The site project's own host; any other host is a client's domain. */
+  siteHost: string;
   location: URL;
   replaceHash: () => void;
+  navigate?: (url: string) => void;
 }) {
   const t = useTranslations('brandHub.site');
-  const slug = slugOf(location);
+  const byPath = onSiteHost(location, siteHost);
+  const pathSlug = byPath ? slugOf(location) : null;
+  /** Tokens are kept per hub: by slug on the site's host, by domain on a client's domain. */
+  const tokenKey = byPath ? pathSlug : location.host;
   const [state, setState] = useState<State>({ kind: 'loading' });
 
   const load = useCallback(
     async (token: string | null) => {
-      if (!slug) {
-        setState({ kind: 'result', result: { status: 404 } });
+      if (!tokenKey) {
+        setState({ kind: 'result', result: { status: 404 }, slug: null });
         return;
       }
       setState({ kind: 'loading' });
-      const result = await api.loadHub(slug, token);
-      if (result.status === 401 && token) tokenStore.clear(slug);
-      setState(result.status === 'error' ? { kind: 'error' } : { kind: 'result', result });
+      const { slug, result } = pathSlug
+        ? { slug: pathSlug, result: await api.loadHub(pathSlug, token) }
+        : await api.loadHubByDomain(location.host, token);
+      if (result.status === 401 && token) tokenStore.clear(tokenKey);
+      setState(result.status === 'error' ? { kind: 'error' } : { kind: 'result', result, slug });
     },
-    [api, slug],
+    [api, location.host, pathSlug, tokenKey],
   );
 
   useEffect(() => {
     const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('token');
-    if (slug && fromHash) {
-      tokenStore.set(slug, fromHash);
+    if (tokenKey && fromHash) {
+      tokenStore.set(tokenKey, fromHash);
       replaceHash();
     }
-    void load(slug ? (fromHash ?? tokenStore.get(slug)) : null);
-  }, [load, location.hash, replaceHash, slug]);
+    void load(tokenKey ? (fromHash ?? tokenStore.get(tokenKey)) : null);
+  }, [load, location.hash, replaceHash, tokenKey]);
 
   const clientTitle =
     state.kind === 'result' && (state.result.status === 200 || state.result.status === 401)
@@ -158,8 +177,8 @@ export function HubSite({
       </Centered>
     );
   }
-  const { result } = state;
-  if (result.status === 404 || result.status === 'error' || !slug) {
+  const { result, slug } = state;
+  if (result.status === 404 || result.status === 'error' || !slug || !tokenKey) {
     return (
       <Centered>
         <EmptyState title={t('notFoundTitle')} description={t('notFoundDescription')} />
@@ -173,7 +192,7 @@ export function HubSite({
         clientName={result.clientName}
         api={api}
         onToken={(token) => {
-          tokenStore.set(slug, token);
+          tokenStore.set(tokenKey, token);
           void load(token);
         }}
       />
@@ -201,10 +220,14 @@ export function HubSite({
   }
 
   const { hub } = result;
-  const token = tokenStore.get(slug);
+  const token = tokenStore.get(tokenKey);
   const requestZip = (pageId: string | null) => async () => {
     const answer = await api.zip(slug, token, pageId);
     return answer.status === 200 ? answer.manifest : null;
+  };
+  const requestManual = async () => {
+    const answer = await api.manual(slug, token);
+    return answer.status === 200 ? answer.url : null;
   };
   return (
     <main className="min-h-dvh bg-canvas p-4 md:p-8">
@@ -219,9 +242,12 @@ export function HubSite({
           ) : null
         }
         footer={
-          hub.snapshot.assets.length > 0 ? (
-            <SiteDownloads label={null} requestZip={requestZip(null)} />
-          ) : null
+          <div className="flex flex-wrap gap-2">
+            {hub.snapshot.assets.length > 0 ? (
+              <SiteDownloads label={null} requestZip={requestZip(null)} />
+            ) : null}
+            <SiteManualDownload requestManual={requestManual} navigate={navigate} />
+          </div>
         }
       />
     </main>

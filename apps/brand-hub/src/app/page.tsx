@@ -26,6 +26,7 @@ export default function BrandHubPage() {
     <NextIntlClientProvider locale="pt-PT" messages={SITE_MESSAGES} timeZone="Europe/Lisbon">
       <HubSite
         api={api}
+        siteHost={process.env.NEXT_PUBLIC_SITE_HOST ?? ''}
         location={new URL(href)}
         replaceHash={() =>
           window.history.replaceState(

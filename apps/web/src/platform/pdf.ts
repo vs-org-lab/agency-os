@@ -1,17 +1,39 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  type PDFFont,
+  type PDFImage,
+  type PDFPage,
+  type RGB,
+} from 'pdf-lib';
 
 export const PAGE_WIDTH = 595.28;
 export const PAGE_HEIGHT = 841.89;
 export const MARGIN = 56;
 export const BODY_SIZE = 10.5;
 const LINE_GAP = 4;
-const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
+export const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 const TEXT_COLOR = rgb(0.1, 0.1, 0.1);
 const MUTED_COLOR = rgb(0.4, 0.4, 0.4);
+const SWATCH_SIZE = 48;
+const SWATCH_GAP = 14;
 
 export type PdfFonts = { regular: PDFFont; bold: PDFFont };
 
-export type ParagraphOptions = { size?: number; bold?: boolean; muted?: boolean; indent?: number };
+export type ParagraphOptions = {
+  size?: number;
+  bold?: boolean;
+  muted?: boolean;
+  indent?: number;
+  color?: RGB;
+};
+
+/** `#RRGGBB` as pdf-lib colour components. */
+export function hexColor(hex: string): RGB {
+  const value = Number.parseInt(hex.slice(1), 16);
+  return rgb(((value >> 16) & 0xff) / 255, ((value >> 8) & 0xff) / 255, (value & 0xff) / 255);
+}
 
 /** Keeps only characters the standard WinAnsi fonts can encode. */
 export function encodable(font: PDFFont, text: string): string {
@@ -80,7 +102,7 @@ export class PdfWriter {
         y: this.y,
         size,
         font,
-        color: options.muted ? MUTED_COLOR : TEXT_COLOR,
+        color: options.color ?? (options.muted ? MUTED_COLOR : TEXT_COLOR),
       });
       this.y -= LINE_GAP;
     }
@@ -92,6 +114,43 @@ export class PdfWriter {
     this.y -= size;
     this.page.drawImage(embedded, { x: MARGIN, y: this.y, width: size, height: size });
     this.y -= LINE_GAP;
+  }
+
+  /** An embedded image scaled to fit the width and height given, keeping its proportions. */
+  picture(image: PDFImage, maxWidth: number, maxHeight: number): void {
+    const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
+    const width = image.width * scale;
+    const height = image.height * scale;
+    if (this.y - height < MARGIN) this.newPage();
+    this.y -= height;
+    this.page.drawImage(image, { x: MARGIN, y: this.y, width, height });
+    this.y -= LINE_GAP;
+  }
+
+  /** A colour sample with its lines of description beside it. */
+  swatch(hex: string, lines: string[]): void {
+    if (this.y - SWATCH_SIZE < MARGIN) this.newPage();
+    const top = this.y;
+    this.page.drawRectangle({
+      x: MARGIN,
+      y: top - SWATCH_SIZE,
+      width: SWATCH_SIZE,
+      height: SWATCH_SIZE,
+      color: hexColor(hex),
+      borderColor: MUTED_COLOR,
+      borderWidth: 0.5,
+    });
+    lines.forEach((line, index) => {
+      const font = index === 0 ? this.fonts.bold : this.fonts.regular;
+      this.page.drawText(encodable(font, line), {
+        x: MARGIN + SWATCH_SIZE + SWATCH_GAP,
+        y: top - BODY_SIZE - index * (BODY_SIZE + LINE_GAP),
+        size: BODY_SIZE,
+        font,
+        color: index === 0 ? TEXT_COLOR : MUTED_COLOR,
+      });
+    });
+    this.y = top - SWATCH_SIZE - SWATCH_GAP;
   }
 }
 

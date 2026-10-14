@@ -46,6 +46,7 @@ export type {
   ProjectDocumentStatus,
   BrandHubPageKind,
   BrandHubAccessMode,
+  BrandHubDomainStatus,
   AgendaEventKind,
   AgendaEventStatus,
   BrandHubStandardKey,

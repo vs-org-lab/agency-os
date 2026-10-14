@@ -1,11 +1,27 @@
 'use client';
 
 import { pageAssetIds, type PortalHubView } from '@/modules/brand-hub';
-import { HubDownloads, type RequestHubZip } from './hub-downloads';
+import {
+  HubDownloads,
+  HubManualDownload,
+  type RequestHubManual,
+  type RequestHubZip,
+} from './hub-downloads';
 import { HubView } from './hub-view';
 
-/** P-08: the publication with a download per page that has files, and every asset at once. */
-export function PortalHub({ hub, requestZip }: { hub: PortalHubView; requestZip: RequestHubZip }) {
+/**
+ * P-08: the publication with a download per page that has files, every asset at once and the full
+ * brand manual.
+ */
+export function PortalHub({
+  hub,
+  requestZip,
+  requestManual,
+}: {
+  hub: PortalHubView;
+  requestZip: RequestHubZip;
+  requestManual: RequestHubManual;
+}) {
   const hasAssets = hub.snapshot.assets.length > 0;
   return (
     <HubView
@@ -18,7 +34,12 @@ export function PortalHub({ hub, requestZip }: { hub: PortalHubView; requestZip:
           <HubDownloads pageId={page.id} label={page.title} requestZip={requestZip} />
         ) : null
       }
-      footer={hasAssets ? <HubDownloads pageId={null} label="" requestZip={requestZip} /> : null}
+      footer={
+        <div className="flex flex-wrap gap-2">
+          {hasAssets ? <HubDownloads pageId={null} label="" requestZip={requestZip} /> : null}
+          <HubManualDownload requestManual={requestManual} />
+        </div>
+      }
     />
   );
 }

@@ -29,6 +29,11 @@ export function createSupabaseLibraryStorage(): LibraryStorage {
       if (error || !data) return null;
       return new Uint8Array(await data.arrayBuffer());
     },
+    async exists(path) {
+      // A missing object answers false with its 400 or 404 attached; other failures throw.
+      const { data } = await bucket().exists(path);
+      return data;
+    },
     signedDownloadUrl: (path, ttlSeconds, fileName) => signed(path, ttlSeconds, fileName),
     signedUrl: (path, ttlSeconds) => signed(path, ttlSeconds),
     async upload(path, bytes, contentType) {

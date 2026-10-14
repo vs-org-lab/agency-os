@@ -49,6 +49,9 @@ export function memoryLibraryStorage(): LibraryStorage & {
     async download(path) {
       return files.get(path) ?? null;
     },
+    async exists(path) {
+      return files.has(path);
+    },
     async signedDownloadUrl(path, ttlSeconds, fileName) {
       return `memory://file/${path}?ttl=${ttlSeconds}&download=${encodeURIComponent(fileName)}`;
     },

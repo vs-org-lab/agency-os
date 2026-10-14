@@ -57,16 +57,28 @@ function api(overrides: Partial<SiteApi> = {}): SiteApi {
     loadHub: vi.fn(async () => ({ status: 200 as const, hub: HUB })),
     unlock: vi.fn(async () => ({ status: 401 as const })),
     zip: vi.fn(async () => ({ status: 404 as const })),
+    manual: vi.fn(async () => ({ status: 404 as const })),
+    loadHubByDomain: vi.fn(async () => ({ slug: null, result: { status: 404 as const } })),
     accessUrl: (slug: string, returnTo: string) =>
       `https://os.example.com/pt-PT/hub-access/${slug}?return=${encodeURIComponent(returnTo)}`,
     ...overrides,
   };
 }
 
-function renderSite(siteApi: SiteApi, href = 'https://hubs.example.com/bloom/') {
+function renderSite(
+  siteApi: SiteApi,
+  href = 'https://hubs.example.com/bloom/',
+  navigate: (url: string) => void = vi.fn(),
+) {
   return render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      <HubSite api={siteApi} location={new URL(href)} replaceHash={vi.fn()} />
+      <HubSite
+        api={siteApi}
+        siteHost="hubs.example.com"
+        location={new URL(href)}
+        replaceHash={vi.fn()}
+        navigate={navigate}
+      />
     </NextIntlClientProvider>,
   );
 }
@@ -145,6 +157,66 @@ describe('the published brand hub site', () => {
     cleanup();
     renderSite(api(), 'https://hubs.example.com/');
     expect(await screen.findByText('Brand Hub não encontrado')).toBeTruthy();
+  });
+
+  it('on the site host the slug comes from the path', async () => {
+    const siteApi = api();
+    renderSite(siteApi, 'https://hubs.example.com/bloom/estrategia');
+    expect(await screen.findByText('Dar forma a marcas honestas.')).toBeTruthy();
+    expect(siteApi.loadHub).toHaveBeenCalledWith('bloom', null);
+    expect(siteApi.loadHubByDomain).not.toHaveBeenCalled();
+  });
+
+  it('on a client domain the hub loads by host and unlocks by its slug', async () => {
+    const loadHubByDomain = vi
+      .fn<SiteApi['loadHubByDomain']>()
+      .mockResolvedValueOnce({
+        slug: 'bloom',
+        result: { status: 401, mode: 'password', clientName: 'Bloom' },
+      })
+      .mockResolvedValue({ slug: 'bloom', result: { status: 200, hub: HUB } });
+    const unlock = vi.fn().mockResolvedValue({ status: 200, token: 'token-3' });
+    const siteApi = api({ loadHubByDomain, unlock });
+    renderSite(siteApi, 'https://marca.bloom.pt/');
+
+    fireEvent.change(await screen.findByLabelText('Palavra-passe'), {
+      target: { value: 'marca segura 2026' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir' }));
+    expect(await screen.findByText('Dar forma a marcas honestas.')).toBeTruthy();
+    expect(loadHubByDomain).toHaveBeenNthCalledWith(1, 'marca.bloom.pt', null);
+    expect(unlock).toHaveBeenCalledWith('bloom', 'marca segura 2026');
+    expect(loadHubByDomain).toHaveBeenLastCalledWith('marca.bloom.pt', 'token-3');
+    expect(siteApi.loadHub).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem('brand-hub-token:marca.bloom.pt')).toBe('token-3');
+  });
+
+  it('a restricted hub on a client domain returns to that domain', async () => {
+    const loadHubByDomain = vi.fn().mockResolvedValue({
+      slug: 'bloom',
+      result: { status: 401, mode: 'restricted', clientName: 'Bloom' },
+    });
+    renderSite(api({ loadHubByDomain }), 'https://marca.bloom.pt/');
+    const link = await screen.findByRole('link', { name: 'Entrar com a conta da empresa' });
+    expect(link.getAttribute('href')).toBe(
+      'https://os.example.com/pt-PT/hub-access/bloom?return=https%3A%2F%2Fmarca.bloom.pt%2F',
+    );
+  });
+
+  it('the manual downloads with the token', async () => {
+    window.localStorage.setItem('brand-hub-token:bloom', 'token-4');
+    const manual = vi.fn().mockResolvedValue({
+      status: 200,
+      url: 'https://storage.example.com/manual.pdf?token=y',
+      fileName: 'bloom-manual-de-marca.pdf',
+    });
+    const navigate = vi.fn();
+    renderSite(api({ manual }), 'https://hubs.example.com/bloom/', navigate);
+    fireEvent.click(await screen.findByRole('button', { name: 'Manual completo (PDF)' }));
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith('https://storage.example.com/manual.pdf?token=y'),
+    );
+    expect(manual).toHaveBeenCalledWith('bloom', 'token-4');
   });
 
   it('a stale token is dropped', async () => {

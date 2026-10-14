@@ -365,6 +365,13 @@
       "when": 1791976789935,
       "tag": "20261014111949_brand_hub_access_modes",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1792001401779,
+      "tag": "20261014181001_brand_hub_domains",
+      "breakpoints": true
     }
   ]
 }

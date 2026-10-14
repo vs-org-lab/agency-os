@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { downloadZip } from 'client-zip';
-import { Download } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import type { ZipManifest } from './api';
@@ -62,6 +62,42 @@ export function SiteDownloads({
           : label === null
             ? t('downloads.all')
             : t('downloads.page', { page: label })}
+      </Button>
+      {failed ? (
+        <p role="alert" className="text-caption text-danger">
+          {t('errors.download_failed')}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** RF-093: the full brand manual of the publication, opened from a link that expires. */
+export function SiteManualDownload({
+  requestManual,
+  navigate,
+}: {
+  requestManual: () => Promise<string | null>;
+  navigate: (url: string) => void;
+}) {
+  const t = useTranslations('brandHub');
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const download = async () => {
+    setPending(true);
+    setFailed(false);
+    const url = await requestManual().catch(() => null);
+    setPending(false);
+    if (url) navigate(url);
+    else setFailed(true);
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <Button type="button" variant="outline" size="sm" disabled={pending} onClick={download}>
+        <FileText aria-hidden="true" />
+        {pending ? t('downloads.preparingManual') : t('downloads.manual')}
       </Button>
       {failed ? (
         <p role="alert" className="text-caption text-danger">

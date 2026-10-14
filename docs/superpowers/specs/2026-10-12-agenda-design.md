@@ -3,7 +3,7 @@
 | Campo                   | Valor                                                                                                                                                                       |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Data                    | 2026-10-12                                                                                                                                                                  |
-| Estado                  | Aprovado (aprovação permanente do fundador)                                                                                                                                 |
+| Estado                  | Implementado (2026-10-14)                                                                                                                                                   |
 | Vaga                    | 2 (… → 2F.1 Brand Hub: editor, publicação e portal → **2G Agenda**; 2F.2 fica a seguir)                                                                                     |
 | Módulos                 | M11 (RF-100), M06 (separador Agenda da sala), S-01 (Próximos eventos), S-04, AUT-13 (kickoff agendado)                                                                      |
 | Documentação de produto | `01` (RF-100), `02` (arquétipo Calendário, S-01, S-04, F2), `06` (Google Calendar), `07` (AUT-13), `08` (matriz)                                                            |

@@ -9,7 +9,7 @@ import { Label } from '@agency-os/ui/components/label';
 import { cn } from '@agency-os/ui/lib/utils';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
-import type { HubDesign, HubEditorView, HubSnapshot } from '@/modules/brand-hub';
+import type { HubDesign, HubEditorView, HubSharingView, HubSnapshot } from '@/modules/brand-hub';
 import { AssetsPanel, type AssetActions } from './assets-panel';
 import { BlockEditor } from './block-editor';
 import { DesignPanel } from './design-panel';
@@ -17,6 +17,7 @@ import { hubError, type ActionResult, type HubError } from './hub-errors';
 import { HubView } from './hub-view';
 import { PageNavigator } from './page-navigator';
 import { PublishBar } from './publish-bar';
+import { SharingPanel, type SaveSharing } from './sharing-panel';
 
 export type HubEditorActions = {
   addPage: (hubId: string, title: string) => Promise<ActionResult>;
@@ -34,6 +35,7 @@ export type HubEditorActions = {
   removeAsset: AssetActions['remove'];
   publish: (hubId: string) => Promise<ActionResult>;
   askApproval: (hubId: string) => Promise<ActionResult>;
+  saveSharing: SaveSharing;
 };
 
 type EditorHub = Extract<HubEditorView, { hub: object }>['hub'];
@@ -58,12 +60,14 @@ export function HubEditor({
   hub,
   clientName,
   preview,
+  sharing = null,
   actions,
 }: {
   hub: EditorHub;
   clientId: string;
   clientName: string;
   preview: HubSnapshot | null;
+  sharing?: HubSharingView | null;
   actions: HubEditorActions;
 }) {
   const t = useTranslations('brandHub');
@@ -74,7 +78,12 @@ export function HubEditor({
   const [blockType, setBlockType] = useState<BrandHubBlockType>('text');
   const [error, setError] = useState<HubError | null>(null);
   const [pending, startTransition] = useTransition();
-  const [sideTab, setSideTab] = useState<'design' | 'assets'>('design');
+  const [sideTab, setSideTab] = useState<'design' | 'assets' | 'sharing'>('design');
+  const sideTabs = [
+    'design',
+    'assets',
+    ...(hub.canPublish && sharing ? (['sharing'] as const) : []),
+  ] as const;
   const page = hub.pages.find((candidate) => candidate.id === selectedId) ?? hub.pages[0] ?? null;
   const refresh = () => router.refresh();
 
@@ -224,7 +233,7 @@ export function HubEditor({
             </section>
             <aside className={column('side')}>
               <div role="group" aria-label={t('panels.side')} className="flex gap-1">
-                {(['design', 'assets'] as const).map((tab) => (
+                {sideTabs.map((tab) => (
                   <Button
                     key={tab}
                     type="button"
@@ -237,7 +246,17 @@ export function HubEditor({
                   </Button>
                 ))}
               </div>
-              {sideTab === 'design' ? (
+              {sideTab === 'sharing' && sharing ? (
+                <SharingPanel
+                  key={`${sharing.slug}-${sharing.mode}`}
+                  sharing={sharing}
+                  save={async (input) => {
+                    const outcome = await actions.saveSharing(input);
+                    if (outcome.ok) refresh();
+                    return outcome;
+                  }}
+                />
+              ) : sideTab === 'design' ? (
                 <DesignPanel
                   key={hub.id}
                   hubId={hub.id}

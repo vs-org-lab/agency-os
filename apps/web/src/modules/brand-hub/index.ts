@@ -26,3 +26,4 @@ export type {
   HubEditorView,
   PortalHubView,
 } from './views';
+export type { HubSharingView } from './sharing';

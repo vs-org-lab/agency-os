@@ -5,7 +5,11 @@ import { CreateHub } from '@/components/brand-hub/create-hub';
 import { HubEditor } from '@/components/brand-hub/hub-editor';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
-import { loadStaffBrandHub, previewBrandHub } from '@/modules/brand-hub/server';
+import {
+  loadBrandHubSharing,
+  loadStaffBrandHub,
+  previewBrandHub,
+} from '@/modules/brand-hub/server';
 import { findVisibleClient } from '@/modules/organizations';
 import { withUserContext } from '@/platform/db';
 import {
@@ -23,6 +27,7 @@ import {
   renameHubPageAction,
   saveHubBlockAction,
   saveHubDesignAction,
+  saveHubSharingAction,
   setHubPageHiddenAction,
   startHubAssetAction,
 } from '../../../brand-hub-actions';
@@ -40,9 +45,10 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
   const session = await requireArea('/', locale);
   const client = await withUserContext(session.claims, (tx) => findVisibleClient(tx, clientId));
   if (!client) notFound();
-  const [view, preview] = await Promise.all([
+  const [view, preview, sharing] = await Promise.all([
     loadStaffBrandHub(session.claims, clientId),
     previewBrandHub(session.claims, clientId),
+    loadBrandHubSharing(session.claims, clientId),
   ]);
   const t = await getTranslations('brandHub');
 
@@ -69,6 +75,7 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
           clientId={clientId}
           clientName={client.name}
           preview={preview}
+          sharing={sharing}
           actions={{
             addPage: addHubPageAction,
             renamePage: renameHubPageAction,
@@ -85,6 +92,7 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
             removeAsset: removeHubAssetAction,
             publish: publishHubAction,
             askApproval: askHubApprovalAction,
+            saveSharing: saveHubSharingAction,
           }}
         />
       )}

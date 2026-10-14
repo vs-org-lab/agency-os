@@ -2617,6 +2617,32 @@
       "deniedTitle": "Sem acesso a este Brand Hub",
       "deniedDescription": "A sua conta não tem acesso a este Brand Hub, ou o endereço já não é válido. Peça acesso à equipa da agência.",
       "home": "Ir para o início"
+    },
+    "sharing": {
+      "title": "Partilha",
+      "siteAddress": "Endereço do site",
+      "copy": "Copiar endereço",
+      "copied": "Endereço copiado.",
+      "noSite": "O site dos Brand Hubs ainda não está configurado neste ambiente.",
+      "unpublished": "Publique o Brand Hub para o site ficar disponível.",
+      "slug": "Endereço do hub",
+      "slugHint": "Letras minúsculas, números e hífenes, de 3 a 60 caracteres.",
+      "access": "Quem pode abrir o site",
+      "modes": {
+        "public": "Público: qualquer pessoa com o endereço.",
+        "password": "Com palavra-passe: quem souber a palavra-passe.",
+        "restricted": "Restrito: só os utilizadores do cliente com sessão no OS."
+      },
+      "password": "Palavra-passe do site",
+      "passwordHint": "De 10 a 128 caracteres.",
+      "passwordKeep": "Deixe em branco para manter a palavra-passe atual.",
+      "save": "Guardar partilha",
+      "saved": "Partilha guardada.",
+      "errors": {
+        "invalid_input": "Verifique o endereço e a palavra-passe.",
+        "invalid_state": "Esse endereço já está a ser usado por outro hub.",
+        "not_found": "Não foi possível guardar a partilha."
+      }
     }
   },
   "agenda": {

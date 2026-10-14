@@ -10,6 +10,7 @@ import { DesignPanel } from './design-panel';
 import { HubDownloads } from './hub-downloads';
 import { HubEditor, type HubEditorActions } from './hub-editor';
 import { HubView } from './hub-view';
+import { SharingPanel } from './sharing-panel';
 
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -328,5 +329,86 @@ describe('brand hub', () => {
     expect(screen.getByRole('link', { name: 'Abrir o Brand Hub' }).getAttribute('href')).toBe(
       '/portal/hub',
     );
+  });
+
+  it('the sharing panel shows the site address and asks for a password only in password mode', async () => {
+    const save = vi.fn(async () => ({ ok: true as const }));
+    withIntl(
+      <SharingPanel
+        sharing={{
+          hubId: 'hub-1',
+          slug: 'atlas',
+          mode: 'restricted',
+          hasPassword: false,
+          siteUrl: 'https://hubs.example.com/atlas/',
+          published: false,
+        }}
+        save={save}
+      />,
+    );
+    expect(screen.getByText('https://hubs.example.com/atlas/')).toBeTruthy();
+    expect(screen.getByText('Publique o Brand Hub para o site ficar disponível.')).toBeTruthy();
+    expect(screen.queryByLabelText('Palavra-passe do site')).toBeNull();
+    fireEvent.click(screen.getByRole('radio', { name: /Com palavra-passe/ }));
+    fireEvent.change(screen.getByLabelText('Palavra-passe do site'), {
+      target: { value: 'marca segura 2026' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar partilha' }));
+    await screen.findByText('Partilha guardada.');
+    expect(save).toHaveBeenCalledWith({
+      hubId: 'hub-1',
+      slug: 'atlas',
+      mode: 'password',
+      password: 'marca segura 2026',
+    });
+  });
+
+  it('the sharing tab is hidden from freelancers', () => {
+    const hub = {
+      id: 'hub-1',
+      design: DEFAULT_HUB_DESIGN,
+      pages: [],
+      assets: [],
+      unpublishedChanges: false,
+      lastPublishedAt: null,
+      approval: 'none' as const,
+      canPublish: false,
+      contrastWarning: false,
+    };
+    const actions = new Proxy(
+      {},
+      { get: () => vi.fn(async () => ({ ok: true })) },
+    ) as HubEditorActions;
+    const sharing = {
+      hubId: 'hub-1',
+      slug: 'atlas',
+      mode: 'public' as const,
+      hasPassword: false,
+      siteUrl: 'https://hubs.example.com/atlas/',
+      published: true,
+    };
+    const { unmount } = withIntl(
+      <HubEditor
+        hub={hub}
+        clientId="client-1"
+        clientName="Bloom"
+        preview={null}
+        sharing={sharing}
+        actions={actions}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Partilha' })).toBeNull();
+    unmount();
+    withIntl(
+      <HubEditor
+        hub={{ ...hub, canPublish: true }}
+        clientId="client-1"
+        clientName="Bloom"
+        preview={null}
+        sharing={sharing}
+        actions={actions}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Partilha' })).toBeTruthy();
   });
 });

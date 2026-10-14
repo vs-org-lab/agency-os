@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { database } from './support/admin';
@@ -43,7 +44,13 @@ test.describe('Agenda', () => {
       values (${credentials.organizationId}, ${seeded.clientId}, ${project.id}, 'Agendar kickoff',
               'kickoff')
     `;
+    // Kickoffs left by earlier runs would crowd the day and the home's next five events.
+    await sql`
+      update public.agenda_events set status = 'cancelled'
+      where organization_id = ${credentials.organizationId} and title like 'Kickoff %'
+    `;
     const { day, label } = tomorrow();
+    const title = `Kickoff ${randomUUID().slice(0, 6)}`;
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/agenda?view=month&date=${day}`);
@@ -51,22 +58,22 @@ test.describe('Agenda', () => {
     const dialog = page.getByRole('dialog', { name: 'Nova reunião' });
     await dialog.getByLabel('Tipo').selectOption({ label: 'Kickoff' });
     await dialog.getByLabel('Projeto').selectOption({ label: 'Website' });
-    await dialog.getByLabel('Título').fill('Kickoff do site');
+    await dialog.getByLabel('Título').fill(title);
     await dialog.getByLabel('Convidar o decisor').check();
     await expect(dialog.getByLabel('Data')).toHaveValue(day);
     await dialog.getByRole('button', { name: 'Guardar' }).click();
     await expect(page.getByText('Reunião marcada.')).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('button', { name: /Kickoff do site/ })).toBeVisible({
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toBeVisible({
       timeout: 30_000,
     });
     await expectAccessible(page);
 
-    await page.goto(`/calendar?view=month&date=${day}`);
-    await expect(page.getByRole('button', { name: /Kickoff do site/ })).toBeVisible();
+    await page.goto(`/calendar?view=week&date=${day}`);
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toBeVisible();
     await expectAccessible(page);
 
     await page.goto('/');
-    await expect(page.getByRole('link', { name: /Kickoff do site/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(title) })).toBeVisible();
 
     const [task] = await sql<{ status: string }[]>`
       select status::text from public.tasks

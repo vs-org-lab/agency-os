@@ -23,6 +23,8 @@ export type PortalInvoice = {
   issuerName: string;
   bank: PortalBankDetails;
   legalInvoice: { number: string; issuer: InvoiceIssuer; issuedOn: string } | null;
+  /** Receipts of the billable expenses this request charges (RF-153). */
+  receipts: { expenseId: string; name: string }[];
 };
 
 type RequestRow = {
@@ -40,6 +42,8 @@ type RequestRow = {
 };
 
 type InvoiceRow = { request_id: string; number: string; issuer: InvoiceIssuer; issued_on: string };
+
+type ReceiptRow = { expense_id: string; payment_request_id: string; receipt_name: string };
 
 /** P-06: the client's sent and paid payment requests, read through the portal views. */
 export async function getPortalInvoices(
@@ -60,6 +64,12 @@ export async function getPortalInvoices(
     select request_id, number, issuer::text as issuer, issued_on::text as issued_on
     from public.portal_legal_invoices
     where client_id = ${clientId}::uuid
+  `);
+  const receipts = await tx.execute<ReceiptRow>(sql`
+    select expense_id, payment_request_id, receipt_name
+    from public.portal_payment_request_receipts
+    where client_id = ${clientId}::uuid
+    order by receipt_name, expense_id
   `);
 
   return requests.map((row) => {
@@ -88,6 +98,9 @@ export async function getPortalInvoices(
       legalInvoice: invoice
         ? { number: invoice.number, issuer: invoice.issuer, issuedOn: invoice.issued_on }
         : null,
+      receipts: receipts
+        .filter((receipt) => receipt.payment_request_id === row.id)
+        .map((receipt) => ({ expenseId: receipt.expense_id, name: receipt.receipt_name })),
     };
   });
 }

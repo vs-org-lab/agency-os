@@ -4,7 +4,7 @@ import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platf
 import { receiptReader } from '@/platform/receipt-reader';
 import type { MoneyDeps } from './access';
 import { deleteExpense, linkExpense, saveExpense, type ExpenseInput } from './expenses';
-import { expenseReceiptUrl, loadMoneyYear } from './readers';
+import { loadMoneyYear, receiptUrlFor } from './readers';
 import { readReceipt, startReceiptUpload } from './receipts';
 import {
   cancelSubscription,
@@ -45,4 +45,4 @@ export const recordRenewal = (
 export const loadMoneyYearView = (claims: VerifiedClaims, year: number) =>
   loadMoneyYear(claims, year, deps());
 export const moneyReceiptUrl = (claims: VerifiedClaims, expenseId: string) =>
-  expenseReceiptUrl(claims, expenseId, deps());
+  receiptUrlFor(claims, expenseId, deps());

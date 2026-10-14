@@ -262,3 +262,28 @@ export async function expenseReceiptUrl(
     row.receipt_name ?? 'recibo',
   );
 }
+
+/**
+ * The receipt link for whoever may see it: billing readers, or the client's decision maker and
+ * finance contact through the portal view when the expense is linked to one of their requests.
+ */
+export async function receiptUrlFor(
+  claims: VerifiedClaims,
+  expenseId: string,
+  deps: MoneyDeps,
+): Promise<string | null> {
+  if (!z.uuid().safeParse(expenseId).success) return null;
+  if (claims.user_kind !== 'client') return expenseReceiptUrl(claims, expenseId, deps);
+  const [row] = await deps.contexts.withUserContext(claims, (tx) =>
+    tx.execute<{ receipt_path: string; receipt_name: string }>(sql`
+      select receipt_path, receipt_name from public.portal_payment_request_receipts
+      where expense_id = ${expenseId}::uuid
+    `),
+  );
+  if (!row) return null;
+  return deps.storage.signedDownloadUrl(
+    row.receipt_path,
+    LIBRARY_LINK_TTL_SECONDS,
+    row.receipt_name,
+  );
+}

@@ -7,7 +7,7 @@ import {
   withTestTransaction,
   type World,
 } from '@agency-os/db/testing';
-import { expenseReceiptUrl, loadMoneyYear } from './readers';
+import { expenseReceiptUrl, loadMoneyYear, receiptUrlFor } from './readers';
 import { moneyClaims, moneyDeps } from './testing';
 
 afterAll(async () => {
@@ -135,6 +135,32 @@ describe('money year', () => {
         expect(
           await expenseReceiptUrl(moneyClaims(world.users.finance), money.internalExpenseId, deps),
         ).toBeNull();
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'the receipt route redirects readers and refuses others',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const money = await createMoneyFixture(sql, world);
+        const { deps } = moneyDeps(sql);
+        const url = (userId: string, kind: 'internal' | 'client', expenseId: string) =>
+          receiptUrlFor(moneyClaims(userId, kind), expenseId, deps);
+
+        expect(await url(world.users.finance, 'internal', money.a.expenseId)).toContain('ttl=900');
+        expect(await url(world.users.decisionMakerA, 'client', money.a.expenseId)).toContain(
+          'ttl=900',
+        );
+        expect(await url(world.users.clientFinanceB, 'client', money.b.expenseId)).toContain(
+          'ttl=900',
+        );
+        expect(await url(world.users.decisionMakerA, 'client', money.b.expenseId)).toBeNull();
+        expect(await url(world.users.operationalA, 'client', money.a.expenseId)).toBeNull();
+        expect(await url(world.users.freelancer, 'internal', money.a.expenseId)).toBeNull();
+        expect(await url(world.users.finance, 'internal', 'not-a-uuid')).toBeNull();
       });
     },
     SLOW,

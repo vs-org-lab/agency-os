@@ -9,10 +9,17 @@ import { Label } from '@agency-os/ui/components/label';
 import { cn } from '@agency-os/ui/lib/utils';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
-import type { HubDesign, HubEditorView, HubSharingView, HubSnapshot } from '@/modules/brand-hub';
+import type {
+  HubDesign,
+  HubDomainState,
+  HubEditorView,
+  HubSharingView,
+  HubSnapshot,
+} from '@/modules/brand-hub';
 import { AssetsPanel, type AssetActions } from './assets-panel';
 import { BlockEditor } from './block-editor';
 import { DesignPanel } from './design-panel';
+import { DomainPanel, type DomainActions } from './domain-panel';
 import { hubError, type ActionResult, type HubError } from './hub-errors';
 import { HubView } from './hub-view';
 import { PageNavigator } from './page-navigator';
@@ -36,7 +43,25 @@ export type HubEditorActions = {
   publish: (hubId: string) => Promise<ActionResult>;
   askApproval: (hubId: string) => Promise<ActionResult>;
   saveSharing: SaveSharing;
+  domain?: DomainActions;
 };
+
+/** The same domain actions, refreshing the page after each one that succeeds. */
+function refreshing(actions: DomainActions, refresh: () => void): DomainActions {
+  const after =
+    <A extends unknown[]>(run: (...args: A) => ReturnType<DomainActions['verify']>) =>
+    async (...args: A) => {
+      const outcome = await run(...args);
+      if (outcome.ok) refresh();
+      return outcome;
+    };
+  return {
+    save: after(actions.save),
+    verify: after(actions.verify),
+    connect: after(actions.connect),
+    remove: after(actions.remove),
+  };
+}
 
 type EditorHub = Extract<HubEditorView, { hub: object }>['hub'];
 type Panel = 'pages' | 'canvas' | 'side';
@@ -61,6 +86,7 @@ export function HubEditor({
   clientName,
   preview,
   sharing = null,
+  domain = null,
   actions,
 }: {
   hub: EditorHub;
@@ -68,6 +94,7 @@ export function HubEditor({
   clientName: string;
   preview: HubSnapshot | null;
   sharing?: HubSharingView | null;
+  domain?: HubDomainState | null;
   actions: HubEditorActions;
 }) {
   const t = useTranslations('brandHub');
@@ -247,15 +274,26 @@ export function HubEditor({
                 ))}
               </div>
               {sideTab === 'sharing' && sharing ? (
-                <SharingPanel
-                  key={`${sharing.slug}-${sharing.mode}`}
-                  sharing={sharing}
-                  save={async (input) => {
-                    const outcome = await actions.saveSharing(input);
-                    if (outcome.ok) refresh();
-                    return outcome;
-                  }}
-                />
+                <div className="flex flex-col gap-8">
+                  <SharingPanel
+                    key={`${sharing.slug}-${sharing.mode}`}
+                    sharing={sharing}
+                    save={async (input) => {
+                      const outcome = await actions.saveSharing(input);
+                      if (outcome.ok) refresh();
+                      return outcome;
+                    }}
+                  />
+                  {domain && actions.domain ? (
+                    <DomainPanel
+                      key={`${domain.domain?.hostname ?? ''}-${domain.domain?.status ?? ''}`}
+                      hubId={hub.id}
+                      approved={domain.approved}
+                      state={domain}
+                      actions={refreshing(actions.domain, refresh)}
+                    />
+                  ) : null}
+                </div>
               ) : sideTab === 'design' ? (
                 <DesignPanel
                   key={hub.id}

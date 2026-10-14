@@ -18,7 +18,7 @@ import {
 } from './access';
 import { normaliseHostname } from './domain/hostname';
 
-const { brandHubDomains } = schema;
+const { brandHubDomains, brandHubs } = schema;
 
 const VERIFICATION_PREFIX = '_agency-os.';
 export const CNAME_TARGET = 'cname.vercel-dns.com';
@@ -40,7 +40,12 @@ export type HubDomainView = {
   configured: boolean | null;
 };
 
-export type HubDomainState = { available: boolean; domain: HubDomainView | null };
+export type HubDomainState = {
+  available: boolean;
+  /** Whether the client has approved a publication, which the first connection needs (RN-81). */
+  approved: boolean;
+  domain: HubDomainView | null;
+};
 
 type DomainRow = typeof brandHubDomains.$inferSelect;
 
@@ -93,15 +98,22 @@ export async function loadHubDomain(
 ): Promise<HubDomainState | NotFound> {
   const id = await publishableHub(claims, hubId, deps);
   if (!id) return NOT_FOUND;
-  const row = await deps.contexts.withSystemContext((tx) => currentDomain(tx, id));
+  const { row, approved } = await deps.contexts.withSystemContext(async (tx) => {
+    const [hub] = await tx
+      .select({ approvedPublicationId: brandHubs.approvedPublicationId })
+      .from(brandHubs)
+      .where(eq(brandHubs.id, id));
+    return { row: await currentDomain(tx, id), approved: Boolean(hub?.approvedPublicationId) };
+  });
   const available = deps.domains !== undefined;
-  if (!row) return { available, domain: null };
+  if (!row) return { available, approved, domain: null };
   const configured =
     row.status === 'connected' && deps.domains
       ? await deps.domains.domainConfigured(row.hostname).catch(() => false)
       : null;
   return {
     available,
+    approved,
     domain: {
       hostname: row.hostname,
       status: row.status,

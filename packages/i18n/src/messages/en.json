@@ -2587,7 +2587,9 @@
     "downloads": {
       "page": "Download {page}",
       "all": "Download all assets",
-      "preparing": "Preparing the ZIP…"
+      "preparing": "Preparing the ZIP…",
+      "manual": "Full manual (PDF)",
+      "preparingManual": "Preparing the manual…"
     },
     "view": {
       "contents": "Brand Hub sections",
@@ -2658,6 +2660,47 @@
       "restrictedDescription": "Only the {client} team can open it. Sign in with the company account.",
       "restrictedAction": "Sign in with the company account",
       "error": "The Brand Hub could not be loaded. Try again."
+    },
+    "domain": {
+      "title": "Client's domain",
+      "intro": "Connect the Brand Hub to a subdomain of the client's, for example brand.client.com.",
+      "hostname": "Domain address",
+      "hostnameHint": "A subdomain with at least three parts, without https://.",
+      "save": "Save domain",
+      "records": "Records to create in the client's DNS",
+      "recordType": "Type",
+      "recordName": "Name",
+      "recordValue": "Value",
+      "copyValue": "Copy {type} value",
+      "verify": "Verify",
+      "connect": "Connect domain",
+      "remove": "Remove domain",
+      "status": {
+        "pending": "Awaiting verification",
+        "verified": "Verified",
+        "connected": "Connected"
+      },
+      "statusLabel": "Status: {status}",
+      "approvalNeeded": "The first publication on a client's domain needs the Brand Hub approved by the client. Ask for approval before connecting the domain.",
+      "waitingDns": "Waiting for DNS: the CNAME does not point to the site yet.",
+      "live": "The site is available at https://{host}.",
+      "unavailable": "Connecting domains is not configured in this environment.",
+      "saved": "Domain saved.",
+      "verified": "Domain verified.",
+      "connected": "Domain connected.",
+      "removed": "Domain removed.",
+      "copied": "Value copied.",
+      "errors": {
+        "invalid_input": "Invalid address, or already used by another Brand Hub.",
+        "missing": "The TXT record was not found yet. DNS changes can take a while.",
+        "mismatch": "The TXT record exists but holds another code.",
+        "rate_limited": "Too many checks. Try again in 15 minutes.",
+        "invalid_state": "The domain changed in the meantime. Refresh the page.",
+        "not_approved": "The first publication on a client's domain needs the Brand Hub approved by the client.",
+        "provider_error": "Vercel refused the domain: {message}",
+        "unavailable": "Connecting domains is not configured in this environment.",
+        "not_found": "This could not be completed. Refresh the page."
+      }
     }
   },
   "agenda": {

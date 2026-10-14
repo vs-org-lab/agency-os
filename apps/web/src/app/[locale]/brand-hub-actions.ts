@@ -1,11 +1,13 @@
 'use server';
 
 import type { BrandHubBlockType } from '@agency-os/db';
+import type { DomainActionResult } from '@/components/brand-hub/domain-panel';
 import type { ActionResult } from '@/components/brand-hub/hub-errors';
 import {
   askHubApproval,
   brandHubManual,
   brandHubZip,
+  checkHubDomain,
   createHubBlock,
   createHubPage,
   decideBrandHubApproval,
@@ -13,16 +15,19 @@ import {
   deleteHubBlock,
   deleteHubPage,
   finishHubAssetUpload,
+  linkHubDomain,
   publishHub,
   reorderHubBlock,
   reorderHubPage,
   retitleHubPage,
   saveHubBlock,
   saveHubDesign,
+  saveHubDomain,
   saveHubSharing,
   startBrandHub,
   startHubAssetUpload,
   toggleHubPage,
+  unlinkHubDomain,
 } from '@/modules/brand-hub/server';
 import type { ZipManifest } from '@/modules/library';
 import { getVerifiedClaims } from '@/platform/session';
@@ -164,4 +169,37 @@ export async function hubManualAction(
   if (!claims) return NOT_FOUND;
   const result = await brandHubManual(claims, clientId);
   return result.ok ? result : { ok: false, code: result.rule };
+}
+
+type DomainOutcome = { ok: true } | { ok: false; rule: string; reason?: string; message?: string };
+
+async function withDomain(
+  run: (
+    claims: NonNullable<Awaited<ReturnType<typeof getVerifiedClaims>>>,
+  ) => Promise<DomainOutcome>,
+): Promise<DomainActionResult> {
+  const claims = await getVerifiedClaims();
+  if (!claims) return NOT_FOUND;
+  const result = await run(claims);
+  if (result.ok) return { ok: true };
+  return { ok: false, code: result.reason ?? result.rule, message: result.message };
+}
+
+export async function setHubDomainAction(
+  hubId: string,
+  hostname: string,
+): Promise<DomainActionResult> {
+  return withDomain((claims) => saveHubDomain(claims, hubId, hostname));
+}
+
+export async function verifyHubDomainAction(hubId: string): Promise<DomainActionResult> {
+  return withDomain((claims) => checkHubDomain(claims, hubId));
+}
+
+export async function connectHubDomainAction(hubId: string): Promise<DomainActionResult> {
+  return withDomain((claims) => linkHubDomain(claims, hubId));
+}
+
+export async function removeHubDomainAction(hubId: string): Promise<DomainActionResult> {
+  return withDomain((claims) => unlinkHubDomain(claims, hubId));
 }

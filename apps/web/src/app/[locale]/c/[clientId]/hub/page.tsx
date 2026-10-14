@@ -6,6 +6,7 @@ import { HubEditor } from '@/components/brand-hub/hub-editor';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import {
+  loadBrandHubDomain,
   loadBrandHubSharing,
   loadStaffBrandHub,
   previewBrandHub,
@@ -16,6 +17,7 @@ import {
   addHubBlockAction,
   addHubPageAction,
   askHubApprovalAction,
+  connectHubDomainAction,
   createBrandHubAction,
   finishHubAssetAction,
   moveHubBlockAction,
@@ -23,13 +25,16 @@ import {
   publishHubAction,
   removeHubAssetAction,
   removeHubBlockAction,
+  removeHubDomainAction,
   removeHubPageAction,
   renameHubPageAction,
   saveHubBlockAction,
   saveHubDesignAction,
   saveHubSharingAction,
+  setHubDomainAction,
   setHubPageHiddenAction,
   startHubAssetAction,
+  verifyHubDomainAction,
 } from '../../../brand-hub-actions';
 import { RoomHeader } from '../room/room-header';
 
@@ -50,6 +55,8 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
     previewBrandHub(session.claims, clientId),
     loadBrandHubSharing(session.claims, clientId),
   ]);
+  const domainState = sharing ? await loadBrandHubDomain(session.claims, sharing.hubId) : null;
+  const domain = domainState && 'available' in domainState ? domainState : null;
   const t = await getTranslations('brandHub');
 
   return (
@@ -76,6 +83,7 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
           clientName={client.name}
           preview={preview}
           sharing={sharing}
+          domain={domain}
           actions={{
             addPage: addHubPageAction,
             renamePage: renameHubPageAction,
@@ -93,6 +101,12 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
             publish: publishHubAction,
             askApproval: askHubApprovalAction,
             saveSharing: saveHubSharingAction,
+            domain: {
+              save: setHubDomainAction,
+              verify: verifyHubDomainAction,
+              connect: connectHubDomainAction,
+              remove: removeHubDomainAction,
+            },
           }}
         />
       )}

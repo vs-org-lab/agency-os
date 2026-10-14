@@ -2587,7 +2587,9 @@
     "downloads": {
       "page": "Descarregar {page}",
       "all": "Descarregar todos os ativos",
-      "preparing": "A preparar o ZIP…"
+      "preparing": "A preparar o ZIP…",
+      "manual": "Manual completo (PDF)",
+      "preparingManual": "A preparar o manual…"
     },
     "view": {
       "contents": "Secções do Brand Hub",
@@ -2658,6 +2660,47 @@
       "restrictedDescription": "Só a equipa de {client} pode abri-lo. Entre com a conta da empresa.",
       "restrictedAction": "Entrar com a conta da empresa",
       "error": "Não foi possível carregar o Brand Hub. Tente de novo."
+    },
+    "domain": {
+      "title": "Domínio do cliente",
+      "intro": "Ligue o Brand Hub a um subdomínio do cliente, por exemplo marca.cliente.com.",
+      "hostname": "Endereço do domínio",
+      "hostnameHint": "Um subdomínio com pelo menos três partes, sem https://.",
+      "save": "Guardar domínio",
+      "records": "Registos a criar no DNS do cliente",
+      "recordType": "Tipo",
+      "recordName": "Nome",
+      "recordValue": "Valor",
+      "copyValue": "Copiar valor de {type}",
+      "verify": "Verificar",
+      "connect": "Ligar domínio",
+      "remove": "Remover domínio",
+      "status": {
+        "pending": "A aguardar verificação",
+        "verified": "Verificado",
+        "connected": "Ligado"
+      },
+      "statusLabel": "Estado: {status}",
+      "approvalNeeded": "A primeira publicação num domínio do cliente exige o Brand Hub aprovado pelo cliente. Peça a aprovação antes de ligar o domínio.",
+      "waitingDns": "A aguardar DNS: o CNAME ainda não aponta para o site.",
+      "live": "O site está disponível em https://{host}.",
+      "unavailable": "A ligação de domínios não está configurada neste ambiente.",
+      "saved": "Domínio guardado.",
+      "verified": "Domínio verificado.",
+      "connected": "Domínio ligado.",
+      "removed": "Domínio removido.",
+      "copied": "Valor copiado.",
+      "errors": {
+        "invalid_input": "Endereço inválido ou já usado noutro Brand Hub.",
+        "missing": "O registo TXT ainda não foi encontrado. A propagação do DNS pode demorar.",
+        "mismatch": "O registo TXT existe, mas tem outro código.",
+        "rate_limited": "Demasiadas verificações. Tente de novo dentro de 15 minutos.",
+        "invalid_state": "O domínio mudou entretanto. Atualize a página.",
+        "not_approved": "A primeira publicação num domínio do cliente exige o Brand Hub aprovado pelo cliente.",
+        "provider_error": "A Vercel recusou o domínio: {message}",
+        "unavailable": "A ligação de domínios não está configurada neste ambiente.",
+        "not_found": "Não foi possível concluir. Atualize a página."
+      }
     }
   },
   "agenda": {

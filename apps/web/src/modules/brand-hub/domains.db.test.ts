@@ -72,6 +72,7 @@ describe('brand hub domains', () => {
         const view = await loadHubDomain(manager, hubId, deps);
         expect(view).toEqual({
           available: true,
+          approved: false,
           domain: {
             hostname: 'marca.cliente.com',
             status: 'pending',
@@ -277,6 +278,7 @@ describe('brand hub domains', () => {
 
         expect(await loadHubDomain(manager, hubId, deps)).toEqual({
           available: false,
+          approved: false,
           domain: null,
         });
         expect(await setHubDomain(manager, { hubId, hostname: 'marca.cliente.com' }, deps)).toEqual(

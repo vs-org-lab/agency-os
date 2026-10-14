@@ -30,6 +30,11 @@ createServer((request, response) => {
     const target = new URL(url.pathname.slice('/os'.length) + url.search, osUrl);
     const send = target.protocol === 'https:' ? httpsRequest : httpRequest;
     const headers: OutgoingHttpHeaders = { ...request.headers, host: target.host };
+    // The test browser sends Vercel bypass headers on every request; asking Vercel for its bypass
+    // cookie answers the API with a redirect to the protected deployment, so only the bypass itself
+    // is forwarded.
+    delete headers['x-vercel-set-bypass-cookie'];
+    delete headers['x-vercel-protection-bypass'];
     if (bypass) headers['x-vercel-protection-bypass'] = bypass;
     const upstream = send(target, { method: request.method, headers }, (answer) => {
       response.writeHead(answer.statusCode ?? 502, answer.headers);

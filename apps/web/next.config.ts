@@ -17,7 +17,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   agentRules: false,
-  transpilePackages: ['@agency-os/ui', '@agency-os/i18n', '@agency-os/db'],
+  transpilePackages: [
+    '@agency-os/ui',
+    '@agency-os/i18n',
+    '@agency-os/db',
+    '@agency-os/brand-hub-view',
+  ],
   serverExternalPackages: ['postgres'],
   experimental: { serverActions: { bodySizeLimit: '5mb' } },
 };

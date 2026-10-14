@@ -55,7 +55,7 @@ Cada sub-projeto tem spec, plano e execução próprios. A ordem segue o princí
    - O resultado aparece como proposta editável nos campos do formulário; nada é gravado sem a pessoa confirmar.
    - Os PDFs não são lidos: a pessoa preenche os campos à mão.
    - **Fornecedor:**
-     - `RECEIPT_READER=groq` usa a visão da Groq (`meta-llama/llama-4-scout-17b-16e-instruct`), já com conta e chave sem custo (ver 1B);
+     - `RECEIPT_READER=groq` usa a visão da Groq (`qwen/qwen3.8-27b`; o Llama 4 Scout saiu do catálogo da Groq), já com conta e chave sem custo (ver 1B), e `RECEIPT_READER_MODEL` troca o modelo sem nova versão;
      - `RECEIPT_READER=fake` devolve uma proposta fixa, para o dev e o e2e;
      - sem configuração, não há proposta.
    - O `06` prevê a API da Anthropic para esta leitura; a troca fica para o lançamento, quando houver orçamento (critério de lançamento).

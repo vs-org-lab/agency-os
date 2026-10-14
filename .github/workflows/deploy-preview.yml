@@ -61,6 +61,7 @@ jobs:
             --env TRANSCRIPTION_PROVIDER=fake \
             --env APPLY_IP_LIMIT_PER_HOUR=1000 \
             --env DOMAIN_PROVIDER=fake \
+            --env RECEIPT_READER=fake \
             --env BRAND_HUB_SITE_URL=http://localhost:3001 \
             --env BRAND_HUB_SITE_ORIGINS=http://localhost:3001 \
             --env BRAND_HUB_TOKEN_SECRET="${{ secrets.PREVIEW_BRAND_HUB_TOKEN_SECRET }}")

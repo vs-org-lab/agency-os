@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  CalendarDays,
   CircleCheck,
   FileText,
   FolderOpen,
@@ -91,6 +92,7 @@ const ICONS = {
   folder: FolderOpen,
   documents: FileText,
   brand: Palette,
+  calendar: CalendarDays,
 } as const;
 
 function NavigationItemLink({

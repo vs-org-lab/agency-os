@@ -13,7 +13,8 @@ export type NavigationIcon =
   | 'proofs'
   | 'folder'
   | 'documents'
-  | 'brand';
+  | 'brand'
+  | 'calendar';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -22,6 +23,7 @@ export type NavigationLabelKey =
   | 'shell.studioNav.acquisition'
   | 'shell.studioNav.updates'
   | 'shell.studioNav.tasks'
+  | 'shell.studioNav.calendar'
   | 'shell.settings'
   | 'shell.room.dashboard'
   | 'shell.room.updates'
@@ -29,6 +31,7 @@ export type NavigationLabelKey =
   | 'shell.room.library'
   | 'shell.room.documents'
   | 'shell.room.brandHub'
+  | 'shell.room.agenda'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -79,6 +82,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
           { href: '/', labelKey: 'shell.studioNav.home', icon: 'home' },
           { href: '/updates', labelKey: 'shell.studioNav.updates', icon: 'feed' },
           { href: '/tasks', labelKey: 'shell.studioNav.tasks', icon: 'tasks' },
+          { href: '/calendar', labelKey: 'shell.studioNav.calendar', icon: 'calendar' },
           ...(input.permissions.pipeline ? COMMERCIAL_ITEMS : []),
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
@@ -111,6 +115,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             href: `/c/${input.clientId}/library`,
             labelKey: 'shell.room.library',
             icon: 'folder',
+          },
+          {
+            href: `/c/${input.clientId}/agenda`,
+            labelKey: 'shell.room.agenda',
+            icon: 'calendar',
           },
           {
             href: `/c/${input.clientId}/hub`,

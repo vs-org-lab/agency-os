@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { clientColor } from './colors';
-import { dayBounds, lisbonDay, monthGrid, weekDays } from './grid';
+import { dayBounds, lisbonDay, lisbonInstant, lisbonTime, monthGrid, weekDays } from './grid';
 import { meetingSchema } from './meeting';
 
 const CLIENT = '3f2b8c1e-7d4a-4c6e-9b1a-2e5f8d7c6b4a';
@@ -82,6 +82,14 @@ describe('agenda domain', () => {
 
     expect(lisbonDay(new Date('2026-10-24T23:30:00Z'))).toBe('2026-10-25');
     expect(lisbonDay(new Date('2026-12-31T23:30:00Z'))).toBe('2026-12-31');
+  });
+
+  it('Lisbon wall times convert to instants and back', () => {
+    expect(lisbonInstant('2026-10-13', '10:00').toISOString()).toBe('2026-10-13T09:00:00.000Z');
+    expect(lisbonInstant('2026-12-01', '10:00').toISOString()).toBe('2026-12-01T10:00:00.000Z');
+    expect(lisbonInstant('2026-10-25', '12:00').toISOString()).toBe('2026-10-25T12:00:00.000Z');
+    expect(lisbonTime(new Date('2026-10-13T09:00:00Z'))).toBe('10:00');
+    expect(lisbonTime(new Date('2026-12-01T23:45:00Z'))).toBe('23:45');
   });
 
   it('client colours are stable', () => {

@@ -16,6 +16,7 @@ describe('buildNavigation', () => {
       '/c/client-1/tasks',
       '/c/client-1/docs',
       '/c/client-1/library',
+      '/c/client-1/agenda',
       '/c/client-1/hub',
     ]);
     expect(navigation.items.at(-1)).toMatchObject({
@@ -28,7 +29,12 @@ describe('buildNavigation', () => {
     const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: false } });
 
     expect(navigation.back).toBeNull();
-    expect(navigation.items.map((item) => item.href)).toEqual(['/', '/updates', '/tasks']);
+    expect(navigation.items.map((item) => item.href)).toEqual([
+      '/',
+      '/updates',
+      '/tasks',
+      '/calendar',
+    ]);
     expect(navigation.footer.map((item) => item.href)).toEqual(['/settings']);
   });
 
@@ -39,6 +45,7 @@ describe('buildNavigation', () => {
       ['/', 'home'],
       ['/updates', 'feed'],
       ['/tasks', 'tasks'],
+      ['/calendar', 'calendar'],
       ['/pipeline', 'kanban'],
       ['/applications', 'inbox'],
       ['/acquisition', 'target'],

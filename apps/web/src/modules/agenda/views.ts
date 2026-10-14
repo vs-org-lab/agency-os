@@ -37,4 +37,6 @@ export type AgendaView = {
   canSchedule: boolean;
   /** Clients the reader may schedule meetings with, by name. */
   clients: { id: string; name: string }[];
+  /** Open projects of those clients, for kickoffs and project meetings. */
+  projects: { id: string; name: string; clientId: string }[];
 };

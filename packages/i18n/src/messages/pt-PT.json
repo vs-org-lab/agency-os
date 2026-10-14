@@ -89,7 +89,8 @@
       "applications": "Candidaturas",
       "acquisition": "Angariação",
       "updates": "Atualizações",
-      "tasks": "Tarefas"
+      "tasks": "Tarefas",
+      "calendar": "Calendário"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -97,7 +98,8 @@
       "tasks": "Tarefas",
       "library": "Biblioteca",
       "documents": "Documentos",
-      "brandHub": "Brand Hub"
+      "brandHub": "Brand Hub",
+      "agenda": "Agenda"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -2607,5 +2609,82 @@
       "upload_failed": "O carregamento falhou. Tente de novo.",
       "download_failed": "O download falhou. Tente de novo."
     }
+  },
+  "agenda": {
+    "title": "Calendário",
+    "roomTitle": "Agenda",
+    "views": {
+      "label": "Vista",
+      "month": "Mês",
+      "week": "Semana",
+      "list": "Agenda"
+    },
+    "nav": {
+      "label": "Período",
+      "today": "Hoje",
+      "previous": "Anterior",
+      "next": "Seguinte"
+    },
+    "filters": {
+      "label": "Mostrar",
+      "meeting": "Reuniões",
+      "call": "Chamadas",
+      "deadlines": "Prazos",
+      "delivery": "Entregas"
+    },
+    "kinds": {
+      "meeting": "Reunião",
+      "call": "Chamada",
+      "phase_due": "Prazo da fase",
+      "step_due": "Prazo do passo",
+      "task_due": "Tarefa",
+      "delivery": "Entrega"
+    },
+    "meetingKinds": {
+      "kickoff": "Kickoff",
+      "meeting": "Reunião com o cliente",
+      "review": "Revisão",
+      "internal": "Interna"
+    },
+    "busy": "Ocupado",
+    "busyRange": "Ocupado, {start}–{end}",
+    "allDay": "Dia inteiro",
+    "more": "+{count} mais",
+    "newOn": "Nova reunião a {date}",
+    "empty": {
+      "title": "Sem eventos",
+      "description": "Não há nada marcado neste período."
+    },
+    "dialog": {
+      "newTitle": "Nova reunião",
+      "editTitle": "Editar reunião",
+      "viewTitle": "Reunião",
+      "kind": "Tipo",
+      "client": "Cliente",
+      "chooseClient": "Escolha um cliente",
+      "project": "Projeto",
+      "noProject": "Sem projeto",
+      "title": "Título",
+      "date": "Data",
+      "start": "Início",
+      "end": "Fim",
+      "location": "Local ou link",
+      "notes": "Notas",
+      "invite": "Convidar o decisor",
+      "save": "Guardar",
+      "cancelMeeting": "Cancelar reunião",
+      "close": "Fechar",
+      "openMeet": "Abrir o Meet",
+      "scheduled": "Reunião marcada.",
+      "updated": "Reunião atualizada.",
+      "cancelled": "Reunião cancelada.",
+      "notSynced": "Ainda não está no Google Calendar. Volte a guardar para tentar de novo."
+    },
+    "errors": {
+      "not_found": "Não encontrámos esta reunião ou já não tem acesso.",
+      "invalid_input": "Verifique os campos: o fim tem de ser depois do início e no máximo 12 horas depois.",
+      "invalid_state": "Esta reunião já passou ou foi cancelada."
+    },
+    "periodRange": "{start} – {end}"
   }
 }

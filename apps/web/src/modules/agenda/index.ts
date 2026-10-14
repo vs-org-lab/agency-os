@@ -1,5 +1,13 @@
 export { CLIENT_COLOR_COUNT, clientColor } from './domain/colors';
-export { addDays, dayBounds, lisbonDay, monthGrid, weekDays } from './domain/grid';
+export {
+  addDays,
+  dayBounds,
+  lisbonDay,
+  lisbonInstant,
+  lisbonTime,
+  monthGrid,
+  weekDays,
+} from './domain/grid';
 export {
   MEETING_KINDS,
   meetingSchema,

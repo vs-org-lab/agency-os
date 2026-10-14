@@ -77,3 +77,23 @@ export function monthGrid(month: string): string[][] {
   }
   return weeks;
 }
+
+const TIME_FORMAT = new Intl.DateTimeFormat('en-GB', {
+  timeZone: TIME_ZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+/** The instant a Lisbon wall time (`HH:MM`) on a Lisbon day stands for. */
+export function lisbonInstant(day: string, time: string): Date {
+  const [hours, minutes] = time.split(':').map(Number) as [number, number];
+  const wall = utcDay(day) + (hours * 60 + minutes) * 60_000;
+  const guess = wall - offsetAt(wall);
+  return new Date(wall - offsetAt(guess));
+}
+
+/** The Lisbon wall time, `HH:MM`, of an instant. */
+export function lisbonTime(date: Date): string {
+  return TIME_FORMAT.format(date);
+}

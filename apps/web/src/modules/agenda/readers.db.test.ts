@@ -49,6 +49,9 @@ describe('agenda readers', () => {
       const view = await loadAgenda(agendaClaims(world.users.founder), RANGE, deps);
       if (!view) throw new Error('Agenda is missing');
       expect(view.canSchedule).toBe(true);
+      expect(view.projects).toContainEqual(
+        expect.objectContaining({ id: agenda.rooms.a.projectId, clientId: world.clients.a }),
+      );
       expect(kinds(view.items)).toEqual(
         [
           'call',

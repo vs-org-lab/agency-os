@@ -137,7 +137,13 @@ export async function loadAgenda(
       where app.can_write_rooms(c.organization_id, c.id) ${onlyClient('c.id')}
       order by c.name
     `);
-    return { meetings, dated, schedulable };
+    const projects = await tx.execute<{ id: string; name: string; client_id: string }>(sql`
+      select p.id, p.name, p.client_id from public.projects p
+      where p.status not in ('cancelled', 'delivered', 'completed')
+        and app.can_write_rooms(p.organization_id, p.client_id) ${onlyClient('p.client_id')}
+      order by p.name
+    `);
+    return { meetings, dated, schedulable, projects };
   });
 
   const writers = new Map<string | null, boolean>();
@@ -202,6 +208,7 @@ export async function loadAgenda(
     items,
     canSchedule: await canWrite(client),
     clients: read.schedulable.map((row) => ({ id: row.id, name: row.name })),
+    projects: read.projects.map((row) => ({ id: row.id, name: row.name, clientId: row.client_id })),
   };
 }
 

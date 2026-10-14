@@ -351,6 +351,13 @@
       "when": 1791791137339,
       "tag": "20261012074537_agenda_access",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791968356966,
+      "tag": "20261014085916_agenda_sync_revision",
+      "breakpoints": true
     }
   ]
 }

@@ -8,7 +8,7 @@ import {
   withTestTransaction,
 } from '@agency-os/db/testing';
 import { cancelMeeting, updateMeeting } from './meetings';
-import { syncMeeting } from './sync';
+import { retryFailedMeetings, syncMeeting } from './sync';
 import { agendaClaims, agendaDeps } from './testing';
 
 afterAll(async () => {
@@ -47,7 +47,7 @@ describe('agenda sync', () => {
 
       expect(await syncMeeting(agenda.kickoffAId, deps)).toBe('synced');
       expect(calendar.created).toHaveLength(1);
-      expect(calendar.created[0]).toMatchObject({ requestId: agenda.kickoffAId, attendee: null });
+      expect(calendar.created[0]).toMatchObject({ attendee: null });
       expect(calendar.created[0]?.summary).toContain('Kickoff');
       expect(await syncState(sql, agenda.kickoffAId)).toEqual({
         sync_status: 'synced',
@@ -157,6 +157,68 @@ describe('agenda sync', () => {
       );
       expect((await syncState(sql, agenda.meetingBId))?.sync_status).toBe('pending');
       expect(await syncMeeting(agenda.meetingBId, deps)).toBe('synced');
+    });
+  });
+
+  it('a change made during a sync is left pending for the next run', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const agenda = await createAgendaFixture(sql, world);
+      const { deps, calendar } = agendaDeps(sql);
+      const create = calendar.createEvent;
+      calendar.createEvent = async (input) => {
+        const created = await create(input);
+        await cancelMeeting(
+          agendaClaims(world.users.founder),
+          { eventId: agenda.meetingBId },
+          deps,
+        );
+        return created;
+      };
+
+      expect(await syncMeeting(agenda.meetingBId, deps)).toBe('skipped');
+      expect(await syncState(sql, agenda.meetingBId)).toEqual({
+        sync_status: 'pending',
+        external_event_id: 'event-1',
+        meet_url: 'https://meet.google.com/abc',
+      });
+      calendar.createEvent = create;
+      expect(await syncMeeting(agenda.meetingBId, deps)).toBe('synced');
+      expect(calendar.deleted).toEqual(['event-1']);
+    });
+  });
+
+  it('a lost event is recreated with a new conference request', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const agenda = await createAgendaFixture(sql, world);
+      const { deps, calendar } = agendaDeps(sql);
+
+      await syncMeeting(agenda.meetingBId, deps);
+      calendar.missing = true;
+      await sql`update public.agenda_events set sync_status = 'pending',
+                sync_revision = sync_revision + 1 where id = ${agenda.meetingBId}`;
+      await syncMeeting(agenda.meetingBId, deps);
+      expect(calendar.created).toHaveLength(2);
+      expect(calendar.created[1]?.requestId).not.toBe(calendar.created[0]?.requestId);
+    });
+  });
+
+  it('failed syncs, cancellations included, are retried by the sweep', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const agenda = await createAgendaFixture(sql, world);
+      const { deps, calendar } = agendaDeps(sql);
+
+      await syncMeeting(agenda.meetingBId, deps);
+      calendar.failing = true;
+      await cancelMeeting(agendaClaims(world.users.founder), { eventId: agenda.meetingBId }, deps);
+      expect(await syncMeeting(agenda.meetingBId, deps)).toBe('failed');
+
+      calendar.failing = false;
+      expect(await retryFailedMeetings(deps)).toEqual({ retried: 1, synced: 1 });
+      expect(calendar.deleted).toEqual(['event-1']);
+      expect((await syncState(sql, agenda.meetingBId))?.sync_status).toBe('synced');
     });
   });
 });

@@ -183,6 +183,7 @@ export async function updateMeeting(
         endsAt: meeting.endsAt,
         inviteClient: meeting.inviteClient,
         syncStatus: 'pending',
+        syncRevision: sql`${agendaEvents.syncRevision} + 1`,
         updatedAt: now,
       })
       .where(eq(agendaEvents.id, locked.id));
@@ -213,7 +214,12 @@ export async function cancelMeeting(
     if (isClosed(locked, now)) return INVALID_STATE;
     await tx
       .update(agendaEvents)
-      .set({ status: 'cancelled', syncStatus: 'pending', updatedAt: now })
+      .set({
+        status: 'cancelled',
+        syncStatus: 'pending',
+        syncRevision: sql`${agendaEvents.syncRevision} + 1`,
+        updatedAt: now,
+      })
       .where(eq(agendaEvents.id, locked.id));
     await announce(
       tx,

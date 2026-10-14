@@ -4,6 +4,7 @@ import {
   check,
   foreignKey,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -34,6 +35,8 @@ export const agendaEvents = pgTable(
     inviteClient: boolean('invite_client').notNull().default(false),
     status: agendaEventStatusEnum('status').notNull().default('scheduled'),
     syncStatus: callSyncStatusEnum('sync_status').notNull().default('pending'),
+    /** Raised by every change, so a sync only marks the revision it sent as synced. */
+    syncRevision: integer('sync_revision').notNull().default(1),
     externalEventId: text('external_event_id'),
     meetUrl: text('meet_url'),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),

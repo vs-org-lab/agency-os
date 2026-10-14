@@ -11,7 +11,11 @@ export type BrandHubDeps = {
   storage: LibraryStorage;
   flush?: () => Promise<void>;
   now?: () => Date;
+  /** The published site: its base address, the origins it calls from and the token secret. */
+  site?: BrandHubSite;
 };
+
+export type BrandHubSite = { url: string; origins: string[]; tokenSecret: string };
 
 export type NotFound = { ok: false; rule: 'not_found' };
 export const NOT_FOUND: NotFound = { ok: false, rule: 'not_found' };
@@ -103,6 +107,7 @@ export type LockedHub = {
   publishedPublicationId: string | null;
   publishedRevision: number | null;
   approvedPublicationId: string | null;
+  accessVersion: number;
 };
 
 /**
@@ -118,9 +123,11 @@ export async function lockHub(tx: DbTransaction, hubId: string): Promise<LockedH
     published_publication_id: string | null;
     published_revision: number | null;
     approved_publication_id: string | null;
+    access_version: number;
   }>(sql`
     select h.id, h.organization_id, h.client_id, h.draft_revision, h.published_publication_id,
-           p.revision as published_revision, h.approved_publication_id
+           p.revision as published_revision, h.approved_publication_id,
+           h.access_version
     from public.brand_hubs h
     left join public.brand_hub_publications p on p.id = h.published_publication_id
     where h.id = ${hubId}::uuid
@@ -135,6 +142,7 @@ export async function lockHub(tx: DbTransaction, hubId: string): Promise<LockedH
     publishedPublicationId: row.published_publication_id,
     publishedRevision: row.published_revision === null ? null : Number(row.published_revision),
     approvedPublicationId: row.approved_publication_id,
+    accessVersion: Number(row.access_version),
   };
 }
 

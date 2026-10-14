@@ -7,6 +7,12 @@ import type { BrandHubDeps } from './access';
 
 export const HUB_TEST_NOW = new Date('2026-10-12T09:00:00Z');
 
+export const HUB_TEST_SITE = {
+  url: 'https://hubs.example.com',
+  origins: ['https://hubs.example.com'],
+  tokenSecret: 'brand-hub-test-secret-0123456789abcdef',
+};
+
 export const PNG_BYTES = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0x0d, 0x49, 0x48, 0x44, 0x52,
 ]);
@@ -64,6 +70,7 @@ export function hubDeps(sql: TransactionSql) {
       flushes.push(1);
     },
     now: () => HUB_TEST_NOW,
+    site: HUB_TEST_SITE,
   };
   return { deps, storage, flushes };
 }

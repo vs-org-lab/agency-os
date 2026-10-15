@@ -173,6 +173,13 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     description: 'Campanha de Natal',
     roomUrl: 'https://os.example.com/c/client/retainer',
   },
+  'founder.outcome_guarantee': {
+    companyName: 'Empresa Exemplo',
+    metric: 'Leads por mês',
+    status: 'active',
+    reason: 'none',
+    outcomeUrl: 'https://os.example.com/c/client/outcome',
+  },
   'founder.testimonial_received': {
     companyName: 'Empresa Exemplo',
     authorName: 'Marta Lopes',
@@ -275,6 +282,32 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
 };
 
 describe('renderEmail', () => {
+  it('founder.outcome_guarantee renders every status in both locales', () => {
+    const render = (
+      locale: 'pt-PT' | 'en',
+      status: 'not_activated' | 'active' | 'closed',
+      reason: 'target_met' | 'conditions_failed' | 'months_used' | 'none',
+    ) =>
+      renderEmail('founder.outcome_guarantee', locale, {
+        companyName: 'Bloom',
+        metric: 'Leads por mês',
+        status,
+        reason,
+        outcomeUrl: 'https://os.example.com/c/client/outcome',
+      });
+
+    expect(render('pt-PT', 'active', 'none').subject).toBe('Garantia de Bloom: ativada');
+    expect(render('pt-PT', 'not_activated', 'conditions_failed').subject).toBe(
+      'Garantia de Bloom: não ativada',
+    );
+    expect(render('pt-PT', 'not_activated', 'conditions_failed').text).toContain(
+      'uma condição do cliente falhou',
+    );
+    expect(render('pt-PT', 'closed', 'months_used').subject).toBe('Garantia de Bloom: encerrada');
+    expect(render('en', 'active', 'none').subject).toBe('Bloom guarantee: activated');
+    expect(render('en', 'closed', 'target_met').text).toContain('the target was reached');
+  });
+
   it('retainer alerts have templates', () => {
     expect(EMAIL_TEMPLATE_KEYS).toEqual(
       expect.arrayContaining([

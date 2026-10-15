@@ -1024,6 +1024,12 @@
         "heading": "Extra request from {companyName}",
         "body": "The client asked for \"{description}\", above this month's limit. Quote it so the decision maker approves it before work starts.",
         "action": "Quote the request"
+      },
+      "outcome_guarantee": {
+        "subject": "{companyName} guarantee: {status, select, not_activated {not activated} active {activated} other {closed}}",
+        "heading": "{companyName} guarantee {status, select, not_activated {not activated} active {activated} other {closed}}",
+        "body": "The outcome \"{metric}\" for {companyName} was evaluated: {reason, select, target_met {the target was reached} conditions_failed {a client condition failed} months_used {the 3 months were used} other {every client condition was met and the target was not reached by the deadline}}. {status, select, active {The guarantee covers up to 3 months of work at no cost, limited to the scope tied to the outcome.} other {See the outcome and the conditions in the client room.}}",
+        "action": "Open the outcome"
       }
     },
     "team": {

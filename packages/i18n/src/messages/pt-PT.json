@@ -1024,6 +1024,12 @@
         "heading": "Pedido extra de {companyName}",
         "body": "O cliente pediu \"{description}\", acima do limite deste mês. Orce o pedido para o decisor o aprovar antes de o trabalho começar.",
         "action": "Orçar o pedido"
+      },
+      "outcome_guarantee": {
+        "subject": "Garantia de {companyName}: {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
+        "heading": "Garantia de {companyName} {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
+        "body": "O resultado \"{metric}\" de {companyName} foi avaliado: {reason, select, target_met {a meta foi atingida} conditions_failed {uma condição do cliente falhou} months_used {os 3 meses foram usados} other {todas as condições do cliente foram cumpridas e a meta ficou por atingir no prazo}}. {status, select, active {A garantia conta até 3 meses de trabalho sem custo, limitado ao âmbito ligado ao resultado.} other {Veja o resultado e as condições na sala do cliente.}}",
+        "action": "Abrir o resultado"
       }
     },
     "team": {

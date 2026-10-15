@@ -38,3 +38,5 @@ export async function hasOutcome(claims: VerifiedClaims, clientId: string): Prom
   );
   return rows.length > 0;
 }
+
+export { OUTCOME_FUNCTIONS } from './automations';

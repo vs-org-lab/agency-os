@@ -100,7 +100,8 @@
       "library": "Biblioteca",
       "documents": "Documentos",
       "brandHub": "Brand Hub",
-      "agenda": "Agenda"
+      "agenda": "Agenda",
+      "retainer": "Retainer"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -111,7 +112,8 @@
       "team": "Colegas",
       "library": "Biblioteca",
       "documents": "Documentos",
-      "brandHub": "Brand Hub"
+      "brandHub": "Brand Hub",
+      "progress": "Progresso"
     }
   },
   "states": {
@@ -888,6 +890,12 @@
         "heading": "O Brand Hub tem novidades",
         "body": "Olá {firstName}, a equipa da {agencyName} publicou uma nova versão do Brand Hub. Pode vê-la e descarregar os ficheiros no portal.",
         "action": "Abrir o Brand Hub"
+      },
+      "retainer_threshold": {
+        "subject": "Consumo do retainer este mês",
+        "heading": "Já usou boa parte do retainer deste mês",
+        "body": "Olá {firstName}, o consumo de um dos limites do seu retainer chegou a 80% ou mais este mês. Pode ver o consumo e pedir trabalho no portal; o que passar o limite é orçado antes de começar.",
+        "action": "Ver o consumo"
       }
     },
     "founder": {
@@ -1004,6 +1012,18 @@
         "heading": "Novo comentário de {companyName}",
         "body": "O cliente deixou um comentário no documento {documentTitle}.",
         "action": "Ver o comentário"
+      },
+      "retainer_threshold": {
+        "subject": "{companyName} usou {percent}% das {kind, select, content_pieces {peças de conteúdo} campaigns {campanhas} maintenance_hours {horas de manutenção} other {automações novas}} do mês",
+        "heading": "{companyName} está a chegar ao limite do retainer",
+        "body": "O retainer de {companyName} já usou {percent}% das {kind, select, content_pieces {peças de conteúdo} campaigns {campanhas} maintenance_hours {horas de manutenção} other {automações novas}} disponíveis este mês. Pedidos acima do limite viram pedidos extra com orçamento.",
+        "action": "Abrir o retainer"
+      },
+      "retainer_extra_requested": {
+        "subject": "{companyName} fez um pedido acima do limite do retainer",
+        "heading": "Pedido extra de {companyName}",
+        "body": "O cliente pediu \"{description}\", acima do limite deste mês. Orce o pedido para o decisor o aprovar antes de o trabalho começar.",
+        "action": "Orçar o pedido"
       }
     },
     "team": {
@@ -2180,7 +2200,9 @@
       "documents": "Documentos",
       "openDocument": "Abrir {name}",
       "brandHub": "Brand Hub",
-      "openHub": "Abrir o Brand Hub"
+      "openHub": "Abrir o Brand Hub",
+      "retainer": "Pedidos extra do retainer",
+      "openRetainer": "Ver o pedido extra"
     },
     "clientList": {
       "title": "Provas",
@@ -2878,6 +2900,97 @@
       "invalid_state": "Não é possível: desligue primeiro a despesa do pedido.",
       "not_found": "Não foi possível concluir. Atualize a página.",
       "upload_failed": "O carregamento do recibo falhou. Tente de novo."
+    }
+  },
+  "retainers": {
+    "title": "Retainer",
+    "empty": "Este cliente ainda não tem retainer.",
+    "create": "Criar retainer",
+    "edit": "Editar retainer",
+    "cancel": "Cancelar",
+    "summary": "Nível {tier} · revisão a {date}",
+    "fee": "Valor mensal: {fee}",
+    "ended": "Terminado",
+    "form": {
+      "project": "Projeto",
+      "tier": "Nível",
+      "fee": "Valor mensal",
+      "currency": "Moeda",
+      "startsOn": "Início",
+      "reviewOn": "Revisão anual",
+      "status": "Estado",
+      "statuses": {
+        "active": "Ativo",
+        "ended": "Terminado"
+      },
+      "limits": "Limites mensais",
+      "limitsHint": "Deixe em branco os tipos que não fazem parte do retainer.",
+      "save": "Guardar retainer",
+      "saved": "Retainer guardado."
+    },
+    "kinds": {
+      "content_pieces": "Peças de conteúdo",
+      "campaigns": "Campanhas",
+      "maintenance_hours": "Horas de manutenção",
+      "automations": "Automações novas"
+    },
+    "month": "Consumo de {month}",
+    "usedOf": "{used} de {available}",
+    "carry": "Inclui {carry} transportado do mês anterior.",
+    "remaining": "Disponível: {remaining}",
+    "usage": {
+      "title": "Registar consumo",
+      "kind": "Tipo",
+      "quantity": "Quantidade",
+      "description": "Descrição",
+      "save": "Registar",
+      "saved": "Consumo registado.",
+      "list": "Registos do mês",
+      "empty": "Ainda não há consumo este mês.",
+      "extra": "Pedido extra",
+      "delete": "Apagar",
+      "deleted": "Registo apagado.",
+      "line": "{quantity} × {kind} · {description}"
+    },
+    "limitReached": "Este registo passa o disponível do mês. O trabalho acima do limite só começa com um pedido extra aprovado pelo cliente.",
+    "extras": {
+      "title": "Pedidos extra",
+      "empty": "Sem pedidos extra.",
+      "statuses": {
+        "requested": "À espera de orçamento",
+        "quoted": "Orçado, à espera do cliente",
+        "approved": "Aprovado",
+        "declined": "Recusado"
+      },
+      "quote": "Orçamento: {amount}",
+      "amount": "Valor do orçamento",
+      "currency": "Moeda",
+      "send": "Enviar orçamento",
+      "sent": "Orçamento enviado ao cliente."
+    },
+    "portal": {
+      "title": "Progresso",
+      "description": "O consumo do retainer este mês e os seus pedidos.",
+      "none": "Não há um retainer ativo.",
+      "request": {
+        "title": "Pedir trabalho",
+        "kind": "Tipo",
+        "quantity": "Quantidade",
+        "description": "O que precisa",
+        "send": "Enviar pedido",
+        "task": "Pedido recebido: a equipa já tem a tarefa.",
+        "extra": "Este pedido passa o limite do mês. A equipa vai enviar um orçamento para aprovar antes de começar."
+      },
+      "approve": "Aprovar orçamento",
+      "decline": "Recusar",
+      "approved": "Orçamento aprovado. A equipa vai começar.",
+      "declined": "Pedido recusado."
+    },
+    "errors": {
+      "invalid_input": "Verifique os campos.",
+      "invalid_state": "Este pedido já mudou. Atualize a página.",
+      "limit_reached": "Este registo passa o disponível do mês. O trabalho acima do limite só começa com um pedido extra aprovado pelo cliente.",
+      "not_found": "Não foi possível concluir. Atualize a página."
     }
   }
 }

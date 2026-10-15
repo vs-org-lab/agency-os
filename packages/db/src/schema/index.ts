@@ -15,6 +15,7 @@ export * from './documents';
 export * from './contracts';
 export * from './billing';
 export * from './money';
+export * from './retainers';
 export * from './rooms';
 export * from './tasks';
 export * from './team';

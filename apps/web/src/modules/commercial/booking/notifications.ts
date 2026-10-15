@@ -316,7 +316,8 @@ export type PortalNoticeTemplate =
   | 'lead.step_shared'
   | 'lead.approval_requested'
   | 'lead.approval_reminder'
-  | 'lead.testimonial_request';
+  | 'lead.testimonial_request'
+  | 'lead.retainer_threshold';
 
 /** Tells the decision maker with portal access that something new was shared with them. */
 export async function sendPortalNotice(

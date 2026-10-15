@@ -1485,3 +1485,53 @@ export async function createMoneyFixture(sql: TransactionSql, world: World): Pro
     subscriptionId: subscription.id,
   };
 }
+
+export type RetainerFixture = {
+  rooms: RoomFixture;
+  retainerId: string;
+  usageId: string;
+  extraRequestId: string;
+};
+
+/**
+ * A retainer on client A's room project with 4 content pieces and 10 maintenance hours a month,
+ * 2 pieces used this month and one extra request waiting for a quote.
+ */
+export async function createRetainerFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<RetainerFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const projectId = rooms.a.projectId;
+  const [retainer] = await sql<{ id: string }[]>`
+    insert into public.retainers (organization_id, client_id, project_id, tier, monthly_fee,
+                                  currency, starts_on, review_on, created_by)
+    values (${world.organizationId}, ${world.clients.a}, ${projectId}, 'Essencial', 1500, 'EUR',
+            (date_trunc('month', now() at time zone 'Europe/Lisbon') - interval '3 months')::date,
+            (now() at time zone 'Europe/Lisbon')::date + 200, ${world.users.founder})
+    returning id
+  `;
+  if (!retainer) throw new Error('Retainer fixture was not created');
+  await sql`
+    insert into public.retainer_limits (retainer_id, organization_id, client_id, kind, monthly_limit)
+    values (${retainer.id}, ${world.organizationId}, ${world.clients.a}, 'content_pieces', 4),
+           (${retainer.id}, ${world.organizationId}, ${world.clients.a}, 'maintenance_hours', 10)
+  `;
+  const [usage] = await sql<{ id: string }[]>`
+    insert into public.retainer_usage (organization_id, client_id, retainer_id, kind, month,
+                                       quantity, description, recorded_by)
+    values (${world.organizationId}, ${world.clients.a}, ${retainer.id}, 'content_pieces',
+            date_trunc('month', now() at time zone 'Europe/Lisbon')::date, 2, 'Publicações',
+            ${world.users.manager})
+    returning id
+  `;
+  const [extra] = await sql<{ id: string }[]>`
+    insert into public.retainer_extra_requests (organization_id, client_id, retainer_id, kind,
+                                                description, quantity, requested_by)
+    values (${world.organizationId}, ${world.clients.a}, ${retainer.id}, 'campaigns',
+            'Campanha de Natal', 1, ${world.users.decisionMakerA})
+    returning id
+  `;
+  if (!usage || !extra) throw new Error('Retainer fixture records were not created');
+  return { rooms, retainerId: retainer.id, usageId: usage.id, extraRequestId: extra.id };
+}

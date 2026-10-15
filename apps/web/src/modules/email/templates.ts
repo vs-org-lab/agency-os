@@ -51,6 +51,9 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.extra_round',
   'founder.testimonial_received',
   'founder.document_comment',
+  'lead.retainer_threshold',
+  'founder.retainer_threshold',
+  'founder.retainer_extra_requested',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -120,6 +123,14 @@ export type EmailParams = {
   };
   'founder.proof_comment': { companyName: string; fileTitle: string; roomUrl: string };
   'founder.document_comment': { companyName: string; documentTitle: string; roomUrl: string };
+  'lead.retainer_threshold': PortalNotice;
+  'founder.retainer_threshold': {
+    companyName: string;
+    kind: 'content_pieces' | 'campaigns' | 'maintenance_hours' | 'automations';
+    percent: number;
+    roomUrl: string;
+  };
+  'founder.retainer_extra_requested': { companyName: string; description: string; roomUrl: string };
   'founder.rounds_warning': { companyName: string; used: number; limit: number; roomUrl: string };
   'founder.extra_round': { companyName: string; used: number; limit: number; roomUrl: string };
   'founder.testimonial_received': {
@@ -201,6 +212,9 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.extra_round': 'roomUrl',
   'founder.testimonial_received': 'roomUrl',
   'founder.document_comment': 'roomUrl',
+  'lead.retainer_threshold': 'portalUrl',
+  'founder.retainer_threshold': 'roomUrl',
+  'founder.retainer_extra_requested': 'roomUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

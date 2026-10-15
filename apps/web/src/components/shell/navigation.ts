@@ -15,7 +15,8 @@ export type NavigationIcon =
   | 'documents'
   | 'brand'
   | 'calendar'
-  | 'wallet';
+  | 'wallet'
+  | 'gauge';
 
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
@@ -34,6 +35,7 @@ export type NavigationLabelKey =
   | 'shell.room.documents'
   | 'shell.room.brandHub'
   | 'shell.room.agenda'
+  | 'shell.room.retainer'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -42,6 +44,7 @@ export type NavigationLabelKey =
   | 'shell.portalNav.library'
   | 'shell.portalNav.documents'
   | 'shell.portalNav.brandHub'
+  | 'shell.portalNav.progress'
   | 'shell.portalNav.team';
 
 export type NavigationCounter = 'unseenApplications';
@@ -61,7 +64,7 @@ export type Navigation = {
 
 export type NavigationLevel =
   | { level: 'studio'; permissions: { pipeline: boolean; money: boolean } }
-  | { level: 'room'; clientId: string }
+  | { level: 'room'; clientId: string; retainer?: boolean }
   | { level: 'portal'; permissions: { invoices: boolean; room: boolean; team: boolean } };
 
 const COMMERCIAL_ITEMS: NavigationItem[] = [
@@ -137,6 +140,15 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             labelKey: 'shell.room.brandHub',
             icon: 'brand',
           },
+          ...(input.retainer
+            ? [
+                {
+                  href: `/c/${input.clientId}/retainer`,
+                  labelKey: 'shell.room.retainer' as const,
+                  icon: 'gauge' as const,
+                },
+              ]
+            : []),
         ],
         footer: [{ href: '/settings', labelKey: 'shell.settings', icon: 'settings' }],
       };
@@ -153,6 +165,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
                 { href: '/portal/docs', labelKey: 'shell.portalNav.documents', icon: 'documents' },
                 { href: '/portal/library', labelKey: 'shell.portalNav.library', icon: 'folder' },
                 { href: '/portal/hub', labelKey: 'shell.portalNav.brandHub', icon: 'brand' },
+                { href: '/portal/progress', labelKey: 'shell.portalNav.progress', icon: 'gauge' },
               ] as const)
             : []),
           ...(input.permissions.invoices

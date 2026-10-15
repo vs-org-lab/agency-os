@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Gauge,
   Wallet,
   ArrowLeft,
   CalendarDays,
@@ -95,6 +96,7 @@ const ICONS = {
   brand: Palette,
   calendar: CalendarDays,
   wallet: Wallet,
+  gauge: Gauge,
 } as const;
 
 function NavigationItemLink({

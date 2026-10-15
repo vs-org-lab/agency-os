@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { TransactionSql } from 'postgres';
 import { testDatabase } from '@agency-os/db/testing';
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
+import { createMemoryBillingStorage } from '@/modules/billing/server';
 import type { RetainersDeps } from './access';
 
 export function retainerClaims(
@@ -25,13 +26,15 @@ export function retainerClaims(
 
 export function retainerDeps(sql: TransactionSql) {
   const flushes: number[] = [];
+  const storage = createMemoryBillingStorage();
   const deps: RetainersDeps = {
     contexts: createDbContexts(testDatabase(sql)),
+    billing: { storage, appBaseUrl: 'https://app.aurion.test' },
     flush: async () => {
       flushes.push(1);
     },
   };
-  return { deps, flushes };
+  return { deps, flushes, storage };
 }
 
 /** Today in Lisbon, as the database fixtures see it. */

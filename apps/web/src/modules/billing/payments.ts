@@ -1,4 +1,4 @@
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, isNotNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type PaymentMethod } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
@@ -49,7 +49,8 @@ const manualPaymentSchema = z.object({
 
 /**
  * Marks a request and its milestone as paid, emits `billing.payment.received` and, when this is
- * the deal's first reconciled payment while it sits at 2.1, moves the deal to 2.2.
+ * the deal's first reconciled milestone payment while it sits at 2.1, moves the deal to 2.2.
+ * Requests without a milestone (retainer months and extra requests) never move the pipeline.
  */
 export async function applyReconciledPayment(
   tx: DbTransaction,
@@ -62,22 +63,30 @@ export async function applyReconciledPayment(
     .update(paymentRequests)
     .set({ status: 'paid', paidAt: now })
     .where(eq(paymentRequests.id, request.id));
-  await tx
-    .update(billingMilestones)
-    .set({ status: 'paid' })
-    .where(eq(billingMilestones.id, request.milestoneId));
+  if (request.milestoneId) {
+    await tx
+      .update(billingMilestones)
+      .set({ status: 'paid' })
+      .where(eq(billingMilestones.id, request.milestoneId));
 
-  const [reconciled] = await tx
-    .select({ total: count() })
-    .from(payments)
-    .innerJoin(paymentRequests, eq(paymentRequests.id, payments.requestId))
-    .where(and(eq(paymentRequests.dealId, request.dealId), eq(payments.status, 'reconciled')));
-  const [deal] = await tx
-    .select({ code: deals.pipelineCode })
-    .from(deals)
-    .where(eq(deals.id, request.dealId));
-  if (reconciled?.total === 1 && deal?.code === FIRST_PAYMENT_FROM_CODE) {
-    await deps.moveDeal(tx, request.dealId);
+    const [reconciled] = await tx
+      .select({ total: count() })
+      .from(payments)
+      .innerJoin(paymentRequests, eq(paymentRequests.id, payments.requestId))
+      .where(
+        and(
+          eq(paymentRequests.dealId, request.dealId),
+          isNotNull(paymentRequests.milestoneId),
+          eq(payments.status, 'reconciled'),
+        ),
+      );
+    const [deal] = await tx
+      .select({ code: deals.pipelineCode })
+      .from(deals)
+      .where(eq(deals.id, request.dealId));
+    if (reconciled?.total === 1 && deal?.code === FIRST_PAYMENT_FROM_CODE) {
+      await deps.moveDeal(tx, request.dealId);
+    }
   }
 
   await emit(tx, {

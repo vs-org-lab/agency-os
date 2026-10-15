@@ -9,6 +9,8 @@ export {
   createBillingFixture,
   createMoneyFixture,
   createRetainerFixture,
+  createRetainerBillingFixture,
+  type RetainerBillingFixture,
   createCommercialFixture,
   createContractFixture,
   createCoreFixture,

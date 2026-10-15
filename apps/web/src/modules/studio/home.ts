@@ -197,6 +197,8 @@ async function billingFigures(
       number: paymentRequests.number,
       dueDate: paymentRequests.dueDate,
       dealId: paymentRequests.dealId,
+      clientId: paymentRequests.clientId,
+      retainerId: paymentRequests.retainerId,
       clientName: clients.name,
     })
     .from(paymentRequests)
@@ -217,7 +219,8 @@ async function billingFigures(
       id: request.id,
       title: request.number,
       clientName: request.clientName,
-      href: `/pipeline/${request.dealId}`,
+      // Retainer requests are worked on in the retainer room, not on the deal.
+      href: request.retainerId ? `/c/${request.clientId}/retainer` : `/pipeline/${request.dealId}`,
       dueAt: dayStart(request.dueDate),
       overdue: true,
       sequenceDay: null,

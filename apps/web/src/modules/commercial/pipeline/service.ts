@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, notInArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNotNull, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { currencies } from '@agency-os/i18n';
 import { schema, type DbTransaction } from '@agency-os/db';
@@ -103,7 +103,14 @@ async function contractFacts(tx: DbTransaction, deal: { id: string; clientId: st
     .select({ id: payments.id })
     .from(payments)
     .innerJoin(paymentRequests, eq(paymentRequests.id, payments.requestId))
-    .where(and(eq(paymentRequests.dealId, deal.id), eq(payments.status, 'reconciled')))
+    // Only a milestone payment starts the project; retainer requests ride on the same deal.
+    .where(
+      and(
+        eq(paymentRequests.dealId, deal.id),
+        isNotNull(paymentRequests.milestoneId),
+        eq(payments.status, 'reconciled'),
+      ),
+    )
     .limit(1);
   return {
     contractSigned: signed !== undefined,

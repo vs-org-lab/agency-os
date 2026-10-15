@@ -1535,3 +1535,42 @@ export async function createRetainerFixture(
   if (!usage || !extra) throw new Error('Retainer fixture records were not created');
   return { rooms, retainerId: retainer.id, usageId: usage.id, extraRequestId: extra.id };
 }
+
+export type RetainerBillingFixture = {
+  retainer: RetainerFixture;
+  contracts: ContractFixture;
+  dealId: string;
+  contractId: string;
+};
+
+/**
+ * The retainer fixture with client A's contract signed (bank details on the entity, client
+ * details on the accepted proposal) and the retainer's project linked to that contract's deal.
+ */
+export async function createRetainerBillingFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<RetainerBillingFixture> {
+  const retainer = await createRetainerFixture(sql, world);
+  const contracts = await createContractFixture(sql, world);
+  const { dealId, contractId } = contracts.a;
+  await sql`
+    update public.legal_entities
+    set bank_name = 'Banco Exemplo', iban = 'PT50000201231234567890154', bic = 'BEXAPTPL'
+    where id = ${contracts.entityId}
+  `;
+  await sql`
+    update public.proposals
+    set status = 'accepted', accepted_at = now(), accepted_by = ${world.users.decisionMakerA},
+        accepted_option_id = ${contracts.a.optionId},
+        client_details = ${JSON.stringify(FIXTURE_BILLED_CLIENT)}::jsonb
+    where id = ${contracts.a.proposalId}
+  `;
+  await sql`
+    update public.contracts set status = 'signed', signed_at = now() where id = ${contractId}
+  `;
+  await sql`
+    update public.projects set deal_id = ${dealId} where id = ${retainer.rooms.a.projectId}
+  `;
+  return { retainer, contracts, dealId, contractId };
+}

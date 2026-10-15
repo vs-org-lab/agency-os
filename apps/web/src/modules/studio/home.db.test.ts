@@ -4,6 +4,7 @@ import {
   closeTestSql,
   createBillingFixture,
   createFixtureWorld,
+  createRetainerBillingFixture,
   createRoomFixture,
   testDatabase,
   withTestTransaction,
@@ -63,6 +64,28 @@ describe('studio home', () => {
       expect(home?.today[0]?.overdue).toBe(true);
       expect(home?.indicators.waiting).toBe(home?.today.length);
       expect(home?.indicators.receivable?.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('an overdue retainer request links to the retainer room', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createRetainerBillingFixture(sql, world);
+      const [request] = await sql<{ id: string }[]>`
+        insert into public.payment_requests (organization_id, client_id, deal_id, retainer_id,
+                                             retainer_month, number, label, amount, currency,
+                                             locale, due_date, issuer_details, client_details)
+        values (${world.organizationId}, ${world.clients.a}, ${fixture.dealId},
+                ${fixture.retainer.retainerId}, '2026-10-01', 'PP-2099-0004', 'Retainer', 1500,
+                'EUR', 'pt-PT', current_date - 3, '{}'::jsonb, '{}'::jsonb)
+        returning id
+      `;
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const home = await loadHome(claimsFor(world.users.founder), new Date(), { contexts });
+
+      const item = home?.today.find((entry) => entry.id === request?.id);
+      expect(item).toMatchObject({ kind: 'payment', href: `/c/${world.clients.a}/retainer` });
     });
   });
 

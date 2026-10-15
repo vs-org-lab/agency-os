@@ -15,6 +15,7 @@ import {
   type RetainersDeps,
 } from './access';
 import { retainerClient } from './client-access';
+import { issueRetainerRequests } from './billing';
 import { lisbonMonth } from './domain/months';
 import { createRequestTask } from './requests';
 import { lockRetainer } from './usage';
@@ -111,7 +112,7 @@ export async function quoteExtra(
 
 /**
  * RN-61: the client's decision maker decides a quoted extra request. Approving creates the team
- * task and records its usage outside the month's limit; declining closes it.
+ * task, records its usage outside the month's limit and bills the quote (3B.2); declining closes it.
  */
 export async function decideExtra(
   claims: VerifiedClaims,
@@ -125,15 +126,15 @@ export async function decideExtra(
   if (input.decision !== 'approved' && input.decision !== 'declined') return INVALID_STATE;
   const now = nowOf(deps);
 
-  return deps.contexts.withSystemContext(async (tx) => {
+  const decided = await deps.contexts.withSystemContext(async (tx) => {
     const retainer = await lockRetainer(tx, extra.retainerId);
-    if (!retainer) return NOT_FOUND;
+    if (!retainer) return { result: NOT_FOUND, billed: false };
     const [current] = await tx
       .select()
       .from(retainerExtraRequests)
       .where(eq(retainerExtraRequests.id, extra.id))
       .for('update');
-    if (current?.status !== 'quoted') return INVALID_STATE;
+    if (current?.status !== 'quoted') return { result: INVALID_STATE, billed: false };
     const approved = input.decision === 'approved';
     if (current.approvalId) {
       await tx
@@ -174,6 +175,11 @@ export async function decideExtra(
       clientId: retainer.clientId,
       metadata: { decision: input.decision },
     });
-    return OK;
+    const billed = approved
+      ? await issueRetainerRequests(tx, retainer.id, deps, 'extras')
+      : { months: 0, extras: 0 };
+    return { result: OK, billed: billed.extras > 0 };
   });
+  if (decided.result.ok && decided.billed) await (deps.flush ?? requestFlush)();
+  return decided.result;
 }

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -79,7 +79,10 @@ describe('DomainPanel', () => {
     await screen.findByText(
       'O registo TXT ainda não foi encontrado. A propagação do DNS pode demorar.',
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Verificar' }));
+    // The first check's transition may still hold the button disabled when its message shows.
+    const button = screen.getByRole('button', { name: 'Verificar' }) as HTMLButtonElement;
+    await waitFor(() => expect(button.disabled).toBe(false));
+    fireEvent.click(button);
     await screen.findByText('O registo TXT existe, mas tem outro código.');
   });
 

@@ -24,7 +24,7 @@ import { billingDeps } from './runtime';
 type BillingEventData = {
   organizationId: string;
   clientId: string | null;
-  payload: { dealId: string; contractId?: string; days?: number };
+  payload: { dealId: string; requestId?: string; contractId?: string; days?: number };
 };
 
 type FounderBillingTemplate = Extract<
@@ -43,10 +43,11 @@ function founderAlertFunction(
       const data = event.data as BillingEventData;
       const sent = await step.run('alert-founders', async () => {
         const deps = notificationDeps();
-        const notice = await dealNotice(data.payload.dealId, {
-          contexts: { withSystemContext },
-          appBaseUrl: deps.appBaseUrl,
-        });
+        const notice = await dealNotice(
+          data.payload.dealId,
+          { contexts: { withSystemContext }, appBaseUrl: deps.appBaseUrl },
+          data.payload.requestId,
+        );
         if (!notice) return 0;
         const params =
           template === 'founder.payment_overdue'

@@ -1,0 +1,319 @@
+import type { TransactionSql } from 'postgres';
+import { afterAll, describe, expect, it } from 'vitest';
+import {
+  closeTestSql,
+  createFixtureWorld,
+  createRetainerBillingFixture,
+  withTestTransaction,
+  type RetainerBillingFixture,
+  type World,
+} from '@agency-os/db/testing';
+import { issueRetainerRequests, sweepRetainerBilling } from './billing';
+import { loadRetainerBilling } from './billing-view';
+import { decideExtra, quoteExtra } from './extras';
+import { inDays, lisbonToday, retainerClaims, retainerDeps } from './testing';
+
+afterAll(async () => {
+  await closeTestSql();
+});
+
+const SLOW = 120_000;
+
+const thisMonth = () => `${lisbonToday().slice(0, 7)}-01`;
+
+type RequestRow = {
+  label: string;
+  amount: string;
+  currency: string;
+  retainer_month: string | null;
+  retainer_extra_request_id: string | null;
+  status: string;
+  due_date: string;
+  pdf_path: string | null;
+};
+
+async function requests(sql: TransactionSql, retainerId: string): Promise<RequestRow[]> {
+  await sql`reset role`;
+  return sql<RequestRow[]>`
+    select label, amount::text, currency::text, retainer_month::text, retainer_extra_request_id,
+           status::text, due_date::text, pdf_path
+    from public.payment_requests where retainer_id = ${retainerId} order by created_at
+  `;
+}
+
+async function setup(sql: TransactionSql) {
+  const world = await createFixtureWorld(sql);
+  const fixture = await createRetainerBillingFixture(sql, world);
+  const { deps, flushes, storage } = retainerDeps(sql);
+  const issue = () =>
+    deps.contexts.withSystemContext((tx) =>
+      issueRetainerRequests(tx, fixture.retainer.retainerId, deps),
+    );
+  return { world, fixture, deps, flushes, storage, issue };
+}
+
+async function approveExtra(
+  world: World,
+  fixture: RetainerBillingFixture,
+  deps: ReturnType<typeof retainerDeps>['deps'],
+) {
+  const extraRequestId = fixture.retainer.extraRequestId;
+  expect(
+    await quoteExtra(
+      retainerClaims(world.users.founder),
+      { extraRequestId, amount: '150', currency: 'EUR' },
+      deps,
+    ),
+  ).toEqual({ ok: true });
+  expect(
+    await decideExtra(
+      retainerClaims(world.users.decisionMakerA, 'client'),
+      { extraRequestId, decision: 'approved' },
+      deps,
+    ),
+  ).toEqual({ ok: true });
+}
+
+describe('retainer billing', () => {
+  it(
+    'the sweep issues the month once even when run twice',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, deps, flushes, storage } = await setup(sql);
+
+        await sweepRetainerBilling(deps);
+        await sweepRetainerBilling(deps);
+
+        const rows = await requests(sql, fixture.retainer.retainerId);
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+          amount: '1500.00',
+          currency: 'EUR',
+          retainer_month: thisMonth(),
+          retainer_extra_request_id: null,
+          status: 'sent',
+          due_date: inDays(7),
+        });
+        expect(rows[0]?.label).toMatch(/^Retainer Essencial · \p{Ll}+ de \d{4}$/u);
+        expect(storage.files.has(rows[0]?.pdf_path ?? '')).toBe(true);
+        expect(flushes.length).toBeGreaterThan(0);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'the month is not billed before the start or after the end',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        const retainerId = fixture.retainer.retainerId;
+
+        await sql`
+          update public.retainers set starts_on = ${`${inDays(40).slice(0, 7)}-01`}
+          where id = ${retainerId}
+        `;
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        await sql`
+          update public.retainers
+          set starts_on = ${thisMonth()}, status = 'ended'
+          where id = ${retainerId}
+        `;
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        expect(await requests(sql, retainerId)).toEqual([]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a voided month is not billed again',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        const retainerId = fixture.retainer.retainerId;
+
+        expect(await issue()).toEqual({ months: 1, extras: 0 });
+        await sql`update public.payment_requests set status = 'void' where retainer_id = ${retainerId}`;
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        expect((await requests(sql, retainerId)).map((row) => row.status)).toEqual(['void']);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    "the month is billed in the retainer's currency",
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        const retainerId = fixture.retainer.retainerId;
+        await sql`
+          update public.retainers set currency = 'USD', monthly_fee = 900 where id = ${retainerId}
+        `;
+
+        await issue();
+
+        expect(await requests(sql, retainerId)).toMatchObject([
+          { amount: '900.00', currency: 'USD' },
+        ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a retainer without a signed contract is not billed',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        await sql`update public.contracts set status = 'void' where id = ${fixture.contractId}`;
+
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'approving an extra request bills its quote at once',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps, flushes } = await setup(sql);
+
+        await approveExtra(world, fixture, deps);
+
+        expect(await requests(sql, fixture.retainer.retainerId)).toMatchObject([
+          {
+            label: 'Pedido extra: Campanha de Natal',
+            amount: '150.00',
+            currency: 'EUR',
+            retainer_month: null,
+            retainer_extra_request_id: fixture.retainer.extraRequestId,
+          },
+        ]);
+        expect(flushes.length).toBeGreaterThan(0);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'an approved extra without a signed contract is billed by the sweep later',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps, issue } = await setup(sql);
+        await sql`update public.contracts set status = 'void' where id = ${fixture.contractId}`;
+
+        await approveExtra(world, fixture, deps);
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+
+        await sql`update public.contracts set status = 'signed' where id = ${fixture.contractId}`;
+        expect(await issue()).toEqual({ months: 1, extras: 1 });
+        expect(
+          (await requests(sql, fixture.retainer.retainerId)).map(
+            (row) => row.retainer_extra_request_id,
+          ),
+        ).toContain(fixture.retainer.extraRequestId);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a retainer without a monthly fee bills no month',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        await sql`
+          update public.retainers set monthly_fee = 0 where id = ${fixture.retainer.retainerId}
+        `;
+
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'one retainer that fails does not stop the sweep for the others',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps } = await setup(sql);
+        const b = fixture.contracts.b;
+        await sql`
+          update public.proposals
+          set status = 'accepted', accepted_at = now(), accepted_option_id = ${b.optionId},
+              client_details = ${JSON.stringify({
+                legalName: 'Cliente B Lda',
+                taxId: '509000001',
+                address: 'Rua B, Lisboa',
+              })}::jsonb
+          where id = ${b.proposalId}
+        `;
+        await sql`update public.contracts set status = 'signed', signed_at = now() where id = ${b.contractId}`;
+        const projectB = fixture.retainer.rooms.b.projectId;
+        await sql`update public.projects set deal_id = ${b.dealId} where id = ${projectB}`;
+        const [retainerB] = await sql<{ id: string }[]>`
+          insert into public.retainers (organization_id, client_id, project_id, tier, monthly_fee,
+                                        currency, starts_on, review_on, created_by)
+          values (${world.organizationId}, ${world.clients.b}, ${projectB}, 'Crescimento', 900,
+                  'EUR', ${thisMonth()}, ${inDays(200)}, ${world.users.founder})
+          returning id
+        `;
+        const storage = deps.billing.storage;
+        const failing = {
+          ...deps,
+          billing: {
+            ...deps.billing,
+            storage: {
+              ...storage,
+              upload: async (path: string, bytes: Uint8Array) => {
+                if (path.includes(world.clients.a)) throw new Error('Storage unavailable');
+                return storage.upload(path, bytes);
+              },
+            },
+          },
+        };
+
+        await expect(sweepRetainerBilling(failing)).resolves.toBeGreaterThan(0);
+
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+        expect(await requests(sql, retainerB?.id ?? '')).toMatchObject([
+          { amount: '900.00', retainer_month: thisMonth() },
+        ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'only billing readers load the retainer billing',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps, issue } = await setup(sql);
+        await issue();
+        const load = (userId: string, kind: 'internal' | 'client' = 'internal') =>
+          loadRetainerBilling(retainerClaims(userId, kind), world.clients.a, deps);
+
+        const founder = await load(world.users.founder);
+        expect(founder).toMatchObject({ canWrite: true, contractMissing: false });
+        expect(founder?.requests).toMatchObject([
+          { origin: 'month', amount: '1500.00', currency: 'EUR', status: 'sent' },
+        ]);
+        expect(founder?.requests[0]?.label).toMatch(/^Retainer Essencial · /);
+        expect(await load(world.users.finance)).toMatchObject({ canWrite: true });
+        expect(await load(world.users.manager)).toMatchObject({ canWrite: false });
+        expect(await load(world.users.freelancer)).toBeNull();
+        expect(await load(world.users.decisionMakerA, 'client')).toBeNull();
+
+        await sql`reset role`;
+        await sql`update public.contracts set status = 'void' where id = ${fixture.contractId}`;
+        expect(await load(world.users.founder)).toMatchObject({ contractMissing: true });
+      });
+    },
+    SLOW,
+  );
+});

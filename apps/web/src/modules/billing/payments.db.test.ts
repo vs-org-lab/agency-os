@@ -1,10 +1,21 @@
 import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
-import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-os/db/testing';
+import {
+  closeTestSql,
+  createFixtureWorld,
+  createRetainerFixture,
+  withTestTransaction,
+} from '@agency-os/db/testing';
 import { legalInvoiceUploadUrl, registerLegalInvoice } from './invoices';
 import { recordPayment, settleReviewedPayment } from './payments';
-import { createPlanForContract, requestPayment } from './requests';
-import { billingClaims, billingDeps, deliveredProject, signedContract } from './testing';
+import { createPlanForContract, issuePaymentRequest, requestPayment } from './requests';
+import {
+  BILLING_TEST_NOW,
+  billingClaims,
+  billingDeps,
+  deliveredProject,
+  signedContract,
+} from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -24,6 +35,13 @@ async function requestStatus(sql: TransactionSql, requestId: string) {
     where r.id = ${requestId}
   `;
   return row;
+}
+
+async function milestoneStatuses(sql: TransactionSql, dealId: string): Promise<string[]> {
+  const rows = await sql<{ status: string }[]>`
+    select status::text from public.billing_milestones where deal_id = ${dealId} order by position
+  `;
+  return rows.map((row) => row.status);
 }
 
 async function auditActions(sql: TransactionSql, organizationId: string): Promise<string[]> {
@@ -61,6 +79,53 @@ describe('payments', () => {
         where organization_id = ${world.organizationId} and type like 'billing.payment.%'
       `;
       expect(events.map((event) => event.type)).toEqual(['billing.payment.received']);
+    });
+  });
+
+  it('a retainer payment leaves the deal and its milestones alone', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await signedContract(sql, world);
+      const retainer = await createRetainerFixture(sql, world);
+      const { deps, moved } = billingDeps(sql);
+      await createPlanForContract(contract.contractId, deps);
+      const milestonesBefore = await milestoneStatuses(sql, contract.dealId);
+      const requestId = await deps.contexts.withSystemContext((tx) =>
+        issuePaymentRequest(
+          tx,
+          {
+            organizationId: world.organizationId,
+            clientId: world.clients.a,
+            dealId: contract.dealId,
+            contractId: contract.contractId,
+            label: 'Retainer Essencial · outubro de 2026',
+            amount: '1500.00',
+            currency: 'EUR',
+            origin: {
+              kind: 'retainer_month',
+              retainerId: retainer.retainerId,
+              month: '2026-10-01',
+            },
+          },
+          deps,
+          BILLING_TEST_NOW,
+        ),
+      );
+
+      const result = await recordPayment(
+        billingClaims(world.users.finance),
+        { requestId, ...TRANSFER, amount: '1500.00' },
+        deps,
+      );
+
+      expect(result).toEqual({ ok: true, status: 'reconciled' });
+      const [request] = await sql<{ status: string; retainer_month: string }[]>`
+        select status::text, retainer_month::text from public.payment_requests
+        where id = ${requestId}
+      `;
+      expect(request).toEqual({ status: 'paid', retainer_month: '2026-10-01' });
+      expect(moved).toEqual([]);
+      expect(await milestoneStatuses(sql, contract.dealId)).toEqual(milestonesBefore);
     });
   });
 

@@ -1,7 +1,9 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import { billingIssueDeps } from '@/modules/billing/server';
 import type { RetainersDeps } from './access';
+import { loadRetainerBilling } from './billing-view';
 import { decideExtra, quoteExtra } from './extras';
 import { loadPortalRetainer } from './portal';
 import { loadStaffRetainer } from './readers';
@@ -9,7 +11,10 @@ import { requestWork } from './requests';
 import { saveRetainer, type RetainerInput } from './retainers';
 import { deleteUsage, recordUsage } from './usage';
 
-const deps = (): RetainersDeps => ({ contexts: { withUserContext, withSystemContext } });
+const deps = (): RetainersDeps => ({
+  contexts: { withUserContext, withSystemContext },
+  billing: billingIssueDeps(),
+});
 
 export const loadRoomRetainer = (claims: VerifiedClaims, clientId: string) =>
   loadStaffRetainer(claims, clientId, deps());
@@ -48,3 +53,6 @@ export const decideExtraRequest = (
 ) => decideExtra(claims, input, deps());
 export const loadClientRetainer = (claims: VerifiedClaims, clientId: string) =>
   loadPortalRetainer(claims, clientId, deps());
+
+export const loadRoomRetainerBilling = (claims: VerifiedClaims, clientId: string) =>
+  loadRetainerBilling(claims, clientId, deps());

@@ -215,9 +215,11 @@ export function PortalRetainer({
         <h2 className="text-title-sm text-text">{t('month', { month: monthLabel })}</h2>
         <LimitBars limits={view.limits} />
       </section>
-      {view.retainer.status === 'active' ? (
+      {view.retainer.status !== 'active' ? null : view.suspended ? (
+        <FormMessage tone="danger">{t('portal.suspended')}</FormMessage>
+      ) : (
         <RequestForm view={view} request={refreshAfter(actions.request)} />
-      ) : null}
+      )}
       <section className="flex flex-col gap-3" aria-label={t('extras.title')}>
         <h2 className="text-title-sm text-text">{t('extras.title')}</h2>
         {view.extraRequests.length === 0 ? (

@@ -68,6 +68,64 @@ export type ApprovalPhaseView = { id: string; name: string; done: boolean };
 export type DealBilling = { milestones: MilestoneView[]; approvalPhases: ApprovalPhaseView[] };
 
 /** The deal's payment plan as the caller may read it (row level security), or null without one. */
+type PaymentRequestRow = typeof paymentRequests.$inferSelect;
+
+/** The staff view of each request, with its payments and legal invoice, in the given order. */
+export async function paymentRequestViews(
+  tx: DbTransaction,
+  requests: readonly PaymentRequestRow[],
+  today: string,
+): Promise<{ id: string; milestoneId: string | null; view: PaymentRequestView }[]> {
+  const requestIds = requests.map((request) => request.id);
+  const paymentRows = requestIds.length
+    ? await tx
+        .select()
+        .from(payments)
+        .where(inArray(payments.requestId, requestIds))
+        .orderBy(asc(payments.createdAt))
+    : [];
+  const invoiceRows = requestIds.length
+    ? await tx.select().from(legalInvoices).where(inArray(legalInvoices.requestId, requestIds))
+    : [];
+
+  const requestView = (request: PaymentRequestRow): PaymentRequestView => {
+    const invoice = invoiceRows.find((row) => row.requestId === request.id);
+    return {
+      id: request.id,
+      number: request.number,
+      amount: request.amount,
+      currency: request.currency,
+      dueDate: request.dueDate,
+      status: request.status,
+      sentAt: request.sentAt,
+      paidAt: request.paidAt,
+      lastChasedAt: request.lastChasedAt,
+      overdueDays: request.status === 'sent' ? Math.max(0, daysBetween(request.dueDate, today)) : 0,
+      pdfAvailable: request.pdfPath !== null,
+      payments: paymentRows
+        .filter((payment) => payment.requestId === request.id)
+        .map((payment) => ({
+          id: payment.id,
+          amount: payment.amount,
+          currency: payment.currency,
+          method: payment.method,
+          reference: payment.reference,
+          receivedOn: payment.receivedOn,
+          status: payment.status,
+        })),
+      legalInvoice: invoice
+        ? { number: invoice.number, issuer: invoice.issuer, issuedOn: invoice.issuedOn }
+        : null,
+    };
+  };
+
+  return requests.map((request) => ({
+    id: request.id,
+    milestoneId: request.milestoneId,
+    view: requestView(request),
+  }));
+}
+
 export async function getDealBilling(
   tx: DbTransaction,
   dealId: string,
@@ -101,48 +159,7 @@ export async function getDealBilling(
     .from(paymentRequests)
     .where(and(eq(paymentRequests.dealId, dealId), ne(paymentRequests.status, 'void')))
     .orderBy(desc(paymentRequests.sentAt));
-  const requestIds = requests.map((request) => request.id);
-  const paymentRows = requestIds.length
-    ? await tx
-        .select()
-        .from(payments)
-        .where(inArray(payments.requestId, requestIds))
-        .orderBy(asc(payments.createdAt))
-    : [];
-  const invoiceRows = requestIds.length
-    ? await tx.select().from(legalInvoices).where(inArray(legalInvoices.requestId, requestIds))
-    : [];
-
-  const requestView = (request: (typeof requests)[number]): PaymentRequestView => {
-    const invoice = invoiceRows.find((row) => row.requestId === request.id);
-    return {
-      id: request.id,
-      number: request.number,
-      amount: request.amount,
-      currency: request.currency,
-      dueDate: request.dueDate,
-      status: request.status,
-      sentAt: request.sentAt,
-      paidAt: request.paidAt,
-      lastChasedAt: request.lastChasedAt,
-      overdueDays: request.status === 'sent' ? Math.max(0, daysBetween(request.dueDate, today)) : 0,
-      pdfAvailable: request.pdfPath !== null,
-      payments: paymentRows
-        .filter((payment) => payment.requestId === request.id)
-        .map((payment) => ({
-          id: payment.id,
-          amount: payment.amount,
-          currency: payment.currency,
-          method: payment.method,
-          reference: payment.reference,
-          receivedOn: payment.receivedOn,
-          status: payment.status,
-        })),
-      legalInvoice: invoice
-        ? { number: invoice.number, issuer: invoice.issuer, issuedOn: invoice.issuedOn }
-        : null,
-    };
-  };
+  const views = await paymentRequestViews(tx, requests, today);
 
   // An approval phase completes only once approved, so a done phase is an approved one.
   const lockedNow = (milestone: (typeof milestones)[number]): boolean => {
@@ -154,7 +171,7 @@ export async function getDealBilling(
   return {
     approvalPhases,
     milestones: milestones.map((milestone) => {
-      const request = requests.find((row) => row.milestoneId === milestone.id);
+      const request = views.find((view) => view.milestoneId === milestone.id);
       const phase = approvalPhases.find((row) => row.id === milestone.phaseId);
       return {
         id: milestone.id,
@@ -167,7 +184,7 @@ export async function getDealBilling(
         trigger: milestone.trigger,
         phase: phase ? { id: phase.id, name: phase.name } : null,
         locked: milestone.status === 'pending' && lockedNow(milestone),
-        request: request ? requestView(request) : null,
+        request: request?.view ?? null,
       };
     }),
   };

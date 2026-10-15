@@ -22,9 +22,10 @@ function withIntl(node: React.ReactNode) {
   );
 }
 
-function view(decides: boolean): PortalRetainerView {
+function view(decides: boolean, suspended = false): PortalRetainerView {
   return {
     decides,
+    suspended,
     month: '2026-10-01',
     retainer: { id: 'retainer-1', tier: 'Essencial', status: 'active' },
     limits: [
@@ -94,6 +95,17 @@ describe('P-10 retainer', () => {
     await screen.findByText(
       'Este pedido passa o limite do mês. A equipa vai enviar um orçamento para aprovar antes de começar.',
     );
+  });
+
+  it('a suspended client sees the notice instead of the form', () => {
+    withIntl(<PortalRetainer view={view(true, true)} actions={actions()} />);
+    expect(
+      screen.getByText(
+        'Há um pagamento em atraso há mais de 30 dias. Os pedidos novos ficam suspensos até ser regularizado.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('O que precisa')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Aprovar orçamento' })).toBeTruthy();
   });
 
   it('the decision maker approves or declines a quoted extra; the operational sees it only', async () => {

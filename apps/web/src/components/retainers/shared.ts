@@ -7,7 +7,13 @@ export type RetainerResult = { ok: true } | { ok: false; code: string };
 export const SELECT =
   'h-9 rounded-md border border-border bg-surface px-2 text-body-sm text-text disabled:opacity-60';
 
-const ERRORS = ['invalid_input', 'invalid_state', 'limit_reached', 'not_found'] as const;
+const ERRORS = [
+  'invalid_input',
+  'invalid_state',
+  'limit_reached',
+  'not_found',
+  'suspended',
+] as const;
 export type RetainerError = (typeof ERRORS)[number];
 
 export const retainerError = (code: string): RetainerError =>

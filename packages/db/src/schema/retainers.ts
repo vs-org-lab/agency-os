@@ -109,6 +109,7 @@ export const retainerExtraRequests = pgTable(
       foreignColumns: [retainers.id, retainers.clientId],
       name: 'retainer_extra_requests_retainer_client_fk',
     }).onDelete('cascade'),
+    unique('retainer_extra_requests_id_client_key').on(table.id, table.clientId),
     index('retainer_extra_requests_retainer_idx').on(table.retainerId, table.createdAt),
     check(
       'retainer_extra_requests_description_length',

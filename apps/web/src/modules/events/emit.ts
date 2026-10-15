@@ -44,6 +44,7 @@ export const DOMAIN_EVENTS = [
   'agenda.meeting.changed',
   'retainers.usage.recorded',
   'retainers.extra.requested',
+  'outcomes.guarantee.decided',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

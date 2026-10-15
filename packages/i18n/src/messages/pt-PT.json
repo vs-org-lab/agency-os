@@ -101,7 +101,8 @@
       "documents": "Documentos",
       "brandHub": "Brand Hub",
       "agenda": "Agenda",
-      "retainer": "Retainer"
+      "retainer": "Retainer",
+      "outcome": "Resultado"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -1024,6 +1025,12 @@
         "heading": "Pedido extra de {companyName}",
         "body": "O cliente pediu \"{description}\", acima do limite deste mês. Orce o pedido para o decisor o aprovar antes de o trabalho começar.",
         "action": "Orçar o pedido"
+      },
+      "outcome_guarantee": {
+        "subject": "Garantia de {companyName}: {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
+        "heading": "Garantia de {companyName} {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
+        "body": "O resultado \"{metric}\" de {companyName} foi avaliado: {reason, select, target_met {a meta foi atingida} conditions_failed {uma condição do cliente falhou} months_used {os 3 meses foram usados} other {todas as condições do cliente foram cumpridas e a meta ficou por atingir no prazo}}. {status, select, active {A garantia conta até 3 meses de trabalho sem custo, limitado ao âmbito ligado ao resultado.} other {Veja o resultado e as condições na sala do cliente.}}",
+        "action": "Abrir o resultado"
       }
     },
     "team": {
@@ -2998,6 +3005,81 @@
       "title": "Faturação",
       "noContract": "Sem contrato assinado com este cliente: o OS não emite os pedidos do retainer.",
       "empty": "Ainda não há pedidos de pagamento."
+    }
+  },
+  "outcomes": {
+    "title": "Resultado",
+    "empty": "Este cliente ainda não tem resultado acordado.",
+    "proposalGuarantee": "Garantia na proposta: {text}",
+    "summary": "{metric}: de {baseline} para {target} até {deadline}",
+    "source": "Fonte dos dados: {source}",
+    "edit": "Editar resultado",
+    "cancel": "Cancelar",
+    "form": {
+      "project": "Projeto",
+      "metric": "Métrica",
+      "unit": "Unidade",
+      "baseline": "Linha de base",
+      "target": "Meta",
+      "deadline": "Prazo",
+      "dataSource": "Fonte dos dados",
+      "save": "Guardar resultado",
+      "saved": "Resultado guardado.",
+      "locked": "A garantia já foi decidida: a métrica, a linha de base, a meta e o prazo ficam como estão."
+    },
+    "evolution": "Evolução",
+    "chart": {
+      "label": "Evolução de {metric}: de {baseline} para a meta {target}",
+      "date": "Data",
+      "value": "Valor",
+      "empty": "Ainda não há valores registados.",
+      "baselineValue": "Linha de base: {value}",
+      "targetValue": "Meta: {value}"
+    },
+    "measurement": {
+      "title": "Registar valor",
+      "date": "Data",
+      "value": "Valor",
+      "note": "Nota",
+      "save": "Registar",
+      "saved": "Valor registado."
+    },
+    "conditions": {
+      "title": "Condições do cliente",
+      "status": {
+        "pending": "Por registar",
+        "met": "Cumprida a {date}",
+        "failed": "Falhada a {date}"
+      },
+      "met": "Cumprida",
+      "failed": "Falhou",
+      "reset": "Voltar a por registar",
+      "note": "Nota",
+      "noteRequired": "Explique o que falhou.",
+      "save": "Guardar",
+      "add": "Acrescentar condição",
+      "addLabel": "Nova condição",
+      "added": "Condição acrescentada.",
+      "recorded": "Condição registada."
+    },
+    "guarantee": {
+      "title": "Garantia",
+      "pending": "Por decidir até {deadline}",
+      "notActivatedTargetMet": "Não ativada: a meta foi atingida",
+      "notActivatedConditionsFailed": "Não ativada: uma condição do cliente falhou",
+      "active": "Ativada a {date} · {months} de 3 meses usados",
+      "closedTargetMet": "Encerrada: a meta foi atingida",
+      "closedMonthsUsed": "Encerrada: os 3 meses foram usados",
+      "deadlinePassed": "O prazo terminou a {deadline}: falta registar as condições do cliente."
+    },
+    "portal": {
+      "title": "Resultado acordado",
+      "empty": "Ainda não há resultado nem retainer."
+    },
+    "errors": {
+      "invalid_input": "Verifique os campos.",
+      "invalid_state": "A garantia já foi decidida. Atualize a página.",
+      "not_found": "Não foi possível concluir. Atualize a página."
     }
   }
 }

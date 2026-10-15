@@ -23,7 +23,7 @@ async function expectAccessible(page: Page): Promise<void> {
 const lisbonToday = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' }).format(new Date());
 
-test.describe('Money', () => {
+test.describe('Money @fake-receipts', () => {
   test('a receipt is read, the expense is linked to a request and the client sees the receipt', async ({
     page,
     browser,

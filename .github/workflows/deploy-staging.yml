@@ -192,7 +192,7 @@ jobs:
           NEXT_PUBLIC_OS_URL: http://localhost:3001/os
           NEXT_PUBLIC_OS_PAGES_URL: https://${{ vars.STAGING_DOMAIN }}
       - name: End-to-end tests without public application writes, fake transcription or captured emails
-        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email|@fake-domains"
+        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email|@fake-domains|@fake-receipts"
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

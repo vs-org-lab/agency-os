@@ -460,3 +460,34 @@ export const retainerExtraStatusEnum = appSchema.enum('retainer_extra_status', [
 export type RetainerLimitKind = (typeof retainerLimitKindEnum.enumValues)[number];
 export type RetainerStatus = (typeof retainerStatusEnum.enumValues)[number];
 export type RetainerExtraStatus = (typeof retainerExtraStatusEnum.enumValues)[number];
+
+export const guaranteeStatusEnum = appSchema.enum('guarantee_status', [
+  'pending',
+  'not_activated',
+  'active',
+  'closed',
+]);
+
+export const guaranteeReasonEnum = appSchema.enum('guarantee_reason', [
+  'target_met',
+  'conditions_failed',
+  'months_used',
+]);
+
+export const outcomeConditionKindEnum = appSchema.enum('outcome_condition_kind', [
+  'access',
+  'approvals',
+  'media_budget',
+  'other',
+]);
+
+export const outcomeConditionStatusEnum = appSchema.enum('outcome_condition_status', [
+  'pending',
+  'met',
+  'failed',
+]);
+
+export type GuaranteeStatus = (typeof guaranteeStatusEnum.enumValues)[number];
+export type GuaranteeReason = (typeof guaranteeReasonEnum.enumValues)[number];
+export type OutcomeConditionKind = (typeof outcomeConditionKindEnum.enumValues)[number];
+export type OutcomeConditionStatus = (typeof outcomeConditionStatusEnum.enumValues)[number];

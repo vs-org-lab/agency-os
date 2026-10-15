@@ -1574,3 +1574,56 @@ export async function createRetainerBillingFixture(
   `;
   return { retainer, contracts, dealId, contractId };
 }
+
+export type OutcomeFixture = {
+  rooms: RoomFixture;
+  outcomeId: string;
+  conditionIds: { access: string; approvals: string; mediaBudget: string };
+  measurementId: string;
+};
+
+/**
+ * An outcome on client A's room project: leads per month from 40 to 60 within 90 days, measured
+ * in Google Analytics, with the three client conditions pending and a value of 45 a month ago.
+ */
+export async function createOutcomeFixture(
+  sql: TransactionSql,
+  world: World,
+): Promise<OutcomeFixture> {
+  const rooms = await createRoomFixture(sql, world);
+  const [outcome] = await sql<{ id: string }[]>`
+    insert into public.project_outcomes (organization_id, client_id, project_id, metric, unit,
+                                         baseline, target, deadline, data_source, created_by)
+    values (${world.organizationId}, ${world.clients.a}, ${rooms.a.projectId}, 'Leads por mês',
+            'leads', 40, 60, (now() at time zone 'Europe/Lisbon')::date + 90, 'Google Analytics',
+            ${world.users.founder})
+    returning id
+  `;
+  if (!outcome) throw new Error('Outcome fixture was not created');
+  const condition = async (kind: string, description: string) => {
+    const [row] = await sql<{ id: string }[]>`
+      insert into public.outcome_conditions (organization_id, client_id, outcome_id, kind,
+                                             description)
+      values (${world.organizationId}, ${world.clients.a}, ${outcome.id},
+              ${kind}::app.outcome_condition_kind, ${description})
+      returning id
+    `;
+    if (!row) throw new Error('Outcome fixture condition was not created');
+    return row.id;
+  };
+  const conditionIds = {
+    access: await condition('access', 'Acessos entregues em 5 dias úteis'),
+    approvals: await condition('approvals', 'Aprovações dentro do prazo'),
+    mediaBudget: await condition('media_budget', 'Orçamento de media acordado'),
+  };
+  const [measurement] = await sql<{ id: string }[]>`
+    insert into public.outcome_measurements (organization_id, client_id, outcome_id, measured_on,
+                                             value, note, recorded_by)
+    values (${world.organizationId}, ${world.clients.a}, ${outcome.id},
+            (now() at time zone 'Europe/Lisbon')::date - 30, 45, 'Primeiro mês',
+            ${world.users.manager})
+    returning id
+  `;
+  if (!measurement) throw new Error('Outcome fixture measurement was not created');
+  return { rooms, outcomeId: outcome.id, conditionIds, measurementId: measurement.id };
+}

@@ -116,21 +116,50 @@ async function requestParties(
   };
 }
 
+/** What a payment request charges: a contract milestone, a retainer month or an extra request. */
+export type PaymentRequestOrigin =
+  | { kind: 'milestone'; milestoneId: string }
+  | { kind: 'retainer_month'; retainerId: string; month: string }
+  | { kind: 'retainer_extra'; retainerId: string; extraRequestId: string };
+
+export type PaymentRequestInput = {
+  organizationId: string;
+  clientId: string;
+  dealId: string;
+  /** The signed contract whose parties and bank details the request freezes. */
+  contractId: string;
+  label: string;
+  amount: string;
+  currency: string;
+  origin: PaymentRequestOrigin;
+};
+
+function originColumns(origin: PaymentRequestOrigin) {
+  switch (origin.kind) {
+    case 'milestone':
+      return { milestoneId: origin.milestoneId };
+    case 'retainer_month':
+      return { retainerId: origin.retainerId, retainerMonth: origin.month };
+    case 'retainer_extra':
+      return { retainerId: origin.retainerId, retainerExtraRequestId: origin.extraRequestId };
+  }
+}
+
 /**
- * Issues the payment request of one milestone: allocates the next number, freezes both parties
- * and the bank details, stores the PDF and emits `billing.request.sent`.
+ * Issues a payment request: allocates the next number, freezes both parties and the bank details
+ * from the contract, stores the PDF and emits `billing.request.sent`.
  */
-export async function issueRequest(
+export async function issuePaymentRequest(
   tx: DbTransaction,
-  milestone: MilestoneRow,
-  deps: BillingDeps,
+  input: PaymentRequestInput,
+  deps: Pick<BillingDeps, 'storage' | 'appBaseUrl'>,
   now: Date,
 ): Promise<string> {
-  const parties = await requestParties(tx, milestone.contractId);
+  const parties = await requestParties(tx, input.contractId);
   if (!parties) throw new Error('Payment request parties were not found');
   const number = await nextRequestNumber(
     tx,
-    milestone.organizationId,
+    input.organizationId,
     Number(lisbonDate(now).slice(0, 4)),
   );
   const dueDate = dueDateFrom(now, REQUEST_DUE_DAYS);
@@ -138,14 +167,14 @@ export async function issueRequest(
   const [request] = await tx
     .insert(paymentRequests)
     .values({
-      organizationId: milestone.organizationId,
-      clientId: milestone.clientId,
-      dealId: milestone.dealId,
-      milestoneId: milestone.id,
+      organizationId: input.organizationId,
+      clientId: input.clientId,
+      dealId: input.dealId,
+      ...originColumns(input.origin),
       number,
-      label: milestone.label,
-      amount: milestone.amount,
-      currency: milestone.currency,
+      label: input.label,
+      amount: input.amount,
+      currency: input.currency as Currency,
       locale: parties.locale,
       dueDate,
       issuerDetails: parties.issuer,
@@ -158,38 +187,63 @@ export async function issueRequest(
   const pdf = await buildPaymentRequestPdf({
     locale: parties.locale,
     number,
-    label: milestone.label,
-    amountMinor: toMinorUnits(milestone.amount),
-    currency: milestone.currency as Currency,
+    label: input.label,
+    amountMinor: toMinorUnits(input.amount),
+    currency: input.currency as Currency,
     sentAt: now,
     dueDate,
     issuer: parties.issuer,
     client: parties.client,
     payUrl: portalInvoicesUrl(deps.appBaseUrl, parties.locale),
   });
-  const path = requestPdfPath(milestone.organizationId, milestone.clientId, request.id);
+  const path = requestPdfPath(input.organizationId, input.clientId, request.id);
   await deps.storage.upload(path, pdf);
 
   await tx.update(paymentRequests).set({ pdfPath: path }).where(eq(paymentRequests.id, request.id));
+  await recordAudit(tx, {
+    organizationId: input.organizationId,
+    action: 'payment_request.sent',
+    resourceType: 'payment_request',
+    resourceId: request.id,
+    clientId: input.clientId,
+    metadata: { number, dealId: input.dealId, ...originColumns(input.origin) },
+  });
+  await emit(tx, {
+    type: 'billing.request.sent',
+    organizationId: input.organizationId,
+    clientId: input.clientId,
+    payload: { dealId: input.dealId, requestId: request.id },
+  });
+  return request.id;
+}
+
+/** Issues the payment request of one milestone and marks the milestone requested. */
+export async function issueRequest(
+  tx: DbTransaction,
+  milestone: MilestoneRow,
+  deps: BillingDeps,
+  now: Date,
+): Promise<string> {
+  const requestId = await issuePaymentRequest(
+    tx,
+    {
+      organizationId: milestone.organizationId,
+      clientId: milestone.clientId,
+      dealId: milestone.dealId,
+      contractId: milestone.contractId,
+      label: milestone.label,
+      amount: milestone.amount,
+      currency: milestone.currency,
+      origin: { kind: 'milestone', milestoneId: milestone.id },
+    },
+    deps,
+    now,
+  );
   await tx
     .update(billingMilestones)
     .set({ status: 'requested' })
     .where(eq(billingMilestones.id, milestone.id));
-  await recordAudit(tx, {
-    organizationId: milestone.organizationId,
-    action: 'payment_request.sent',
-    resourceType: 'payment_request',
-    resourceId: request.id,
-    clientId: milestone.clientId,
-    metadata: { number, milestoneId: milestone.id, dealId: milestone.dealId },
-  });
-  await emit(tx, {
-    type: 'billing.request.sent',
-    organizationId: milestone.organizationId,
-    clientId: milestone.clientId,
-    payload: { dealId: milestone.dealId, requestId: request.id },
-  });
-  return request.id;
+  return requestId;
 }
 
 /**
@@ -328,15 +382,17 @@ export async function voidPaymentRequest(
       .update(paymentRequests)
       .set({ status: 'void', voidedAt: now, voidReason: reason })
       .where(eq(paymentRequests.id, request.id));
-    await tx
-      .update(billingMilestones)
-      .set({ status: 'pending' })
-      .where(
-        and(
-          eq(billingMilestones.id, request.milestoneId),
-          eq(billingMilestones.status, 'requested'),
-        ),
-      );
+    if (request.milestoneId) {
+      await tx
+        .update(billingMilestones)
+        .set({ status: 'pending' })
+        .where(
+          and(
+            eq(billingMilestones.id, request.milestoneId),
+            eq(billingMilestones.status, 'requested'),
+          ),
+        );
+    }
     await recordAudit(tx, {
       organizationId: request.organizationId,
       action: 'payment_request.voided',

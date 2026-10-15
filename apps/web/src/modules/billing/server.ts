@@ -19,6 +19,7 @@ import {
   voidPaymentRequest,
 } from './requests';
 import { billingDeps } from './runtime';
+import type { BillingDeps } from './requests';
 import { processProviderEvent, startCheckout } from './stripe-events';
 import { lisbonDate } from './domain/plan';
 import { handleStripeWebhook } from './webhook-handler';
@@ -110,3 +111,18 @@ export function loadPortalInvoices(claims: VerifiedClaims, clientId: string) {
   return withUserContext(claims, (tx) => getPortalInvoices(tx, clientId, lisbonDate(new Date())));
 }
 export { BILLING_FUNCTIONS } from './automations';
+export { signedContractFor, type SignedContractRef } from './parties';
+export {
+  issuePaymentRequest,
+  REQUEST_DUE_DAYS,
+  type PaymentRequestInput,
+  type PaymentRequestOrigin,
+} from './requests';
+export { createMemoryBillingStorage } from './storage';
+
+/** What another module needs to issue payment requests: the PDF storage and the portal URL. */
+export function billingIssueDeps(): Pick<BillingDeps, 'storage' | 'appBaseUrl'> {
+  const { storage, appBaseUrl } = billingDeps();
+  return { storage, appBaseUrl };
+}
+export type { BillingDeps } from './requests';

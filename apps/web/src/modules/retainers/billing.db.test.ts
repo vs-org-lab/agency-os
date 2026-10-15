@@ -9,6 +9,7 @@ import {
   type World,
 } from '@agency-os/db/testing';
 import { issueRetainerRequests, sweepRetainerBilling } from './billing';
+import { loadRetainerBilling } from './billing-view';
 import { decideExtra, quoteExtra } from './extras';
 import { inDays, lisbonToday, retainerClaims, retainerDeps } from './testing';
 
@@ -215,6 +216,34 @@ describe('retainer billing', () => {
             (row) => row.retainer_extra_request_id,
           ),
         ).toContain(fixture.retainer.extraRequestId);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'only billing readers load the retainer billing',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps, issue } = await setup(sql);
+        await issue();
+        const load = (userId: string, kind: 'internal' | 'client' = 'internal') =>
+          loadRetainerBilling(retainerClaims(userId, kind), world.clients.a, deps);
+
+        const founder = await load(world.users.founder);
+        expect(founder).toMatchObject({ canWrite: true, contractMissing: false });
+        expect(founder?.requests).toMatchObject([
+          { origin: 'month', amount: '1500.00', currency: 'EUR', status: 'sent' },
+        ]);
+        expect(founder?.requests[0]?.label).toMatch(/^Retainer Essencial · /);
+        expect(await load(world.users.finance)).toMatchObject({ canWrite: true });
+        expect(await load(world.users.manager)).toMatchObject({ canWrite: false });
+        expect(await load(world.users.freelancer)).toBeNull();
+        expect(await load(world.users.decisionMakerA, 'client')).toBeNull();
+
+        await sql`reset role`;
+        await sql`update public.contracts set status = 'void' where id = ${fixture.contractId}`;
+        expect(await load(world.users.founder)).toMatchObject({ contractMissing: true });
       });
     },
     SLOW,

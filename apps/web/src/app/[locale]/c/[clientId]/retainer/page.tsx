@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
+import { RetainerBilling } from '@/components/retainers/retainer-billing';
 import { RetainerScreen } from '@/components/retainers/retainer-screen';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { findVisibleClient } from '@/modules/organizations';
-import { loadRoomRetainer } from '@/modules/retainers/server';
+import { loadRoomRetainer, loadRoomRetainerBilling } from '@/modules/retainers/server';
 import { withUserContext } from '@/platform/db';
 import {
   deleteUsageAction,
@@ -12,6 +13,14 @@ import {
   recordUsageAction,
   saveRetainerAction,
 } from '../../../retainer-actions';
+import {
+  chaseRequestAction,
+  invoiceUploadAction,
+  recordPaymentAction,
+  registerInvoiceAction,
+  settlePaymentAction,
+  voidRequestAction,
+} from '../../../(workspace)/pipeline/[dealId]/billing/actions';
 import { RoomHeader } from '../room/room-header';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +35,10 @@ export default async function RoomRetainerPage({ params }: PageProps) {
   const session = await requireArea('/', locale);
   const client = await withUserContext(session.claims, (tx) => findVisibleClient(tx, clientId));
   if (!client) notFound();
-  const view = await loadRoomRetainer(session.claims, clientId);
+  const [view, billing] = await Promise.all([
+    loadRoomRetainer(session.claims, clientId),
+    loadRoomRetainerBilling(session.claims, clientId),
+  ]);
   if (!view || (!view.retainer && !view.canWrite)) notFound();
 
   return (
@@ -48,6 +60,19 @@ export default async function RoomRetainerPage({ params }: PageProps) {
           quoteExtra: quoteExtraAction,
         }}
       />
+      {billing ? (
+        <RetainerBilling
+          view={billing}
+          actions={{
+            chase: chaseRequestAction,
+            void: voidRequestAction,
+            record: recordPaymentAction,
+            settle: settlePaymentAction,
+            invoiceUpload: invoiceUploadAction,
+            registerInvoice: registerInvoiceAction,
+          }}
+        />
+      ) : null}
     </div>
   );
 }

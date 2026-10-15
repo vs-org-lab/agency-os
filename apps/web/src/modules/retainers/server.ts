@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { billingIssueDeps } from '@/modules/billing/server';
 import type { RetainersDeps } from './access';
+import { loadRetainerBilling } from './billing-view';
 import { decideExtra, quoteExtra } from './extras';
 import { loadPortalRetainer } from './portal';
 import { loadStaffRetainer } from './readers';
@@ -52,3 +53,6 @@ export const decideExtraRequest = (
 ) => decideExtra(claims, input, deps());
 export const loadClientRetainer = (claims: VerifiedClaims, clientId: string) =>
   loadPortalRetainer(claims, clientId, deps());
+
+export const loadRoomRetainerBilling = (claims: VerifiedClaims, clientId: string) =>
+  loadRetainerBilling(claims, clientId, deps());

@@ -2993,6 +2993,11 @@
       "limit_reached": "Este registo passa o disponível do mês. O trabalho acima do limite só começa com um pedido extra aprovado pelo cliente.",
       "not_found": "Não foi possível concluir. Atualize a página.",
       "suspended": "Há um pagamento em atraso há mais de 30 dias. Os pedidos novos ficam suspensos até ser regularizado."
+    },
+    "billing": {
+      "title": "Faturação",
+      "noContract": "Sem contrato assinado com este cliente: o OS não emite os pedidos do retainer.",
+      "empty": "Ainda não há pedidos de pagamento."
     }
   }
 }

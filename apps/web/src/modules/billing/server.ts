@@ -127,3 +127,4 @@ export function billingIssueDeps(): Pick<BillingDeps, 'storage' | 'appBaseUrl'> 
 }
 export type { BillingDeps } from './requests';
 export { clientPaymentsSuspended } from './overdue';
+export { paymentRequestViews } from './workspace';

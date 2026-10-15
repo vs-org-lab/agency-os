@@ -2993,6 +2993,11 @@
       "limit_reached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
       "not_found": "This could not be completed. Refresh the page.",
       "suspended": "A payment is more than 30 days overdue. New requests are on hold until it is settled."
+    },
+    "billing": {
+      "title": "Billing",
+      "noContract": "No signed contract with this client: the OS does not issue the retainer's requests.",
+      "empty": "No payment requests yet."
     }
   }
 }

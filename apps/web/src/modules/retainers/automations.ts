@@ -10,9 +10,11 @@ import {
   sendClientPortalNotice,
 } from '@/modules/commercial/server';
 import { nextAllowedSendTime } from '@/modules/email';
+import { billingIssueDeps } from '@/modules/billing/server';
 import { inngest } from '@/modules/events';
 import { withSystemContext, withUserContext } from '@/platform/db';
 import { pendingAlerts } from './alerts';
+import { sweepRetainerBilling } from './billing';
 import { lisbonDay } from './domain/months';
 import { sweepRetainerReviews } from './review';
 
@@ -131,4 +133,20 @@ const reviewSweep = inngest.createFunction(
   },
 );
 
-export const RETAINER_FUNCTIONS = [usageAlerts, extraRequested, reviewSweep];
+/** 3B.2: every morning, each active retainer's month and each approved extra still to bill. */
+const billingSweep = inngest.createFunction(
+  {
+    id: 'retainers-billing',
+    triggers: [{ cron: 'TZ=Europe/Lisbon 0 7 * * *' }],
+    retries: RETRIES,
+    onFailure: failureHandler('retainers-billing'),
+  },
+  async ({ step }) => {
+    const issued = await step.run('sweep-billing', () =>
+      sweepRetainerBilling({ contexts, billing: billingIssueDeps() }),
+    );
+    return { issued };
+  },
+);
+
+export const RETAINER_FUNCTIONS = [usageAlerts, extraRequested, reviewSweep, billingSweep];

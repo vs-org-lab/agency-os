@@ -1,9 +1,12 @@
 import type { Actor } from '@/modules/access';
+import type { BillingDeps } from '@/modules/billing/server';
 import { roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
 export type RetainersDeps = {
   contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
+  /** Issues the retainer's payment requests (3B.2). */
+  billing: Pick<BillingDeps, 'storage' | 'appBaseUrl'>;
   now?: () => Date;
   flush?: () => Promise<void>;
 };

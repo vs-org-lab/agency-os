@@ -61,6 +61,7 @@ export const AUDIT_ACTIONS = [
   'outcome.measurement_recorded',
   'outcome.guarantee_decided',
   'outcome.conditions_due',
+  'client.renewal_due',
   'agenda.meeting_scheduled',
   'agenda.meeting_updated',
   'agenda.meeting_cancelled',

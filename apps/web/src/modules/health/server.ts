@@ -7,3 +7,5 @@ const deps = (): HealthDeps => ({ contexts: { withUserContext, withSystemContext
 
 export const loadRoomHealth = (claims: VerifiedClaims, clientId: string) =>
   loadClientHealth(claims, clientId, deps());
+
+export { MILESTONE_FUNCTIONS } from './automations';

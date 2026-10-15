@@ -154,6 +154,46 @@ describe('retainers', () => {
   );
 
   it(
+    'a retainer past its review date can still be edited and ended',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const retainer = await createRetainerFixture(sql, world);
+        const projectId = retainer.rooms.a.projectId;
+        await sql`
+          update public.retainers set review_on = ${inDays(-1)} where id = ${retainer.retainerId}
+        `;
+        const { deps } = retainerDeps(sql);
+        const founder = retainerClaims(world.users.founder);
+        const current = await retainerRow(sql, projectId);
+        const edit = {
+          clientId: world.clients.a,
+          projectId,
+          tier: 'Essencial',
+          monthlyFee: '1500.00',
+          currency: 'EUR',
+          startsOn: current?.starts_on ?? '',
+          reviewOn: inDays(-1),
+          status: 'ended' as const,
+          limits: [{ kind: 'content_pieces', monthlyLimit: '4' }],
+        };
+
+        expect(await saveRetainer(founder, { ...edit, reviewOn: inDays(-2) }, deps)).toEqual({
+          ok: false,
+          rule: 'invalid_input',
+        });
+        expect(await saveRetainer(founder, edit, deps)).toMatchObject({ ok: true });
+        const [row] = await sql<{ status: string; review_on: string }[]>`
+          select status::text, review_on::text from public.retainers
+          where id = ${retainer.retainerId}
+        `;
+        expect(row).toEqual({ status: 'ended', review_on: inDays(-1) });
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'the staff view shows the month per limit and hides the fee from freelancers',
     async () => {
       await withTestTransaction(async (sql) => {

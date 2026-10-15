@@ -59,8 +59,8 @@ export type RetainerInput = {
 
 /**
  * Creates or edits the retainer of a project (RF-110). The start is the first day of its month,
- * the review lies ahead, and the limits replace the previous ones. A new review date allows a new
- * review reminder (AUT-24).
+ * a new review date lies ahead, and the limits replace the previous ones. A new review date allows
+ * a new review reminder (AUT-24).
  */
 export async function saveRetainer(
   claims: VerifiedClaims,
@@ -76,7 +76,7 @@ export async function saveRetainer(
   const now = nowOf(deps);
   const today = lisbonDay(now);
   const startsOn = firstOfMonth(data.startsOn);
-  if (data.reviewOn <= today || data.reviewOn <= startsOn) return INVALID_INPUT;
+  if (data.reviewOn <= startsOn) return INVALID_INPUT;
 
   return deps.contexts.withSystemContext(async (tx) => {
     const [project] = await tx
@@ -95,6 +95,8 @@ export async function saveRetainer(
       .from(retainers)
       .where(eq(retainers.projectId, project.id))
       .for('update');
+    // A retainer usually ends around its review date, so an unchanged past date stays valid.
+    if (data.reviewOn <= today && current?.reviewOn !== data.reviewOn) return INVALID_INPUT;
     const fields = {
       tier: data.tier,
       monthlyFee: data.monthlyFee,

@@ -6,6 +6,7 @@ import { roomAccess } from '@/components/shell/routing';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { findVisibleClient } from '@/modules/organizations';
+import { hasOutcome } from '@/modules/outcomes/server';
 import { hasRetainer } from '@/modules/retainers/server';
 import { withUserContext } from '@/platform/db';
 
@@ -24,12 +25,18 @@ export default async function RoomLayout({ children, params }: LayoutProps) {
     notFound();
   }
 
-  const retainer =
-    session.actor.roles.some((role) => role === 'founder' || role === 'project_manager') ||
-    (await hasRetainer(session.claims, clientId));
+  const writesRooms = session.actor.roles.some(
+    (role) => role === 'founder' || role === 'project_manager',
+  );
+  const [retainer, outcome] = writesRooms
+    ? [true, true]
+    : await Promise.all([
+        hasRetainer(session.claims, clientId),
+        hasOutcome(session.claims, clientId),
+      ]);
 
   return (
-    <AppShell session={session} level={{ level: 'room', clientId, retainer }}>
+    <AppShell session={session} level={{ level: 'room', clientId, retainer, outcome }}>
       {children}
     </AppShell>
   );

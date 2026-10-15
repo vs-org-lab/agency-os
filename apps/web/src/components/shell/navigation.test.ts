@@ -39,6 +39,24 @@ describe('buildNavigation', () => {
     });
   });
 
+  it('room navigation links the outcome when it exists or for writers', () => {
+    expect(
+      buildNavigation({ level: 'room', clientId: 'client-1', retainer: true }).items.some(
+        (item) => item.href === '/c/client-1/outcome',
+      ),
+    ).toBe(false);
+    const navigation = buildNavigation({
+      level: 'room',
+      clientId: 'client-1',
+      retainer: true,
+      outcome: true,
+    });
+    expect(navigation.items.slice(-2)).toEqual([
+      { href: '/c/client-1/retainer', labelKey: 'shell.room.retainer', icon: 'gauge' },
+      { href: '/c/client-1/outcome', labelKey: 'shell.room.outcome', icon: 'target' },
+    ]);
+  });
+
   it('studio navigation lists updates and tasks', () => {
     const navigation = buildNavigation({
       level: 'studio',

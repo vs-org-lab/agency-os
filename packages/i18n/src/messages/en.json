@@ -101,7 +101,8 @@
       "documents": "Documents",
       "brandHub": "Brand Hub",
       "agenda": "Agenda",
-      "retainer": "Retainer"
+      "retainer": "Retainer",
+      "outcome": "Outcome"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -3004,6 +3005,80 @@
       "title": "Billing",
       "noContract": "No signed contract with this client: the OS does not issue the retainer's requests.",
       "empty": "No payment requests yet."
+    }
+  },
+  "outcomes": {
+    "title": "Outcome",
+    "empty": "This client has no agreed outcome yet.",
+    "proposalGuarantee": "Guarantee in the proposal: {text}",
+    "summary": "{metric}: from {baseline} to {target} by {deadline}",
+    "source": "Data source: {source}",
+    "edit": "Edit outcome",
+    "cancel": "Cancel",
+    "form": {
+      "project": "Project",
+      "metric": "Metric",
+      "unit": "Unit",
+      "baseline": "Baseline",
+      "target": "Target",
+      "deadline": "Deadline",
+      "dataSource": "Data source",
+      "save": "Save outcome",
+      "saved": "Outcome saved.",
+      "locked": "The guarantee has been decided: the metric, baseline, target and deadline stay as they are."
+    },
+    "evolution": "Progress",
+    "chart": {
+      "label": "Progress of {metric}: from {baseline} to the target {target}",
+      "date": "Date",
+      "value": "Value",
+      "empty": "No values recorded yet.",
+      "baselineValue": "Baseline: {value}",
+      "targetValue": "Target: {value}"
+    },
+    "measurement": {
+      "title": "Record a value",
+      "date": "Date",
+      "value": "Value",
+      "note": "Note",
+      "save": "Record",
+      "saved": "Value recorded."
+    },
+    "conditions": {
+      "title": "Client conditions",
+      "status": {
+        "pending": "Not recorded",
+        "met": "Met on {date}",
+        "failed": "Failed on {date}"
+      },
+      "met": "Met",
+      "failed": "Failed",
+      "reset": "Back to not recorded",
+      "note": "Note",
+      "noteRequired": "Explain what failed.",
+      "save": "Save",
+      "add": "Add condition",
+      "addLabel": "New condition",
+      "added": "Condition added.",
+      "recorded": "Condition recorded."
+    },
+    "guarantee": {
+      "title": "Guarantee",
+      "pending": "To be decided by {deadline}",
+      "notActivatedTargetMet": "Not activated: the target was reached",
+      "notActivatedConditionsFailed": "Not activated: a client condition failed",
+      "active": "Activated on {date} · {months} of 3 months used",
+      "closedTargetMet": "Closed: the target was reached",
+      "closedMonthsUsed": "Closed: the 3 months were used"
+    },
+    "portal": {
+      "title": "Agreed outcome",
+      "empty": "There is no outcome or retainer yet."
+    },
+    "errors": {
+      "invalid_input": "Check the fields.",
+      "invalid_state": "The guarantee has been decided. Refresh the page.",
+      "not_found": "Could not complete. Refresh the page."
     }
   }
 }

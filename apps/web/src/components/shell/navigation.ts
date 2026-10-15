@@ -36,6 +36,7 @@ export type NavigationLabelKey =
   | 'shell.room.brandHub'
   | 'shell.room.agenda'
   | 'shell.room.retainer'
+  | 'shell.room.outcome'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -64,7 +65,7 @@ export type Navigation = {
 
 export type NavigationLevel =
   | { level: 'studio'; permissions: { pipeline: boolean; money: boolean } }
-  | { level: 'room'; clientId: string; retainer?: boolean }
+  | { level: 'room'; clientId: string; retainer?: boolean; outcome?: boolean }
   | { level: 'portal'; permissions: { invoices: boolean; room: boolean; team: boolean } };
 
 const COMMERCIAL_ITEMS: NavigationItem[] = [
@@ -146,6 +147,15 @@ export function buildNavigation(input: NavigationLevel): Navigation {
                   href: `/c/${input.clientId}/retainer`,
                   labelKey: 'shell.room.retainer' as const,
                   icon: 'gauge' as const,
+                },
+              ]
+            : []),
+          ...(input.outcome
+            ? [
+                {
+                  href: `/c/${input.clientId}/outcome`,
+                  labelKey: 'shell.room.outcome' as const,
+                  icon: 'target' as const,
                 },
               ]
             : []),

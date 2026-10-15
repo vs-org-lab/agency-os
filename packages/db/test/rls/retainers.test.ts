@@ -75,6 +75,39 @@ describe('retainer access', () => {
   );
 
   it(
+    "extra request quotes are readable only by the client's decision maker",
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const retainer = await createRetainerFixture(sql, world);
+        await sql`
+          update public.retainer_extra_requests
+          set status = 'quoted', quote_amount = 150, currency = 'EUR'
+          where id = ${retainer.extraRequestId}
+        `;
+
+        for (const user of [world.users.founder, world.users.freelancer]) {
+          await asUser(sql, user);
+          await expect(
+            sql.savepoint(
+              (tx) => tx`select quote_amount, currency from public.retainer_extra_requests`,
+            ),
+          ).rejects.toThrow(/permission denied/);
+        }
+
+        const quotes = () => sql<{ quote_amount: string | null; currency: string | null }[]>`
+          select quote_amount::text, currency::text from public.portal_retainer_extra_requests
+        `;
+        await asUser(sql, world.users.decisionMakerA);
+        expect(await quotes()).toEqual([{ quote_amount: '150.00', currency: 'EUR' }]);
+        await asUser(sql, world.users.operationalA);
+        expect(await quotes()).toEqual([{ quote_amount: null, currency: null }]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     "portal views show the client's own retainer to its decision maker and operational only",
     async () => {
       await withTestTransaction(async (sql) => {

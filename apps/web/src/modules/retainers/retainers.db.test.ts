@@ -159,6 +159,11 @@ describe('retainers', () => {
       await withTestTransaction(async (sql) => {
         const world = await createFixtureWorld(sql);
         const retainer = await createRetainerFixture(sql, world);
+        await sql`
+          update public.retainer_extra_requests
+          set status = 'quoted', quote_amount = 150, currency = 'EUR'
+          where id = ${retainer.extraRequestId}
+        `;
         const { deps } = retainerDeps(sql);
 
         const manager = await loadStaffRetainer(
@@ -193,7 +198,7 @@ describe('retainers', () => {
             percent: 0,
           },
         ]);
-        expect(manager?.extraRequests).toHaveLength(1);
+        expect(manager?.extraRequests).toMatchObject([{ quoteAmount: '150.00', currency: 'EUR' }]);
 
         const freelancer = await loadStaffRetainer(
           retainerClaims(world.users.freelancer),
@@ -202,6 +207,9 @@ describe('retainers', () => {
         );
         expect(freelancer?.canWrite).toBe(false);
         expect(freelancer?.retainer?.monthlyFee).toBeNull();
+        expect(freelancer?.extraRequests).toMatchObject([
+          { status: 'quoted', quoteAmount: null, currency: null },
+        ]);
         expect(
           await loadStaffRetainer(
             retainerClaims(world.users.decisionMakerA, 'client'),

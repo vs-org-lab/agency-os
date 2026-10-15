@@ -288,6 +288,11 @@ describe('retainer requests', () => {
       await withTestTransaction(async (sql) => {
         const world = await createFixtureWorld(sql);
         const retainer = await createRetainerFixture(sql, world);
+        await sql`
+          update public.retainer_extra_requests
+          set status = 'quoted', quote_amount = 150, currency = 'EUR'
+          where id = ${retainer.extraRequestId}
+        `;
         const { deps } = retainerDeps(sql);
 
         const decisionMaker = await loadPortalRetainer(
@@ -306,13 +311,18 @@ describe('retainer requests', () => {
           ['content_pieces', 4.8, 2],
           ['maintenance_hours', 12, 0],
         ]);
-        expect(decisionMaker?.extraRequests).toHaveLength(1);
+        expect(decisionMaker?.extraRequests).toMatchObject([
+          { quoteAmount: '150.00', currency: 'EUR' },
+        ]);
         const operational = await loadPortalRetainer(
           retainerClaims(world.users.operationalA, 'client'),
           world.clients.a,
           deps,
         );
         expect(operational?.decides).toBe(false);
+        expect(operational?.extraRequests).toMatchObject([
+          { status: 'quoted', quoteAmount: null, currency: null },
+        ]);
         expect(
           await loadPortalRetainer(
             retainerClaims(world.users.clientFinanceB, 'client'),

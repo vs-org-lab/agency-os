@@ -1,10 +1,18 @@
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
+import { clientPaymentsSuspended } from '@/modules/billing/server';
 import { emit, requestFlush } from '@/modules/events';
 import { soleClientManager } from '@/modules/rooms/server';
 import type { VerifiedClaims } from '@/platform/db';
-import { INVALID_INPUT, NOT_FOUND, nowOf, type NotFound, type RetainersDeps } from './access';
+import {
+  INVALID_INPUT,
+  NOT_FOUND,
+  nowOf,
+  SUSPENDED,
+  type NotFound,
+  type RetainersDeps,
+} from './access';
 import { retainerClient } from './client-access';
 import { fitsAllowance } from './domain/allowance';
 import { RETAINER_LIMIT_KINDS } from './domain/kinds';
@@ -54,13 +62,16 @@ export async function createRequestTask(
 /**
  * F7 and US-19: the client asks for work. Within the month's allowance it becomes a team task
  * with its usage; above it, an extra request the team quotes and the client approves first
- * (RN-61). The retainer is locked, so concurrent requests never pass the allowance together.
+ * (RN-61). The retainer is locked, so concurrent requests never pass the allowance together. A
+ * payment more than 30 days overdue puts new requests on hold (RN-62).
  */
 export async function requestWork(
   claims: VerifiedClaims,
   input: { retainerId: string; kind: string; description: string; quantity: string },
   deps: RetainersDeps,
-): Promise<{ ok: true; outcome: 'task' | 'extra' } | NotFound | typeof INVALID_INPUT> {
+): Promise<
+  { ok: true; outcome: 'task' | 'extra' } | NotFound | typeof INVALID_INPUT | typeof SUSPENDED
+> {
   const client = await retainerClient(claims, input.retainerId, deps);
   if (!client) return NOT_FOUND;
   const parsed = requestSchema.safeParse(input);
@@ -70,6 +81,7 @@ export async function requestWork(
   const month = lisbonMonth(now);
 
   const result = await deps.contexts.withSystemContext(async (tx) => {
+    if (await clientPaymentsSuspended(tx, client.clientId, lisbonDay(now))) return SUSPENDED;
     const retainer = await lockRetainer(tx, data.retainerId);
     if (!retainer || retainer.clientId !== client.clientId) return NOT_FOUND;
     if (retainer.status !== 'active') return INVALID_INPUT;

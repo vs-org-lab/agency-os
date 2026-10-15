@@ -15,6 +15,7 @@ export type NotFound = { ok: false; rule: 'not_found' };
 export const NOT_FOUND: NotFound = { ok: false, rule: 'not_found' };
 export const INVALID_INPUT = { ok: false, rule: 'invalid_input' } as const;
 export const INVALID_STATE = { ok: false, rule: 'invalid_state' } as const;
+export const SUSPENDED = { ok: false, rule: 'suspended' } as const;
 export const LIMIT_REACHED = { ok: false, rule: 'limit_reached' } as const;
 export const OK = { ok: true } as const;
 

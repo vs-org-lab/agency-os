@@ -2984,13 +2984,15 @@
       "approve": "Approve quote",
       "decline": "Decline",
       "approved": "Quote approved. The team will start.",
-      "declined": "Request declined."
+      "declined": "Request declined.",
+      "suspended": "A payment is more than 30 days overdue. New requests are on hold until it is settled."
     },
     "errors": {
       "invalid_input": "Check the fields.",
       "invalid_state": "This request has changed. Refresh the page.",
       "limit_reached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
-      "not_found": "This could not be completed. Refresh the page."
+      "not_found": "This could not be completed. Refresh the page.",
+      "suspended": "A payment is more than 30 days overdue. New requests are on hold until it is settled."
     }
   }
 }

@@ -3,6 +3,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createRetainerBillingFixture,
   createRetainerFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
@@ -10,7 +11,7 @@ import { getClientApprovals } from '@/modules/rooms/server';
 import { decideExtra, quoteExtra } from './extras';
 import { loadPortalRetainer } from './portal';
 import { requestWork } from './requests';
-import { retainerClaims, retainerDeps } from './testing';
+import { inDays, retainerClaims, retainerDeps } from './testing';
 
 afterAll(async () => {
   await closeTestSql();
@@ -358,6 +359,68 @@ describe('retainer requests', () => {
             deps,
           ),
         ).toBeNull();
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'requests are suspended by a payment more than 30 days overdue',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const fixture = await createRetainerBillingFixture(sql, world);
+        const { deps } = retainerDeps(sql);
+        const [overdue] = await sql<{ id: string }[]>`
+          insert into public.payment_requests (organization_id, client_id, deal_id, retainer_id,
+                                               retainer_month, number, label, amount, currency,
+                                               locale, due_date, issuer_details, client_details)
+          values (${world.organizationId}, ${world.clients.a}, ${fixture.dealId},
+                  ${fixture.retainer.retainerId}, '2026-01-01', 'PP-2099-0001', 'Retainer', 1500,
+                  'EUR', 'pt-PT', ${inDays(-31)}, '{}'::jsonb, '{}'::jsonb)
+          returning id
+        `;
+        const ask = () =>
+          requestWork(
+            retainerClaims(world.users.decisionMakerA, 'client'),
+            {
+              retainerId: fixture.retainer.retainerId,
+              kind: 'content_pieces',
+              description: 'Publicação',
+              quantity: '0.1',
+            },
+            deps,
+          );
+        const due = (date: string, status: string) =>
+          sql`
+            update public.payment_requests
+            set due_date = ${date}, status = ${status}::app.payment_request_status
+            where id = ${overdue?.id ?? ''}
+          `;
+
+        expect(await ask()).toEqual({ ok: false, rule: 'suspended' });
+        const portal = await loadPortalRetainer(
+          retainerClaims(world.users.decisionMakerA, 'client'),
+          world.clients.a,
+          deps,
+        );
+        expect(portal?.suspended).toBe(true);
+
+        await due(inDays(-30), 'sent');
+        expect(await ask()).toEqual({ ok: true, outcome: 'task' });
+        await due(inDays(-31), 'paid');
+        expect(await ask()).toEqual({ ok: true, outcome: 'task' });
+        await due(inDays(-31), 'void');
+        expect(await ask()).toEqual({ ok: true, outcome: 'task' });
+        expect(
+          (
+            await loadPortalRetainer(
+              retainerClaims(world.users.decisionMakerA, 'client'),
+              world.clients.a,
+              deps,
+            )
+          )?.suspended,
+        ).toBe(false);
       });
     },
     SLOW,

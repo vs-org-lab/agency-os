@@ -1,15 +1,18 @@
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { clientPaymentsSuspended } from '@/modules/billing/server';
 import type { VerifiedClaims } from '@/platform/db';
 import { nowOf, type RetainersDeps } from './access';
 import type { RetainerLimitKind } from './domain/kinds';
-import { lisbonMonth } from './domain/months';
+import { lisbonDay, lisbonMonth } from './domain/months';
 import { limitMonths, type LimitMonth } from './month';
 import type { RetainerExtraRow } from './readers';
 
 /** P-10: the month of the client's retainer, without its value; the decision maker decides. */
 export type PortalRetainerView = {
   decides: boolean;
+  /** RN-62: a payment more than 30 days overdue puts new requests on hold. */
+  suspended: boolean;
   month: string;
   retainer: { id: string; tier: string; status: 'active' | 'ended' };
   limits: LimitMonth[];
@@ -58,12 +61,19 @@ export async function loadPortalRetainer(
     return { retainer, extras };
   });
   if (!seen) return null;
-  const month = lisbonMonth(nowOf(deps));
-  const limits = await deps.contexts.withSystemContext((tx) =>
-    limitMonths(tx, { id: seen.retainer.id, startsOn: seen.retainer.starts_on }, month),
-  );
+  const now = nowOf(deps);
+  const month = lisbonMonth(now);
+  const { limits, suspended } = await deps.contexts.withSystemContext(async (tx) => ({
+    limits: await limitMonths(
+      tx,
+      { id: seen.retainer.id, startsOn: seen.retainer.starts_on },
+      month,
+    ),
+    suspended: await clientPaymentsSuspended(tx, clientId, lisbonDay(now)),
+  }));
   return {
     decides: seen.retainer.decides,
+    suspended,
     month,
     retainer: { id: seen.retainer.id, tier: seen.retainer.tier, status: seen.retainer.status },
     limits,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import type { ClientHealthView, Signal } from '@/modules/health';
@@ -16,6 +17,7 @@ const LEVEL_VARIANT = {
 export function HealthCard({ health }: { health: ClientHealthView }) {
   const t = useTranslations('health');
   const format = useFormatter();
+  const headingId = useId();
   const detail = (signal: Signal) => {
     const value = signal.detail;
     switch (value.kind) {
@@ -38,10 +40,12 @@ export function HealthCard({ health }: { health: ClientHealthView }) {
   return (
     <section
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
-      aria-label={t('title')}
+      aria-labelledby={headingId}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-body font-medium text-text">{t('title')}</h3>
+        <h2 id={headingId} className="text-body font-medium text-text">
+          {t('title')}
+        </h2>
         {health.score === null || health.level === null ? (
           <span className="text-body-sm text-text-secondary">{t('noData')}</span>
         ) : (

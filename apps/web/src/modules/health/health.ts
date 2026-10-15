@@ -37,7 +37,12 @@ async function payments(tx: DbTransaction, clientId: string, today: string) {
                 then (paid_at at time zone 'Europe/Lisbon')::date::text end as paid_on
     from public.payment_requests
     where client_id = ${clientId}::uuid and status <> 'void'
-      and due_date between ${shift(today, -PAYMENTS_WINDOW_DAYS)}::date and ${today}::date
+      and (
+        -- An open request is late only after its due date, and stays late however old it is.
+        (status = 'sent' and due_date < ${today}::date)
+        or (paid_at is not null
+            and due_date between ${shift(today, -PAYMENTS_WINDOW_DAYS)}::date and ${today}::date)
+      )
   `);
   return paymentsSignal(rows.map((row) => ({ dueDate: row.due_date, paidOn: row.paid_on })));
 }
@@ -48,8 +53,9 @@ async function approvals(tx: DbTransaction, clientId: string, now: Date) {
     sql`
       select requested_at, decided_at from public.approvals
       where client_id = ${clientId}::uuid and status <> 'withdrawn'
-        and requested_at >= ${since.toISOString()}::timestamptz
         and requested_at <= ${now.toISOString()}::timestamptz
+        -- A pending approval keeps counting however long ago it was asked for.
+        and (requested_at >= ${since.toISOString()}::timestamptz or status = 'pending')
     `,
   );
   return approvalsSignal(

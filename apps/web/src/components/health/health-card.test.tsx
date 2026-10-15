@@ -39,6 +39,7 @@ describe('C-01 health card', () => {
   it('the card shows the score, the level and each signal', () => {
     show(FULL);
     const card = screen.getByRole('region', { name: 'Saúde' });
+    expect(within(card).getByRole('heading', { level: 2, name: 'Saúde' })).toBeTruthy();
     expect(within(card).getByText('78 de 100')).toBeTruthy();
     expect(within(card).getByText('Saudável')).toBeTruthy();
     expect(within(card).getByText('Pagamentos em dia')).toBeTruthy();

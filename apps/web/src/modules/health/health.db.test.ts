@@ -163,6 +163,62 @@ describe('client health', () => {
   );
 
   it(
+    'a request due today and still open is not late yet',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const billing = await createBillingFixture(sql, world);
+        await sql`
+          update public.payment_requests set due_date = '2026-10-15'
+          where id = ${billing.a.sentRequestId}
+        `;
+        const { deps } = healthDeps(sql);
+
+        const health = await loadClientHealth(
+          healthClaims(world.users.founder),
+          world.clients.a,
+          deps,
+        );
+
+        expect(health?.signals.payments).toBeNull();
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'items open for longer than the window keep counting',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const billing = await createBillingFixture(sql, world);
+        const rooms = await createRoomFixture(sql, world);
+        await sql`
+          update public.payment_requests set due_date = '2025-09-01'
+          where id = ${billing.a.sentRequestId}
+        `;
+        await approvals(sql, world, rooms.a.projectId, rooms.a.phaseIds[1], [
+          { requestedAt: '2026-03-01T10:00:00Z', decidedAt: null },
+        ]);
+        const { deps } = healthDeps(sql);
+
+        const health = await loadClientHealth(
+          healthClaims(world.users.founder),
+          world.clients.a,
+          deps,
+        );
+
+        expect(health?.signals.payments).toEqual({
+          score: 0,
+          detail: { kind: 'payments', onTime: 0, total: 1 },
+        });
+        expect(health?.signals.approvals?.score).toBe(0);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'only visible team comments and client replies count',
     async () => {
       await withTestTransaction(async (sql) => {

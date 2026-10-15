@@ -888,6 +888,12 @@
         "heading": "The Brand Hub has news",
         "body": "Hi {firstName}, the {agencyName} team published a new version of the Brand Hub. You can see it and download the files in the portal.",
         "action": "Open the Brand Hub"
+      },
+      "retainer_threshold": {
+        "subject": "This month's retainer usage",
+        "heading": "You have used much of this month's retainer",
+        "body": "Hello {firstName}, one of your retainer limits has reached 80% or more this month. You can see the usage and ask for work in the portal; anything above the limit is quoted before it starts.",
+        "action": "View usage"
       }
     },
     "founder": {
@@ -1004,6 +1010,18 @@
         "heading": "New comment from {companyName}",
         "body": "The client left a comment on the document {documentTitle}.",
         "action": "View the comment"
+      },
+      "retainer_threshold": {
+        "subject": "{companyName} used {percent}% of this month's {kind, select, content_pieces {content pieces} campaigns {campaigns} maintenance_hours {maintenance hours} other {new automations}}",
+        "heading": "{companyName} is reaching the retainer limit",
+        "body": "{companyName}'s retainer has used {percent}% of the {kind, select, content_pieces {content pieces} campaigns {campaigns} maintenance_hours {maintenance hours} other {new automations}} available this month. Requests above the limit become extra requests with a quote.",
+        "action": "Open the retainer"
+      },
+      "retainer_extra_requested": {
+        "subject": "{companyName} asked for work above the retainer limit",
+        "heading": "Extra request from {companyName}",
+        "body": "The client asked for \"{description}\", above this month's limit. Quote it so the decision maker approves it before work starts.",
+        "action": "Quote the request"
       }
     },
     "team": {

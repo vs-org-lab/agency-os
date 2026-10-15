@@ -17,3 +17,5 @@ export const addUsage = (
 ) => recordUsage(claims, input, deps());
 export const removeUsage = (claims: VerifiedClaims, usageId: string) =>
   deleteUsage(claims, usageId, deps());
+
+export { RETAINER_FUNCTIONS } from './automations';

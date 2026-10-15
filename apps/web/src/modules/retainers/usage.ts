@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
+import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
 import {
   INVALID_INPUT,
@@ -114,7 +115,7 @@ export async function recordUsage(
   if (!actor) return NOT_FOUND;
   const month = lisbonMonth(nowOf(deps));
 
-  return deps.contexts.withSystemContext(async (tx) => {
+  const result = await deps.contexts.withSystemContext(async (tx) => {
     const retainer = await lockRetainer(tx, data.retainerId);
     if (!retainer || retainer.organizationId !== actor.organizationId) return NOT_FOUND;
     if (retainer.status !== 'active') return INVALID_INPUT;
@@ -139,8 +140,19 @@ export async function recordUsage(
       clientId: retainer.clientId,
       metadata: { kind: data.kind, quantity: data.quantity, month },
     });
-    return OK;
+    if (counted.crossed.length > 0) {
+      await emit(tx, {
+        type: 'retainers.usage.recorded',
+        organizationId: retainer.organizationId,
+        clientId: retainer.clientId,
+        payload: { retainerId: retainer.id, month },
+      });
+    }
+    return { ...OK, crossed: counted.crossed.length > 0 };
   });
+  if (!result.ok) return result;
+  if (result.crossed) await (deps.flush ?? requestFlush)();
+  return OK;
 }
 
 /** Removes a usage entry; correcting usage is deleting and recording again. */

@@ -157,6 +157,22 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     documentTitle: 'Estratégia',
     roomUrl: 'https://os.example.com/c/client/docs/doc',
   },
+  'lead.retainer_threshold': {
+    firstName: 'Ana',
+    agencyName: 'Aurion',
+    portalUrl: 'https://os.example.com/pt-PT/portal/progress',
+  },
+  'founder.retainer_threshold': {
+    companyName: 'Empresa Exemplo',
+    kind: 'content_pieces',
+    percent: 80,
+    roomUrl: 'https://os.example.com/c/client/retainer',
+  },
+  'founder.retainer_extra_requested': {
+    companyName: 'Empresa Exemplo',
+    description: 'Campanha de Natal',
+    roomUrl: 'https://os.example.com/c/client/retainer',
+  },
   'founder.testimonial_received': {
     companyName: 'Empresa Exemplo',
     authorName: 'Marta Lopes',
@@ -259,6 +275,23 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
 };
 
 describe('renderEmail', () => {
+  it('retainer alerts have templates', () => {
+    expect(EMAIL_TEMPLATE_KEYS).toEqual(
+      expect.arrayContaining([
+        'lead.retainer_threshold',
+        'founder.retainer_threshold',
+        'founder.retainer_extra_requested',
+      ]),
+    );
+    const team = renderEmail('founder.retainer_threshold', 'pt-PT', {
+      companyName: 'Bloom',
+      kind: 'content_pieces',
+      percent: 80,
+      roomUrl: 'https://os.example.com/c/client/retainer',
+    });
+    expect(team.subject).toBe('Bloom usou 80% das peças de conteúdo do mês');
+  });
+
   it('renders every template in both locales without missing keys', () => {
     for (const locale of ['pt-PT', 'en'] as const) {
       for (const key of EMAIL_TEMPLATE_KEYS) {

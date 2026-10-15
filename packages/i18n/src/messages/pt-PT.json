@@ -888,6 +888,12 @@
         "heading": "O Brand Hub tem novidades",
         "body": "Olá {firstName}, a equipa da {agencyName} publicou uma nova versão do Brand Hub. Pode vê-la e descarregar os ficheiros no portal.",
         "action": "Abrir o Brand Hub"
+      },
+      "retainer_threshold": {
+        "subject": "Consumo do retainer este mês",
+        "heading": "Já usou boa parte do retainer deste mês",
+        "body": "Olá {firstName}, o consumo de um dos limites do seu retainer chegou a 80% ou mais este mês. Pode ver o consumo e pedir trabalho no portal; o que passar o limite é orçado antes de começar.",
+        "action": "Ver o consumo"
       }
     },
     "founder": {
@@ -1004,6 +1010,18 @@
         "heading": "Novo comentário de {companyName}",
         "body": "O cliente deixou um comentário no documento {documentTitle}.",
         "action": "Ver o comentário"
+      },
+      "retainer_threshold": {
+        "subject": "{companyName} usou {percent}% das {kind, select, content_pieces {peças de conteúdo} campaigns {campanhas} maintenance_hours {horas de manutenção} other {automações novas}} do mês",
+        "heading": "{companyName} está a chegar ao limite do retainer",
+        "body": "O retainer de {companyName} já usou {percent}% das {kind, select, content_pieces {peças de conteúdo} campaigns {campanhas} maintenance_hours {horas de manutenção} other {automações novas}} disponíveis este mês. Pedidos acima do limite viram pedidos extra com orçamento.",
+        "action": "Abrir o retainer"
+      },
+      "retainer_extra_requested": {
+        "subject": "{companyName} fez um pedido acima do limite do retainer",
+        "heading": "Pedido extra de {companyName}",
+        "body": "O cliente pediu \"{description}\", acima do limite deste mês. Orce o pedido para o decisor o aprovar antes de o trabalho começar.",
+        "action": "Orçar o pedido"
       }
     },
     "team": {

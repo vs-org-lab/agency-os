@@ -252,6 +252,7 @@ export const approvalSubjectEnum = appSchema.enum('approval_subject', [
   'project',
   'document_version',
   'brand_hub_publication',
+  'retainer_extra',
 ]);
 
 export const approvalStatusEnum = appSchema.enum('approval_status', [
@@ -439,3 +440,23 @@ export const subscriptionStatusEnum = appSchema.enum('subscription_status', [
 export type ExpenseCategory = (typeof expenseCategoryEnum.enumValues)[number];
 export type SubscriptionCycle = (typeof subscriptionCycleEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
+
+export const retainerLimitKindEnum = appSchema.enum('retainer_limit_kind', [
+  'content_pieces',
+  'campaigns',
+  'maintenance_hours',
+  'automations',
+]);
+
+export const retainerStatusEnum = appSchema.enum('retainer_status', ['active', 'ended']);
+
+export const retainerExtraStatusEnum = appSchema.enum('retainer_extra_status', [
+  'requested',
+  'quoted',
+  'approved',
+  'declined',
+]);
+
+export type RetainerLimitKind = (typeof retainerLimitKindEnum.enumValues)[number];
+export type RetainerStatus = (typeof retainerStatusEnum.enumValues)[number];
+export type RetainerExtraStatus = (typeof retainerExtraStatusEnum.enumValues)[number];

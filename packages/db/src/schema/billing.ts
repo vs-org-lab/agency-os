@@ -31,6 +31,7 @@ import {
 } from './enums';
 import { organizations } from './organizations';
 import { profiles } from './profiles';
+import { retainerExtraRequests, retainers } from './retainers';
 import { projectPhases } from './rooms';
 
 /** The issuing entity as it stood when the payment request was sent. */
@@ -126,7 +127,10 @@ export const paymentRequests = pgTable(
     organizationId: uuid('organization_id').notNull(),
     clientId: uuid('client_id').notNull(),
     dealId: uuid('deal_id').notNull(),
-    milestoneId: uuid('milestone_id').notNull(),
+    milestoneId: uuid('milestone_id'),
+    retainerId: uuid('retainer_id'),
+    retainerMonth: date('retainer_month'),
+    retainerExtraRequestId: uuid('retainer_extra_request_id'),
     number: text('number').notNull(),
     label: text('label').notNull(),
     amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
@@ -161,6 +165,18 @@ export const paymentRequests = pgTable(
       foreignColumns: [billingMilestones.id, billingMilestones.clientId],
       name: 'payment_requests_milestone_client_fk',
     }).onDelete('restrict'),
+    foreignKey({
+      columns: [table.retainerId, table.clientId],
+      foreignColumns: [retainers.id, retainers.clientId],
+      name: 'payment_requests_retainer_client_fk',
+    }).onDelete('restrict'),
+    foreignKey({
+      columns: [table.retainerExtraRequestId, table.clientId],
+      foreignColumns: [retainerExtraRequests.id, retainerExtraRequests.clientId],
+      name: 'payment_requests_retainer_extra_client_fk',
+    }).onDelete('restrict'),
+    unique('payment_requests_retainer_month_key').on(table.retainerId, table.retainerMonth),
+    unique('payment_requests_retainer_extra_key').on(table.retainerExtraRequestId),
     unique('payment_requests_number_key').on(table.organizationId, table.number),
     unique('payment_requests_id_client_id_key').on(table.id, table.clientId),
     uniqueIndex('payment_requests_open_per_milestone_key')
@@ -171,6 +187,13 @@ export const paymentRequests = pgTable(
       .on(table.dueDate)
       .where(sql`${table.status} = 'sent'`),
     check('payment_requests_amount_positive', sql`${table.amount} > 0`),
+    check(
+      'payment_requests_origin',
+      sql`num_nonnulls(${table.milestoneId}, ${table.retainerMonth}, ${table.retainerExtraRequestId}) = 1
+          and (${table.retainerMonth} is null
+               or (${table.retainerId} is not null and extract(day from ${table.retainerMonth}) = 1))
+          and (${table.retainerExtraRequestId} is null or ${table.retainerId} is not null)`,
+    ),
     check('payment_requests_reminder_stage_range', sql`${table.lastReminderStage} between 0 and 5`),
   ],
 ).enableRLS();

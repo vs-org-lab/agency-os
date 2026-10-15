@@ -188,6 +188,7 @@ export async function issuePaymentRequest(
     locale: parties.locale,
     number,
     label: input.label,
+    caption: input.origin.kind === 'milestone' ? 'milestone' : 'description',
     amountMinor: toMinorUnits(input.amount),
     currency: input.currency as Currency,
     sentAt: now,

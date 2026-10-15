@@ -67,6 +67,19 @@ describe('buildPaymentRequestPdf', () => {
     expect(pdfContainsText(pdf, 'Multicaixa Express: 923 000 000')).toBe(true);
   });
 
+  it('names a milestone a milestone and anything else a description', async () => {
+    const milestone = await buildPaymentRequestPdf(INPUT);
+    expect(pdfContainsText(milestone, 'Prestação: Assinatura')).toBe(true);
+
+    const retainer = await buildPaymentRequestPdf({
+      ...INPUT,
+      caption: 'description',
+      label: 'Retainer Essencial · outubro de 2026',
+    });
+    expect(pdfContainsText(retainer, 'Descrição: Retainer Essencial')).toBe(true);
+    expect(pdfContainsText(retainer, 'Prestação')).toBe(false);
+  });
+
   it('writes english labels for english requests', async () => {
     const pdf = await buildPaymentRequestPdf({ ...INPUT, locale: 'en', currency: 'GBP' });
     const document = await PDFDocument.load(pdf);

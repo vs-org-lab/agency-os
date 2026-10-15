@@ -1,4 +1,4 @@
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { dueDateFrom } from './domain/plan';
 
@@ -9,7 +9,7 @@ export const SUSPENSION_OVERDUE_DAYS = 30;
 
 /**
  * RN-62: whether the client has a payment request still open more than 30 days after its due
- * date. `today` is the Lisbon calendar date.
+ * date and no payment for it under review. `today` is the Lisbon calendar date.
  */
 export async function clientPaymentsSuspended(
   tx: DbTransaction,
@@ -25,6 +25,9 @@ export async function clientPaymentsSuspended(
         eq(paymentRequests.clientId, clientId),
         eq(paymentRequests.status, 'sent'),
         lt(paymentRequests.dueDate, limit),
+        // A payment waiting for finance to settle it means the client has paid (as in reminders).
+        sql`not exists (select 1 from public.payments p
+                        where p.request_id = ${paymentRequests.id} and p.status = 'review')`,
       ),
     )
     .limit(1);

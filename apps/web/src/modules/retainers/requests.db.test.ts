@@ -399,6 +399,15 @@ describe('retainer requests', () => {
           `;
 
         expect(await ask()).toEqual({ ok: false, rule: 'suspended' });
+        await sql`
+          insert into public.payments (organization_id, client_id, request_id, amount, currency,
+                                       method, reference, received_on, status)
+          values (${world.organizationId}, ${world.clients.a}, ${overdue?.id ?? ''}, 1500, 'EUR',
+                  'bank_transfer', 'TRF 1', current_date, 'review')
+        `;
+        expect(await ask()).toEqual({ ok: true, outcome: 'task' });
+        await sql`delete from public.payments where request_id = ${overdue?.id ?? ''}`;
+        expect(await ask()).toEqual({ ok: false, rule: 'suspended' });
         const portal = await loadPortalRetainer(
           retainerClaims(world.users.decisionMakerA, 'client'),
           world.clients.a,

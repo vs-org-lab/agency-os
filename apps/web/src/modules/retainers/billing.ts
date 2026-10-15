@@ -2,6 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { issuePaymentRequest, signedContractFor } from '@/modules/billing/server';
 import { requestFlush } from '@/modules/events';
+import { logger } from '@/platform/logger';
 import { nowOf, type RetainersDeps } from './access';
 import { retainerExtraLabel, retainerMonthLabel } from './domain/labels';
 import { lisbonMonth } from './domain/months';
@@ -46,7 +47,9 @@ export async function issueRetainerRequests(
 
   let months = 0;
   const month = lisbonMonth(now);
-  if (scope === 'all' && retainer.status === 'active' && month >= retainer.startsOn) {
+  // A retainer without a fee has nothing to bill; a request needs a positive amount.
+  const billsMonths = retainer.status === 'active' && Number(retainer.monthlyFee) > 0;
+  if (scope === 'all' && billsMonths && month >= retainer.startsOn) {
     const [billed] = await tx
       .select({ id: paymentRequests.id })
       .from(paymentRequests)
@@ -116,7 +119,7 @@ export async function sweepRetainerBilling(deps: RetainersDeps): Promise<number>
   const due = await deps.contexts.withSystemContext((tx) =>
     tx.execute<{ id: string }>(sql`
       select r.id from public.retainers r
-      where (r.status = 'active' and r.starts_on <= ${month}::date)
+      where (r.status = 'active' and r.monthly_fee > 0 and r.starts_on <= ${month}::date)
          or exists (
            select 1 from public.retainer_extra_requests e
            where e.retainer_id = r.id and e.status = 'approved'
@@ -127,11 +130,20 @@ export async function sweepRetainerBilling(deps: RetainersDeps): Promise<number>
     `),
   );
   let issued = 0;
+  // One retainer that cannot be billed must not hold back the others; its failure is logged and
+  // the next sweep tries it again.
   for (const { id } of due) {
-    const result = await deps.contexts.withSystemContext((tx) =>
-      issueRetainerRequests(tx, id, deps),
-    );
-    issued += result.months + result.extras;
+    try {
+      const result = await deps.contexts.withSystemContext((tx) =>
+        issueRetainerRequests(tx, id, deps),
+      );
+      issued += result.months + result.extras;
+    } catch (error) {
+      logger.error('retainers.billing_failed', {
+        retainerId: id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
   if (issued > 0) await (deps.flush ?? requestFlush)();
   return issued;

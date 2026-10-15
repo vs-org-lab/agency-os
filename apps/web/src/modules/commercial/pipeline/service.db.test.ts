@@ -8,6 +8,7 @@ import {
   createContractFixture,
   createCoreFixture,
   createFixtureWorld,
+  createRetainerFixture,
   testDatabase,
   withTestTransaction,
 } from '@agency-os/db/testing';
@@ -407,6 +408,41 @@ describe('pipeline stage service', () => {
       await sql`reset role`;
       await sql`update public.payments set status = 'reconciled' where id = ${billing.a.paymentId}`;
       expect(await move()).toMatchObject({ ok: true, to: '2.2' });
+    });
+  });
+  it('a paid retainer request does not unlock 2.2', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const billing = await createBillingFixture(sql, world);
+      const retainer = await createRetainerFixture(sql, world);
+      const dealId = billing.contracts.a.dealId;
+      await sql`update public.deals set pipeline_code = '2.1' where id = ${dealId}`;
+      await sql`update public.payments set status = 'review' where id = ${billing.a.paymentId}`;
+      const [request] = await sql<{ id: string }[]>`
+        insert into public.payment_requests (organization_id, client_id, deal_id, retainer_id,
+                                             retainer_month, number, label, amount, currency,
+                                             locale, due_date, status, issuer_details,
+                                             client_details)
+        values (${world.organizationId}, ${world.clients.a}, ${dealId}, ${retainer.retainerId},
+                '2026-10-01', 'PP-2099-0002', 'Retainer', 1500, 'EUR', 'pt-PT', current_date,
+                'paid', '{}'::jsonb, '{}'::jsonb)
+        returning id
+      `;
+      await sql`
+        insert into public.payments (organization_id, client_id, request_id, amount, currency,
+                                     method, received_on, status)
+        values (${world.organizationId}, ${world.clients.a}, ${request?.id ?? ''}, 1500, 'EUR',
+                'bank_transfer', current_date, 'reconciled')
+      `;
+      const deps = { contexts: createDbContexts(testDatabase(sql)), flush: async () => {} };
+
+      expect(
+        await changeDealStage(
+          claimsFor(world.users.founder),
+          { dealId, to: '2.2', reason: null },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'payment_required' });
     });
   });
 });

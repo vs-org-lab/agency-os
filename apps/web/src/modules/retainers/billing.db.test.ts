@@ -222,6 +222,74 @@ describe('retainer billing', () => {
   );
 
   it(
+    'a retainer without a monthly fee bills no month',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { fixture, issue } = await setup(sql);
+        await sql`
+          update public.retainers set monthly_fee = 0 where id = ${fixture.retainer.retainerId}
+        `;
+
+        expect(await issue()).toEqual({ months: 0, extras: 0 });
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'one retainer that fails does not stop the sweep for the others',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const { world, fixture, deps } = await setup(sql);
+        const b = fixture.contracts.b;
+        await sql`
+          update public.proposals
+          set status = 'accepted', accepted_at = now(), accepted_option_id = ${b.optionId},
+              client_details = ${JSON.stringify({
+                legalName: 'Cliente B Lda',
+                taxId: '509000001',
+                address: 'Rua B, Lisboa',
+              })}::jsonb
+          where id = ${b.proposalId}
+        `;
+        await sql`update public.contracts set status = 'signed', signed_at = now() where id = ${b.contractId}`;
+        const projectB = fixture.retainer.rooms.b.projectId;
+        await sql`update public.projects set deal_id = ${b.dealId} where id = ${projectB}`;
+        const [retainerB] = await sql<{ id: string }[]>`
+          insert into public.retainers (organization_id, client_id, project_id, tier, monthly_fee,
+                                        currency, starts_on, review_on, created_by)
+          values (${world.organizationId}, ${world.clients.b}, ${projectB}, 'Crescimento', 900,
+                  'EUR', ${thisMonth()}, ${inDays(200)}, ${world.users.founder})
+          returning id
+        `;
+        const storage = deps.billing.storage;
+        const failing = {
+          ...deps,
+          billing: {
+            ...deps.billing,
+            storage: {
+              ...storage,
+              upload: async (path: string, bytes: Uint8Array) => {
+                if (path.includes(world.clients.a)) throw new Error('Storage unavailable');
+                return storage.upload(path, bytes);
+              },
+            },
+          },
+        };
+
+        await expect(sweepRetainerBilling(failing)).resolves.toBeGreaterThan(0);
+
+        expect(await requests(sql, fixture.retainer.retainerId)).toEqual([]);
+        expect(await requests(sql, retainerB?.id ?? '')).toMatchObject([
+          { amount: '900.00', retainer_month: thisMonth() },
+        ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'only billing readers load the retainer billing',
     async () => {
       await withTestTransaction(async (sql) => {

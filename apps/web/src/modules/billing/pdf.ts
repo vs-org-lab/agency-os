@@ -8,6 +8,8 @@ export type PaymentRequestPdfInput = {
   locale: Locale;
   number: string;
   label: string;
+  /** What the label names: a contract milestone, or anything else (a retainer month or extra). */
+  caption?: 'milestone' | 'description';
   amountMinor: bigint;
   currency: Currency;
   sentAt: Date;
@@ -23,6 +25,7 @@ type Labels = {
   taxId: string;
   billedTo: string;
   milestone: string;
+  description: string;
   amount: string;
   issuedOn: string;
   dueOn: string;
@@ -43,6 +46,7 @@ const LABELS: Record<Locale, Labels> = {
     taxId: 'NIF',
     billedTo: 'Cliente',
     milestone: 'Prestação',
+    description: 'Descrição',
     amount: 'Valor',
     issuedOn: 'Data',
     dueOn: 'Vencimento',
@@ -60,6 +64,7 @@ const LABELS: Record<Locale, Labels> = {
     taxId: 'Tax ID',
     billedTo: 'Billed to',
     milestone: 'Milestone',
+    description: 'Description',
     amount: 'Amount',
     issuedOn: 'Date',
     dueOn: 'Due',
@@ -103,7 +108,7 @@ export async function buildPaymentRequestPdf(input: PaymentRequestPdfInput): Pro
   writer.paragraph(input.client.address);
   writer.space(10);
 
-  writer.paragraph(`${labels.milestone}: ${input.label}`);
+  writer.paragraph(`${labels[input.caption ?? 'milestone']}: ${input.label}`);
   writer.paragraph(
     `${labels.amount}: ${formatMoney(input.amountMinor, input.currency, input.locale)}`,
     { size: 12, bold: true },

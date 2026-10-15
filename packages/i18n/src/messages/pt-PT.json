@@ -2180,7 +2180,9 @@
       "documents": "Documentos",
       "openDocument": "Abrir {name}",
       "brandHub": "Brand Hub",
-      "openHub": "Abrir o Brand Hub"
+      "openHub": "Abrir o Brand Hub",
+      "retainer": "Pedidos extra do retainer",
+      "openRetainer": "Ver o pedido extra"
     },
     "clientList": {
       "title": "Provas",

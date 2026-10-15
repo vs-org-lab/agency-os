@@ -29,6 +29,10 @@ export function ApprovalsList({
       items: approvals.filter((approval) => approval.kind === 'brand_hub'),
     },
     {
+      key: 'retainer' as const,
+      items: approvals.filter((approval) => approval.kind === 'retainer'),
+    },
+    {
       key: 'delivery' as const,
       items: approvals.filter((approval) => approval.kind === 'delivery'),
     },
@@ -78,6 +82,13 @@ export function ApprovalsList({
                     className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
                     {t('openDocument', { name: approval.subjectName })}
+                  </Link>
+                ) : approval.kind === 'retainer' ? (
+                  <Link
+                    href="/portal/progress"
+                    className="self-start rounded-md bg-primary px-4 py-2 text-body-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    {t('openRetainer')}
                   </Link>
                 ) : approval.kind === 'brand_hub' ? (
                   <Link

@@ -42,6 +42,8 @@ export const DOMAIN_EVENTS = [
   'rooms.document.commented',
   'brand_hub.published',
   'agenda.meeting.changed',
+  'retainers.usage.recorded',
+  'retainers.extra.requested',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

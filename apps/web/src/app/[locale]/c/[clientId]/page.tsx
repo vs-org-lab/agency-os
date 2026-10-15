@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
+import { HealthCard } from '@/components/health/health-card';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
+import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
 import {
@@ -49,6 +51,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   const data = await loadStaffRoom(session, { clientId, projectId });
   if (!data) notFound();
   const { room, writable, editable } = data;
+  const health = await loadRoomHealth(session.claims, clientId);
   const templates = writable
     ? await loadProcessTemplates({
         claims: session.claims,
@@ -73,6 +76,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
         selectedId={room.project?.id ?? null}
         basePath={`/c/${clientId}`}
       />
+      {health ? <HealthCard health={health} /> : null}
 
       {room.project ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">

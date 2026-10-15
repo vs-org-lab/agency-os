@@ -3081,5 +3081,27 @@
       "invalid_state": "A garantia já foi decidida. Atualize a página.",
       "not_found": "Não foi possível concluir. Atualize a página."
     }
+  },
+  "health": {
+    "title": "Saúde",
+    "noData": "Sem dados",
+    "score": "{score} de 100",
+    "levels": {
+      "healthy": "Saudável",
+      "attention": "Atenção",
+      "at_risk": "Em risco"
+    },
+    "signals": {
+      "payments": "Pagamentos em dia",
+      "approvals": "Tempo de aprovação",
+      "responses": "Tempo de resposta",
+      "outcome": "Evolução do resultado"
+    },
+    "details": {
+      "payments": "{onTime} de {total} pedidos pagos a tempo",
+      "approvals": "Mediana de {days} dias",
+      "responses": "Mediana de {hours} horas",
+      "outcome": "{progress}% da meta com {expected}% do tempo"
+    }
   }
 }

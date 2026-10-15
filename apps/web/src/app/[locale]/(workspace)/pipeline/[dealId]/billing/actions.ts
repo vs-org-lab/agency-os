@@ -17,7 +17,7 @@ import {
 } from '@/modules/billing/server';
 import { getVerifiedClaims } from '@/platform/session';
 import type { BillingActionResult } from './billing-section';
-import type { UploadLinkResult } from './billing-forms';
+import type { UploadLinkResult } from '@/components/billing/billing-forms';
 
 async function session() {
   const claims = await getVerifiedClaims();

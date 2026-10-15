@@ -70,6 +70,34 @@ describe('retainer requests', () => {
   );
 
   it(
+    'a request that exactly uses up a decimal allowance is still a task',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const retainer = await createRetainerFixture(sql, world);
+        const { deps } = retainerDeps(sql);
+        const ask = (quantity: string) =>
+          requestWork(
+            retainerClaims(world.users.operationalA, 'client'),
+            {
+              retainerId: retainer.retainerId,
+              kind: 'content_pieces',
+              description: `Pedido de ${quantity}`,
+              quantity,
+            },
+            deps,
+          );
+
+        expect(await ask('0.1')).toEqual({ ok: true, outcome: 'task' });
+        expect(await ask('2.7')).toEqual({ ok: true, outcome: 'task' });
+        const after = await rows(sql, retainer.retainerId);
+        expect(after.extras.filter((extra) => extra.status === 'requested')).toHaveLength(1);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'a request above it becomes an extra request',
     async () => {
       await withTestTransaction(async (sql) => {

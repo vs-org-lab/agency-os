@@ -14,7 +14,7 @@ import {
   type NotFound,
   type RetainersDeps,
 } from './access';
-import { crossedThresholds, type AlertThreshold } from './domain/allowance';
+import { crossedThresholds, fitsAllowance, type AlertThreshold } from './domain/allowance';
 import { RETAINER_LIMIT_KINDS, type RetainerLimitKind } from './domain/kinds';
 import { lisbonMonth } from './domain/months';
 import { limitMonths } from './month';
@@ -57,7 +57,7 @@ export async function countUsage(
   const state = (await limitMonths(tx, retainer, month)).find((limit) => limit.kind === entry.kind);
   if (!state) return INVALID_INPUT;
   const after = Math.round((state.used + Number(entry.quantity)) * 10) / 10;
-  if (after > state.available) return LIMIT_REACHED;
+  if (!fitsAllowance(state.used, Number(entry.quantity), state.available)) return LIMIT_REACHED;
   const [row] = await tx
     .insert(retainerUsage)
     .values({

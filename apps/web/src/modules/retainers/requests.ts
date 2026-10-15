@@ -6,6 +6,7 @@ import { soleClientManager } from '@/modules/rooms/server';
 import type { VerifiedClaims } from '@/platform/db';
 import { INVALID_INPUT, NOT_FOUND, nowOf, type NotFound, type RetainersDeps } from './access';
 import { retainerClient } from './client-access';
+import { fitsAllowance } from './domain/allowance';
 import { RETAINER_LIMIT_KINDS } from './domain/kinds';
 import { lisbonDay, lisbonMonth } from './domain/months';
 import { limitMonths } from './month';
@@ -75,7 +76,8 @@ export async function requestWork(
     const state = (await limitMonths(tx, retainer, month)).find(
       (limit) => limit.kind === data.kind,
     );
-    const fits = state !== undefined && state.used + Number(data.quantity) <= state.available;
+    const fits =
+      state !== undefined && fitsAllowance(state.used, Number(data.quantity), state.available);
 
     if (fits) {
       const taskId = await createRequestTask(tx, retainer, data.description, claims.sub, now);

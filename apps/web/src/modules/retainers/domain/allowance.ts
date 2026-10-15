@@ -50,3 +50,8 @@ export function crossedThresholds(
     (threshold) => share(before) < threshold && share(after) >= threshold,
   );
 }
+
+/** RN-61: whether a new quantity fits what is still available this month. */
+export function fitsAllowance(used: number, quantity: number, available: number): boolean {
+  return tenths(used) + tenths(quantity) <= tenths(available);
+}

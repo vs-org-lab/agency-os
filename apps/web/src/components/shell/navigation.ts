@@ -44,6 +44,7 @@ export type NavigationLabelKey =
   | 'shell.portalNav.library'
   | 'shell.portalNav.documents'
   | 'shell.portalNav.brandHub'
+  | 'shell.portalNav.progress'
   | 'shell.portalNav.team';
 
 export type NavigationCounter = 'unseenApplications';
@@ -164,6 +165,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
                 { href: '/portal/docs', labelKey: 'shell.portalNav.documents', icon: 'documents' },
                 { href: '/portal/library', labelKey: 'shell.portalNav.library', icon: 'folder' },
                 { href: '/portal/hub', labelKey: 'shell.portalNav.brandHub', icon: 'brand' },
+                { href: '/portal/progress', labelKey: 'shell.portalNav.progress', icon: 'gauge' },
               ] as const)
             : []),
           ...(input.permissions.invoices

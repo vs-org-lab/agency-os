@@ -137,6 +137,7 @@ describe('buildNavigation', () => {
       '/portal/docs',
       '/portal/library',
       '/portal/hub',
+      '/portal/progress',
     ]);
   });
 

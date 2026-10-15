@@ -93,7 +93,7 @@ export async function loadStaffOutcome(
   if (!reader) return null;
   const writer = await outcomeWriter(claims, clientId, deps);
 
-  return deps.contexts.withSystemContext(async (tx) => {
+  const view = await deps.contexts.withSystemContext(async (tx) => {
     const projects = await tx.execute<{ id: string; name: string }>(sql`
       select id, name from public.projects
       where client_id = ${clientId}::uuid and organization_id = ${reader.organizationId}::uuid
@@ -105,20 +105,10 @@ export async function loadStaffOutcome(
       order by created_at desc
       limit 1
     `);
-    const projectId = row?.project_id ?? projects[0]?.id ?? null;
-    const [proposal] = projectId
-      ? await tx.execute<{ guarantee: string }>(sql`
-          select p.guarantee from public.proposals p
-          join public.projects pr on pr.deal_id = p.deal_id
-          where pr.id = ${projectId}::uuid and p.status = 'accepted'
-          order by p.accepted_at desc nulls last
-          limit 1
-        `)
-      : [];
     const base = {
       canWrite: writer !== null,
       projects: [...projects],
-      proposalGuarantee: proposal?.guarantee || null,
+      projectId: row?.project_id ?? projects[0]?.id ?? null,
     };
     if (!row) return { ...base, outcome: null, conditions: [], measurements: [] };
 
@@ -162,4 +152,20 @@ export async function loadStaffOutcome(
       })),
     };
   });
+
+  // The proposal is read under the caller's own policies: freelancers read the room, not the
+  // pipeline, so they do not see the proposal's guarantee (08).
+  const { projectId, ...rest } = view;
+  const [proposal] = projectId
+    ? await deps.contexts.withUserContext(claims, (tx) =>
+        tx.execute<{ guarantee: string }>(sql`
+          select p.guarantee from public.proposals p
+          join public.projects pr on pr.deal_id = p.deal_id
+          where pr.id = ${projectId}::uuid and p.status = 'accepted'
+          order by p.accepted_at desc nulls last
+          limit 1
+        `),
+      )
+    : [];
+  return { ...rest, proposalGuarantee: proposal?.guarantee || null };
 }

@@ -50,6 +50,10 @@ export async function decideGuarantee(
       .orderBy(asc(outcomeMeasurements.measuredOn))
   ).map((row) => ({ measuredOn: row.measuredOn, value: Number(row.value) }));
 
+  // Values after the deadline do not decide activation, but they close the guarantee (RN-73).
+  const reachedAfterDeadline = values.some(
+    (value) => value.measuredOn > outcome.deadline && reachesTarget(range, value.value),
+  );
   let decision: GuaranteeDecision | null = null;
   let monthsUsed = outcome.monthsUsed;
   let activatedOn = outcome.activatedOn;
@@ -64,16 +68,19 @@ export async function decideGuarantee(
       conditions: conditions.map((row) => row.status),
     });
     if (evaluation.status === 'active') {
-      decision = { status: 'active', reason: null };
       activatedOn = today;
       monthsUsed = 0;
+      // A target reached after the deadline, while the conditions were still being decided,
+      // already ends the guarantee it would start (RN-73).
+      decision = reachedAfterDeadline
+        ? { status: 'closed', reason: 'target_met' }
+        : { status: 'active', reason: null };
     } else if (evaluation.status === 'not_activated') {
       decision = { status: 'not_activated', reason: evaluation.reason };
     }
   } else if (outcome.guaranteeStatus === 'active' && outcome.activatedOn) {
-    const since = outcome.activatedOn;
-    monthsUsed = fullMonthsSince(since, today);
-    if (values.some((value) => value.measuredOn >= since && reachesTarget(range, value.value))) {
+    monthsUsed = fullMonthsSince(outcome.activatedOn, today);
+    if (reachedAfterDeadline) {
       decision = { status: 'closed', reason: 'target_met' };
     } else if (monthsUsed >= GUARANTEE_MONTHS) {
       decision = { status: 'closed', reason: 'months_used' };

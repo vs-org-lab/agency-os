@@ -4,6 +4,10 @@ import { useTranslations } from 'next-intl';
 import type { GuaranteeView } from '@/modules/outcomes';
 import { useLongDate } from './shared';
 
+function todayInLisbon(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' }).format(new Date());
+}
+
 /** RF-123: the guarantee's state in one sentence, with its reason or the months used. */
 export function GuaranteeCard({
   guarantee,
@@ -18,7 +22,9 @@ export function GuaranteeCard({
   const text = (() => {
     switch (guarantee.status) {
       case 'pending':
-        return t('pending', { deadline: longDate(deadline) });
+        return deadline < todayInLisbon()
+          ? t('deadlinePassed', { deadline: longDate(deadline) })
+          : t('pending', { deadline: longDate(deadline) });
       case 'not_activated':
         return guarantee.reason === 'target_met'
           ? t('notActivatedTargetMet')

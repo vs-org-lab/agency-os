@@ -182,6 +182,16 @@ describe('C-11 outcome', () => {
     });
   });
 
+  it('a passed deadline waits for the client conditions instead of naming a past date', () => {
+    withIntl(<GuaranteeCard guarantee={PENDING} deadline="2020-01-31" />);
+    expect(
+      screen.getByText(
+        'O prazo terminou a 31 de janeiro de 2020: falta registar as condições do cliente.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/^Por decidir até/)).toBeNull();
+  });
+
   it('the guarantee card states each status', () => {
     const states: [GuaranteeView, string][] = [
       [PENDING, 'Por decidir até 31 de dezembro de 2026'],

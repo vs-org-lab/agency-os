@@ -75,6 +75,71 @@ describe('guarantee decisions', () => {
   );
 
   it(
+    'a target reached after the deadline closes the guarantee as it activates',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const fixture = await createOutcomeFixture(sql, world);
+        await sql`
+          update public.project_outcomes set deadline = ${inDays(-10)}
+          where id = ${fixture.outcomeId}
+        `;
+        await sql`
+          insert into public.outcome_measurements (organization_id, client_id, outcome_id,
+                                                   measured_on, value)
+          values (${world.organizationId}, ${world.clients.a}, ${fixture.outcomeId},
+                  ${inDays(-5)}, 62)
+        `;
+        const { deps } = outcomeDeps(sql);
+        const manager = outcomeClaims(world.users.manager);
+        for (const conditionId of Object.values(fixture.conditionIds)) {
+          await recordCondition(manager, { conditionId, status: 'met' }, deps);
+        }
+
+        expect(await guarantee(sql, fixture.outcomeId)).toMatchObject({
+          status: 'closed',
+          reason: 'target_met',
+          activated_on: lisbonToday(),
+        });
+        expect(await decisions(sql, world.organizationId)).toMatchObject([
+          { status: 'closed', reason: 'target_met' },
+        ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'a late value dated between the deadline and the activation closes the guarantee',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const fixture = await createOutcomeFixture(sql, world);
+        await sql`
+          update public.project_outcomes
+          set deadline = ${inDays(-10)}, guarantee_status = 'active', activated_on = ${inDays(-3)}
+          where id = ${fixture.outcomeId}
+        `;
+        const { deps } = outcomeDeps(sql);
+
+        expect(
+          await recordMeasurement(
+            outcomeClaims(world.users.manager),
+            { outcomeId: fixture.outcomeId, measuredOn: inDays(-5), value: '60' },
+            deps,
+          ),
+        ).toEqual({ ok: true });
+
+        expect(await guarantee(sql, fixture.outcomeId)).toMatchObject({
+          status: 'closed',
+          reason: 'target_met',
+        });
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'a value reaching the target closes an active guarantee',
     async () => {
       await withTestTransaction(async (sql) => {

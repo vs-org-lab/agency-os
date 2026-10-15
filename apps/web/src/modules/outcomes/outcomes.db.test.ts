@@ -2,6 +2,7 @@ import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
+  createContractFixture,
   createFixtureWorld,
   createOutcomeFixture,
   createRoomFixture,
@@ -248,6 +249,39 @@ describe('outcomes', () => {
           { measured_on: inDays(-30), value: '45.00' },
           { measured_on: lisbonToday(), value: '52.50' },
         ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
+    'only pipeline readers see the proposal guarantee',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const fixture = await createOutcomeFixture(sql, world);
+        const contracts = await createContractFixture(sql, world);
+        await sql`
+          update public.proposals
+          set status = 'accepted', accepted_at = now(), accepted_option_id = ${contracts.a.optionId},
+              guarantee = 'Até 3 meses de trabalho sem custo se a meta falhar'
+          where id = ${contracts.a.proposalId}
+        `;
+        await sql`
+          update public.projects set deal_id = ${contracts.a.dealId}
+          where id = ${fixture.rooms.a.projectId}
+        `;
+        const { deps } = outcomeDeps(sql);
+        const load = (userId: string) =>
+          loadStaffOutcome(outcomeClaims(userId), world.clients.a, deps);
+
+        expect((await load(world.users.founder))?.proposalGuarantee).toBe(
+          'Até 3 meses de trabalho sem custo se a meta falhar',
+        );
+        expect((await load(world.users.manager))?.proposalGuarantee).toBe(
+          'Até 3 meses de trabalho sem custo se a meta falhar',
+        );
+        expect((await load(world.users.freelancer))?.proposalGuarantee).toBeNull();
       });
     },
     SLOW,

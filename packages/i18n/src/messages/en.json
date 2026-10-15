@@ -3069,7 +3069,8 @@
       "notActivatedConditionsFailed": "Not activated: a client condition failed",
       "active": "Activated on {date} · {months} of 3 months used",
       "closedTargetMet": "Closed: the target was reached",
-      "closedMonthsUsed": "Closed: the 3 months were used"
+      "closedMonthsUsed": "Closed: the 3 months were used",
+      "deadlinePassed": "The deadline passed on {deadline}: the client conditions still need to be recorded."
     },
     "portal": {
       "title": "Agreed outcome",

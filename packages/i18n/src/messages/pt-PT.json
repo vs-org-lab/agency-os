@@ -3069,7 +3069,8 @@
       "notActivatedConditionsFailed": "Não ativada: uma condição do cliente falhou",
       "active": "Ativada a {date} · {months} de 3 meses usados",
       "closedTargetMet": "Encerrada: a meta foi atingida",
-      "closedMonthsUsed": "Encerrada: os 3 meses foram usados"
+      "closedMonthsUsed": "Encerrada: os 3 meses foram usados",
+      "deadlinePassed": "O prazo terminou a {deadline}: falta registar as condições do cliente."
     },
     "portal": {
       "title": "Resultado acordado",

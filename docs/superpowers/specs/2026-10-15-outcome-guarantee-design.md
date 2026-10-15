@@ -46,7 +46,7 @@ Cada projeto pode ter um resultado acordado: uma métrica com linha de base, met
 
    Decidir a última condição de um resultado com o prazo passado avalia-o logo, sem esperar pelo varrimento.
 
-6. **Meses da garantia.** O mesmo varrimento atualiza os meses usados de cada garantia ativa: são os meses completos desde a ativação, até 3. Aos 3 meses, a garantia fecha com `months_used`. Registar um valor que atinge a meta com a garantia ativa fecha-a com `target_met`. O 3C não muda a faturação: o trabalho da garantia é gerido pela equipa.
+6. **Meses da garantia.** O mesmo varrimento atualiza os meses usados de cada garantia ativa: são os meses completos desde a ativação, até 3. Aos 3 meses, a garantia fecha com `months_used`. Um valor com data depois do prazo que atinge a meta fecha a garantia ativa com `target_met`; se esse valor já existir quando a garantia se ativaria, ela fica logo encerrada com `target_met`. O 3C não muda a faturação: o trabalho da garantia é gerido pela equipa.
 7. **Avisos.** Cada decisão da garantia (não ativada, ativada, encerrada) avisa por email os fundadores e os gestores atribuídos, com o motivo e a ligação ao C-11. O cliente vê o estado no portal; não recebe email no 3C.
 8. **Acesso:**
    - **ler:** quem lê a sala (`can_read_rooms`); o resultado não é um valor monetário;

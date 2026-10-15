@@ -25,6 +25,20 @@ describe('buildNavigation', () => {
     });
   });
 
+  it('the room shows Retainer only when there is one', () => {
+    expect(
+      buildNavigation({ level: 'room', clientId: 'client-1' }).items.some(
+        (item) => item.href === '/c/client-1/retainer',
+      ),
+    ).toBe(false);
+    const navigation = buildNavigation({ level: 'room', clientId: 'client-1', retainer: true });
+    expect(navigation.items.at(-1)).toEqual({
+      href: '/c/client-1/retainer',
+      labelKey: 'shell.room.retainer',
+      icon: 'gauge',
+    });
+  });
+
   it('studio navigation lists updates and tasks', () => {
     const navigation = buildNavigation({
       level: 'studio',
@@ -123,6 +137,7 @@ describe('buildNavigation', () => {
       '/portal/docs',
       '/portal/library',
       '/portal/hub',
+      '/portal/progress',
     ]);
   });
 

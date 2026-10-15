@@ -193,7 +193,7 @@ export async function getClientRoom(
 
 export type ClientPendingApproval = {
   id: string;
-  kind: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
+  kind: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub' | 'retainer';
   projectId: string;
   projectName: string;
   /** The phase name, the file title or, for the final approval, the project name. */
@@ -212,7 +212,7 @@ export async function getClientApprovals(
 ): Promise<ClientPendingApproval[]> {
   const rows = await tx.execute<{
     id: string;
-    kind: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub';
+    kind: 'phase' | 'file' | 'delivery' | 'document' | 'brand_hub' | 'retainer';
     project_id: string;
     project_name: string;
     subject_name: string;
@@ -262,6 +262,15 @@ export async function getClientApprovals(
     join public.portal_brand_hub_publications pub on pub.id = a.subject_id
     where a.client_id = ${clientId}::uuid and a.status = 'pending'
       and a.subject_type = 'brand_hub_publication'
+    union all
+    select a.id, 'retainer' as kind, a.project_id, p.name as project_name,
+           e.description as subject_name, null::uuid as version_id, null::uuid as document_id,
+           a.requested_at
+    from public.portal_approvals a
+    join public.portal_projects p on p.id = a.project_id
+    join public.portal_retainer_extra_requests e on e.id = a.subject_id
+    where a.client_id = ${clientId}::uuid and a.status = 'pending'
+      and a.subject_type = 'retainer_extra'
     order by requested_at desc, id
   `);
   return rows.map((row) => ({

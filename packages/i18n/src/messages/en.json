@@ -100,7 +100,8 @@
       "library": "Library",
       "documents": "Documents",
       "brandHub": "Brand Hub",
-      "agenda": "Agenda"
+      "agenda": "Agenda",
+      "retainer": "Retainer"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -111,7 +112,8 @@
       "team": "Colleagues",
       "library": "Library",
       "documents": "Documents",
-      "brandHub": "Brand Hub"
+      "brandHub": "Brand Hub",
+      "progress": "Progress"
     }
   },
   "states": {
@@ -888,6 +890,12 @@
         "heading": "The Brand Hub has news",
         "body": "Hi {firstName}, the {agencyName} team published a new version of the Brand Hub. You can see it and download the files in the portal.",
         "action": "Open the Brand Hub"
+      },
+      "retainer_threshold": {
+        "subject": "This month's retainer usage",
+        "heading": "You have used much of this month's retainer",
+        "body": "Hello {firstName}, one of your retainer limits has reached 80% or more this month. You can see the usage and ask for work in the portal; anything above the limit is quoted before it starts.",
+        "action": "View usage"
       }
     },
     "founder": {
@@ -1004,6 +1012,18 @@
         "heading": "New comment from {companyName}",
         "body": "The client left a comment on the document {documentTitle}.",
         "action": "View the comment"
+      },
+      "retainer_threshold": {
+        "subject": "{companyName} used {percent}% of this month's {kind, select, content_pieces {content pieces} campaigns {campaigns} maintenance_hours {maintenance hours} other {new automations}}",
+        "heading": "{companyName} is reaching the retainer limit",
+        "body": "{companyName}'s retainer has used {percent}% of the {kind, select, content_pieces {content pieces} campaigns {campaigns} maintenance_hours {maintenance hours} other {new automations}} available this month. Requests above the limit become extra requests with a quote.",
+        "action": "Open the retainer"
+      },
+      "retainer_extra_requested": {
+        "subject": "{companyName} asked for work above the retainer limit",
+        "heading": "Extra request from {companyName}",
+        "body": "The client asked for \"{description}\", above this month's limit. Quote it so the decision maker approves it before work starts.",
+        "action": "Quote the request"
       }
     },
     "team": {
@@ -2180,7 +2200,9 @@
       "documents": "Documents",
       "openDocument": "Open {name}",
       "brandHub": "Brand Hub",
-      "openHub": "Open the Brand Hub"
+      "openHub": "Open the Brand Hub",
+      "retainer": "Retainer extra requests",
+      "openRetainer": "View the extra request"
     },
     "clientList": {
       "title": "Proofs",
@@ -2878,6 +2900,97 @@
       "invalid_state": "Not possible: unlink the expense from the request first.",
       "not_found": "This could not be completed. Refresh the page.",
       "upload_failed": "The receipt upload failed. Try again."
+    }
+  },
+  "retainers": {
+    "title": "Retainer",
+    "empty": "This client has no retainer yet.",
+    "create": "Create retainer",
+    "edit": "Edit retainer",
+    "cancel": "Cancel",
+    "summary": "{tier} tier · review on {date}",
+    "fee": "Monthly fee: {fee}",
+    "ended": "Ended",
+    "form": {
+      "project": "Project",
+      "tier": "Tier",
+      "fee": "Monthly fee",
+      "currency": "Currency",
+      "startsOn": "Start",
+      "reviewOn": "Annual review",
+      "status": "Status",
+      "statuses": {
+        "active": "Active",
+        "ended": "Ended"
+      },
+      "limits": "Monthly limits",
+      "limitsHint": "Leave blank the kinds that are not part of the retainer.",
+      "save": "Save retainer",
+      "saved": "Retainer saved."
+    },
+    "kinds": {
+      "content_pieces": "Content pieces",
+      "campaigns": "Campaigns",
+      "maintenance_hours": "Maintenance hours",
+      "automations": "New automations"
+    },
+    "month": "Usage in {month}",
+    "usedOf": "{used} of {available}",
+    "carry": "Includes {carry} carried over from last month.",
+    "remaining": "Available: {remaining}",
+    "usage": {
+      "title": "Record usage",
+      "kind": "Kind",
+      "quantity": "Quantity",
+      "description": "Description",
+      "save": "Record",
+      "saved": "Usage recorded.",
+      "list": "This month's entries",
+      "empty": "No usage this month yet.",
+      "extra": "Extra request",
+      "delete": "Delete",
+      "deleted": "Entry deleted.",
+      "line": "{quantity} × {kind} · {description}"
+    },
+    "limitReached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
+    "extras": {
+      "title": "Extra requests",
+      "empty": "No extra requests.",
+      "statuses": {
+        "requested": "Waiting for a quote",
+        "quoted": "Quoted, waiting for the client",
+        "approved": "Approved",
+        "declined": "Declined"
+      },
+      "quote": "Quote: {amount}",
+      "amount": "Quote amount",
+      "currency": "Currency",
+      "send": "Send quote",
+      "sent": "Quote sent to the client."
+    },
+    "portal": {
+      "title": "Progress",
+      "description": "This month's retainer usage and your requests.",
+      "none": "There is no active retainer.",
+      "request": {
+        "title": "Ask for work",
+        "kind": "Kind",
+        "quantity": "Quantity",
+        "description": "What you need",
+        "send": "Send request",
+        "task": "Request received: the team already has the task.",
+        "extra": "This request passes the month's limit. The team will send a quote to approve before starting."
+      },
+      "approve": "Approve quote",
+      "decline": "Decline",
+      "approved": "Quote approved. The team will start.",
+      "declined": "Request declined."
+    },
+    "errors": {
+      "invalid_input": "Check the fields.",
+      "invalid_state": "This request has changed. Refresh the page.",
+      "limit_reached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
+      "not_found": "This could not be completed. Refresh the page."
     }
   }
 }

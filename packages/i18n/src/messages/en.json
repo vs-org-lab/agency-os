@@ -100,7 +100,8 @@
       "library": "Library",
       "documents": "Documents",
       "brandHub": "Brand Hub",
-      "agenda": "Agenda"
+      "agenda": "Agenda",
+      "retainer": "Retainer"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -111,7 +112,8 @@
       "team": "Colleagues",
       "library": "Library",
       "documents": "Documents",
-      "brandHub": "Brand Hub"
+      "brandHub": "Brand Hub",
+      "progress": "Progress"
     }
   },
   "states": {
@@ -2898,6 +2900,97 @@
       "invalid_state": "Not possible: unlink the expense from the request first.",
       "not_found": "This could not be completed. Refresh the page.",
       "upload_failed": "The receipt upload failed. Try again."
+    }
+  },
+  "retainers": {
+    "title": "Retainer",
+    "empty": "This client has no retainer yet.",
+    "create": "Create retainer",
+    "edit": "Edit retainer",
+    "cancel": "Cancel",
+    "summary": "{tier} tier · review on {date}",
+    "fee": "Monthly fee: {fee}",
+    "ended": "Ended",
+    "form": {
+      "project": "Project",
+      "tier": "Tier",
+      "fee": "Monthly fee",
+      "currency": "Currency",
+      "startsOn": "Start",
+      "reviewOn": "Annual review",
+      "status": "Status",
+      "statuses": {
+        "active": "Active",
+        "ended": "Ended"
+      },
+      "limits": "Monthly limits",
+      "limitsHint": "Leave blank the kinds that are not part of the retainer.",
+      "save": "Save retainer",
+      "saved": "Retainer saved."
+    },
+    "kinds": {
+      "content_pieces": "Content pieces",
+      "campaigns": "Campaigns",
+      "maintenance_hours": "Maintenance hours",
+      "automations": "New automations"
+    },
+    "month": "Usage in {month}",
+    "usedOf": "{used} of {available}",
+    "carry": "Includes {carry} carried over from last month.",
+    "remaining": "Available: {remaining}",
+    "usage": {
+      "title": "Record usage",
+      "kind": "Kind",
+      "quantity": "Quantity",
+      "description": "Description",
+      "save": "Record",
+      "saved": "Usage recorded.",
+      "list": "This month's entries",
+      "empty": "No usage this month yet.",
+      "extra": "Extra request",
+      "delete": "Delete",
+      "deleted": "Entry deleted.",
+      "line": "{quantity} × {kind} · {description}"
+    },
+    "limitReached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
+    "extras": {
+      "title": "Extra requests",
+      "empty": "No extra requests.",
+      "statuses": {
+        "requested": "Waiting for a quote",
+        "quoted": "Quoted, waiting for the client",
+        "approved": "Approved",
+        "declined": "Declined"
+      },
+      "quote": "Quote: {amount}",
+      "amount": "Quote amount",
+      "currency": "Currency",
+      "send": "Send quote",
+      "sent": "Quote sent to the client."
+    },
+    "portal": {
+      "title": "Progress",
+      "description": "This month's retainer usage and your requests.",
+      "none": "There is no active retainer.",
+      "request": {
+        "title": "Ask for work",
+        "kind": "Kind",
+        "quantity": "Quantity",
+        "description": "What you need",
+        "send": "Send request",
+        "task": "Request received: the team already has the task.",
+        "extra": "This request passes the month's limit. The team will send a quote to approve before starting."
+      },
+      "approve": "Approve quote",
+      "decline": "Decline",
+      "approved": "Quote approved. The team will start.",
+      "declined": "Request declined."
+    },
+    "errors": {
+      "invalid_input": "Check the fields.",
+      "invalid_state": "This request has changed. Refresh the page.",
+      "limit_reached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
+      "not_found": "This could not be completed. Refresh the page."
     }
   }
 }

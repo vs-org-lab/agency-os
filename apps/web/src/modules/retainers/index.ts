@@ -8,4 +8,5 @@ export {
 export { RETAINER_LIMIT_KINDS, type RetainerLimitKind } from './domain/kinds';
 export { firstOfMonth, lisbonMonth, previousMonth } from './domain/months';
 export type { LimitMonth } from './month';
+export type { PortalRetainerView } from './portal';
 export type { RetainerExtraRow, RetainerUsageRow, StaffRetainerView } from './readers';

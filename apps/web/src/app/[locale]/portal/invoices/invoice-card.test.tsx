@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -30,6 +30,7 @@ const OPEN: PortalInvoice = {
     paymentInstructions: 'Multicaixa Express: 923 000 000',
   },
   legalInvoice: null,
+  receipts: [],
 };
 
 function renderCard(invoice: PortalInvoice, cardEnabled: boolean, pay: PayAction = vi.fn()) {
@@ -41,6 +42,33 @@ function renderCard(invoice: PortalInvoice, cardEnabled: boolean, pay: PayAction
 }
 
 describe('InvoiceCard', () => {
+  it('the invoice card lists receipts', () => {
+    renderCard(
+      {
+        ...OPEN,
+        receipts: [
+          { expenseId: 'expense-1', name: 'recibo-grafica.png' },
+          { expenseId: 'expense-2', name: 'bilhete.pdf' },
+        ],
+      },
+      false,
+    );
+    const receipts = screen.getByRole('list', { name: 'Comprovativos' });
+    expect(
+      within(receipts)
+        .getAllByRole('link')
+        .map((link) => [link.textContent, link.getAttribute('href')]),
+    ).toEqual([
+      ['recibo-grafica.png', '/api/money/receipts/expense-1'],
+      ['bilhete.pdf', '/api/money/receipts/expense-2'],
+    ]);
+  });
+
+  it('shows no receipts list without receipts', () => {
+    renderCard(OPEN, false);
+    expect(screen.queryByRole('list', { name: 'Comprovativos' })).toBeNull();
+  });
+
   it('shows an open request with bank details, the reference and the pdf', () => {
     renderCard(OPEN, true);
 

@@ -155,6 +155,22 @@ export function InvoiceCard({
           </a>
         ) : null}
       </div>
+      {invoice.receipts.length > 0 ? (
+        <div className="flex flex-col gap-1">
+          <h3 id={`${headingId}-receipts`} className="text-label text-text">
+            {t('receipts')}
+          </h3>
+          <ul aria-labelledby={`${headingId}-receipts`} className="flex flex-wrap gap-x-4 gap-y-1">
+            {invoice.receipts.map((receipt) => (
+              <li key={receipt.expenseId}>
+                <a href={`/api/money/receipts/${receipt.expenseId}`} className={LINK}>
+                  {receipt.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -90,7 +90,8 @@
       "acquisition": "Angariação",
       "updates": "Atualizações",
       "tasks": "Tarefas",
-      "calendar": "Calendário"
+      "calendar": "Calendário",
+      "money": "Dinheiro"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -336,7 +337,8 @@
       "errors": {
         "unavailable": "O pagamento com cartão não está disponível para este pedido.",
         "not_found": "Este pedido já não está disponível. Atualize a página."
-      }
+      },
+      "receipts": "Comprovativos"
     },
     "room": {
       "title": "O seu projeto: {name}",
@@ -2779,5 +2781,103 @@
       "invalid_state": "Esta reunião já passou ou foi cancelada."
     },
     "periodRange": "{start} – {end}"
+  },
+  "money": {
+    "title": "Dinheiro",
+    "description": "O que entrou, o que está em aberto e o que saiu, por ano.",
+    "year": "Ano",
+    "summary": {
+      "received": "Entrou",
+      "open": "Em aberto",
+      "spent": "Saiu",
+      "none": "Sem valores"
+    },
+    "requests": {
+      "title": "Faturas",
+      "empty": "Sem pedidos de pagamento neste ano.",
+      "client": "Cliente",
+      "number": "Pedido",
+      "amount": "Valor",
+      "status": "Estado",
+      "legalInvoice": "Fatura legal",
+      "statuses": {
+        "sent": "Enviado",
+        "paid": "Pago",
+        "void": "Anulado"
+      }
+    },
+    "expenses": {
+      "title": "Despesas",
+      "empty": "Sem despesas neste ano.",
+      "add": "Nova despesa",
+      "edit": "Editar",
+      "delete": "Apagar",
+      "receipt": "Recibo",
+      "noClient": "Sem cliente",
+      "link": "Ligar a um pedido",
+      "noRequest": "Sem pedido",
+      "deleted": "Despesa apagada.",
+      "linked": "Ligação guardada."
+    },
+    "expenseForm": {
+      "spentOn": "Data",
+      "vendor": "Fornecedor",
+      "description": "Descrição",
+      "category": "Categoria",
+      "amount": "Valor",
+      "currency": "Moeda",
+      "client": "Cliente (despesa faturável)",
+      "receipt": "Recibo (JPEG, PNG, WebP ou PDF, até 10 MB)",
+      "reading": "A ler o recibo…",
+      "proposal": "Proposta lida do recibo. Confirme antes de guardar.",
+      "noProposal": "Recibo anexado. Preencha os campos.",
+      "save": "Guardar despesa",
+      "cancel": "Cancelar",
+      "saved": "Despesa guardada."
+    },
+    "categories": {
+      "software": "Software",
+      "advertising": "Publicidade",
+      "freelancers": "Freelancers",
+      "equipment": "Equipamento",
+      "travel": "Deslocações",
+      "training": "Formação",
+      "other": "Outros"
+    },
+    "subscriptions": {
+      "title": "Subscrições",
+      "empty": "Sem subscrições.",
+      "add": "Nova subscrição",
+      "renew": "Registar renovação",
+      "cancel": "Cancelar subscrição",
+      "nextRenewal": "Próxima renovação a {date}",
+      "cycles": {
+        "monthly": "Mensal",
+        "annual": "Anual"
+      },
+      "overdue": "Atrasada",
+      "soon": "Em breve",
+      "cancelled": "Cancelada",
+      "renewed": "Renovação registada.",
+      "cancelledDone": "Subscrição cancelada."
+    },
+    "subscriptionForm": {
+      "name": "Nome",
+      "vendor": "Fornecedor",
+      "category": "Categoria",
+      "amount": "Valor",
+      "currency": "Moeda",
+      "cycle": "Ciclo",
+      "nextRenewalOn": "Próxima renovação",
+      "save": "Guardar subscrição",
+      "saved": "Subscrição guardada."
+    },
+    "errors": {
+      "invalid_input": "Verifique os campos.",
+      "invalid_file": "O recibo tem de ser JPEG, PNG, WebP ou PDF, até 10 MB.",
+      "invalid_state": "Não é possível: desligue primeiro a despesa do pedido.",
+      "not_found": "Não foi possível concluir. Atualize a página.",
+      "upload_failed": "O carregamento do recibo falhou. Tente de novo."
+    }
   }
 }

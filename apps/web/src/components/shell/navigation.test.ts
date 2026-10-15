@@ -26,7 +26,10 @@ describe('buildNavigation', () => {
   });
 
   it('studio navigation lists updates and tasks', () => {
-    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: false } });
+    const navigation = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: false, money: false },
+    });
 
     expect(navigation.back).toBeNull();
     expect(navigation.items.map((item) => item.href)).toEqual([
@@ -39,7 +42,10 @@ describe('buildNavigation', () => {
   });
 
   it('studio shows commercial items only with pipeline permission', () => {
-    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: true } });
+    const navigation = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: true, money: false },
+    });
 
     expect(navigation.items.map((item) => [item.href, item.icon])).toEqual([
       ['/', 'home'],
@@ -52,8 +58,29 @@ describe('buildNavigation', () => {
     ]);
   });
 
+  it('studio shows money after the commercial items for billing readers', () => {
+    const navigation = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: true, money: true },
+    });
+    expect(navigation.items.slice(-2).map((item) => [item.href, item.labelKey, item.icon])).toEqual(
+      [
+        ['/acquisition', 'shell.studioNav.acquisition', 'target'],
+        ['/money', 'shell.studioNav.money', 'wallet'],
+      ],
+    );
+    const finance = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: false, money: true },
+    });
+    expect(finance.items.map((item) => item.href)).toContain('/money');
+  });
+
   it('applications carry the unseen applications counter', () => {
-    const navigation = buildNavigation({ level: 'studio', permissions: { pipeline: true } });
+    const navigation = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: true, money: false },
+    });
 
     expect(navigation.items.filter((item) => item.counter).map((item) => item.href)).toEqual([
       '/applications',

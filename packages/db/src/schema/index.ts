@@ -14,6 +14,7 @@ export * from './diagnosis';
 export * from './documents';
 export * from './contracts';
 export * from './billing';
+export * from './money';
 export * from './rooms';
 export * from './tasks';
 export * from './team';

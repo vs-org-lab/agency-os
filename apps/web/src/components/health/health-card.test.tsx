@@ -1,0 +1,67 @@
+// @vitest-environment jsdom
+import { cleanup, render, screen, within } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import { afterEach, describe, expect, it } from 'vitest';
+import messages from '@agency-os/i18n/messages/pt-PT';
+import type { ClientHealthView } from '@/modules/health';
+import { HealthCard } from './health-card';
+
+afterEach(() => {
+  cleanup();
+});
+
+function show(health: ClientHealthView) {
+  return render(
+    <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
+      <HealthCard health={health} />
+    </NextIntlClientProvider>,
+  );
+}
+
+const FULL: ClientHealthView = {
+  score: 78,
+  level: 'healthy',
+  signals: {
+    payments: { score: 50, detail: { kind: 'payments', onTime: 1, total: 2 } },
+    approvals: { score: 64, detail: { kind: 'approvals', medianDays: 7 } },
+    responses: { score: 96, detail: { kind: 'responses', medianHours: 30.4 } },
+    outcome: { score: 100, detail: { kind: 'outcome', progress: 0.5, expected: 0.5 } },
+  },
+};
+
+const EMPTY: ClientHealthView = {
+  score: null,
+  level: null,
+  signals: { payments: null, approvals: null, responses: null, outcome: null },
+};
+
+describe('C-01 health card', () => {
+  it('the card shows the score, the level and each signal', () => {
+    show(FULL);
+    const card = screen.getByRole('region', { name: 'Saúde' });
+    expect(within(card).getByRole('heading', { level: 2, name: 'Saúde' })).toBeTruthy();
+    expect(within(card).getByText('78 de 100')).toBeTruthy();
+    expect(within(card).getByText('Saudável')).toBeTruthy();
+    expect(within(card).getByText('Pagamentos em dia')).toBeTruthy();
+    expect(within(card).getByText('1 de 2 pedidos pagos a tempo')).toBeTruthy();
+    expect(within(card).getByText('Mediana de 7 dias')).toBeTruthy();
+    expect(within(card).getByText('Mediana de 30 horas')).toBeTruthy();
+    expect(within(card).getByText('50% da meta com 50% do tempo')).toBeTruthy();
+  });
+
+  it('levels at their limits and no data', () => {
+    const { unmount } = show(EMPTY);
+    expect(screen.getAllByText('Sem dados')).toHaveLength(5);
+    unmount();
+    const at = (score: number, level: ClientHealthView['level']) => {
+      const view = show({ ...EMPTY, score, level });
+      return view;
+    };
+    const risk = at(49, 'at_risk');
+    expect(screen.getByText('Em risco')).toBeTruthy();
+    risk.unmount();
+    const attention = at(50, 'attention');
+    expect(screen.getByText('Atenção')).toBeTruthy();
+    attention.unmount();
+  });
+});

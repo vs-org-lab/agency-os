@@ -3081,5 +3081,27 @@
       "invalid_state": "The guarantee has been decided. Refresh the page.",
       "not_found": "Could not complete. Refresh the page."
     }
+  },
+  "health": {
+    "title": "Health",
+    "noData": "No data",
+    "score": "{score} of 100",
+    "levels": {
+      "healthy": "Healthy",
+      "attention": "Attention",
+      "at_risk": "At risk"
+    },
+    "signals": {
+      "payments": "Payments on time",
+      "approvals": "Approval time",
+      "responses": "Response time",
+      "outcome": "Outcome progress"
+    },
+    "details": {
+      "payments": "{onTime} of {total} requests paid on time",
+      "approvals": "Median of {days} days",
+      "responses": "Median of {hours} hours",
+      "outcome": "{progress}% of the target with {expected}% of the time"
+    }
   }
 }

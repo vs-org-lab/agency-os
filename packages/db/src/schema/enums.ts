@@ -491,3 +491,9 @@ export type GuaranteeStatus = (typeof guaranteeStatusEnum.enumValues)[number];
 export type GuaranteeReason = (typeof guaranteeReasonEnum.enumValues)[number];
 export type OutcomeConditionKind = (typeof outcomeConditionKindEnum.enumValues)[number];
 export type OutcomeConditionStatus = (typeof outcomeConditionStatusEnum.enumValues)[number];
+
+export const clientMilestoneKindEnum = appSchema.enum('client_milestone_kind', [
+  'renewal_anniversary',
+]);
+
+export type ClientMilestoneKind = (typeof clientMilestoneKindEnum.enumValues)[number];

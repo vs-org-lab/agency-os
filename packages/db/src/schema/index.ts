@@ -26,3 +26,4 @@ export * from './project-documents';
 export * from './brand-hub';
 export * from './agenda';
 export * from './outcomes';
+export * from './milestones';

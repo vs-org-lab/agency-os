@@ -1,9 +1,17 @@
 const BOM = '﻿';
 const NEEDS_QUOTES = /[",\r\n]/;
 
+const FORMULA_START = /^[=+\-@\t\r]/;
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
+
 function field(value: string | number | null): string {
   if (value === null) return '';
-  const text = String(value);
+  // Text a spreadsheet would run as a formula (client and member names come from outside) is
+  // kept as text with a leading apostrophe; plain numbers stay numbers.
+  const text =
+    typeof value === 'string' && FORMULA_START.test(value) && !PLAIN_NUMBER.test(value)
+      ? `'${value}`
+      : String(value);
   return NEEDS_QUOTES.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 

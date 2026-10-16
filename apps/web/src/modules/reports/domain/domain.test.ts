@@ -44,6 +44,20 @@ describe('reports domain', () => {
     ]);
   });
 
+  it('csv neutralises text that a spreadsheet would run as a formula', () => {
+    expect(
+      toCsv(
+        ['Cliente', 'Valor'],
+        [
+          ['=1+1', '-12.50'],
+          ['@SUM(A1)', 3],
+          ['+x', null],
+          ['-x', -2],
+        ],
+      ),
+    ).toBe("﻿Cliente,Valor\r\n'=1+1,-12.50\r\n'@SUM(A1),3\r\n'+x,\r\n'-x,-2\r\n");
+  });
+
   it('csv quotes fields and starts with a BOM', () => {
     expect(
       toCsv(

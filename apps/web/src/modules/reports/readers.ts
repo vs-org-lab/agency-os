@@ -119,7 +119,10 @@ async function atRisk(tx: DbTransaction, organizationId: string, today: string) 
       order by client_id, day desc
     ) latest
     join public.clients c on c.id = latest.client_id
-    where latest.level = 'at_risk'
+    -- Today's state: active clients whose latest snapshot is today's or yesterday's (the sweep
+    -- runs in the morning), so former clients and stalled histories do not linger.
+    where latest.level = 'at_risk' and c.lifecycle = 'active' and c.archived_at is null
+      and latest.day >= ${shift(today, -1)}::date
     order by latest.score, c.name
   `);
   return rows.map((row) => ({

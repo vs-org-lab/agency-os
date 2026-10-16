@@ -63,9 +63,17 @@ describe('team reports', () => {
     async () => {
       await withTestTransaction(async (sql) => {
         const world = await createFixtureWorld(sql);
-        await createBillingFixture(sql, world);
+        const billing = await createBillingFixture(sql, world);
         const year = Number(lisbonToday().slice(0, 4));
         const month = Number(lisbonToday().slice(5, 7)) - 1;
+        await sql`
+          insert into public.payments (organization_id, client_id, request_id, amount, currency,
+                                       method, received_on, status)
+          values (${world.organizationId}, ${world.clients.a}, ${billing.a.sentRequestId}, 999,
+                  'EUR', 'bank_transfer', current_date, 'review')
+        `;
+        const other = await createFixtureWorld(sql);
+        await createBillingFixture(sql, other);
 
         const reports = await loadReports(
           reportsClaims(world.users.founder),
@@ -215,6 +223,17 @@ describe('team reports', () => {
         await snapshot(world.clients.a, lisbonToday(), 30, 'at_risk');
         await snapshot(world.clients.b, shift(-2), 20, 'at_risk');
         await snapshot(world.clients.b, lisbonToday(), 80, 'healthy');
+        const extra = async (lifecycle: string, day: string) => {
+          const [row] = await sql<{ id: string }[]>`
+            insert into public.clients (organization_id, name, lifecycle)
+            values (${world.organizationId}, ${`Cliente ${lifecycle} ${day}`},
+                    ${lifecycle}::app.client_lifecycle)
+            returning id
+          `;
+          await snapshot(row?.id ?? '', day, 10, 'at_risk');
+        };
+        await extra('former', lisbonToday());
+        await extra('active', shift(-5));
 
         const reports = await loadReports(
           reportsClaims(world.users.founder),

@@ -3,6 +3,7 @@ import type { DbTransaction } from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
 import { healthReader, lisbonDay, nowOf, type HealthDeps } from './access';
 import { healthScore, type HealthLevel } from './domain/score';
+import { healthTrend, TREND_WINDOW_DAYS } from './domain/trend';
 import {
   approvalsSignal,
   outcomeSignal,
@@ -13,6 +14,8 @@ import {
 
 export type ClientHealthView = {
   score: number | null;
+  /** The change against the earliest snapshot of the last 30 days, or null without one. */
+  trend: number | null;
   level: HealthLevel | null;
   signals: {
     payments: Signal | null;
@@ -132,8 +135,42 @@ async function outcome(tx: DbTransaction, clientId: string, today: string) {
 }
 
 /**
- * RF-160 on C-01: the client's health from payments on time, approval time, response time and
- * the outcome's progress, for the room's readers who also read billing; others get null.
+ * RF-160: the client's health from payments on time, approval time, response time and the
+ * outcome's progress, in the caller's transaction and without authorization; callers check access.
+ */
+export async function computeClientHealth(
+  tx: DbTransaction,
+  clientId: string,
+  now: Date,
+): Promise<Omit<ClientHealthView, 'trend'>> {
+  const today = lisbonDay(now);
+  const signals = {
+    payments: await payments(tx, clientId, today),
+    approvals: await approvals(tx, clientId, now),
+    responses: await responses(tx, clientId, now),
+    outcome: await outcome(tx, clientId, today),
+  };
+  return {
+    ...healthScore([signals.payments, signals.approvals, signals.responses, signals.outcome]),
+    signals,
+  };
+}
+
+/** The earliest snapshot score of the last 30 days, which the trend compares with. */
+async function pastScore(tx: DbTransaction, clientId: string, today: string) {
+  const [row] = await tx.execute<{ score: number }>(sql`
+    select score from public.client_health_snapshots
+    where client_id = ${clientId}::uuid and score is not null
+      and day between ${shift(today, -TREND_WINDOW_DAYS)}::date and ${shift(today, -1)}::date
+    order by day
+    limit 1
+  `);
+  return row?.score ?? null;
+}
+
+/**
+ * RF-160 on C-01: the client's health and its trend over 30 days, for the room's readers who also
+ * read billing; others get null.
  */
 export async function loadClientHealth(
   claims: VerifiedClaims,
@@ -143,16 +180,10 @@ export async function loadClientHealth(
   const reader = await healthReader(claims, clientId, deps);
   if (!reader) return null;
   const now = nowOf(deps);
-  const today = lisbonDay(now);
 
-  const signals = await deps.contexts.withSystemContext(async (tx) => ({
-    payments: await payments(tx, clientId, today),
-    approvals: await approvals(tx, clientId, now),
-    responses: await responses(tx, clientId, now),
-    outcome: await outcome(tx, clientId, today),
-  }));
-  return {
-    ...healthScore([signals.payments, signals.approvals, signals.responses, signals.outcome]),
-    signals,
-  };
+  return deps.contexts.withSystemContext(async (tx) => {
+    const health = await computeClientHealth(tx, clientId, now);
+    const past = await pastScore(tx, clientId, lisbonDay(now));
+    return { ...health, trend: healthTrend(health.score, past) };
+  });
 }

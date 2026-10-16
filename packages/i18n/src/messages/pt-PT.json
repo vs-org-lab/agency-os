@@ -1031,6 +1031,12 @@
         "heading": "Garantia de {companyName} {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
         "body": "O resultado \"{metric}\" de {companyName} foi avaliado: {reason, select, target_met {a meta foi atingida} conditions_failed {uma condição do cliente falhou} months_used {os 3 meses foram usados} other {todas as condições do cliente foram cumpridas e a meta ficou por atingir no prazo}}. {status, select, active {A garantia conta até 3 meses de trabalho sem custo, limitado ao âmbito ligado ao resultado.} other {Veja o resultado e as condições na sala do cliente.}}",
         "action": "Abrir o resultado"
+      },
+      "health_at_risk": {
+        "subject": "{companyName} está em risco: saúde {score} de 100",
+        "heading": "{companyName} entrou em risco",
+        "body": "A saúde de {companyName} desceu para {score} de 100. Veja os sinais na sala do cliente: pagamentos, aprovações, respostas e evolução do resultado.",
+        "action": "Abrir a sala"
       }
     },
     "team": {
@@ -3102,6 +3108,11 @@
       "approvals": "Mediana de {days} dias",
       "responses": "Mediana de {hours} horas",
       "outcome": "{progress}% da meta com {expected}% do tempo"
+    },
+    "trend": {
+      "up": "+{change} nos últimos 30 dias",
+      "down": "−{change} nos últimos 30 dias",
+      "flat": "Sem variação nos últimos 30 dias"
     }
   }
 }

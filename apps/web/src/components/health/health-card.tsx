@@ -57,6 +57,15 @@ export function HealthCard({ health }: { health: ClientHealthView }) {
           </span>
         )}
       </div>
+      {health.trend !== null ? (
+        <p className="text-caption text-text-secondary">
+          {health.trend > 0
+            ? t('trend.up', { change: health.trend })
+            : health.trend < 0
+              ? t('trend.down', { change: Math.abs(health.trend) })
+              : t('trend.flat')}
+        </p>
+      ) : null}
       <ul className="flex flex-col">
         {SIGNALS.map((key) => {
           const signal = health.signals[key];

@@ -45,6 +45,7 @@ export const DOMAIN_EVENTS = [
   'retainers.usage.recorded',
   'retainers.extra.requested',
   'outcomes.guarantee.decided',
+  'health.client.at_risk',
 ] as const;
 
 export type DomainEventType = (typeof DOMAIN_EVENTS)[number];

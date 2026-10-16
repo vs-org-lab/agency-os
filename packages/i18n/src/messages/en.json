@@ -1031,6 +1031,12 @@
         "heading": "{companyName} guarantee {status, select, not_activated {not activated} active {activated} other {closed}}",
         "body": "The outcome \"{metric}\" for {companyName} was evaluated: {reason, select, target_met {the target was reached} conditions_failed {a client condition failed} months_used {the 3 months were used} other {every client condition was met and the target was not reached by the deadline}}. {status, select, active {The guarantee covers up to 3 months of work at no cost, limited to the scope tied to the outcome.} other {See the outcome and the conditions in the client room.}}",
         "action": "Open the outcome"
+      },
+      "health_at_risk": {
+        "subject": "{companyName} is at risk: health {score} of 100",
+        "heading": "{companyName} is now at risk",
+        "body": "The health of {companyName} dropped to {score} of 100. See the signals in the client room: payments, approvals, responses and outcome progress.",
+        "action": "Open the room"
       }
     },
     "team": {
@@ -3102,6 +3108,11 @@
       "approvals": "Median of {days} days",
       "responses": "Median of {hours} hours",
       "outcome": "{progress}% of the target with {expected}% of the time"
+    },
+    "trend": {
+      "up": "+{change} over the last 30 days",
+      "down": "−{change} over the last 30 days",
+      "flat": "No change over the last 30 days"
     }
   }
 }

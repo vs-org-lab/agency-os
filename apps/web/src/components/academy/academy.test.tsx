@@ -92,7 +92,7 @@ const ROOM: RoomAcademyView = {
       materials: [{ id: 'i1', title: 'Arranque do CMS', kind: 'checklist' }],
     },
   ],
-  files: [{ id: 'f1', name: 'manual.pdf', folderName: 'Marca' }],
+  files: [{ id: 'f1', name: 'manual.pdf', folderName: 'Marca', kind: 'document' }],
   people: [
     { id: 'u1', name: 'Rita Cliente', side: 'client' },
     { id: 'u2', name: 'Vladimir Silva', side: 'team' },
@@ -183,6 +183,18 @@ describe('C-12 academy', () => {
         materialIds: ['i1'],
       }),
     );
+  });
+});
+
+describe('C-12 sessions', () => {
+  it('deleting a session asks first', async () => {
+    const deleteSession = ok();
+    wrap(<RoomAcademy clientId="c1" view={ROOM} actions={actions({ deleteSession })} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Apagar sessão' }));
+    expect(deleteSession).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Apagar de vez' }));
+    await waitFor(() => expect(deleteSession).toHaveBeenCalledWith({ sessionId: 'x1' }));
   });
 });
 

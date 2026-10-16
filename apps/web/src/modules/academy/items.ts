@@ -110,8 +110,11 @@ export async function saveAcademyItem(
   return deps.contexts.withSystemContext(async (tx) => {
     const source = sourceColumns(item);
     if (source.libraryFileId) {
-      const files = await eligibleFiles(tx, input.clientId);
-      if (!files.some((file) => file.id === source.libraryFileId)) return INVALID_INPUT;
+      const file = (await eligibleFiles(tx, input.clientId)).find(
+        (candidate) => candidate.id === source.libraryFileId,
+      );
+      // A tutorial plays in the portal, so its library material must be a video.
+      if (!file || (item.kind === 'tutorial' && file.kind !== 'video')) return INVALID_INPUT;
     }
     let itemId = input.itemId;
     if (itemId) {

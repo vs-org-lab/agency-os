@@ -60,20 +60,39 @@ export function SessionList({
               {t('used', { titles: session.materials.map((item) => item.title).join(', ') })}
             </p>
           ) : null}
-          {onDelete ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="self-start"
-              onClick={() => onDelete(session.id)}
-            >
-              {t('delete')}
-            </Button>
-          ) : null}
+          {onDelete ? <DeleteSession onDelete={() => onDelete(session.id)} /> : null}
         </li>
       ))}
     </ul>
+  );
+}
+
+/** A session goes with its participants and materials, so deleting it asks first. */
+function DeleteSession({ onDelete }: { onDelete: () => void }) {
+  const t = useTranslations('academy');
+  const [confirming, setConfirming] = useState(false);
+  if (!confirming) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="self-start"
+        onClick={() => setConfirming(true)}
+      >
+        {t('sessions.delete')}
+      </Button>
+    );
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button type="button" size="sm" variant="destructive" onClick={onDelete}>
+        {t('actions.confirmDelete')}
+      </Button>
+      <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(false)}>
+        {t('actions.cancel')}
+      </Button>
+    </div>
   );
 }
 

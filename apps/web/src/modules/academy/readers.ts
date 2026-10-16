@@ -1,5 +1,10 @@
 import { sql } from 'drizzle-orm';
-import type { AcademyItemKind, AcademyItemStatus, DbTransaction } from '@agency-os/db';
+import type {
+  AcademyItemKind,
+  AcademyItemStatus,
+  DbTransaction,
+  LibraryFileKind,
+} from '@agency-os/db';
 import type { VerifiedClaims } from '@/platform/db';
 import { academyLearner, academyReader, academyWriter, type AcademyDeps } from './access';
 import { checklistProgress } from './domain/progress';
@@ -40,7 +45,7 @@ export type RoomAcademyView = {
   items: RoomAcademyItem[];
   sessions: TrainingSessionView[];
   /** Ready files in folders the client sees, for tutorials and manuals. */
-  files: { id: string; name: string; folderName: string }[];
+  files: { id: string; name: string; folderName: string; kind: LibraryFileKind | null }[];
   /** The client's members and the team, for a session's participants. */
   people: { id: string; name: string; side: 'client' | 'team' }[];
 };
@@ -175,17 +180,32 @@ async function roomRecords(tx: DbTransaction, clientId: string) {
   return { items, steps, sessions, participants, materials };
 }
 
-/** Files a tutorial or manual may use: ready, in a project of the client, under a client root. */
+/**
+ * Files a tutorial or manual may use: ready, in a live project of the client, under a root the
+ * client sees, as the portal library shows them.
+ */
 export async function eligibleFiles(tx: DbTransaction, clientId: string) {
-  const rows = await tx.execute<{ id: string; name: string; folder_name: string }>(sql`
-    select f.id, f.name, fo.name as folder_name
+  const rows = await tx.execute<{
+    id: string;
+    name: string;
+    folder_name: string;
+    kind: LibraryFileKind | null;
+  }>(sql`
+    select f.id, f.name, fo.name as folder_name, f.kind::text as kind
     from public.library_files f
     join public.library_folders fo on fo.id = f.folder_id
     join public.library_folders r on r.id = f.root_id
+    join public.projects p on p.id = f.project_id
     where f.client_id = ${clientId}::uuid and f.status = 'ready' and r.visibility = 'client'
+      and p.status <> 'cancelled'
     order by lower(f.name), f.id
   `);
-  return rows.map((row) => ({ id: row.id, name: row.name, folderName: row.folder_name }));
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    folderName: row.folder_name,
+    kind: row.kind,
+  }));
 }
 
 /** The people a session may list: the client's active members and the organisation's team. */
@@ -235,8 +255,10 @@ export async function loadPortalAcademy(
   return deps.contexts.withUserContext(claims, async (tx) => {
     const items = await tx.execute<ItemRow>(sql`
       select i.id, i.kind::text, 'published' as status, i.title, i.description, i.url,
-             i.library_file_id as file_id, null as file_name
+             f.id as file_id, f.name as file_name
       from public.portal_academy_items i
+      -- Only a file the client can still open in the library; otherwise the item has no material.
+      left join public.portal_library_files f on f.id = i.library_file_id
       where i.client_id = ${clientId}::uuid
       order by i.position, i.published_at
     `);

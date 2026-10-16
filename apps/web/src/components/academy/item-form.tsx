@@ -44,7 +44,12 @@ export function ItemForm({
   const [title, setTitle] = useState(item?.title ?? '');
   const [description, setDescription] = useState(item?.description ?? '');
   const [sourceKind, setSourceKind] = useState<'file' | 'link'>(item?.url ? 'link' : 'file');
-  const [fileId, setFileId] = useState(item?.file?.id ?? files[0]?.id ?? '');
+  // A tutorial plays in the portal, so it offers only the library's videos.
+  const choices = (forKind: AcademyItemKind) =>
+    forKind === 'tutorial' ? files.filter((file) => file.kind === 'video') : files;
+  const [fileId, setFileId] = useState(
+    item?.file?.id ?? choices(item?.kind ?? 'checklist')[0]?.id ?? '',
+  );
   const [url, setUrl] = useState(item?.url ?? '');
   const [steps, setSteps] = useState(item?.steps.map((step) => step.text).join('\n') ?? '');
   const [error, setError] = useState<AcademyError | null>(null);
@@ -85,7 +90,11 @@ export function ItemForm({
             value={kind}
             disabled={Boolean(item)}
             className={SELECT}
-            onChange={(event) => setKind(event.target.value as AcademyItemKind)}
+            onChange={(event) => {
+              const next = event.target.value as AcademyItemKind;
+              setKind(next);
+              setFileId(choices(next)[0]?.id ?? '');
+            }}
           >
             {KINDS.map((value) => (
               <option key={value} value={value}>
@@ -149,7 +158,7 @@ export function ItemForm({
             </label>
           </div>
           {sourceKind === 'file' ? (
-            files.length === 0 ? (
+            choices(kind).length === 0 ? (
               <p className="text-body-sm text-text-secondary">{t('form.noFiles')}</p>
             ) : (
               <div className="flex flex-col gap-1">
@@ -160,7 +169,7 @@ export function ItemForm({
                   className={SELECT}
                   onChange={(event) => setFileId(event.target.value)}
                 >
-                  {files.map((file) => (
+                  {choices(kind).map((file) => (
                     <option key={file.id} value={file.id}>
                       {t('form.fileOption', { folder: file.folderName, name: file.name })}
                     </option>

@@ -49,86 +49,92 @@ export async function publishGeneratedPdf(
   const storagePath = documentVersionPath({ ...editor, documentId, versionId });
   await deps.storage.upload(storagePath, input.bytes, 'application/pdf');
 
-  const published = await deps.contexts.withSystemContext(async (tx) => {
-    const created = await tx
-      .insert(projectDocuments)
-      .values({
-        id: documentId,
+  const published = await deps.contexts
+    .withSystemContext(async (tx) => {
+      const created = await tx
+        .insert(projectDocuments)
+        .values({
+          id: documentId,
+          organizationId: editor.organizationId,
+          clientId: editor.clientId,
+          projectId: editor.projectId,
+          title: input.title,
+          kind: 'pdf',
+          createdBy: editor.actorId,
+        })
+        .onConflictDoNothing()
+        .returning({ id: projectDocuments.id });
+      if (created.length > 0) {
+        await recordAudit(tx, {
+          organizationId: editor.organizationId,
+          action: 'project_document.created',
+          resourceType: 'project_document',
+          resourceId: documentId,
+          clientId: editor.clientId,
+          metadata: { kind: 'pdf', generated: true },
+        });
+      }
+      await lockDocument(tx, documentId);
+      const [owner] = await tx
+        .select({ projectId: projectDocuments.projectId, kind: projectDocuments.kind })
+        .from(projectDocuments)
+        .where(eq(projectDocuments.id, documentId));
+      if (owner?.projectId !== editor.projectId || owner.kind !== 'pdf') return false;
+      const [latest] = await tx
+        .select({ number: max(projectDocumentVersions.number) })
+        .from(projectDocumentVersions)
+        .where(eq(projectDocumentVersions.documentId, documentId));
+      const number = (latest?.number ?? 0) + 1;
+      await tx.insert(projectDocumentVersions).values({
+        id: versionId,
+        documentId,
         organizationId: editor.organizationId,
         clientId: editor.clientId,
         projectId: editor.projectId,
-        title: input.title,
+        number,
         kind: 'pdf',
+        storagePath,
+        fileName: input.fileName,
+        mimeType: 'application/pdf',
+        sizeBytes: input.bytes.length,
+        pages,
+        uploadStatus: 'ready',
         createdBy: editor.actorId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: projectDocuments.id });
-    if (created.length > 0) {
+      });
+      await applyNewVersion(tx, documentId, { id: versionId, number }, now);
+      // A new or approved document is back in draft after the version: it goes to the client now.
+      const shared = await tx
+        .update(projectDocuments)
+        .set({ status: 'with_client', sharedAt: now, updatedAt: now })
+        .where(and(eq(projectDocuments.id, documentId), eq(projectDocuments.status, 'draft')))
+        .returning({ id: projectDocuments.id });
+      if (shared.length > 0) {
+        await tx
+          .update(projectDocumentVersions)
+          .set({ sharedAt: now })
+          .where(eq(projectDocumentVersions.id, versionId));
+      }
       await recordAudit(tx, {
         organizationId: editor.organizationId,
-        action: 'project_document.created',
+        action: 'project_document.shared',
         resourceType: 'project_document',
         resourceId: documentId,
         clientId: editor.clientId,
-        metadata: { kind: 'pdf', generated: true },
+        metadata: { versionId, generated: true },
       });
-    }
-    await lockDocument(tx, documentId);
-    const [owner] = await tx
-      .select({ projectId: projectDocuments.projectId, kind: projectDocuments.kind })
-      .from(projectDocuments)
-      .where(eq(projectDocuments.id, documentId));
-    if (owner?.projectId !== editor.projectId || owner.kind !== 'pdf') return false;
-    const [latest] = await tx
-      .select({ number: max(projectDocumentVersions.number) })
-      .from(projectDocumentVersions)
-      .where(eq(projectDocumentVersions.documentId, documentId));
-    const number = (latest?.number ?? 0) + 1;
-    await tx.insert(projectDocumentVersions).values({
-      id: versionId,
-      documentId,
-      organizationId: editor.organizationId,
-      clientId: editor.clientId,
-      projectId: editor.projectId,
-      number,
-      kind: 'pdf',
-      storagePath,
-      fileName: input.fileName,
-      mimeType: 'application/pdf',
-      sizeBytes: input.bytes.length,
-      pages,
-      uploadStatus: 'ready',
-      createdBy: editor.actorId,
+      await emit(tx, {
+        type: 'rooms.document.shared',
+        organizationId: editor.organizationId,
+        clientId: editor.clientId,
+        payload: { documentId },
+      });
+      return true;
+    })
+    .catch(async (error: unknown) => {
+      // A version that never committed must not leave its file behind.
+      await deps.storage.remove(storagePath);
+      throw error;
     });
-    await applyNewVersion(tx, documentId, { id: versionId, number }, now);
-    // A new or approved document is back in draft after the version: it goes to the client now.
-    const shared = await tx
-      .update(projectDocuments)
-      .set({ status: 'with_client', sharedAt: now, updatedAt: now })
-      .where(and(eq(projectDocuments.id, documentId), eq(projectDocuments.status, 'draft')))
-      .returning({ id: projectDocuments.id });
-    if (shared.length > 0) {
-      await tx
-        .update(projectDocumentVersions)
-        .set({ sharedAt: now })
-        .where(eq(projectDocumentVersions.id, versionId));
-    }
-    await recordAudit(tx, {
-      organizationId: editor.organizationId,
-      action: 'project_document.shared',
-      resourceType: 'project_document',
-      resourceId: documentId,
-      clientId: editor.clientId,
-      metadata: { versionId, generated: true },
-    });
-    await emit(tx, {
-      type: 'rooms.document.shared',
-      organizationId: editor.organizationId,
-      clientId: editor.clientId,
-      payload: { documentId },
-    });
-    return true;
-  });
   if (!published) {
     await deps.storage.remove(storagePath);
     return NOT_FOUND;

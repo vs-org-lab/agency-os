@@ -195,6 +195,34 @@ describe('generated pdf publication', () => {
   );
 
   it(
+    'a failed publication leaves no file in storage',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const rooms = await createRoomFixture(sql, world);
+        const { deps, storage } = documentsDeps(sql);
+
+        await expect(
+          publishGeneratedPdf(
+            documentClaims(world.users.manager),
+            {
+              projectId: rooms.a.projectId,
+              documentId: randomUUID(),
+              // longer than the 200 characters a document title allows
+              title: 'R'.repeat(201),
+              fileName: 'relatorio.pdf',
+              bytes: await onePagePdf(),
+            },
+            deps,
+          ),
+        ).rejects.toThrow();
+        expect(storage.files.size).toBe(0);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'a document id of another project is not reused',
     async () => {
       await withTestTransaction(async (sql) => {

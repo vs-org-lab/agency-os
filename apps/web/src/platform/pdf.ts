@@ -48,10 +48,30 @@ export function encodable(font: PDFFont, text: string): string {
     .join('');
 }
 
-function wrap(font: PDFFont, text: string, size: number, width: number): string[] {
+/** A word wider than the line (a long link) in pieces that each fit it. */
+function splitWord(font: PDFFont, word: string, size: number, width: number): string[] {
+  const pieces: string[] = [];
+  let piece = '';
+  for (const character of word) {
+    if (piece && font.widthOfTextAtSize(piece + character, size) > width) {
+      pieces.push(piece);
+      piece = '';
+    }
+    piece += character;
+  }
+  pieces.push(piece);
+  return pieces;
+}
+
+export function wrapText(font: PDFFont, text: string, size: number, width: number): string[] {
   const lines: string[] = [];
   let line = '';
-  for (const word of text.split(' ')) {
+  const words = text
+    .split(' ')
+    .flatMap((word) =>
+      font.widthOfTextAtSize(word, size) > width ? splitWord(font, word, size, width) : [word],
+    );
+  for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
     if (font.widthOfTextAtSize(candidate, size) <= width || line === '') {
       line = candidate;
@@ -94,7 +114,7 @@ export class PdfWriter {
     const font = options.bold ? this.fonts.bold : this.fonts.regular;
     const size = options.size ?? BODY_SIZE;
     const indent = options.indent ?? 0;
-    for (const line of wrap(font, encodable(font, text), size, CONTENT_WIDTH - indent)) {
+    for (const line of wrapText(font, encodable(font, text), size, CONTENT_WIDTH - indent)) {
       if (this.y - size < MARGIN) this.newPage();
       this.y -= size;
       this.page.drawText(line, {
@@ -211,7 +231,7 @@ export class SlideWriter {
 
   private draw(text: string, size: number, bold: boolean, indent: number, muted = false): void {
     const font = bold ? this.fonts.bold : this.fonts.regular;
-    for (const line of wrap(font, encodable(font, text), size, SLIDE_CONTENT_WIDTH - indent)) {
+    for (const line of wrapText(font, encodable(font, text), size, SLIDE_CONTENT_WIDTH - indent)) {
       if (!this.page || this.y - size < MARGIN) this.continueSlide();
       this.y -= size;
       this.page?.drawText(line, {
@@ -229,7 +249,7 @@ export class SlideWriter {
     this.page = this.document.addPage([SLIDE_WIDTH, SLIDE_HEIGHT]);
     this.y = SLIDE_HEIGHT - MARGIN;
     const font = this.fonts.bold;
-    for (const line of wrap(
+    for (const line of wrapText(
       font,
       encodable(font, heading),
       SLIDE_TITLE_SIZE,

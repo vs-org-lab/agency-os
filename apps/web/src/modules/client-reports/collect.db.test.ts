@@ -195,4 +195,25 @@ describe('client report data', () => {
     },
     SLOW,
   );
+
+  it(
+    'report project skips cancelled projects',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const rooms = await createRoomFixture(sql, world);
+        await sql`
+          insert into public.projects (organization_id, client_id, name, template_key,
+                                       template_version, starts_on, status, created_at)
+          values (${world.organizationId}, ${world.clients.a}, 'Cancelado', 'orbit', 1,
+                  current_date, 'cancelled', now() + interval '1 minute')
+        `;
+
+        expect(await system(sql)((tx) => reportProject(tx, world.clients.a))).toBe(
+          rooms.a.projectId,
+        );
+      });
+    },
+    SLOW,
+  );
 });

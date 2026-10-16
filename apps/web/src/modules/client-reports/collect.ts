@@ -6,12 +6,12 @@ import type { ReportPeriod } from './domain/periods';
 
 const lisbonDay = (column: string) => sql.raw(`(${column} at time zone 'Europe/Lisbon')::date`);
 
-/** The report's project: the active retainer's, otherwise the client's most recent one. */
+/** The report's project: the active retainer's, otherwise the client's most recent one not cancelled. */
 export async function reportProject(tx: DbTransaction, clientId: string): Promise<string | null> {
   const [row] = await tx.execute<{ id: string }>(sql`
     select p.id from public.projects p
     left join public.retainers r on r.project_id = p.id and r.status = 'active'
-    where p.client_id = ${clientId}::uuid
+    where p.client_id = ${clientId}::uuid and p.status <> 'cancelled'
     order by (r.id is not null) desc, p.created_at desc
     limit 1
   `);

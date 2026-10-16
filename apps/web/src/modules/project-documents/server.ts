@@ -99,3 +99,6 @@ export function commentOnDocument(
 }
 
 export { DOCUMENT_FUNCTIONS } from './automations';
+export { documentEditor, type DocumentsDeps } from './access';
+export { publishGeneratedPdf, type GeneratedPdf } from './publish';
+export const roomDocumentsDeps = deps;

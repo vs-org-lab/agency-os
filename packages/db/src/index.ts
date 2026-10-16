@@ -44,6 +44,8 @@ export type {
   LibraryFileKind,
   ProjectDocumentKind,
   ProjectDocumentStatus,
+  ClientReportKind,
+  ClientReportStatus,
   BrandHubPageKind,
   BrandHubAccessMode,
   BrandHubDomainStatus,

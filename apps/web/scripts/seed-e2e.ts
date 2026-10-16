@@ -116,6 +116,18 @@ async function main(): Promise<void> {
       update public.calls set status = 'cancelled'
       where organization_id = ${organizationId} and status = 'scheduled' and starts_at > now()
     `;
+    // Every test seeds its own deals and clients; earlier runs' records would otherwise keep
+    // growing the pipeline and the client list that the accessibility checks scan in full.
+    await sql`
+      update public.deals set archived_at = now()
+      where organization_id = ${organizationId} and archived_at is null
+        and created_at < now() - interval '6 hours'
+    `;
+    await sql`
+      update public.clients set archived_at = now()
+      where organization_id = ${organizationId} and archived_at is null and id <> ${clientId}
+        and created_at < now() - interval '6 hours'
+    `;
     // An interrupted run leaves approvals waiting, which later runs and global sweeps would see.
     await sql`
       update public.approvals set status = 'withdrawn'

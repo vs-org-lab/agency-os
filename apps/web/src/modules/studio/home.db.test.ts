@@ -5,6 +5,7 @@ import {
   createBillingFixture,
   createFixtureWorld,
   createRetainerBillingFixture,
+  createRetainerFixture,
   createRoomFixture,
   testDatabase,
   withTestTransaction,
@@ -86,6 +87,38 @@ describe('studio home', () => {
 
       const item = home?.today.find((entry) => entry.id === request?.id);
       expect(item).toMatchObject({ kind: 'payment', href: `/c/${world.clients.a}/retainer` });
+    });
+  });
+
+  it('home clients show the retainer label and the latest health level', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      await createRetainerFixture(sql, world);
+      for (const [day, score, level] of [
+        ['2026-10-10', 80, 'healthy'],
+        ['2026-10-14', 30, 'at_risk'],
+      ] as const) {
+        await sql`
+          insert into public.client_health_snapshots (organization_id, client_id, day, score,
+                                                      level)
+          values (${world.organizationId}, ${world.clients.a}, ${day}, ${score},
+                  ${level}::app.health_level)
+        `;
+      }
+      const contexts = createDbContexts(testDatabase(sql));
+      const clientA = async (userId: string) =>
+        (await loadHome(claimsFor(userId), new Date(), { contexts }))?.clients.find(
+          (client) => client.id === world.clients.a,
+        );
+
+      expect(await clientA(world.users.founder)).toMatchObject({
+        retainer: true,
+        healthLevel: 'at_risk',
+      });
+      const freelancer = await loadHome(claimsFor(world.users.freelancer), new Date(), {
+        contexts,
+      });
+      expect(freelancer?.clients.every((client) => client.healthLevel === null)).toBe(true);
     });
   });
 

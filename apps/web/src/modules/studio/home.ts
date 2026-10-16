@@ -12,6 +12,7 @@ import { isStudioStaff } from './access';
 
 const {
   approvals,
+  clientHealthSnapshots,
   clients,
   commercialSettings,
   paymentRequests,
@@ -19,6 +20,7 @@ const {
   projectSteps,
   projectUpdates,
   projects,
+  retainers,
   tasks,
 } = schema;
 
@@ -42,6 +44,10 @@ export type HomeClient = {
   name: string;
   progress: { done: number; total: number } | null;
   lastActivityAt: Date | null;
+  /** The client has an active retainer (S-01 label). */
+  retainer: boolean;
+  /** The latest health level, for those who see the health (RLS of the snapshots). */
+  healthLevel: 'healthy' | 'attention' | 'at_risk' | null;
 };
 
 export type HomeView = {
@@ -267,7 +273,30 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
         ? { done: own.filter((phase) => phase.status === 'done').length, total: own.length }
         : null,
       lastActivityAt: last ? new Date(last) : null,
+      retainer: false,
+      healthLevel: null,
     });
+  }
+  const clientIds = [...byClient.keys()];
+  const withRetainer = await tx
+    .select({ clientId: retainers.clientId })
+    .from(retainers)
+    .where(and(inArray(retainers.clientId, clientIds), eq(retainers.status, 'active')));
+  const latest = await tx
+    .selectDistinctOn([clientHealthSnapshots.clientId], {
+      clientId: clientHealthSnapshots.clientId,
+      level: clientHealthSnapshots.level,
+    })
+    .from(clientHealthSnapshots)
+    .where(inArray(clientHealthSnapshots.clientId, clientIds))
+    .orderBy(clientHealthSnapshots.clientId, sql`${clientHealthSnapshots.day} desc`);
+  for (const row of withRetainer) {
+    const client = byClient.get(row.clientId);
+    if (client) client.retainer = true;
+  }
+  for (const row of latest) {
+    const client = byClient.get(row.clientId);
+    if (client) client.healthLevel = row.level;
   }
   return [...byClient.values()];
 }

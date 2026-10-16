@@ -173,6 +173,11 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     description: 'Campanha de Natal',
     roomUrl: 'https://os.example.com/c/client/retainer',
   },
+  'founder.health_at_risk': {
+    companyName: 'Empresa Exemplo',
+    score: 42,
+    roomUrl: 'https://os.example.com/c/client',
+  },
   'founder.outcome_guarantee': {
     companyName: 'Empresa Exemplo',
     metric: 'Leads por mês',
@@ -282,6 +287,20 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
 };
 
 describe('renderEmail', () => {
+  it('founder.health_at_risk renders in both locales', () => {
+    const params = {
+      companyName: 'Bloom',
+      score: 42,
+      roomUrl: 'https://os.example.com/c/client',
+    };
+    expect(renderEmail('founder.health_at_risk', 'pt-PT', params).subject).toBe(
+      'Bloom está em risco: saúde 42 de 100',
+    );
+    expect(renderEmail('founder.health_at_risk', 'en', params).subject).toBe(
+      'Bloom is at risk: health 42 of 100',
+    );
+  });
+
   it('founder.outcome_guarantee renders every status in both locales', () => {
     const render = (
       locale: 'pt-PT' | 'en',

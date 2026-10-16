@@ -55,6 +55,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'founder.retainer_threshold',
   'founder.retainer_extra_requested',
   'founder.outcome_guarantee',
+  'founder.health_at_risk',
 ] as const;
 
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -139,6 +140,7 @@ export type EmailParams = {
     reason: 'target_met' | 'conditions_failed' | 'months_used' | 'none';
     outcomeUrl: string;
   };
+  'founder.health_at_risk': { companyName: string; score: number; roomUrl: string };
   'founder.rounds_warning': { companyName: string; used: number; limit: number; roomUrl: string };
   'founder.extra_round': { companyName: string; used: number; limit: number; roomUrl: string };
   'founder.testimonial_received': {
@@ -224,6 +226,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'founder.retainer_threshold': 'roomUrl',
   'founder.retainer_extra_requested': 'roomUrl',
   'founder.outcome_guarantee': 'outcomeUrl',
+  'founder.health_at_risk': 'roomUrl',
 };
 
 const MESSAGES: Record<Locale, typeof ptPT> = { 'pt-PT': ptPT, en };

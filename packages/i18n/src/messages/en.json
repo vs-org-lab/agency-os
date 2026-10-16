@@ -91,7 +91,8 @@
       "updates": "Updates",
       "tasks": "Tasks",
       "calendar": "Calendar",
-      "money": "Money"
+      "money": "Money",
+      "reports": "Reports"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -198,7 +199,8 @@
         "progress": "{done} of {total} phases",
         "noProject": "No phases",
         "lastActivity": "Last activity {date}",
-        "noActivity": "No activity"
+        "noActivity": "No activity",
+        "retainer": "Retainer"
       }
     },
     "today": {
@@ -1031,6 +1033,12 @@
         "heading": "{companyName} guarantee {status, select, not_activated {not activated} active {activated} other {closed}}",
         "body": "The outcome \"{metric}\" for {companyName} was evaluated: {reason, select, target_met {the target was reached} conditions_failed {a client condition failed} months_used {the 3 months were used} other {every client condition was met and the target was not reached by the deadline}}. {status, select, active {The guarantee covers up to 3 months of work at no cost, limited to the scope tied to the outcome.} other {See the outcome and the conditions in the client room.}}",
         "action": "Open the outcome"
+      },
+      "health_at_risk": {
+        "subject": "{companyName} is at risk: health {score} of 100",
+        "heading": "{companyName} is now at risk",
+        "body": "The health of {companyName} dropped to {score} of 100. See the signals in the client room: payments, approvals, responses and outcome progress.",
+        "action": "Open the room"
       }
     },
     "team": {
@@ -3102,6 +3110,73 @@
       "approvals": "Median of {days} days",
       "responses": "Median of {hours} hours",
       "outcome": "{progress}% of the target with {expected}% of the time"
+    },
+    "trend": {
+      "up": "+{change} over the last 30 days",
+      "down": "−{change} over the last 30 days",
+      "flat": "No change over the last 30 days"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "year": "Year {year}",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "download": "Download CSV",
+    "emptyYear": "No data this year.",
+    "empty": "No data.",
+    "noPercent": "—",
+    "percent": "{value}%",
+    "total": "Total",
+    "stages": {
+      "pre_sale": "Pre-sale",
+      "core": "Core",
+      "orbit": "Orbit",
+      "gravity": "Gravity",
+      "constellation": "Constellation",
+      "off_cycle": "Off cycle"
+    },
+    "panels": {
+      "revenue": "Revenue by month",
+      "recurring": "Recurring revenue",
+      "pipeline": "Deals by code",
+      "conversion": "Conversion between stages",
+      "load": "Team load",
+      "at-risk": "Clients at risk"
+    },
+    "columns": {
+      "currency": "Currency",
+      "monthly": "Per month",
+      "retainers": "Retainers",
+      "stage": "Stage",
+      "code": "Code",
+      "deals": "Deals",
+      "passage": "Passage",
+      "entered": "Entered",
+      "passed": "Passed",
+      "conversion": "Conversion",
+      "member": "Member",
+      "tasks": "Tasks this week",
+      "projects": "Active projects",
+      "hours": "Weekly hours",
+      "client": "Client",
+      "score": "Health",
+      "before": "30 days ago"
+    },
+    "passage": "{from} → {to}",
+    "months": {
+      "0": "Jan",
+      "1": "Feb",
+      "2": "Mar",
+      "3": "Apr",
+      "4": "May",
+      "5": "Jun",
+      "6": "Jul",
+      "7": "Aug",
+      "8": "Sep",
+      "9": "Oct",
+      "10": "Nov",
+      "11": "Dec"
     }
   }
 }

@@ -91,7 +91,8 @@
       "updates": "Atualizações",
       "tasks": "Tarefas",
       "calendar": "Calendário",
-      "money": "Dinheiro"
+      "money": "Dinheiro",
+      "reports": "Relatórios"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -198,7 +199,8 @@
         "progress": "{done} de {total} fases",
         "noProject": "Sem fases",
         "lastActivity": "Última atividade {date}",
-        "noActivity": "Sem atividade"
+        "noActivity": "Sem atividade",
+        "retainer": "Retainer"
       }
     },
     "today": {
@@ -1031,6 +1033,12 @@
         "heading": "Garantia de {companyName} {status, select, not_activated {não ativada} active {ativada} other {encerrada}}",
         "body": "O resultado \"{metric}\" de {companyName} foi avaliado: {reason, select, target_met {a meta foi atingida} conditions_failed {uma condição do cliente falhou} months_used {os 3 meses foram usados} other {todas as condições do cliente foram cumpridas e a meta ficou por atingir no prazo}}. {status, select, active {A garantia conta até 3 meses de trabalho sem custo, limitado ao âmbito ligado ao resultado.} other {Veja o resultado e as condições na sala do cliente.}}",
         "action": "Abrir o resultado"
+      },
+      "health_at_risk": {
+        "subject": "{companyName} está em risco: saúde {score} de 100",
+        "heading": "{companyName} entrou em risco",
+        "body": "A saúde de {companyName} desceu para {score} de 100. Veja os sinais na sala do cliente: pagamentos, aprovações, respostas e evolução do resultado.",
+        "action": "Abrir a sala"
       }
     },
     "team": {
@@ -3102,6 +3110,73 @@
       "approvals": "Mediana de {days} dias",
       "responses": "Mediana de {hours} horas",
       "outcome": "{progress}% da meta com {expected}% do tempo"
+    },
+    "trend": {
+      "up": "+{change} nos últimos 30 dias",
+      "down": "−{change} nos últimos 30 dias",
+      "flat": "Sem variação nos últimos 30 dias"
+    }
+  },
+  "reports": {
+    "title": "Relatórios",
+    "year": "Ano de {year}",
+    "previousYear": "Ano anterior",
+    "nextYear": "Ano seguinte",
+    "download": "Descarregar CSV",
+    "emptyYear": "Sem dados neste ano.",
+    "empty": "Sem dados.",
+    "noPercent": "—",
+    "percent": "{value}%",
+    "total": "Total",
+    "stages": {
+      "pre_sale": "Pré-venda",
+      "core": "Core",
+      "orbit": "Orbit",
+      "gravity": "Gravity",
+      "constellation": "Constellation",
+      "off_cycle": "Fora do ciclo"
+    },
+    "panels": {
+      "revenue": "Receita por mês",
+      "recurring": "Receita recorrente",
+      "pipeline": "Negócios por código",
+      "conversion": "Conversão entre etapas",
+      "load": "Carga da equipa",
+      "at-risk": "Clientes em risco"
+    },
+    "columns": {
+      "currency": "Moeda",
+      "monthly": "Por mês",
+      "retainers": "Retainers",
+      "stage": "Etapa",
+      "code": "Código",
+      "deals": "Negócios",
+      "passage": "Passagem",
+      "entered": "Entraram",
+      "passed": "Passaram",
+      "conversion": "Conversão",
+      "member": "Membro",
+      "tasks": "Tarefas desta semana",
+      "projects": "Projetos ativos",
+      "hours": "Horas semanais",
+      "client": "Cliente",
+      "score": "Saúde",
+      "before": "Há 30 dias"
+    },
+    "passage": "{from} → {to}",
+    "months": {
+      "0": "Jan",
+      "1": "Fev",
+      "2": "Mar",
+      "3": "Abr",
+      "4": "Mai",
+      "5": "Jun",
+      "6": "Jul",
+      "7": "Ago",
+      "8": "Set",
+      "9": "Out",
+      "10": "Nov",
+      "11": "Dez"
     }
   }
 }

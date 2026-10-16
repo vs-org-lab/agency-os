@@ -22,6 +22,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps)
         permissions: {
           pipeline: canSeePipeline(session.actor),
           money: canReadBilling(session.actor),
+          reports: session.actor.mfaVerifiedAt !== null && session.actor.roles.includes('founder'),
         },
       }}
       counters={

@@ -497,3 +497,7 @@ export const clientMilestoneKindEnum = appSchema.enum('client_milestone_kind', [
 ]);
 
 export type ClientMilestoneKind = (typeof clientMilestoneKindEnum.enumValues)[number];
+
+export const healthLevelEnum = appSchema.enum('health_level', ['healthy', 'attention', 'at_risk']);
+
+export type HealthLevelValue = (typeof healthLevelEnum.enumValues)[number];

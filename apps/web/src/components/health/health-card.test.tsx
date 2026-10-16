@@ -20,6 +20,7 @@ function show(health: ClientHealthView) {
 
 const FULL: ClientHealthView = {
   score: 78,
+  trend: null,
   level: 'healthy',
   signals: {
     payments: { score: 50, detail: { kind: 'payments', onTime: 1, total: 2 } },
@@ -31,6 +32,7 @@ const FULL: ClientHealthView = {
 
 const EMPTY: ClientHealthView = {
   score: null,
+  trend: null,
   level: null,
   signals: { payments: null, approvals: null, responses: null, outcome: null },
 };
@@ -47,6 +49,20 @@ describe('C-01 health card', () => {
     expect(within(card).getByText('Mediana de 7 dias')).toBeTruthy();
     expect(within(card).getByText('Mediana de 30 horas')).toBeTruthy();
     expect(within(card).getByText('50% da meta com 50% do tempo')).toBeTruthy();
+  });
+
+  it('the card shows the trend over 30 days', () => {
+    for (const [trend, text] of [
+      [5, '+5 nos últimos 30 dias'],
+      [-12, '−12 nos últimos 30 dias'],
+      [0, 'Sem variação nos últimos 30 dias'],
+    ] as const) {
+      const { unmount } = show({ ...FULL, trend });
+      expect(screen.getByText(text)).toBeTruthy();
+      unmount();
+    }
+    show({ ...FULL, trend: null });
+    expect(screen.queryByText(/nos últimos 30 dias/)).toBeNull();
   });
 
   it('levels at their limits and no data', () => {

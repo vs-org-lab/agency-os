@@ -428,6 +428,13 @@
       "when": 1792104208952,
       "tag": "20261015224328_client_milestones",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1792112069289,
+      "tag": "20261016005429_client_health_snapshots",
+      "breakpoints": true
     }
   ]
 }

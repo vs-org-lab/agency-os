@@ -27,4 +27,5 @@ export * from './brand-hub';
 export * from './agenda';
 export * from './outcomes';
 export * from './milestones';
+export * from './client-reports';
 export * from './health';

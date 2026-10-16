@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { REPORT_PANELS, type ReportPanel } from '@/modules/reports';
+import { REPORT_PANELS, reportYear, type ReportPanel } from '@/modules/reports';
 import { loadReportCsv } from '@/modules/reports/server';
 import { getVerifiedClaims } from '@/platform/session';
 
@@ -13,9 +13,11 @@ export async function GET(
 ): Promise<Response> {
   const { panel: file } = await context.params;
   const panel = file.replace(/\.csv$/, '');
-  const year = Number(new URL(request.url).searchParams.get('year'));
+  // The CSV always names its year; the screen's default does not apply to a download link.
+  const requested = new URL(request.url).searchParams.get('year');
+  const year = requested ? reportYear(requested, 0) : null;
   const claims = await getVerifiedClaims();
-  if (!claims || !isPanel(panel) || !Number.isInteger(year) || year < 2000) {
+  if (!claims || !isPanel(panel) || year === null) {
     return new NextResponse(null, { status: 404 });
   }
   const csv = await loadReportCsv(claims, panel, year);

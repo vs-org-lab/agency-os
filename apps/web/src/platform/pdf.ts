@@ -48,10 +48,30 @@ export function encodable(font: PDFFont, text: string): string {
     .join('');
 }
 
-function wrap(font: PDFFont, text: string, size: number, width: number): string[] {
+/** A word wider than the line (a long link) in pieces that each fit it. */
+function splitWord(font: PDFFont, word: string, size: number, width: number): string[] {
+  const pieces: string[] = [];
+  let piece = '';
+  for (const character of word) {
+    if (piece && font.widthOfTextAtSize(piece + character, size) > width) {
+      pieces.push(piece);
+      piece = '';
+    }
+    piece += character;
+  }
+  pieces.push(piece);
+  return pieces;
+}
+
+export function wrapText(font: PDFFont, text: string, size: number, width: number): string[] {
   const lines: string[] = [];
   let line = '';
-  for (const word of text.split(' ')) {
+  const words = text
+    .split(' ')
+    .flatMap((word) =>
+      font.widthOfTextAtSize(word, size) > width ? splitWord(font, word, size, width) : [word],
+    );
+  for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
     if (font.widthOfTextAtSize(candidate, size) <= width || line === '') {
       line = candidate;
@@ -94,7 +114,7 @@ export class PdfWriter {
     const font = options.bold ? this.fonts.bold : this.fonts.regular;
     const size = options.size ?? BODY_SIZE;
     const indent = options.indent ?? 0;
-    for (const line of wrap(font, encodable(font, text), size, CONTENT_WIDTH - indent)) {
+    for (const line of wrapText(font, encodable(font, text), size, CONTENT_WIDTH - indent)) {
       if (this.y - size < MARGIN) this.newPage();
       this.y -= size;
       this.page.drawText(line, {
@@ -186,4 +206,110 @@ export function numberPages(document: PDFDocument, fonts: PdfFonts, template: st
       color: MUTED_COLOR,
     });
   });
+}
+
+const SLIDE_TITLE_SIZE = 22;
+const SLIDE_BODY_SIZE = 14;
+const SLIDE_LINE_GAP = 6;
+const SLIDE_WIDTH = PAGE_HEIGHT;
+const SLIDE_HEIGHT = PAGE_WIDTH;
+const SLIDE_CONTENT_WIDTH = SLIDE_WIDTH - MARGIN * 2;
+
+/**
+ * Writes a deck of A4 landscape slides: each slide has a title, and content that does not fit
+ * continues on a new slide under the same title marked "(cont.)".
+ */
+export class SlideWriter {
+  private page: PDFPage | null = null;
+  private y = 0;
+  private title = '';
+
+  constructor(
+    private readonly document: PDFDocument,
+    private readonly fonts: PdfFonts,
+  ) {}
+
+  private draw(text: string, size: number, bold: boolean, indent: number, muted = false): void {
+    const font = bold ? this.fonts.bold : this.fonts.regular;
+    for (const line of wrapText(font, encodable(font, text), size, SLIDE_CONTENT_WIDTH - indent)) {
+      if (!this.page || this.y - size < MARGIN) this.continueSlide();
+      this.y -= size;
+      this.page?.drawText(line, {
+        x: MARGIN + indent,
+        y: this.y,
+        size,
+        font,
+        color: muted ? MUTED_COLOR : TEXT_COLOR,
+      });
+      this.y -= SLIDE_LINE_GAP;
+    }
+  }
+
+  private open(heading: string): void {
+    this.page = this.document.addPage([SLIDE_WIDTH, SLIDE_HEIGHT]);
+    this.y = SLIDE_HEIGHT - MARGIN;
+    const font = this.fonts.bold;
+    for (const line of wrapText(
+      font,
+      encodable(font, heading),
+      SLIDE_TITLE_SIZE,
+      SLIDE_CONTENT_WIDTH,
+    )) {
+      this.y -= SLIDE_TITLE_SIZE;
+      this.page.drawText(line, {
+        x: MARGIN,
+        y: this.y,
+        size: SLIDE_TITLE_SIZE,
+        font,
+        color: TEXT_COLOR,
+      });
+      this.y -= SLIDE_LINE_GAP;
+    }
+    this.y -= SLIDE_BODY_SIZE;
+  }
+
+  private continueSlide(): void {
+    this.open(`${this.title} (cont.)`);
+  }
+
+  /** A cover slide: the title centred in the upper half and a muted line below it. */
+  cover(title: string, subtitle: string): void {
+    this.title = title;
+    this.page = this.document.addPage([SLIDE_WIDTH, SLIDE_HEIGHT]);
+    this.y = SLIDE_HEIGHT / 2 + SLIDE_TITLE_SIZE * 2;
+    this.draw(title, SLIDE_TITLE_SIZE + 6, true, 0);
+    this.y -= SLIDE_LINE_GAP;
+    this.draw(subtitle, SLIDE_BODY_SIZE, false, 0, true);
+  }
+
+  slide(title: string): void {
+    this.title = title;
+    this.open(title);
+  }
+
+  heading(text: string): void {
+    this.draw(text, SLIDE_BODY_SIZE, true, 0);
+  }
+
+  bullet(text: string): void {
+    this.draw(`•  ${text}`, SLIDE_BODY_SIZE, false, 12);
+  }
+
+  paragraph(text: string): void {
+    for (const block of text.split(/\n+/)) this.draw(block, SLIDE_BODY_SIZE, false, 0);
+  }
+}
+
+export async function createDeck(meta: { title: string }): Promise<{
+  document: PDFDocument;
+  slides: SlideWriter;
+}> {
+  const document = await PDFDocument.create();
+  document.setTitle(meta.title);
+  document.setProducer('Agency OS');
+  const fonts: PdfFonts = {
+    regular: await document.embedFont(StandardFonts.Helvetica),
+    bold: await document.embedFont(StandardFonts.HelveticaBold),
+  };
+  return { document, slides: new SlideWriter(document, fonts) };
 }

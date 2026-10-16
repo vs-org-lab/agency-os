@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { ReportsScreen } from '@/components/reports/reports-screen';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
+import { reportYear } from '@/modules/reports';
 import { loadTeamReports } from '@/modules/reports/server';
 
 export const dynamic = 'force-dynamic';
@@ -22,9 +23,8 @@ export default async function ReportsPage({ params, searchParams }: PageProps) {
   const locale = requireLocale((await params).locale);
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
-  const requested = Number((await searchParams).year);
-  const year = Number.isInteger(requested) && requested >= 2000 ? requested : lisbonYear();
-  const view = await loadTeamReports(session.claims, year);
+  const year = reportYear((await searchParams).year, lisbonYear());
+  const view = year === null ? null : await loadTeamReports(session.claims, year);
   if (!view) notFound();
 
   return <ReportsScreen view={view} />;

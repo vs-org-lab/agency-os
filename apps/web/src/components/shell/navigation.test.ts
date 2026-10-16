@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildNavigation } from './navigation';
 
 describe('buildNavigation', () => {
-  it('room and portal navigation link documents, the library and the brand hub', () => {
+  it('room navigation links documents, the library, the brand hub and reports', () => {
     const navigation = buildNavigation({ level: 'room', clientId: 'client-1' });
 
     expect(navigation.back).toEqual({ href: '/', labelKey: 'shell.allClients' });
@@ -18,10 +18,12 @@ describe('buildNavigation', () => {
       '/c/client-1/library',
       '/c/client-1/agenda',
       '/c/client-1/hub',
+      '/c/client-1/reports',
     ]);
-    expect(navigation.items.at(-1)).toMatchObject({
-      labelKey: 'shell.room.brandHub',
-      icon: 'brand',
+    expect(navigation.items.at(-1)).toEqual({
+      href: '/c/client-1/reports',
+      labelKey: 'shell.room.reports',
+      icon: 'chart',
     });
   });
 

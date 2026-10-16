@@ -5,6 +5,7 @@ import { outboxDispatch } from '@/modules/events';
 import { LIBRARY_FUNCTIONS } from '@/modules/library/server';
 import { AGENDA_FUNCTIONS } from '@/modules/agenda/server';
 import { BRAND_HUB_FUNCTIONS } from '@/modules/brand-hub/server';
+import { CLIENT_REPORT_FUNCTIONS } from '@/modules/client-reports/server';
 import { HEALTH_FUNCTIONS, MILESTONE_FUNCTIONS } from '@/modules/health/server';
 import { OUTCOME_FUNCTIONS } from '@/modules/outcomes/server';
 import { RETAINER_FUNCTIONS } from '@/modules/retainers/server';
@@ -31,4 +32,5 @@ export const INNGEST_FUNCTIONS = [
   ...MILESTONE_FUNCTIONS,
   ...HEALTH_FUNCTIONS,
   ...AGENDA_FUNCTIONS,
+  ...CLIENT_REPORT_FUNCTIONS,
 ];

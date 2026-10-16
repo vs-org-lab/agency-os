@@ -103,7 +103,8 @@
       "brandHub": "Brand Hub",
       "agenda": "Agenda",
       "retainer": "Retainer",
-      "outcome": "Outcome"
+      "outcome": "Outcome",
+      "reports": "Reports"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -3121,6 +3122,7 @@
     "title": "Reports",
     "year": "Year {year}",
     "previousYear": "Previous year",
+    "downloadPdf": "Download PDF",
     "nextYear": "Next year",
     "download": "Download CSV",
     "emptyYear": "No data this year.",
@@ -3177,6 +3179,67 @@
       "9": "Oct",
       "10": "Nov",
       "11": "Dec"
+    }
+  },
+  "clientReports": {
+    "title": "Reports",
+    "intro": "The client's monthly report and QBR, shared as a PDF room document.",
+    "empty": "There are no reports for this client yet.",
+    "newReport": "New report",
+    "kind": "Type",
+    "kinds": {
+      "monthly": "Monthly report",
+      "qbr": "QBR"
+    },
+    "period": "Period",
+    "quarter": "Q{quarter} {year}",
+    "create": "Create report",
+    "item": "{kind} · {period}",
+    "status": {
+      "draft": "Draft",
+      "shared": "Shared on {date}"
+    },
+    "back": "All reports",
+    "generated": "The period's data",
+    "generatedHint": "Calculated now; frozen when you share.",
+    "sections": {
+      "steps": "Completed steps",
+      "updates": "Updates",
+      "approvals": "Approved documents",
+      "retainer": "Retainer",
+      "outcome": "Outcome"
+    },
+    "none": "Nothing in this period.",
+    "limits": {
+      "content_pieces": "Content pieces",
+      "campaigns": "Campaigns",
+      "maintenance_hours": "Maintenance hours",
+      "automations": "Automations"
+    },
+    "limitUsage": "{kind}: {used} of {available}",
+    "outcomeSummary": "Baseline {baseline} · Target {target} · Deadline {deadline}",
+    "texts": {
+      "title": "Report texts",
+      "summary": "Summary",
+      "highlights": "Highlights",
+      "nextSteps": "Next steps",
+      "priorities": "Next quarter's priorities"
+    },
+    "save": "Save",
+    "saved": "Saved.",
+    "preview": "Preview PDF",
+    "share": "Share with the client",
+    "shareConfirm": "The client gets the PDF in the room documents and an email. The period's data is frozen.",
+    "confirmShare": "Share",
+    "cancel": "Cancel",
+    "sharedNow": "Shared with the client.",
+    "viewDocument": "View document",
+    "readOnly": "Only people who edit the room documents can change this report.",
+    "errors": {
+      "invalid_input": "Each text has at most 2000 characters.",
+      "invalid_period": "Choose a month or quarter that has ended.",
+      "exists": "There is already a report for this period.",
+      "not_found": "This could not be completed. Refresh the page and try again."
     }
   }
 }

@@ -28,6 +28,7 @@ export const removeUsage = (claims: VerifiedClaims, usageId: string) =>
   deleteUsage(claims, usageId, deps());
 
 export { RETAINER_FUNCTIONS } from './automations';
+export { limitMonths } from './month';
 
 /** Whether the client has a retainer the caller may read, for the room menu (02). */
 export async function hasRetainer(claims: VerifiedClaims, clientId: string): Promise<boolean> {

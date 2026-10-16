@@ -442,6 +442,13 @@
       "when": 1792116617102,
       "tag": "20261016021017_client_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1792186299391,
+      "tag": "20261016213139_academy",
+      "breakpoints": true
     }
   ]
 }

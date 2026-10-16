@@ -104,7 +104,8 @@
       "agenda": "Agenda",
       "retainer": "Retainer",
       "outcome": "Resultado",
-      "reports": "Relatórios"
+      "reports": "Relatórios",
+      "academy": "Academia"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -116,7 +117,8 @@
       "library": "Biblioteca",
       "documents": "Documentos",
       "brandHub": "Brand Hub",
-      "progress": "Progresso"
+      "progress": "Progresso",
+      "academy": "Academia"
     }
   },
   "states": {
@@ -3241,5 +3243,81 @@
       "exists": "Já existe um relatório deste período.",
       "not_found": "Não foi possível concluir. Atualize a página e tente de novo."
     }
+  },
+  "academy": {
+    "title": "Academia",
+    "intro": "Tutoriais, manuais e listas de verificação para a equipa do cliente, e as sessões de formação.",
+    "empty": "Ainda não há materiais na Academia.",
+    "portalEmpty": "A equipa ainda não publicou materiais.",
+    "kinds": {
+      "tutorial": "Tutorial",
+      "manual": "Manual",
+      "checklist": "Lista de verificação"
+    },
+    "sections": {
+      "tutorial": "Tutoriais",
+      "manual": "Manuais",
+      "checklist": "Listas de verificação"
+    },
+    "status": {
+      "draft": "Rascunho",
+      "published": "Publicado"
+    },
+    "progress": "{done} de {total} passos",
+    "checkedBy": "{name} · {date}",
+    "open": "Abrir",
+    "download": "Descarregar",
+    "externalVideo": "Ver o vídeo (abre noutro separador)",
+    "externalLink": "Abrir a ligação (abre noutro separador)",
+    "noMaterial": "O ficheiro deste item foi removido da Biblioteca.",
+    "actions": {
+      "newItem": "Novo item",
+      "publish": "Publicar",
+      "withdraw": "Retirar",
+      "edit": "Editar",
+      "delete": "Apagar",
+      "confirmDelete": "Apagar de vez",
+      "cancel": "Cancelar",
+      "up": "Subir",
+      "down": "Descer"
+    },
+    "form": {
+      "kind": "Tipo",
+      "title": "Título",
+      "description": "Descrição",
+      "source": "Material",
+      "file": "Ficheiro da Biblioteca",
+      "link": "Ligação",
+      "fileChoice": "Ficheiro",
+      "url": "Endereço",
+      "noFiles": "Não há ficheiros prontos em pastas visíveis ao cliente.",
+      "steps": "Passos, um por linha",
+      "save": "Guardar item",
+      "fileOption": "{folder} / {name}"
+    },
+    "sessions": {
+      "title": "Sessões de formação",
+      "empty": "Ainda não há sessões registadas.",
+      "record": "Registar sessão",
+      "heldOn": "Data",
+      "name": "Título",
+      "duration": "Duração (minutos)",
+      "summary": "Resumo",
+      "participants": "Participantes",
+      "client": "Do cliente",
+      "team": "Da equipa",
+      "guests": "Convidados, um por linha",
+      "materials": "Materiais",
+      "save": "Guardar sessão",
+      "minutes": "{minutes} min",
+      "with": "Com {names}",
+      "used": "Materiais: {titles}",
+      "delete": "Apagar sessão"
+    },
+    "errors": {
+      "invalid_input": "Verifique os campos: os títulos têm até 120 caracteres e as ligações começam por https://.",
+      "not_found": "Não foi possível concluir. Atualize a página e tente de novo."
+    },
+    "itemAction": "{action} · {title}"
   }
 }

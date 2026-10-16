@@ -40,6 +40,7 @@ export type NavigationLabelKey =
   | 'shell.room.retainer'
   | 'shell.room.outcome'
   | 'shell.room.reports'
+  | 'shell.room.academy'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -49,6 +50,7 @@ export type NavigationLabelKey =
   | 'shell.portalNav.documents'
   | 'shell.portalNav.brandHub'
   | 'shell.portalNav.progress'
+  | 'shell.portalNav.academy'
   | 'shell.portalNav.team';
 
 export type NavigationCounter = 'unseenApplications';
@@ -158,6 +160,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             labelKey: 'shell.room.reports',
             icon: 'chart',
           },
+          {
+            href: `/c/${input.clientId}/academy`,
+            labelKey: 'shell.room.academy',
+            icon: 'check',
+          },
           ...(input.retainer
             ? [
                 {
@@ -193,6 +200,7 @@ export function buildNavigation(input: NavigationLevel): Navigation {
                 { href: '/portal/library', labelKey: 'shell.portalNav.library', icon: 'folder' },
                 { href: '/portal/hub', labelKey: 'shell.portalNav.brandHub', icon: 'brand' },
                 { href: '/portal/progress', labelKey: 'shell.portalNav.progress', icon: 'gauge' },
+                { href: '/portal/academy', labelKey: 'shell.portalNav.academy', icon: 'check' },
               ] as const)
             : []),
           ...(input.permissions.invoices

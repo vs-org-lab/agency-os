@@ -154,7 +154,10 @@ describe('C-14 client reports', () => {
     );
 
     await screen.findByText('Guardado.');
-    fireEvent.click(screen.getByRole('button', { name: 'Partilhar com o cliente' }));
+    // The save's transition ends after its message, so the share button is enabled a beat later.
+    const shareButton = screen.getByRole('button', { name: 'Partilhar com o cliente' });
+    await waitFor(() => expect((shareButton as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(shareButton);
     expect(share).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Partilhar' }));
     await waitFor(() => expect(share).toHaveBeenCalledWith({ reportId: 'r2' }));

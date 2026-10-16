@@ -109,8 +109,17 @@ describe('home components', () => {
             name: 'Atlas Lda',
             progress: { done: 1, total: 4 },
             lastActivityAt: new Date('2026-10-10T10:00:00Z'),
+            retainer: false,
+            healthLevel: null,
           },
-          { id: 'client-2', name: 'Boreal SA', progress: null, lastActivityAt: null },
+          {
+            id: 'client-2',
+            name: 'Boreal SA',
+            progress: null,
+            lastActivityAt: null,
+            retainer: false,
+            healthLevel: null,
+          },
         ]}
       />,
     );
@@ -124,6 +133,37 @@ describe('home components', () => {
       '/c/client-1',
       '/c/client-2',
     ]);
+  });
+
+  it('the client list shows the retainer and health badges', () => {
+    renderWithIntl(
+      <ClientProgress
+        clients={[
+          {
+            id: 'client-1',
+            name: 'Atlas Lda',
+            progress: { done: 1, total: 4 },
+            lastActivityAt: null,
+            retainer: true,
+            healthLevel: 'at_risk',
+          },
+          {
+            id: 'client-2',
+            name: 'Boreal SA',
+            progress: null,
+            lastActivityAt: null,
+            retainer: false,
+            healthLevel: null,
+          },
+        ]}
+      />,
+    );
+
+    const [atlas, boreal] = screen.getAllByRole('listitem') as HTMLElement[];
+    expect(within(atlas as HTMLElement).getByText('Retainer')).toBeTruthy();
+    expect(within(atlas as HTMLElement).getByText('Em risco')).toBeTruthy();
+    expect(within(boreal as HTMLElement).queryByText('Retainer')).toBeNull();
+    expect(within(boreal as HTMLElement).queryByText('Em risco')).toBeNull();
   });
 
   it('the upcoming block lists meetings, calls and deadlines and links to the calendar', () => {

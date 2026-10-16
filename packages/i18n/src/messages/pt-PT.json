@@ -199,7 +199,8 @@
         "progress": "{done} de {total} fases",
         "noProject": "Sem fases",
         "lastActivity": "Última atividade {date}",
-        "noActivity": "Sem atividade"
+        "noActivity": "Sem atividade",
+        "retainer": "Retainer"
       }
     },
     "today": {

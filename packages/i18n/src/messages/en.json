@@ -199,7 +199,8 @@
         "progress": "{done} of {total} phases",
         "noProject": "No phases",
         "lastActivity": "Last activity {date}",
-        "noActivity": "No activity"
+        "noActivity": "No activity",
+        "retainer": "Retainer"
       }
     },
     "today": {

@@ -1,10 +1,21 @@
 import { useFormatter, useTranslations } from 'next-intl';
+import { Badge } from '@agency-os/ui/components/badge';
 import { Link } from '@/i18n/navigation';
 import type { HomeClient } from '@/modules/studio';
 
-/** Clients with an active project, the share of its phases done and the latest room activity. */
+const LEVEL_VARIANT = {
+  healthy: 'secondary',
+  attention: 'outline',
+  at_risk: 'destructive',
+} as const;
+
+/**
+ * Clients with an active project, the share of its phases done, the latest room activity, the
+ * retainer label and, for those who see it, the latest health level.
+ */
 export function ClientProgress({ clients }: { clients: HomeClient[] }) {
   const t = useTranslations('studio.home.clients');
+  const tHealth = useTranslations('health');
   const format = useFormatter();
 
   if (clients.length === 0) {
@@ -24,7 +35,15 @@ export function ClientProgress({ clients }: { clients: HomeClient[] }) {
               className="flex flex-col gap-2 px-4 py-3 hover:bg-surface-muted"
             >
               <span className="flex items-baseline justify-between gap-4">
-                <span className="truncate text-body font-medium text-text">{client.name}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-body font-medium text-text">{client.name}</span>
+                  {client.retainer ? <Badge variant="outline">{t('retainer')}</Badge> : null}
+                  {client.healthLevel ? (
+                    <Badge variant={LEVEL_VARIANT[client.healthLevel]}>
+                      {tHealth(`levels.${client.healthLevel}`)}
+                    </Badge>
+                  ) : null}
+                </span>
                 <span className="shrink-0 text-caption text-text-secondary">
                   {client.lastActivityAt
                     ? t('lastActivity', {

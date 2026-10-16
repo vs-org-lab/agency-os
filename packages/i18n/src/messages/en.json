@@ -91,7 +91,8 @@
       "updates": "Updates",
       "tasks": "Tasks",
       "calendar": "Calendar",
-      "money": "Money"
+      "money": "Money",
+      "reports": "Reports"
     },
     "room": {
       "dashboard": "Dashboard",
@@ -3113,6 +3114,68 @@
       "up": "+{change} over the last 30 days",
       "down": "−{change} over the last 30 days",
       "flat": "No change over the last 30 days"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "year": "Year {year}",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "download": "Download CSV",
+    "emptyYear": "No data this year.",
+    "empty": "No data.",
+    "noPercent": "—",
+    "percent": "{value}%",
+    "total": "Total",
+    "stages": {
+      "pre_sale": "Pre-sale",
+      "core": "Core",
+      "orbit": "Orbit",
+      "gravity": "Gravity",
+      "constellation": "Constellation",
+      "off_cycle": "Off cycle"
+    },
+    "panels": {
+      "revenue": "Revenue by month",
+      "recurring": "Recurring revenue",
+      "pipeline": "Deals by code",
+      "conversion": "Conversion between stages",
+      "load": "Team load",
+      "at-risk": "Clients at risk"
+    },
+    "columns": {
+      "currency": "Currency",
+      "monthly": "Per month",
+      "retainers": "Retainers",
+      "stage": "Stage",
+      "code": "Code",
+      "deals": "Deals",
+      "passage": "Passage",
+      "entered": "Entered",
+      "passed": "Passed",
+      "conversion": "Conversion",
+      "member": "Member",
+      "tasks": "Tasks this week",
+      "projects": "Active projects",
+      "hours": "Weekly hours",
+      "client": "Client",
+      "score": "Health",
+      "before": "30 days ago"
+    },
+    "passage": "{from} → {to}",
+    "months": {
+      "0": "Jan",
+      "1": "Feb",
+      "2": "Mar",
+      "3": "Apr",
+      "4": "May",
+      "5": "Jun",
+      "6": "Jul",
+      "7": "Aug",
+      "8": "Sep",
+      "9": "Oct",
+      "10": "Nov",
+      "11": "Dec"
     }
   }
 }

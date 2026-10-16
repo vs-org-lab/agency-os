@@ -57,6 +57,23 @@ describe('buildNavigation', () => {
     ]);
   });
 
+  it('studio navigation links reports for founders', () => {
+    const founder = buildNavigation({
+      level: 'studio',
+      permissions: { pipeline: true, money: true, reports: true },
+    });
+    expect(founder.items.at(-1)).toEqual({
+      href: '/reports',
+      labelKey: 'shell.studioNav.reports',
+      icon: 'chart',
+    });
+    expect(
+      buildNavigation({ level: 'studio', permissions: { pipeline: true, money: true } }).items.some(
+        (item) => item.href === '/reports',
+      ),
+    ).toBe(false);
+  });
+
   it('studio navigation lists updates and tasks', () => {
     const navigation = buildNavigation({
       level: 'studio',

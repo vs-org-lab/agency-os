@@ -3,6 +3,7 @@
 import {
   Gauge,
   Wallet,
+  BarChart3,
   ArrowLeft,
   CalendarDays,
   CircleCheck,
@@ -96,6 +97,7 @@ const ICONS = {
   brand: Palette,
   calendar: CalendarDays,
   wallet: Wallet,
+  chart: BarChart3,
   gauge: Gauge,
 } as const;
 

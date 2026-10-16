@@ -1,11 +1,12 @@
 'use client';
 
-import { useId, useTransition } from 'react';
+import { useId } from 'react';
 import { useTranslations } from 'next-intl';
 import type { AcademyItemKind } from '@agency-os/db';
 import { useRouter } from '@/i18n/navigation';
 import type { AcademyItemView, PortalAcademyView } from '@/modules/academy';
 import { SessionList } from './room-academy';
+import { StepCheck } from './step-check';
 import type { AcademyResult } from './shared';
 
 const KINDS: AcademyItemKind[] = ['tutorial', 'manual', 'checklist'];
@@ -55,12 +56,10 @@ function PortalItem({
   item,
   canCheck,
   check,
-  pending,
 }: {
   item: AcademyItemView;
   canCheck: boolean;
-  check: (stepId: string, done: boolean) => void;
-  pending: boolean;
+  check: (stepId: string, done: boolean) => Promise<void>;
 }) {
   const t = useTranslations('academy');
   const titleId = useId();
@@ -81,14 +80,13 @@ function PortalItem({
           <ul className="flex flex-col gap-1">
             {item.steps.map((step) => (
               <li key={step.id} className="flex items-center gap-2 text-body-sm text-text">
-                <input
-                  type="checkbox"
+                <StepCheck
                   id={`${titleId}-${step.id}`}
-                  checked={step.done}
-                  disabled={!canCheck || pending}
-                  onChange={() => check(step.id, !step.done)}
+                  text={step.text}
+                  done={step.done}
+                  disabled={!canCheck}
+                  change={(done) => check(step.id, done)}
                 />
-                <label htmlFor={`${titleId}-${step.id}`}>{step.text}</label>
               </li>
             ))}
           </ul>
@@ -110,13 +108,11 @@ export function PortalAcademy({
 }) {
   const t = useTranslations('academy');
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
   const sessionsId = useId();
-  const onCheck = (stepId: string, done: boolean) =>
-    startTransition(async () => {
-      const result = await check({ stepId, done }).catch(() => ({ ok: false as const }));
-      if (result.ok) router.refresh();
-    });
+  const onCheck = async (stepId: string, done: boolean) => {
+    const result = await check({ stepId, done }).catch(() => ({ ok: false as const }));
+    if (result.ok) router.refresh();
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-10">
@@ -133,13 +129,7 @@ export function PortalAcademy({
           <section key={kind} className="flex flex-col gap-3">
             <h2 className="text-body font-medium text-text">{t(`sections.${kind}`)}</h2>
             {items.map((item) => (
-              <PortalItem
-                key={item.id}
-                item={item}
-                canCheck={view.canCheck}
-                check={onCheck}
-                pending={pending}
-              />
+              <PortalItem key={item.id} item={item} canCheck={view.canCheck} check={onCheck} />
             ))}
           </section>
         );

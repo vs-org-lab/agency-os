@@ -225,7 +225,9 @@ const PORTAL: PortalAcademyView = {
 
 describe('P-09 academy', () => {
   it('portal academy lists published items and checks steps', async () => {
-    const check = ok();
+    const check = vi.fn(
+      () => new Promise<{ ok: true }>((resolve) => setTimeout(() => resolve({ ok: true }), 50)),
+    );
     wrap(<PortalAcademy view={PORTAL} check={check} />);
 
     const external = screen.getByRole('link', { name: /Como publicar/ });
@@ -236,9 +238,12 @@ describe('P-09 academy', () => {
     expect(video.getAttribute('src')).toBe('/api/library/files/f9');
     expect(screen.getByText('Formação do CMS')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Publicar' }));
+    const step = screen.getByRole('checkbox', { name: 'Publicar' }) as HTMLInputElement;
+    fireEvent.click(step);
+    // The step shows as done at once, before the server answers.
+    expect(step.checked).toBe(true);
     await waitFor(() => expect(check).toHaveBeenCalledWith({ stepId: 's2', done: true }));
-    expect(refresh).toHaveBeenCalled();
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
   });
 
   it('an empty academy says so', () => {

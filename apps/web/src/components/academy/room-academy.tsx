@@ -10,6 +10,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { RoomAcademyItem, RoomAcademyView, TrainingSessionView } from '@/modules/academy';
 import { ItemForm, type SaveItem } from './item-form';
 import { SessionForm, type SaveSession } from './session-form';
+import { StepCheck } from './step-check';
 import { academyError, useShortDate, type AcademyResult } from './shared';
 
 export type RoomAcademyActions = {
@@ -149,16 +150,18 @@ function ItemCard({
                 key={step.id}
                 className="flex flex-wrap items-center gap-2 text-body-sm text-text"
               >
-                <input
-                  type="checkbox"
+                <StepCheck
                   id={`${titleId}-${step.id}`}
-                  checked={step.done}
-                  disabled={!view.canWrite || pending}
-                  onChange={() =>
-                    run(() => actions.checkStep({ stepId: step.id, done: !step.done }))
-                  }
+                  text={step.text}
+                  done={step.done}
+                  disabled={!view.canWrite}
+                  change={async (done) => {
+                    const result = await actions
+                      .checkStep({ stepId: step.id, done })
+                      .catch(() => ({ ok: false as const }));
+                    if (result.ok) router.refresh();
+                  }}
                 />
-                <label htmlFor={`${titleId}-${step.id}`}>{step.text}</label>
                 {step.done && step.checkedBy && step.checkedAt ? (
                   <span className="text-text-secondary">
                     {t('checkedBy', { name: step.checkedBy, date: shortDate(step.checkedAt) })}

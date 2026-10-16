@@ -435,6 +435,13 @@
       "when": 1792112069289,
       "tag": "20261016005429_client_health_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1792116617102,
+      "tag": "20261016021017_client_reports",
+      "breakpoints": true
     }
   ]
 }

@@ -3121,6 +3121,7 @@
     "title": "Reports",
     "year": "Year {year}",
     "previousYear": "Previous year",
+    "downloadPdf": "Download PDF",
     "nextYear": "Next year",
     "download": "Download CSV",
     "emptyYear": "No data this year.",

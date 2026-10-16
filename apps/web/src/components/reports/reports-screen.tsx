@@ -72,6 +72,9 @@ export function ReportsScreen({ view }: { view: ReportsView }) {
             {t('nextYear')}
           </Link>
         </nav>
+        <a href={`/api/reports/pdf?year=${view.year}`} className="text-body-sm text-link">
+          {t('downloadPdf')}
+        </a>
       </header>
 
       <Panel panel="revenue" year={view.year} empty={view.revenue.length ? null : t('emptyYear')}>

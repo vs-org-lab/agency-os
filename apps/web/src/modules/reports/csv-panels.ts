@@ -25,7 +25,10 @@ const STAGE_LABEL = {
   off_cycle: 'Fora do ciclo',
 } as const;
 
-function table(view: ReportsView, panel: ReportPanel): [string[], (string | number | null)[][]] {
+export function panelTable(
+  view: ReportsView,
+  panel: ReportPanel,
+): [string[], (string | number | null)[][]] {
   switch (panel) {
     case 'revenue':
       return [
@@ -77,6 +80,6 @@ export async function reportCsv(
 ): Promise<{ filename: string; body: string } | null> {
   const view = await loadReports(claims, year, deps);
   if (!view) return null;
-  const [headers, rows] = table(view, panel);
+  const [headers, rows] = panelTable(view, panel);
   return { filename: `${panel}-${year}.csv`, body: toCsv(headers, rows) };
 }

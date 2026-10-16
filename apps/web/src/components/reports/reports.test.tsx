@@ -81,4 +81,10 @@ describe('S-11 reports', () => {
     expect(within(conversion).getByText('—')).toBeTruthy();
     expect(within(conversion).getByText('50%')).toBeTruthy();
   });
+
+  it('reports screen links the pdf', () => {
+    show(FULL);
+    const link = screen.getByRole('link', { name: 'Descarregar PDF' });
+    expect(link.getAttribute('href')).toBe('/api/reports/pdf?year=2026');
+  });
 });

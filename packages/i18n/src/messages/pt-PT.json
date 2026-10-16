@@ -3121,6 +3121,7 @@
     "title": "Relatórios",
     "year": "Ano de {year}",
     "previousYear": "Ano anterior",
+    "downloadPdf": "Descarregar PDF",
     "nextYear": "Ano seguinte",
     "download": "Descarregar CSV",
     "emptyYear": "Sem dados neste ano.",

@@ -39,6 +39,7 @@ export type NavigationLabelKey =
   | 'shell.room.agenda'
   | 'shell.room.retainer'
   | 'shell.room.outcome'
+  | 'shell.room.reports'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
   | 'shell.portalNav.approvals'
@@ -151,6 +152,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             href: `/c/${input.clientId}/hub`,
             labelKey: 'shell.room.brandHub',
             icon: 'brand',
+          },
+          {
+            href: `/c/${input.clientId}/reports`,
+            labelKey: 'shell.room.reports',
+            icon: 'chart',
           },
           ...(input.retainer
             ? [

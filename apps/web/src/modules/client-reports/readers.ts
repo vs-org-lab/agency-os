@@ -29,8 +29,8 @@ export type ClientReportRow = {
 export type ClientReportsView = {
   canWrite: boolean;
   reports: ClientReportRow[];
-  /** The periods "Novo relatório" offers first: last month and last quarter. */
-  defaults: { monthly: string; qbr: string };
+  /** The finished periods "Novo relatório" offers, newest first. */
+  periods: { monthly: string[]; qbr: string[] };
 };
 
 export type ClientReportView = {
@@ -45,6 +45,16 @@ export type ClientReportView = {
   data: ReportData;
   canWrite: boolean;
 };
+
+function recentPeriods(kind: ReportKind, today: string, count: number): string[] {
+  const starts: string[] = [];
+  for (let day = today; starts.length < count;) {
+    const period = previousPeriod(kind, day);
+    starts.push(period.start);
+    day = period.start;
+  }
+  return starts;
+}
 
 /** C-14: the client's reports for whoever reads the room. */
 export async function loadClientReports(
@@ -78,10 +88,7 @@ export async function loadClientReports(
       ...row,
       title: documentTitle({ kind: row.kind, start: row.periodStart, end: row.periodEnd }),
     })),
-    defaults: {
-      monthly: previousPeriod('monthly', today).start,
-      qbr: previousPeriod('qbr', today).start,
-    },
+    periods: { monthly: recentPeriods('monthly', today, 12), qbr: recentPeriods('qbr', today, 8) },
   };
 }
 

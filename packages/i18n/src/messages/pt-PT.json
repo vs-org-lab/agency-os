@@ -103,7 +103,8 @@
       "brandHub": "Brand Hub",
       "agenda": "Agenda",
       "retainer": "Retainer",
-      "outcome": "Resultado"
+      "outcome": "Resultado",
+      "reports": "Relatórios"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -3178,6 +3179,67 @@
       "9": "Out",
       "10": "Nov",
       "11": "Dez"
+    }
+  },
+  "clientReports": {
+    "title": "Relatórios",
+    "intro": "O relatório mensal e o QBR do cliente, partilhados como documento PDF da sala.",
+    "empty": "Ainda não há relatórios deste cliente.",
+    "newReport": "Novo relatório",
+    "kind": "Tipo",
+    "kinds": {
+      "monthly": "Relatório mensal",
+      "qbr": "QBR"
+    },
+    "period": "Período",
+    "quarter": "T{quarter} {year}",
+    "create": "Criar relatório",
+    "item": "{kind} · {period}",
+    "status": {
+      "draft": "Rascunho",
+      "shared": "Partilhado em {date}"
+    },
+    "back": "Todos os relatórios",
+    "generated": "Dados do período",
+    "generatedHint": "Calculados agora; ficam congelados quando partilha.",
+    "sections": {
+      "steps": "Passos concluídos",
+      "updates": "Atualizações",
+      "approvals": "Documentos aprovados",
+      "retainer": "Retainer",
+      "outcome": "Resultado"
+    },
+    "none": "Nada neste período.",
+    "limits": {
+      "content_pieces": "Peças de conteúdo",
+      "campaigns": "Campanhas",
+      "maintenance_hours": "Horas de manutenção",
+      "automations": "Automações"
+    },
+    "limitUsage": "{kind}: {used} de {available}",
+    "outcomeSummary": "Linha de base {baseline} · Meta {target} · Prazo {deadline}",
+    "texts": {
+      "title": "Textos do relatório",
+      "summary": "Resumo",
+      "highlights": "Destaques",
+      "nextSteps": "Próximos passos",
+      "priorities": "Prioridades do próximo trimestre"
+    },
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "preview": "Pré-visualizar PDF",
+    "share": "Partilhar com o cliente",
+    "shareConfirm": "O cliente recebe o PDF nos documentos da sala e é avisado por email. Os dados do período ficam congelados.",
+    "confirmShare": "Partilhar",
+    "cancel": "Cancelar",
+    "sharedNow": "Partilhado com o cliente.",
+    "viewDocument": "Ver documento",
+    "readOnly": "Só quem edita os documentos da sala altera este relatório.",
+    "errors": {
+      "invalid_input": "Cada texto tem no máximo 2000 caracteres.",
+      "invalid_period": "Escolha um mês ou trimestre que já terminou.",
+      "exists": "Já existe um relatório deste período.",
+      "not_found": "Não foi possível concluir. Atualize a página e tente de novo."
     }
   }
 }

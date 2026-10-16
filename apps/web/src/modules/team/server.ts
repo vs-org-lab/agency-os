@@ -91,3 +91,4 @@ export function changeClientColleagueRole(
 export function revokeClientColleague(claims: VerifiedClaims, membershipId: string) {
   return revokeColleague(claims, { membershipId }, deps());
 }
+export { listTeam, type TeamDeps } from './service';

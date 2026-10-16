@@ -25,3 +25,4 @@ export const clientReportPreview = (claims: VerifiedClaims, reportId: string) =>
   previewClientReport(claims, reportId, roomDocumentsDeps());
 export const publishClientReport = (claims: VerifiedClaims, reportId: string) =>
   shareClientReport(claims, reportId, roomDocumentsDeps());
+export { CLIENT_REPORT_FUNCTIONS } from './automations';

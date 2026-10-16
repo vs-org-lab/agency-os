@@ -28,6 +28,7 @@ describe('inngest functions', () => {
         expect.stringContaining('brand-hub-asset-sweep'),
         expect.stringContaining('agenda-meeting-sync'),
         expect.stringContaining('agenda-sync-sweep'),
+        expect.stringContaining('client-reports-drafts'),
       ]),
     );
     expect(new Set(ids).size).toBe(ids.length);

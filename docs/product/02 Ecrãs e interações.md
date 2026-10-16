@@ -78,6 +78,7 @@ São 27 ecrãs da equipa, cada um construído a partir de um de nove arquétipos
 | C-11 | Resultado | /c/:cliente/outcome | Painel | Linha de base, meta, prazo, gráfico de evolução, condições do cliente, estado da garantia | B3 |
 | C-12 | Academia | /c/:cliente/academy | Lista | Tutoriais, manuais e sessões de formação | B3 |
 | C-13 | Definições do cliente | /c/:cliente/settings | Formulário | Contactos e papéis, acessos ao portal, domínio do portal e do Brand Hub, cofre de credenciais | B1 |
+| C-14 | Relatórios | /c/:cliente/reports | Lista e editor | Relatório mensal e QBR por período, dados do período, textos da equipa, pré-visualização do PDF e partilha como documento da sala | B3 |
 
 ## Portal do cliente e Brand Hub
 

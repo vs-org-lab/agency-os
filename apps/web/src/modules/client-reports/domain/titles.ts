@@ -15,13 +15,13 @@ const MONTH_NAMES = [
   'dezembro',
 ] as const;
 
-/** "outubro 2026" for a month, "T3 2026" for a quarter. */
+/** "outubro de 2026" for a month, "T3 2026" for a quarter. */
 export function periodLabel(period: ReportPeriod): string {
   if (period.kind === 'qbr') {
     const { quarter, year } = quarterOf(period.start);
     return `T${quarter} ${year}`;
   }
-  return `${MONTH_NAMES[Number(period.start.slice(5, 7)) - 1]} ${period.start.slice(0, 4)}`;
+  return `${MONTH_NAMES[Number(period.start.slice(5, 7)) - 1]} de ${period.start.slice(0, 4)}`;
 }
 
 /** The title of the room document the report is shared as. */

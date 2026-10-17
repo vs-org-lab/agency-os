@@ -69,7 +69,7 @@ describe('buildPaymentRequestPdf', () => {
 
   it('names a milestone a milestone and anything else a description', async () => {
     const milestone = await buildPaymentRequestPdf(INPUT);
-    expect(pdfContainsText(milestone, 'Prestação: Assinatura')).toBe(true);
+    expect(pdfContainsText(milestone, 'Marco: Assinatura')).toBe(true);
 
     const retainer = await buildPaymentRequestPdf({
       ...INPUT,
@@ -77,7 +77,7 @@ describe('buildPaymentRequestPdf', () => {
       label: 'Retainer Essencial · outubro de 2026',
     });
     expect(pdfContainsText(retainer, 'Descrição: Retainer Essencial')).toBe(true);
-    expect(pdfContainsText(retainer, 'Prestação')).toBe(false);
+    expect(pdfContainsText(retainer, 'Marco:')).toBe(false);
   });
 
   it('writes english labels for english requests', async () => {

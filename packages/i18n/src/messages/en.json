@@ -2655,7 +2655,7 @@
     },
     "access": {
       "signInTitle": "Sign in to see the Brand Hub",
-      "signInDescription": "This Brand Hub opens only to the company team. Sign in to the OS and go back to the Brand Hub.",
+      "signInDescription": "This Brand Hub opens only to the company team. Sign in with the company account and come back to the Brand Hub.",
       "signIn": "Sign in",
       "magicLink": "Get a link by email",
       "deniedTitle": "No access to this Brand Hub",

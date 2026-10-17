@@ -64,9 +64,9 @@ describe('client reports domain', () => {
   it('titles in pt-PT', () => {
     const october = periodOf('monthly', '2026-10-05');
     const third = periodOf('qbr', '2026-08-05');
-    expect(documentTitle(october)).toBe('Relatório mensal — outubro 2026');
+    expect(documentTitle(october)).toBe('Relatório mensal — outubro de 2026');
     expect(documentTitle(third)).toBe('QBR — T3 2026');
-    expect(pdfTitle(october, 'Bloom')).toBe('Relatório mensal · Bloom · outubro 2026');
+    expect(pdfTitle(october, 'Bloom')).toBe('Relatório mensal · Bloom · outubro de 2026');
     expect(pdfTitle(third, 'Bloom')).toBe('QBR · Bloom · T3 2026');
     expect(pdfFileName(october)).toBe('relatorio-2026-10.pdf');
     expect(pdfFileName(third)).toBe('qbr-2026-t3.pdf');

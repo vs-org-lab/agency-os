@@ -140,7 +140,7 @@ describe('client reports service', () => {
         `;
         expect(document).toEqual({
           status: 'with_client',
-          title: 'Relatório mensal — setembro 2026',
+          title: 'Relatório mensal — setembro de 2026',
         });
         expect(storage.files.size).toBe(1);
       });
@@ -256,7 +256,7 @@ describe('client reports service', () => {
             {
               id: reportId,
               kind: 'monthly',
-              title: 'Relatório mensal — setembro 2026',
+              title: 'Relatório mensal — setembro de 2026',
               status: 'draft',
             },
           ],

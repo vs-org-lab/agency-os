@@ -456,6 +456,20 @@
       "when": 1792244141634,
       "tag": "20261017133541_proposal_status_privilege",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1792246636552,
+      "tag": "20261017141716_proposal_status_function",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1792247358451,
+      "tag": "20261017142918_proposal_insert_draft",
+      "breakpoints": true
     }
   ]
 }

@@ -160,4 +160,23 @@ describe('contracts access', () => {
       }
     });
   });
+
+  it('pipeline writers cannot insert a proposal past draft', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createContractFixture(sql, world);
+      await asUser(sql, world.users.manager);
+
+      await expect(
+        sql.savepoint(
+          (tx) => tx`
+            insert into public.proposals (organization_id, client_id, deal_id, legal_entity_id,
+                                          currency, locale, valid_until, status, sent_at)
+            values (${world.organizationId}, ${world.clients.a}, ${fixture.a.dealId},
+                    ${fixture.entityId}, 'EUR', 'pt-PT', current_date + 30, 'sent', now())
+          `,
+        ),
+      ).rejects.toThrow(/row-level security/);
+    });
+  });
 });

@@ -44,7 +44,7 @@ const PROJECT_START_CODE = '2.1';
 
 export type ContractTemplates = Record<Locale, { version: number; body: string }>;
 
-const contexts = { withUserContext, withSystemContext };
+const contexts = { withUserContext };
 
 export function loadLegalEntities(session: ContractSession): Promise<LegalEntity[]> {
   return withUserContext(session.claims, (tx) => listLegalEntities(tx));

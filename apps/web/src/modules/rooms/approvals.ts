@@ -288,6 +288,9 @@ export type ApprovalDecision = 'approved' | 'changes_requested';
  */
 const ROOM_SUBJECTS: readonly ApprovalSubject[] = ['phase', 'project'];
 
+/** The team also takes back a proof's approval request here; a file has nothing else to undo. */
+const WITHDRAWABLE_SUBJECTS: readonly ApprovalSubject[] = [...ROOM_SUBJECTS, 'file_version'];
+
 /**
  * The client's decision maker approves a phase or asks for changes, with a comment (RN-41).
  * File version approvals are decided by the proofing module.
@@ -391,7 +394,7 @@ export async function withdrawApproval(
       .from(approvals)
       .where(eq(approvals.id, input.approvalId))
       .for('update');
-    if (!approval || !ROOM_SUBJECTS.includes(approval.subjectType)) return NOT_FOUND;
+    if (!approval || !WITHDRAWABLE_SUBJECTS.includes(approval.subjectType)) return NOT_FOUND;
     if (approval.status !== 'pending')
       return { ok: false as const, rule: 'invalid_state' as const };
     await tx.update(approvals).set({ status: 'withdrawn' }).where(eq(approvals.id, approval.id));

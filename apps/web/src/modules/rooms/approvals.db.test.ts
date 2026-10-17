@@ -243,6 +243,33 @@ describe('phase approvals', () => {
     });
   });
 
+  it('the team still withdraws a proof approval', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const project = await projectAwaitingApproval(sql, world, deps);
+      const [approval] = await sql<{ id: string }[]>`
+        insert into public.approvals (organization_id, client_id, project_id, subject_type,
+                                      subject_id, requested_by)
+        values (${world.organizationId}, ${world.clients.a}, ${project.projectId}, 'file_version',
+                gen_random_uuid(), ${world.users.founder})
+        returning id
+      `;
+
+      expect(
+        await withdrawApproval(
+          roomClaims(world.users.manager),
+          { approvalId: approval?.id ?? '' },
+          deps,
+        ),
+      ).toEqual({ ok: true });
+      const [row] = await sql<{ status: string }[]>`
+        select status::text from public.approvals where id = ${approval?.id ?? ''}
+      `;
+      expect(row?.status).toBe('withdrawn');
+    });
+  });
+
   it('generic decisions refuse approvals that have their own path', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

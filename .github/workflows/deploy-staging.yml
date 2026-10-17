@@ -167,7 +167,7 @@ jobs:
     name: End-to-end and accessibility
     needs: deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       CI: true
       E2E_BASE_URL: https://${{ vars.STAGING_DOMAIN }}

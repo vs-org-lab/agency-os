@@ -70,7 +70,7 @@ export type ProposalView = {
 export type ProposalFinding = { id: string; title: string; front: OrbitFront };
 
 export type ProposalDeps = {
-  contexts: Pick<DbContexts, 'withUserContext'>;
+  contexts: Pick<DbContexts, 'withUserContext' | 'withSystemContext'>;
   flush?: () => Promise<void>;
 };
 
@@ -338,7 +338,7 @@ export async function sendProposal(
 ): Promise<
   { ok: true } | NotFound | { ok: false; rule: 'invalid_state' | 'stage' | 'portal_access' }
 > {
-  const result = await withActor(
+  const checked = await withActor(
     deps.contexts,
     claims,
     async (tx, actor) => {
@@ -360,61 +360,72 @@ export async function sendProposal(
       if (proposal.validUntil < new Date().toISOString().slice(0, 10)) {
         return { ok: false as const, rule: 'invalid_state' as const };
       }
-
-      await tx
-        .update(proposals)
-        .set({ status: 'sent', sentAt: new Date() })
-        .where(and(eq(proposals.id, proposal.id), eq(proposals.status, 'draft')));
-      await recordAudit(tx, {
-        organizationId: deal.organizationId,
-        action: 'proposal.sent',
-        resourceType: 'proposal',
-        resourceId: proposal.id,
-        clientId: deal.clientId,
-        metadata: {},
-      });
-      await emit(tx, {
-        type: 'contracts.proposal.sent',
-        organizationId: deal.organizationId,
-        clientId: deal.clientId,
-        payload: { proposalId: proposal.id, dealId: deal.id },
-      });
-      return { ok: true as const };
+      return { ok: true as const, proposalId: proposal.id, deal };
     },
     NOT_FOUND,
   );
+  if (!checked.ok) return checked;
+  const { proposalId, deal } = checked;
+
+  // The founder's check is done; the status changes in the system context, where it is guarded.
+  const result = await deps.contexts.withSystemContext(async (tx) => {
+    const sent = await tx
+      .update(proposals)
+      .set({ status: 'sent', sentAt: new Date() })
+      .where(and(eq(proposals.id, proposalId), eq(proposals.status, 'draft')))
+      .returning({ id: proposals.id });
+    if (sent.length === 0) return { ok: false as const, rule: 'invalid_state' as const };
+    const proposal = { id: proposalId };
+    await recordAudit(tx, {
+      organizationId: deal.organizationId,
+      action: 'proposal.sent',
+      resourceType: 'proposal',
+      resourceId: proposal.id,
+      clientId: deal.clientId,
+      metadata: {},
+    });
+    await emit(tx, {
+      type: 'contracts.proposal.sent',
+      organizationId: deal.organizationId,
+      clientId: deal.clientId,
+      payload: { proposalId: proposal.id, dealId: deal.id },
+    });
+    return { ok: true as const };
+  });
   if (result.ok) await (deps.flush ?? requestFlush)();
   return result;
 }
 
-export function withdrawProposal(
+export async function withdrawProposal(
   claims: VerifiedClaims,
   input: { proposalId: string },
   deps: ProposalDeps,
 ): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_state' }> {
-  return withActor(
+  const scoped = await withActor(
     deps.contexts,
     claims,
     async (tx, actor) => {
-      if (!isFounderActor(actor)) return NOT_FOUND;
-      const scoped = await proposalFor(tx, actor, input.proposalId);
-      if (!scoped) return NOT_FOUND;
-      const updated = await tx
-        .update(proposals)
-        .set({ status: 'draft', sentAt: null })
-        .where(and(eq(proposals.id, scoped.proposal.id), inArray(proposals.status, ['sent'])))
-        .returning({ id: proposals.id });
-      if (updated.length === 0) return { ok: false as const, rule: 'invalid_state' as const };
-      await recordAudit(tx, {
-        organizationId: scoped.deal.organizationId,
-        action: 'proposal.withdrawn',
-        resourceType: 'proposal',
-        resourceId: scoped.proposal.id,
-        clientId: scoped.deal.clientId,
-        metadata: {},
-      });
-      return { ok: true as const };
+      if (!isFounderActor(actor)) return null;
+      return proposalFor(tx, actor, input.proposalId);
     },
-    NOT_FOUND,
+    null,
   );
+  if (!scoped) return NOT_FOUND;
+  return deps.contexts.withSystemContext(async (tx) => {
+    const updated = await tx
+      .update(proposals)
+      .set({ status: 'draft', sentAt: null })
+      .where(and(eq(proposals.id, scoped.proposal.id), inArray(proposals.status, ['sent'])))
+      .returning({ id: proposals.id });
+    if (updated.length === 0) return { ok: false as const, rule: 'invalid_state' as const };
+    await recordAudit(tx, {
+      organizationId: scoped.deal.organizationId,
+      action: 'proposal.withdrawn',
+      resourceType: 'proposal',
+      resourceId: scoped.proposal.id,
+      clientId: scoped.deal.clientId,
+      metadata: {},
+    });
+    return { ok: true as const };
+  });
 }

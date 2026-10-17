@@ -449,6 +449,13 @@
       "when": 1792186299391,
       "tag": "20261016213139_academy",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1792244141634,
+      "tag": "20261017133541_proposal_status_privilege",
+      "breakpoints": true
     }
   ]
 }

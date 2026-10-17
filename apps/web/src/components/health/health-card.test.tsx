@@ -80,4 +80,25 @@ describe('C-01 health card', () => {
     expect(screen.getByText('Atenção')).toBeTruthy();
     attention.unmount();
   });
+
+  it('health messages use singular and plural', () => {
+    const withSignals = (medianDays: number, medianHours: number): ClientHealthView => ({
+      ...FULL,
+      signals: {
+        ...FULL.signals,
+        approvals: { score: 64, detail: { kind: 'approvals', medianDays } },
+        responses: { score: 96, detail: { kind: 'responses', medianHours } },
+      },
+    });
+    for (const [days, hours, daysText, hoursText] of [
+      [1, 1, 'Mediana de 1 dia', 'Mediana de 1 hora'],
+      [2, 5, 'Mediana de 2 dias', 'Mediana de 5 horas'],
+      [3, 0.4, 'Mediana de 3 dias', 'Mediana de menos de 1 hora'],
+    ] as const) {
+      const { unmount } = show(withSignals(days, hours));
+      expect(screen.getByText(daysText)).toBeTruthy();
+      expect(screen.getByText(hoursText)).toBeTruthy();
+      unmount();
+    }
+  });
 });

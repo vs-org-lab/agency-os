@@ -507,3 +507,13 @@ export const clientReportStatusEnum = appSchema.enum('client_report_status', ['d
 
 export type ClientReportKind = (typeof clientReportKindEnum.enumValues)[number];
 export type ClientReportStatus = (typeof clientReportStatusEnum.enumValues)[number];
+
+export const academyItemKindEnum = appSchema.enum('academy_item_kind', [
+  'tutorial',
+  'manual',
+  'checklist',
+]);
+export const academyItemStatusEnum = appSchema.enum('academy_item_status', ['draft', 'published']);
+
+export type AcademyItemKind = (typeof academyItemKindEnum.enumValues)[number];
+export type AcademyItemStatus = (typeof academyItemStatusEnum.enumValues)[number];

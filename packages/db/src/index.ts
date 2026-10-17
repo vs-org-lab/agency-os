@@ -46,6 +46,8 @@ export type {
   ProjectDocumentStatus,
   ClientReportKind,
   ClientReportStatus,
+  AcademyItemKind,
+  AcademyItemStatus,
   BrandHubPageKind,
   BrandHubAccessMode,
   BrandHubDomainStatus,

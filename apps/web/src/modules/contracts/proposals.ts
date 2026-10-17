@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   schema,
@@ -331,6 +331,24 @@ async function proposalFor(tx: DbTransaction, actor: Actor, proposalId: string) 
   return deal ? { proposal, deal } : null;
 }
 
+/**
+ * Moves a proposal between draft and sent through `app.set_proposal_status`, which checks the
+ * founder, locks the row and changes it in this same transaction, so the audit names the founder.
+ */
+async function changeProposalStatus(
+  tx: DbTransaction,
+  proposalId: string,
+  from: 'draft' | 'sent',
+  to: 'draft' | 'sent',
+): Promise<boolean> {
+  const rows = await tx.execute<{ changed: boolean }>(sql`
+    select app.set_proposal_status(
+      ${proposalId}::uuid, ${from}::app.proposal_status, ${to}::app.proposal_status
+    ) as changed
+  `);
+  return rows[0]?.changed === true;
+}
+
 export async function sendProposal(
   claims: VerifiedClaims,
   input: { proposalId: string },
@@ -361,10 +379,9 @@ export async function sendProposal(
         return { ok: false as const, rule: 'invalid_state' as const };
       }
 
-      await tx
-        .update(proposals)
-        .set({ status: 'sent', sentAt: new Date() })
-        .where(and(eq(proposals.id, proposal.id), eq(proposals.status, 'draft')));
+      if (!(await changeProposalStatus(tx, proposal.id, 'draft', 'sent'))) {
+        return { ok: false as const, rule: 'invalid_state' as const };
+      }
       await recordAudit(tx, {
         organizationId: deal.organizationId,
         action: 'proposal.sent',
@@ -399,12 +416,9 @@ export function withdrawProposal(
       if (!isFounderActor(actor)) return NOT_FOUND;
       const scoped = await proposalFor(tx, actor, input.proposalId);
       if (!scoped) return NOT_FOUND;
-      const updated = await tx
-        .update(proposals)
-        .set({ status: 'draft', sentAt: null })
-        .where(and(eq(proposals.id, scoped.proposal.id), inArray(proposals.status, ['sent'])))
-        .returning({ id: proposals.id });
-      if (updated.length === 0) return { ok: false as const, rule: 'invalid_state' as const };
+      if (!(await changeProposalStatus(tx, scoped.proposal.id, 'sent', 'draft'))) {
+        return { ok: false as const, rule: 'invalid_state' as const };
+      }
       await recordAudit(tx, {
         organizationId: scoped.deal.organizationId,
         action: 'proposal.withdrawn',

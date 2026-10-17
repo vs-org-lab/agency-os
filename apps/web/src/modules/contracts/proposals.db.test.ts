@@ -226,6 +226,36 @@ describe('proposals', () => {
     });
   });
 
+  it('the audit names the founder who sent and withdrew', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { core, entityId } = await prepare(sql, world);
+      await readyToSend(sql, world, core);
+      const deps = depsFor(sql);
+      const founder = claimsFor(world.users.founder);
+      const saved = await saveProposalDraft(founder, draft(core.a.dealId, entityId), deps);
+      if (!saved.ok) throw new Error('Draft was not saved');
+
+      expect(await sendProposal(founder, { proposalId: saved.proposalId }, deps)).toEqual({
+        ok: true,
+      });
+      expect(await withdrawProposal(founder, { proposalId: saved.proposalId }, deps)).toEqual({
+        ok: true,
+      });
+      await sql`reset role`;
+      const entries = await sql<{ action: string; actor_user_id: string | null }[]>`
+        select action, actor_user_id::text from public.audit_log
+        where resource_id = ${saved.proposalId}
+          and action in ('proposal.sent', 'proposal.withdrawn')
+        order by occurred_at
+      `;
+      expect(entries).toEqual([
+        { action: 'proposal.sent', actor_user_id: world.users.founder },
+        { action: 'proposal.withdrawn', actor_user_id: world.users.founder },
+      ]);
+    });
+  });
+
   it('manager of another client gets not_found', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

@@ -93,21 +93,27 @@ export async function collectReportData(
   const { clientId, period } = input;
   const within = (column: string) =>
     sql`${lisbonDay(column)} between ${period.start}::date and ${period.end}::date`;
+  // As in the portal, a cancelled project's work is no longer the client's to see.
+  const liveProject = sql.raw(
+    "exists (select 1 from public.projects p where p.id = project_id and p.status <> 'cancelled')",
+  );
 
   const steps = await tx.execute<{ name: string; on: string }>(sql`
     select name, ${lisbonDay('completed_at')}::text as on from public.project_steps
-    where client_id = ${clientId}::uuid and visible_to_client and status = 'done'
+    where client_id = ${clientId}::uuid and visible_to_client and status = 'done' and ${liveProject}
       and ${within('completed_at')}
     order by completed_at, name
   `);
   const updates = await tx.execute<{ milestone: string | null; body: string; on: string }>(sql`
     select milestone, body, ${lisbonDay('created_at')}::text as on from public.project_updates
     where client_id = ${clientId}::uuid and visibility = 'client' and ${within('created_at')}
+      and ${liveProject}
     order by created_at
   `);
   const approvals = await tx.execute<{ title: string; on: string }>(sql`
     select title, ${lisbonDay('approved_at')}::text as on from public.project_documents
     where client_id = ${clientId}::uuid and approved_at is not null and ${within('approved_at')}
+      and ${liveProject}
     order by approved_at, title
   `);
 

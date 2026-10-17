@@ -1,6 +1,11 @@
 import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { schema, type ApprovalStatus, type DbTransaction } from '@agency-os/db';
+import {
+  schema,
+  type ApprovalStatus,
+  type ApprovalSubject,
+  type DbTransaction,
+} from '@agency-os/db';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { VerifiedClaims } from '@/platform/db';
@@ -278,6 +283,12 @@ async function decidePhaseInTx(
 export type ApprovalDecision = 'approved' | 'changes_requested';
 
 /**
+ * The room's own approvals: phases and the project's delivery. Files, documents, Brand Hub
+ * publications and retainer extras are decided where their consequences live.
+ */
+const ROOM_SUBJECTS: readonly ApprovalSubject[] = ['phase', 'project'];
+
+/**
  * The client's decision maker approves a phase or asks for changes, with a comment (RN-41).
  * File version approvals are decided by the proofing module.
  * Approving completes the phase; asking for changes returns it to the team. A decided approval
@@ -317,7 +328,7 @@ export async function decideApproval(
       .from(approvals)
       .where(eq(approvals.id, input.approvalId))
       .for('update');
-    if (!approval || approval.subjectType === 'file_version') return NOT_FOUND;
+    if (!approval || !ROOM_SUBJECTS.includes(approval.subjectType)) return NOT_FOUND;
     if (approval.status !== 'pending') {
       return { ok: true as const, status: approval.status, decided: false };
     }
@@ -380,7 +391,7 @@ export async function withdrawApproval(
       .from(approvals)
       .where(eq(approvals.id, input.approvalId))
       .for('update');
-    if (!approval) return NOT_FOUND;
+    if (!approval || !ROOM_SUBJECTS.includes(approval.subjectType)) return NOT_FOUND;
     if (approval.status !== 'pending')
       return { ok: false as const, rule: 'invalid_state' as const };
     await tx.update(approvals).set({ status: 'withdrawn' }).where(eq(approvals.id, approval.id));

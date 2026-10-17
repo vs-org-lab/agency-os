@@ -242,4 +242,39 @@ describe('phase approvals', () => {
       expect(await phaseStatus(sql, phaseId)).toBe('in_progress');
     });
   });
+
+  it('generic decisions refuse approvals that have their own path', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const project = await projectAwaitingApproval(sql, world, deps);
+      const NOT_FOUND = { ok: false, rule: 'not_found' };
+
+      for (const subjectType of ['retainer_extra', 'document_version', 'brand_hub_publication']) {
+        const [approval] = await sql<{ id: string }[]>`
+          insert into public.approvals (organization_id, client_id, project_id, subject_type,
+                                        subject_id, requested_by)
+          values (${world.organizationId}, ${world.clients.a}, ${project.projectId},
+                  ${subjectType}::app.approval_subject, gen_random_uuid(), ${world.users.founder})
+          returning id
+        `;
+        const approvalId = approval?.id ?? '';
+
+        expect(
+          await decideApproval(
+            roomClaims(world.users.decisionMakerA, 'client'),
+            { approvalId, decision: 'approved', comment: '' },
+            deps,
+          ),
+        ).toEqual(NOT_FOUND);
+        expect(
+          await withdrawApproval(roomClaims(world.users.manager), { approvalId }, deps),
+        ).toEqual(NOT_FOUND);
+        const [row] = await sql<{ status: string }[]>`
+          select status::text from public.approvals where id = ${approvalId}
+        `;
+        expect(row?.status, subjectType).toBe('pending');
+      }
+    });
+  });
 });

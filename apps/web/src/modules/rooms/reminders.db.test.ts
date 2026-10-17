@@ -65,4 +65,39 @@ describe('approval reminders', () => {
       });
     });
   });
+
+  it('reminders skip paused and cancelled projects', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = roomDeps(sql);
+      const project = await projectAwaitingApproval(sql, world, deps);
+      const requested = await requestPhaseApproval(
+        roomClaims(world.users.founder),
+        { phaseId: project.phaseIds[0] ?? '' },
+        deps,
+      );
+      if (!requested.ok) throw new Error('Approval was not requested');
+      const [row] = await sql<{ requested_at: string | Date }[]>`
+        select requested_at from public.approvals where id = ${requested.approvalId}
+      `;
+      const requestedAt = row ? new Date(row.requested_at).getTime() : 0;
+      const marks = async () => {
+        const [approval] = await sql<{ reminded: boolean; alerted: boolean }[]>`
+          select reminded_at is not null as reminded, alerted_at is not null as alerted
+          from public.approvals where id = ${requested.approvalId}
+        `;
+        return approval;
+      };
+
+      for (const status of ['paused', 'cancelled']) {
+        await sql`update public.projects set status = ${status}::app.project_status
+                  where id = ${project.projectId}`;
+        await sweepApprovalReminders(new Date(requestedAt + 6 * DAY), deps);
+        expect(await marks(), status).toEqual({ reminded: false, alerted: false });
+      }
+      await sql`update public.projects set status = 'active' where id = ${project.projectId}`;
+      await sweepApprovalReminders(new Date(requestedAt + 6 * DAY), deps);
+      expect(await marks()).toEqual({ reminded: true, alerted: true });
+    });
+  });
 });

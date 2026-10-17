@@ -11,6 +11,7 @@ import {
   type BookingSource,
 } from '@/modules/commercial/server';
 import { logger } from '@/platform/logger';
+import type { CancelBookingState } from '@/components/public/cancel-booking';
 import { clientIpAddress } from '@/platform/request';
 
 function parseStart(formData: FormData): Date | null {
@@ -89,11 +90,16 @@ export async function rescheduleSlotAction(
   }
 }
 
-export async function cancelBookingAction(manageToken: string): Promise<void> {
+export async function cancelBookingAction(
+  manageToken: string,
+  _state: CancelBookingState,
+): Promise<CancelBookingState> {
   try {
     await publicCancel(manageToken);
   } catch (error) {
     logger.error('commercial.cancel_failed', { error });
+    return { status: 'error' };
   }
   revalidatePath('/apply/booking/[token]', 'page');
+  return { status: 'idle' };
 }

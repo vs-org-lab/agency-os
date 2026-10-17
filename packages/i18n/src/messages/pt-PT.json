@@ -1137,7 +1137,10 @@
         "current": "Marcada para {when}.",
         "reschedule": "Mudar de horário",
         "cancel": "Cancelar chamada",
-        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário."
+        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário.",
+        "confirmCancel": "Sim, cancelar",
+        "keep": "Manter a chamada",
+        "cancelFailed": "Não foi possível cancelar. Tente de novo dentro de momentos."
       }
     }
   },

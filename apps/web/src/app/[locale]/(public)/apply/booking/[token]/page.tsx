@@ -1,5 +1,5 @@
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Button } from '@agency-os/ui/components/button';
+import { CancelBooking } from '@/components/public/cancel-booking';
 import { PublicBooking } from '@/components/public/public-booking';
 import { PublicFrame } from '@/components/public/public-frame';
 import { requireLocale } from '@/i18n/require-locale';
@@ -45,11 +45,7 @@ export default async function ManageBookingPage({ params }: PageProps) {
       {scheduledAt ? (
         <>
           <PublicBooking view={view} action={rescheduleSlotAction.bind(null, token)} />
-          <form action={cancelBookingAction.bind(null, token)}>
-            <Button type="submit" variant="outline" className="h-11 w-full md:h-9 sm:w-auto">
-              {t('manage.cancel')}
-            </Button>
-          </form>
+          <CancelBooking action={cancelBookingAction.bind(null, token)} />
         </>
       ) : (
         <PublicBooking view={view} action={bookSlotAction.bind(null, source)} />

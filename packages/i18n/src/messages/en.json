@@ -1137,7 +1137,10 @@
         "current": "Booked for {when}.",
         "reschedule": "Change the time",
         "cancel": "Cancel the call",
-        "cancelled": "The call was cancelled. You can choose another time if you want."
+        "cancelled": "The call was cancelled. You can choose another time if you want.",
+        "confirmCancel": "Yes, cancel",
+        "keep": "Keep the call",
+        "cancelFailed": "The call could not be cancelled. Try again in a moment."
       }
     }
   },

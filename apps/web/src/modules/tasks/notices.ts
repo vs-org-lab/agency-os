@@ -3,7 +3,7 @@ import { schema } from '@agency-os/db';
 import { organizationSender, renderEmail, type EmailPort } from '@/modules/email';
 import type { DbContexts } from '@/platform/db';
 
-const { clients, profiles, tasks } = schema;
+const { clients, organizationMemberships, profiles, tasks } = schema;
 
 export type TaskNoticeDeps = {
   contexts: Pick<DbContexts, 'withSystemContext'>;
@@ -13,7 +13,7 @@ export type TaskNoticeDeps = {
 
 /**
  * Tells the assignee about a task given to them by someone else. Nothing is sent when the task is
- * done or has meanwhile gone to another person.
+ * done, has meanwhile gone to another person, or the assignee is no longer an active member.
  */
 export async function sendTaskAssignedNotice(
   taskId: string,
@@ -33,6 +33,14 @@ export async function sendTaskAssignedNotice(
       .from(tasks)
       .leftJoin(clients, eq(clients.id, tasks.clientId))
       .innerJoin(profiles, eq(profiles.id, tasks.assigneeId))
+      .innerJoin(
+        organizationMemberships,
+        and(
+          eq(organizationMemberships.organizationId, tasks.organizationId),
+          eq(organizationMemberships.userId, tasks.assigneeId),
+          eq(organizationMemberships.status, 'active'),
+        ),
+      )
       .where(and(eq(tasks.id, taskId), eq(tasks.assigneeId, assigneeId), eq(tasks.status, 'open')));
     if (!task) return null;
     const rows = await tx.execute<{ email: string | null }>(

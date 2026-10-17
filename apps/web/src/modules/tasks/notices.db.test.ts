@@ -81,4 +81,31 @@ describe('task notices', () => {
       expect(email.sent).toHaveLength(0);
     });
   });
+
+  it('assigned notices skip members who left', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const created = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Rever o mapa', clientId: world.clients.a, assigneeId: world.users.freelancer },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      await sql`
+        update public.organization_memberships set status = 'revoked'
+        where organization_id = ${world.organizationId} and user_id = ${world.users.freelancer}
+      `;
+      const email = recordingEmail();
+
+      const sent = await sendTaskAssignedNotice(created.taskId, world.users.freelancer, {
+        contexts: deps.contexts,
+        email,
+        appBaseUrl: 'https://os.example.com',
+      });
+
+      expect(sent).toBe(false);
+      expect(email.sent).toHaveLength(0);
+    });
+  });
 });

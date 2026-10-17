@@ -7,7 +7,9 @@ import { RouteError } from './route-error';
 
 const captureException = vi.fn();
 
-vi.mock('@sentry/nextjs', () => ({ captureException: (error: unknown) => captureException(error) }));
+vi.mock('@sentry/nextjs', () => ({
+  captureException: (error: unknown) => captureException(error),
+}));
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>

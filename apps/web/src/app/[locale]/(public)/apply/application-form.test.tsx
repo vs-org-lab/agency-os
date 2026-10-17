@@ -140,4 +140,48 @@ describe('ApplicationForm', () => {
     expect(screen.getByText('Para enviar, aceite o tratamento dos dados.')).toBeDefined();
     expect(action).not.toHaveBeenCalled();
   });
+
+  it('emails the server would refuse stop at the contact step', async () => {
+    renderForm();
+    await fillContact('joão@empresa.c');
+    await next();
+
+    expect(screen.getByText('Indique um email válido.')).toBeDefined();
+    expect(screen.getByLabelText('Email profissional')).toBeDefined();
+  });
+
+  it('a server refusal returns to the answer to fix', async () => {
+    window.sessionStorage.setItem(
+      'apply-draft-v1',
+      JSON.stringify({
+        step: 8,
+        answers: {
+          contact: { fullName: 'Ana Costa', email: 'ana@empresa.pt' },
+          company: { name: 'Empresa Exemplo', website: '' },
+          choices: {
+            role: 'ceo_founder_partner',
+            sector: 'consulting',
+            revenue: 'over_20m',
+            priority: 'brand_and_site',
+            investment: 'over_50k',
+            timing: 'this_quarter',
+          },
+          texts: { cost_of_inaction: 'Perdemos contratos.' },
+        },
+        startedAt: Date.now() - 60_000,
+      }),
+    );
+    renderForm(
+      vi.fn(async (): Promise<ApplyActionState> => ({
+        status: 'invalid',
+        questionIds: ['contact'],
+      })),
+    );
+
+    await userEvent.click(screen.getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar candidatura' }));
+
+    expect(await screen.findByLabelText('Email profissional')).toBeDefined();
+    expect(screen.getByText('Indique um email válido.')).toBeDefined();
+  });
 });

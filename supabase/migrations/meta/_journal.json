@@ -470,6 +470,13 @@
       "when": 1792247358451,
       "tag": "20261017142918_proposal_insert_draft",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1792249307542,
+      "tag": "20261017150147_signed_clients_active",
+      "breakpoints": true
     }
   ]
 }

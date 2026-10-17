@@ -175,6 +175,32 @@ describe('contract signing', () => {
     });
   });
 
+  it('a signed contract makes the prospect an active client', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const contract = await generatedContract(sql, world);
+      await sql`update public.clients set lifecycle = 'prospect' where id = ${world.clients.a}`;
+      const { deps } = depsFor(sql);
+
+      await signContract(
+        claimsFor(world.users.decisionMakerA, 'client'),
+        clientSignature(contract),
+        deps,
+      );
+      await signContract(
+        claimsFor(world.users.founder, 'internal'),
+        studioSignature(contract),
+        deps,
+      );
+
+      await sql`reset role`;
+      const [client] = await sql<{ lifecycle: string }[]>`
+        select lifecycle::text from public.clients where id = ${world.clients.a}
+      `;
+      expect(client?.lifecycle).toBe('active');
+    });
+  });
+
   it('studio then client also completes', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

@@ -16,7 +16,7 @@ import { sameSigner } from './domain/signature';
 import { buildContractPdf, type ContractPdfInput } from './pdf';
 import { CONTRACT_URL_TTL_SECONDS, type ContractStorage } from './storage';
 
-const { contractSignatures, contracts, deals, proposals } = schema;
+const { clients, contractSignatures, contracts, deals, proposals } = schema;
 
 const SIGNING_STAGE = '1.6';
 
@@ -178,6 +178,12 @@ async function completeContract(
     .set({ status: 'signed', signedAt: now, pdfPath: path })
     .where(eq(contracts.id, contract.id));
   await deps.moveDeal(tx, contract.dealId);
+  // A signed contract makes the prospect a client: from here the room, its automations and the
+  // reports count it.
+  await tx
+    .update(clients)
+    .set({ lifecycle: 'active' })
+    .where(and(eq(clients.id, contract.clientId), ne(clients.lifecycle, 'active')));
   await recordAudit(tx, {
     organizationId: contract.organizationId,
     action: 'contract.completed',

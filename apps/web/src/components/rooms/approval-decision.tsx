@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Label } from '@agency-os/ui/components/label';
@@ -39,6 +39,11 @@ export function ApprovalDecision({
   const [pending, startTransition] = useTransition();
   const fieldId = `approval-${approvalId}-comment`;
   const hintId = `${fieldId}-hint`;
+  const messageRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (result) messageRef.current?.focus();
+  }, [result]);
 
   const submit = (decision: 'approved' | 'changes_requested') =>
     startTransition(async () => {
@@ -48,7 +53,12 @@ export function ApprovalDecision({
       setResult(outcome.ok ? { ok: true } : { ok: false, error: decisionError(outcome.code) });
     });
 
-  if (result?.ok) return <FormMessage tone="success">{t('decided')}</FormMessage>;
+  if (result?.ok)
+    return (
+      <FormMessage tone="success" ref={messageRef} tabIndex={-1}>
+        {t('decided')}
+      </FormMessage>
+    );
 
   return (
     <div className="flex flex-col gap-3">
@@ -70,7 +80,9 @@ export function ApprovalDecision({
         </p>
       </div>
       {result?.ok === false ? (
-        <FormMessage tone="danger">{t(`errors.${result.error}`)}</FormMessage>
+        <FormMessage tone="danger" ref={messageRef} tabIndex={-1}>
+          {t(`errors.${result.error}`)}
+        </FormMessage>
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button type="button" disabled={pending} onClick={() => submit('approved')}>

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@agency-os/ui/lib/utils';
 
 type Tone = 'info' | 'success' | 'warning' | 'danger';
@@ -10,22 +10,17 @@ const toneClasses: Record<Tone, string> = {
   danger: 'bg-danger-bg text-danger',
 };
 
+/** Pass `ref` and `tabIndex={-1}` when focus should move to the message after an action. */
 export function FormMessage({
   tone,
-  id,
-  children,
-}: {
-  tone: Tone;
-  id?: string;
-  children: ReactNode;
-}) {
+  className,
+  ...props
+}: { tone: Tone } & Omit<ComponentProps<'p'>, 'role'>) {
   return (
     <p
-      id={id}
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('rounded-md px-3 py-2 text-body-sm', toneClasses[tone])}
-    >
-      {children}
-    </p>
+      className={cn('rounded-md px-3 py-2 text-body-sm outline-none', toneClasses[tone], className)}
+      {...props}
+    />
   );
 }

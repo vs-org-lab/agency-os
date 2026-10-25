@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { cn } from '@agency-os/ui/lib/utils';
@@ -49,6 +49,8 @@ export function BookingPanel(props: BookingPanelProps) {
   );
   const [selected, setSelected] = useState<string | null>(null);
   const [day, setDay] = useState<string | null>(null);
+  const bookedRef = useRef<HTMLHeadingElement>(null);
+  const messageRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     if (props.defaultTimeZone) return;
@@ -59,6 +61,8 @@ export function BookingPanel(props: BookingPanelProps) {
 
   useEffect(() => {
     if (state.status === 'slot_taken') setSelected(null);
+    if (state.status === 'booked') bookedRef.current?.focus();
+    else if (state.status !== 'idle') messageRef.current?.focus();
   }, [state]);
 
   const slots = state.status === 'slot_taken' ? state.slots : props.slots;
@@ -96,7 +100,9 @@ export function BookingPanel(props: BookingPanelProps) {
   if (state.status === 'booked') {
     return (
       <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-6">
-        <h2 className="text-title text-text">{t('booked.title')}</h2>
+        <h2 ref={bookedRef} tabIndex={-1} className="text-title text-text outline-none">
+          {t('booked.title')}
+        </h2>
         <p className="text-body text-text-secondary">
           {t('booked.body', { when: fullLabel.format(new Date(state.startsAt)) })}
         </p>
@@ -142,9 +148,15 @@ export function BookingPanel(props: BookingPanelProps) {
       </label>
 
       {state.status === 'slot_taken' ? (
-        <FormMessage tone="warning">{t('slotTaken')}</FormMessage>
+        <FormMessage tone="warning" ref={messageRef} tabIndex={-1}>
+          {t('slotTaken')}
+        </FormMessage>
       ) : null}
-      {errorKey ? <FormMessage tone="danger">{t(errorKey)}</FormMessage> : null}
+      {errorKey ? (
+        <FormMessage tone="danger" ref={messageRef} tabIndex={-1}>
+          {t(errorKey)}
+        </FormMessage>
+      ) : null}
 
       {groups.length === 0 ? (
         <p className="text-body text-text-secondary">{t('noSlots')}</p>

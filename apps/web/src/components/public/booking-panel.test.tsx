@@ -70,7 +70,8 @@ describe('BookingPanel', () => {
     await userEvent.click(screen.getByRole('button', { name: '10:00' }));
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar marcação' }));
 
-    expect(await screen.findByText('A chamada está marcada')).toBeDefined();
+    const heading = await screen.findByText('A chamada está marcada');
+    expect(document.activeElement).toBe(heading);
     const formData = action.mock.calls[0]?.[1] as FormData | undefined;
     expect(formData?.get('start')).toBe('2026-10-13T09:00:00.000Z');
     expect(formData?.get('timeZone')).toBe('Africa/Luanda');

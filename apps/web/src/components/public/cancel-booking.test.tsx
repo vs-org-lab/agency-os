@@ -35,8 +35,9 @@ describe('cancel booking', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar chamada' }));
     fireEvent.click(screen.getByRole('button', { name: 'Sim, cancelar' }));
 
-    expect(
-      await screen.findByText('Não foi possível cancelar. Tente de novo dentro de momentos.'),
-    ).toBeTruthy();
+    const message = await screen.findByText(
+      'Não foi possível cancelar. Tente de novo dentro de momentos.',
+    );
+    expect(document.activeElement).toBe(message);
   });
 });

@@ -477,6 +477,13 @@
       "when": 1792249307542,
       "tag": "20261017150147_signed_clients_active",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1792953595636,
+      "tag": "20261025183955_deal_stage_privilege",
+      "breakpoints": true
     }
   ]
 }

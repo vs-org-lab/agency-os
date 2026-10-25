@@ -279,4 +279,28 @@ describe('commercial access', () => {
       expect(updated.count).toBe(0);
     });
   });
+  it('pipeline writers change a deal stage only through the service', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+
+      for (const user of [world.users.manager, world.users.founder]) {
+        await asUser(sql, user);
+        await expect(
+          sql.savepoint(
+            (tx) =>
+              tx`update public.deals set pipeline_code = '2.2' where id = ${fixture.a.dealId}`,
+          ),
+        ).rejects.toThrow(/permission denied/);
+        await expect(
+          sql.savepoint(
+            (tx) => tx`
+              insert into public.deals (organization_id, client_id, title, pipeline_code)
+              values (${world.organizationId}, ${world.clients.a}, 'Atalho', '2.10')
+            `,
+          ),
+        ).rejects.toThrow(/row-level security/);
+      }
+    });
+  });
 });

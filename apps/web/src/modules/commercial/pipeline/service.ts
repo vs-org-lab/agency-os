@@ -238,6 +238,12 @@ export async function applyStageChange(
   }
 
   await tx.execute(sql`select set_config('app.stage_change_reason', ${reason ?? ''}, true)`);
+  // The stage is not writable by authenticated users: the RN rules above are its only gate. The
+  // update runs as the owner, and the history trigger still reads the caller from the claims.
+  const [{ role } = { role: '' }] = await tx.execute<{ role: string }>(
+    sql`select current_user::text as role`,
+  );
+  if (role === 'authenticated') await tx.execute(sql`reset role`);
   await tx
     .update(deals)
     .set({
@@ -245,6 +251,7 @@ export async function applyStageChange(
       ...(input.to === 'X.4' ? { lostReason: reason } : {}),
     })
     .where(eq(deals.id, deal.id));
+  if (role === 'authenticated') await tx.execute(sql`set local role authenticated`);
   await tx.execute(sql`select set_config('app.stage_change_reason', '', true)`);
   if (FINAL_CODES.includes(input.to)) await cancelScheduledCalls(tx, deal, input.actor);
 

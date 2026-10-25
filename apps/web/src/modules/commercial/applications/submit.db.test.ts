@@ -171,15 +171,13 @@ describe('submitApplication', () => {
     });
   });
 
-  it('normalises email before matching the contact', async () => {
+  it('normalises the email it stores', async () => {
     await withTestTransaction(async (sql) => {
       const { world, deps } = await setup(sql);
 
-      const first = await submitApplication(submission(), deps);
-      const second = await submitApplication(submission({ email: '  ANA@Empresa.PT ' }), deps);
+      const accepted = await submitApplication(submission({ email: '  ANA@Empresa.PT ' }), deps);
 
-      expect(first.status).toBe('accepted');
-      expect(second.status).toBe('accepted');
+      expect(accepted.status).toBe('accepted');
       const contacts = await sql<{ email: string }[]>`
         select email from public.contacts where organization_id = ${world.organizationId}
       `;
@@ -187,7 +185,7 @@ describe('submitApplication', () => {
     });
   });
 
-  it('repeat application attaches to the open deal without changing its stage', async () => {
+  it('a repeat application opens its own prospect and is marked as a possible duplicate', async () => {
     await withTestTransaction(async (sql) => {
       const { world, deps } = await setup(sql);
       const first = await submitApplication(submission(), deps);
@@ -195,15 +193,57 @@ describe('submitApplication', () => {
       await sql`update public.deals set pipeline_code = 'X.2' where id = ${first.dealId}`;
 
       const second = await submitApplication(
-        submission({ choices: { investment: 'under_10k' } }),
+        submission({ email: 'ANA@empresa.pt', choices: { investment: 'under_10k' } }),
         deps,
       );
 
-      expect(second).toMatchObject({ status: 'accepted', path: 'c', dealId: first.dealId });
+      if (second.status !== 'accepted') throw new Error('expected an accepted application');
+      expect(second.dealId).not.toBe(first.dealId);
       expect(await dealOf(sql, first.dealId)).toMatchObject({ code: 'X.2' });
+      const [application] = await sql<{ duplicate: string | null }[]>`
+        select source ->> 'possibleDuplicateOf' as duplicate from public.applications
+        where deal_id = ${second.dealId}
+      `;
+      const [firstDeal] = await sql<{ client_id: string }[]>`
+        select client_id::text from public.deals where id = ${first.dealId}
+      `;
+      expect(application?.duplicate).toBe(firstDeal?.client_id);
       const deals =
         await sql`select id from public.deals where organization_id = ${world.organizationId}`;
-      expect(deals).toHaveLength(1);
+      expect(deals).toHaveLength(2);
+    });
+  });
+
+  it("an application with an existing client's email changes nothing of that client", async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, deps } = await setup(sql);
+      const [contact] = await sql<{ id: string; email: string; full_name: string }[]>`
+        insert into public.contacts (organization_id, client_id, full_name, email, role)
+        values (${world.organizationId}, ${world.clients.a}, 'Marta Lopes', 'marta@cliente.pt',
+                'decision_maker')
+        returning id, email, full_name
+      `;
+      const before = await sql`
+        select (select count(*) from public.deals where client_id = ${world.clients.a})::int
+                 as deals,
+               (select count(*) from public.applications where client_id = ${world.clients.a})::int
+                 as applications
+      `;
+
+      const accepted = await submitApplication(submission({ email: 'marta@cliente.pt' }), deps);
+
+      expect(accepted.status).toBe('accepted');
+      const [after] = await sql<{ full_name: string }[]>`
+        select full_name from public.contacts where id = ${contact?.id ?? ''}
+      `;
+      expect(after?.full_name).toBe('Marta Lopes');
+      const now = await sql`
+        select (select count(*) from public.deals where client_id = ${world.clients.a})::int
+                 as deals,
+               (select count(*) from public.applications where client_id = ${world.clients.a})::int
+                 as applications
+      `;
+      expect(now).toEqual(before);
     });
   });
 

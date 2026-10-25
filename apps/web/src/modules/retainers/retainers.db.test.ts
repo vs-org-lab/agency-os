@@ -126,7 +126,8 @@ describe('retainers', () => {
 
         for (const invalid of [
           { ...base, reviewOn: inDays(-1) },
-          { ...base, startsOn: inDays(400), reviewOn: inDays(380) },
+          // Far enough apart that moving the start to the 1st of its month never reaches the review.
+          { ...base, startsOn: inDays(400), reviewOn: inDays(300) },
           { ...base, limits: [] },
           {
             ...base,

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { FormMessage } from '@/components/forms/form-message';
+import { Link } from '@/i18n/navigation';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { acceptInvitationAction, type AcceptInvitationState } from './actions';
 import { parseInvitationFragment, type InvitationTokens } from './invitation-fragment';
@@ -27,7 +28,14 @@ export function AcceptInvitationForm({ tokenHash }: { tokenHash: string }) {
 
   if (!ready) return null;
   if (state.error || (!tokenHash && !tokens)) {
-    return <FormMessage tone="warning">{t('invalid')}</FormMessage>;
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <FormMessage tone="warning">{t('invalid')}</FormMessage>
+        <Link href="/sign-in" className="text-body-sm text-link underline-offset-4 hover:underline">
+          {t('signIn')}
+        </Link>
+      </div>
+    );
   }
 
   return (

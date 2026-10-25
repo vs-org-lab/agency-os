@@ -43,7 +43,8 @@
       "title": "Aceitar convite",
       "description": "Confirme para ativar o seu acesso.",
       "accept": "Aceitar convite",
-      "invalid": "O convite expirou ou já foi usado. Peça um novo convite a quem o enviou."
+      "invalid": "O convite expirou ou já foi usado. Peça um novo convite a quem o enviou.",
+      "signIn": "Ir para o início de sessão"
     },
     "setPassword": {
       "title": "Definir palavra-passe",

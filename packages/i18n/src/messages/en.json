@@ -43,7 +43,8 @@
       "title": "Accept invitation",
       "description": "Confirm to activate your access.",
       "accept": "Accept invitation",
-      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation."
+      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation.",
+      "signIn": "Go to sign in"
     },
     "setPassword": {
       "title": "Set password",

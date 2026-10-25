@@ -9,5 +9,9 @@ export default function LocaleError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <RouteError error={error} reset={reset} home="/" />;
+  return (
+    <main id="main" tabIndex={-1}>
+      <RouteError error={error} reset={reset} home="/" />
+    </main>
+  );
 }

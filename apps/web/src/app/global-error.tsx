@@ -32,6 +32,9 @@ export default function GlobalError({
             className="mt-2 self-center rounded-md border border-border px-3 py-1.5 text-body-sm text-text"
           >
             {ptPT.states.error.retry}
+            <span lang="en" className="text-text-tertiary">
+              {` · ${en.states.error.retry}`}
+            </span>
           </button>
         </main>
       </body>

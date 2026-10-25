@@ -9,7 +9,8 @@ import { Link } from '@/i18n/navigation';
 
 /**
  * What a screen shows when it fails to load: the cause goes to Sentry, never to the reader, and
- * the reader can try again or go back to the start of their area.
+ * the reader can try again or go back to the start of their area. It renders inside the page's
+ * main landmark, which the shell provides and the locale error boundary adds itself.
  */
 export function RouteError({
   error,
@@ -26,7 +27,7 @@ export function RouteError({
   }, [error]);
 
   return (
-    <main className="flex min-h-[60dvh] items-center justify-center px-4">
+    <div className="flex min-h-[60dvh] items-center justify-center px-4">
       <ErrorState
         className="w-full max-w-[480px]"
         title={t('error.title')}
@@ -42,6 +43,6 @@ export function RouteError({
           </div>
         }
       />
-    </main>
+    </div>
   );
 }

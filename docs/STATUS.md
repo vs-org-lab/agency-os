@@ -303,8 +303,9 @@ Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([
 
 - [ ] Repositório `vs-org-lab/agency-os` de volta a privado depois do teste completo do OS
 - [ ] Projeto Supabase de produção em eu-west-1, plano Pro
-- [ ] Plano Vercel Pro
-- [ ] Domínio, Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth
+- [ ] Plano Vercel Pro (o Hobby não permite uso comercial e pausa por excesso de CPU; decidido a 2026-10-25)
+- [ ] Domínio comprado (o mesmo do site da agência, alojado na Hostinger; o nome da agência pode mudar antes da compra). O OS e o portal ficam em `os.<domínio>` e o Brand Hub em `marca.<domínio>`; os registos da raiz, que servem o site, não mudam (decidido a 2026-10-25)
+- [ ] Resend com SPF, DKIM e DMARC, SMTP próprio no Supabase Auth
 - [ ] Trocar o SMTP de testes (Gmail) pelo email do domínio definitivo, com SPF, DKIM e DMARC
 - [ ] Pipeline de `main` ativo, com aprovação do fundador
 - [ ] GitHub Team e proteção de `main`

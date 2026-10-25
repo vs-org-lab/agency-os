@@ -104,7 +104,8 @@
       "agenda": "Agenda",
       "retainer": "Retainer",
       "outcome": "Outcome",
-      "reports": "Reports"
+      "reports": "Reports",
+      "academy": "Academy"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -116,7 +117,8 @@
       "library": "Library",
       "documents": "Documents",
       "brandHub": "Brand Hub",
-      "progress": "Progress"
+      "progress": "Progress",
+      "academy": "Academy"
     }
   },
   "states": {
@@ -3241,5 +3243,81 @@
       "exists": "There is already a report for this period.",
       "not_found": "This could not be completed. Refresh the page and try again."
     }
+  },
+  "academy": {
+    "title": "Academy",
+    "intro": "Tutorials, manuals and checklists for the client's team, and the training sessions.",
+    "empty": "There is nothing in the Academy yet.",
+    "portalEmpty": "The team has not published any materials yet.",
+    "kinds": {
+      "tutorial": "Tutorial",
+      "manual": "Manual",
+      "checklist": "Checklist"
+    },
+    "sections": {
+      "tutorial": "Tutorials",
+      "manual": "Manuals",
+      "checklist": "Checklists"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "progress": "{done} of {total} steps",
+    "checkedBy": "{name} · {date}",
+    "open": "Open",
+    "download": "Download",
+    "externalVideo": "Watch the video (opens in another tab)",
+    "externalLink": "Open the link (opens in another tab)",
+    "noMaterial": "This item's file was removed from the Library.",
+    "actions": {
+      "newItem": "New item",
+      "publish": "Publish",
+      "withdraw": "Withdraw",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete for good",
+      "cancel": "Cancel",
+      "up": "Move up",
+      "down": "Move down"
+    },
+    "form": {
+      "kind": "Type",
+      "title": "Title",
+      "description": "Description",
+      "source": "Material",
+      "file": "Library file",
+      "link": "Link",
+      "fileChoice": "File",
+      "url": "Address",
+      "noFiles": "There are no ready files in folders the client sees.",
+      "steps": "Steps, one per line",
+      "save": "Save item",
+      "fileOption": "{folder} / {name}"
+    },
+    "sessions": {
+      "title": "Training sessions",
+      "empty": "No sessions recorded yet.",
+      "record": "Record session",
+      "heldOn": "Date",
+      "name": "Title",
+      "duration": "Duration (minutes)",
+      "summary": "Summary",
+      "participants": "Participants",
+      "client": "Client's team",
+      "team": "Our team",
+      "guests": "Guests, one per line",
+      "materials": "Materials",
+      "save": "Save session",
+      "minutes": "{minutes} min",
+      "with": "With {names}",
+      "used": "Materials: {titles}",
+      "delete": "Delete session"
+    },
+    "errors": {
+      "invalid_input": "Check the fields: titles have up to 120 characters and links start with https://.",
+      "not_found": "This could not be completed. Refresh the page and try again."
+    },
+    "itemAction": "{action} · {title}"
   }
 }

@@ -13,7 +13,7 @@
   "dependencies": {
     "@agency-os/ui": "workspace:*",
     "next-intl": "4.14.9",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "peerDependencies": {
     "react": "19.3.0"

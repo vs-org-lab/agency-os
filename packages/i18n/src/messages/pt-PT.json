@@ -64,6 +64,7 @@
     "studio": "Estúdio",
     "allClients": "Todos os clientes",
     "toggleSidebar": "Mostrar ou ocultar menu",
+    "skipToContent": "Saltar para o conteúdo",
     "navigation": "Navegação",
     "navigationDescription": "Menu principal da aplicação.",
     "theme": {
@@ -127,7 +128,7 @@
       "description": "Quando houver conteúdo, aparece neste espaço."
     },
     "loading": {
-      "title": "A carregar"
+      "title": "A carregar…"
     },
     "error": {
       "title": "Algo correu mal",

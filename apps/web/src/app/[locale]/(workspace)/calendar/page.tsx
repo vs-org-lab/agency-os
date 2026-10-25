@@ -11,6 +11,7 @@ import {
   scheduleMeetingAction,
   updateMeetingAction,
 } from '../../agenda-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,4 +56,8 @@ export default async function StudioCalendarPage({ params, searchParams }: PageP
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'agenda.title');
 }

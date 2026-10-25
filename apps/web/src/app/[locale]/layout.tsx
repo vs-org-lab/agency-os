@@ -28,7 +28,7 @@ export async function generateMetadata({
   const locale = requireLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'app' });
   return {
-    title: t('name'),
+    title: { default: t('name'), template: `%s · ${t('name')}` },
     icons: { icon: '/icons/icon.svg', apple: '/icons/apple-touch-icon.png' },
   };
 }

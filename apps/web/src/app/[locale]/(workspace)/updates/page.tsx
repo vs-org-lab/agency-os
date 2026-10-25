@@ -4,6 +4,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadStudioUpdates } from '@/modules/studio/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { StudioFeed } from './studio-feed';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -22,4 +23,8 @@ export default async function StudioUpdatesPage({ params }: PageProps) {
       <StudioFeed entries={entries} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'studio.feed.title');
 }

@@ -11,6 +11,7 @@ import { getVerifiedClaims } from '@/platform/session';
 import { moveDealAction } from './actions';
 import { Board } from './board';
 import { DealList } from './deal-list';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,4 +137,8 @@ export default async function PipelinePage({ params, searchParams }: PageProps) 
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'commercial.board.title');
 }

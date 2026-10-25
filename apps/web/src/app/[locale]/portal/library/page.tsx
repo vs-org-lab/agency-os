@@ -15,6 +15,7 @@ import {
   zipAction,
 } from '../../library-actions';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,4 +80,8 @@ export default async function PortalLibraryPage({ params, searchParams }: PagePr
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'library.title');
 }

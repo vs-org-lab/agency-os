@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from '@/platform/supabase-server';
 import { AuthCard } from '../../auth-card';
 import { safeNextPath } from '../safe-next-path';
 import { TotpForm } from '../totp-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -37,4 +38,8 @@ export default async function VerifyTotpPage({ params, searchParams }: PageProps
       />
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'auth.mfa.verifyTitle');
 }

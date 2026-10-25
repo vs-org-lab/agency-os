@@ -41,6 +41,7 @@ import {
   voidRequestAction,
 } from './billing/actions';
 import { BillingSection } from './billing/billing-section';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -432,4 +433,8 @@ export default async function DealPage({ params }: PageProps) {
       </div>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'shell.studioNav.pipeline');
 }

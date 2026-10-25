@@ -8,6 +8,7 @@ import { commercialSession, loadAcquisition } from '@/modules/commercial/server'
 import { getVerifiedClaims } from '@/platform/session';
 import { CopyTemplate, ConvertTarget, TargetForm } from './acquisition-forms';
 import { convertTargetAction, saveTargetAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -146,4 +147,8 @@ export default async function AcquisitionPage({ params }: PageProps) {
       </aside>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'commercial.acquisition.title');
 }

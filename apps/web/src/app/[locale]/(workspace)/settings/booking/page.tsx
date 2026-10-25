@@ -6,6 +6,7 @@ import { commercialSession, loadSettingsData } from '@/modules/commercial/server
 import { getVerifiedClaims } from '@/platform/session';
 import { saveBookingAction } from '../commercial-actions';
 import { BookingSettingsForm } from '../settings-forms';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,4 +33,8 @@ export default async function BookingSettingsPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'settings.booking.title');
 }

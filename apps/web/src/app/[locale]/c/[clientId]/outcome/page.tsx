@@ -13,6 +13,7 @@ import {
   saveOutcomeAction,
 } from '../../../outcome-actions';
 import { RoomHeader } from '../room/room-header';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,4 +51,8 @@ export default async function RoomOutcomePage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'outcomes.title');
 }

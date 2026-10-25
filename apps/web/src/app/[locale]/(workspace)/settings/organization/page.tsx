@@ -9,6 +9,7 @@ import { loadLegalEntities } from '@/modules/contracts/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { archiveEntityAction, saveEntityAction } from './actions';
 import { EntityForm } from './entity-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,4 +91,8 @@ export default async function OrganizationSettingsPage({ params }: PageProps) {
       </section>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'settings.organization.title');
 }

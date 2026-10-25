@@ -14,6 +14,7 @@ import {
   setClientAction,
   setProjectAction,
 } from '../actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,4 +56,8 @@ export default async function TeamMemberPage({ params }: PageProps) {
       ) : null}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'team.title');
 }

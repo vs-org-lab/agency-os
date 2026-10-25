@@ -6,6 +6,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { cardPaymentsEnabled, loadPortalInvoices } from '@/modules/billing/server';
 import { payByCardAction } from './actions';
 import { InvoiceCard } from './invoice-card';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,4 +51,8 @@ export default async function PortalInvoicesPage({ params, searchParams }: PageP
       </ul>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.invoices.title');
 }

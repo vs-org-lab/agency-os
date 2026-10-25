@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireLocale } from '@/i18n/require-locale';
 import { AuthCard } from '../auth-card';
 import { MagicLinkForm } from './magic-link-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -18,4 +19,8 @@ export default async function MagicLinkPage({ params, searchParams }: PageProps)
       <MagicLinkForm linkFailed={error === 'link'} />
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'auth.magicLink.title');
 }

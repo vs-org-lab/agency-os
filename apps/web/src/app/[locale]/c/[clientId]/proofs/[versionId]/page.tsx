@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadStaffProofVersion } from '@/modules/proofing/server';
 import { commentOnProofAction, resolveProofCommentAction } from '../../proof-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,4 +55,8 @@ export default async function StaffProofPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'proofing.section.title');
 }

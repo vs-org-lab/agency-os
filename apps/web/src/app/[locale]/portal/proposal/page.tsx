@@ -6,6 +6,7 @@ import { loadPortalProposal } from '@/modules/contracts/server';
 import { acceptProposalAction, requestChangesAction } from './actions';
 import { ProposalHomeCard, proposalCardState } from '../portal-cards';
 import { ProposalAcceptance } from './proposal-acceptance';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,4 +39,8 @@ export default async function PortalProposalPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.proposal.title');
 }

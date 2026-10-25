@@ -4,6 +4,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPublicApplicationForm } from '@/modules/commercial/server';
 import { submitApplicationAction } from './actions';
 import { ApplicationForm } from './application-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,4 +33,8 @@ export default async function ApplyPage({ params, searchParams }: PageProps) {
       />
     </PublicFrame>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'publicApply.title');
 }

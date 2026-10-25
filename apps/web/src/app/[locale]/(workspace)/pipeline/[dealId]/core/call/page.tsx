@@ -7,6 +7,7 @@ import { commercialSession, loadDealDetail } from '@/modules/commercial/server';
 import { loadCoreWorkspace } from '@/modules/diagnosis/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { CallMode } from './call-mode';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,4 +39,8 @@ export default async function CallModePage({ params }: PageProps) {
       locale={locale}
     />
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'shell.studioNav.pipeline');
 }

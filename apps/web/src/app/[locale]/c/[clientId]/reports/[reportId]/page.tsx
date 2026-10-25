@@ -8,6 +8,7 @@ import { findVisibleClient } from '@/modules/organizations';
 import { withUserContext } from '@/platform/db';
 import { saveClientReportAction, shareClientReportAction } from '../../../../client-report-actions';
 import { RoomHeader } from '../../room/room-header';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,4 +40,8 @@ export default async function RoomReportPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'clientReports.title');
 }

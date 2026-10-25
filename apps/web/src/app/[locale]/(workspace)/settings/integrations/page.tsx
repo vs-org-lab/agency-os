@@ -8,6 +8,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { integrationsView, isFounder } from '@/modules/commercial/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { connectGoogleAction, disconnectGoogleAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -79,4 +80,8 @@ export default async function IntegrationsPage({ params, searchParams }: PagePro
       </section>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'settings.integrations.title');
 }

@@ -7,6 +7,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadColleagues } from '@/modules/team/server';
 import { portalRoomAccess } from '../../room-session';
 import { changeColleagueRoleAction, inviteColleagueAction, revokeColleagueAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,4 +48,8 @@ export default async function PortalColleaguesPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'team.colleagues.title');
 }

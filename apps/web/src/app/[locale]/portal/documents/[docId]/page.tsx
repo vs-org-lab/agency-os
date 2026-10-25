@@ -6,6 +6,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalDocument } from '@/modules/documents/server';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = { params: Promise<{ locale: string; docId: string }> };
 
@@ -28,4 +29,8 @@ export default async function PortalDocumentPage({ params }: PageProps) {
       <FigmaFrame embedUrl={document.embedUrl} title={document.title} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'shell.portalNav.documents');
 }

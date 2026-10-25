@@ -9,6 +9,7 @@ import { commercialSession } from '@/modules/commercial/server';
 import { loadCoreWorkspace } from '@/modules/diagnosis/server';
 import { FIGMA_EMBED_HOST, toFigmaEmbedUrl } from '@/modules/documents';
 import { getVerifiedClaims } from '@/platform/session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,4 +58,8 @@ export default async function StudioDocumentPage({ params }: PageProps) {
       <p className="text-caption text-text-tertiary">{t('publicHint')}</p>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'diagnosis.presentation.title');
 }

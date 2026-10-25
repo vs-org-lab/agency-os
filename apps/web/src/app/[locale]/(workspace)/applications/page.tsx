@@ -23,6 +23,7 @@ import { getVerifiedClaims } from '@/platform/session';
 import { markApplicationsSeenAction } from './actions';
 import { MarkApplicationsSeen } from './mark-seen';
 import { ReviewButtons } from './review-buttons';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,4 +163,8 @@ export default async function ApplicationsPage({ params, searchParams }: PagePro
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'commercial.applications.title');
 }

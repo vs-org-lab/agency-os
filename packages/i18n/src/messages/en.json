@@ -64,6 +64,7 @@
     "studio": "Studio",
     "allClients": "All clients",
     "toggleSidebar": "Show or hide menu",
+    "skipToContent": "Skip to content",
     "navigation": "Navigation",
     "navigationDescription": "Main application menu.",
     "theme": {
@@ -127,7 +128,7 @@
       "description": "Content will appear here when there is some."
     },
     "loading": {
-      "title": "Loading"
+      "title": "Loading…"
     },
     "error": {
       "title": "Something went wrong",

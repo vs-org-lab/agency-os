@@ -10,6 +10,7 @@ import { ClientProgress } from './home/client-progress';
 import { HomeIndicators } from './home/indicators';
 import { TodayList } from './home/today-list';
 import { UpcomingEvents } from './home/upcoming-events';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -80,4 +81,8 @@ export default async function StudioHomePage({ params }: PageProps) {
       </div>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'studio.home.title');
 }

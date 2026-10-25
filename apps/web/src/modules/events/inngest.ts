@@ -3,6 +3,7 @@ import { Inngest } from 'inngest';
 import { logger } from '@/platform/logger';
 import { withSystemContext } from '@/platform/db';
 import { createOutboxDispatcher, type DispatchResult, type OutboxFailure } from './dispatch';
+import { boundedFlushRequest } from './flush-request';
 
 export const inngest = new Inngest({ id: 'agency-os' });
 
@@ -38,10 +39,14 @@ export const outboxDispatch = inngest.createFunction(
   async ({ step }) => step.run('dispatch-pending', () => dispatchPending()),
 );
 
-export async function requestFlush(): Promise<void> {
-  try {
-    await inngest.send({ name: OUTBOX_FLUSH_EVENT, data: {} });
-  } catch (error) {
-    logger.warn('outbox.flush_request_failed', { error });
-  }
+const FLUSH_REQUEST_TIMEOUT_MS = 2_000;
+
+export function requestFlush(): Promise<void> {
+  return boundedFlushRequest(
+    async () => {
+      await inngest.send({ name: OUTBOX_FLUSH_EVENT, data: {} });
+    },
+    FLUSH_REQUEST_TIMEOUT_MS,
+    (error) => logger.warn('outbox.flush_request_failed', { error }),
+  );
 }

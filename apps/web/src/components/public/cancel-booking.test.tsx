@@ -3,13 +3,13 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
-import { CancelBooking } from './cancel-booking';
+import { CancelBooking, type CancelBookingState } from './cancel-booking';
 
 afterEach(() => {
   cleanup();
 });
 
-function show(action: () => Promise<{ status: 'idle' | 'error' }>) {
+function show(action: () => Promise<CancelBookingState>) {
   render(
     <NextIntlClientProvider locale="pt-PT" messages={messages}>
       <CancelBooking action={action} />
@@ -39,5 +39,26 @@ describe('cancel booking', () => {
       'Não foi possível cancelar. Tente de novo dentro de momentos.',
     );
     expect(document.activeElement).toBe(message);
+  });
+
+  it('a cancel inside the cutoff says it can no longer be changed online', async () => {
+    show(vi.fn(async () => ({ status: 'too_late' as const })));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar chamada' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sim, cancelar' }));
+
+    const message = await screen.findByText(
+      'Já não é possível alterar esta marcação online. Responda ao email de confirmação.',
+    );
+    expect(document.activeElement).toBe(message);
+  });
+
+  it('a cancel on an inactive link says the link is no longer active', async () => {
+    show(vi.fn(async () => ({ status: 'closed' as const })));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar chamada' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sim, cancelar' }));
+
+    expect(await screen.findByText('Este link de marcação já não está ativo.')).toBeTruthy();
   });
 });

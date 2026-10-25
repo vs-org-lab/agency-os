@@ -5,7 +5,13 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { FormMessage } from '@/components/forms/form-message';
 
-export type CancelBookingState = { status: 'idle' | 'error' };
+export type CancelBookingState = { status: 'idle' | 'error' | 'too_late' | 'closed' };
+
+const FAILURE_KEYS = {
+  error: 'manage.cancelFailed',
+  too_late: 'tooLate',
+  closed: 'closed',
+} as const;
 
 /** Cancelling the call asks first, and a cancel that fails says so instead of doing nothing. */
 export function CancelBooking({
@@ -13,7 +19,7 @@ export function CancelBooking({
 }: {
   action: (state: CancelBookingState) => Promise<CancelBookingState>;
 }) {
-  const t = useTranslations('publicApply.booking.manage');
+  const t = useTranslations('publicApply.booking');
   const [state, formAction, pending] = useActionState<CancelBookingState>(action, {
     status: 'idle',
   });
@@ -24,7 +30,7 @@ export function CancelBooking({
   const toggled = useRef(false);
 
   useEffect(() => {
-    if (state.status === 'error') errorRef.current?.focus();
+    if (state.status !== 'idle') errorRef.current?.focus();
   }, [state]);
 
   useEffect(() => {
@@ -43,7 +49,7 @@ export function CancelBooking({
             disabled={pending}
             className="h-11 w-full md:h-9 sm:w-auto"
           >
-            {t('confirmCancel')}
+            {t('manage.confirmCancel')}
           </Button>
           <Button
             type="button"
@@ -54,7 +60,7 @@ export function CancelBooking({
               setConfirming(false);
             }}
           >
-            {t('keep')}
+            {t('manage.keep')}
           </Button>
         </form>
       ) : (
@@ -68,12 +74,12 @@ export function CancelBooking({
             setConfirming(true);
           }}
         >
-          {t('cancel')}
+          {t('manage.cancel')}
         </Button>
       )}
-      {state.status === 'error' ? (
+      {state.status !== 'idle' ? (
         <FormMessage tone="danger" ref={errorRef} tabIndex={-1}>
-          {t('cancelFailed')}
+          {t(FAILURE_KEYS[state.status])}
         </FormMessage>
       ) : null}
     </div>

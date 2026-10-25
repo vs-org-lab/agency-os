@@ -95,7 +95,8 @@ export async function cancelBookingAction(
   _state: CancelBookingState,
 ): Promise<CancelBookingState> {
   try {
-    await publicCancel(manageToken);
+    const result = await publicCancel(manageToken);
+    if (result.status === 'too_late' || result.status === 'closed') return { status: result.status };
   } catch (error) {
     logger.error('commercial.cancel_failed', { error });
     return { status: 'error' };

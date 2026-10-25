@@ -144,8 +144,12 @@ describe('C-11 outcome', () => {
 
     fireEvent.click(within(approvals).getByRole('button', { name: 'Falhou' }));
     fireEvent.click(within(approvals).getByRole('button', { name: 'Guardar' }));
-    await screen.findByText('Explique o que falhou.');
+    const alert = await screen.findByText('Explique o que falhou.');
     expect(run.recordCondition).not.toHaveBeenCalled();
+    const noteField = within(approvals).getByLabelText('Nota');
+    expect(noteField.getAttribute('aria-invalid')).toBe('true');
+    expect(noteField.getAttribute('aria-describedby')).toContain(alert.id);
+    expect(document.activeElement).toBe(noteField);
     fireEvent.change(within(approvals).getByLabelText('Nota'), {
       target: { value: 'Duas aprovações com uma semana de atraso' },
     });

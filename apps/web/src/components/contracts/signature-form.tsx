@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
@@ -40,6 +40,14 @@ export function SignatureForm({
   const [error, setError] = useState<SignError | null>(null);
   const [pending, startTransition] = useTransition();
   const id = `signature-${contractId}`;
+  const errorId = `${id}-error`;
+  const nameRef = useRef<HTMLInputElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (error === 'name_mismatch') nameRef.current?.focus();
+    if (error === 'confirm') confirmRef.current?.focus();
+  }, [error]);
 
   return (
     <form
@@ -66,7 +74,10 @@ export function SignatureForm({
         <Label htmlFor={`${id}-name`}>{t('nameLabel', { name: expectedName })}</Label>
         <Input
           id={`${id}-name`}
+          ref={nameRef}
           required
+          aria-invalid={error === 'name_mismatch' ? true : undefined}
+          aria-describedby={error === 'name_mismatch' ? errorId : undefined}
           autoComplete="name"
           maxLength={200}
           value={name}
@@ -79,6 +90,10 @@ export function SignatureForm({
       <div className="flex items-start gap-3">
         <Checkbox
           id={`${id}-confirm`}
+          ref={confirmRef}
+          aria-required
+          aria-invalid={error === 'confirm' ? true : undefined}
+          aria-describedby={error === 'confirm' ? errorId : undefined}
           checked={confirmed}
           onCheckedChange={(checked) => {
             setConfirmed(checked === true);
@@ -91,7 +106,9 @@ export function SignatureForm({
       </div>
       <p className="text-caption text-text-secondary">{t('legal')}</p>
       {error ? (
-        <FormMessage tone="danger">{t(`errors.${error}`, { name: expectedName })}</FormMessage>
+        <FormMessage tone="danger" id={errorId}>
+          {t(`errors.${error}`, { name: expectedName })}
+        </FormMessage>
       ) : null}
       <div className="md:w-72">
         <Button type="submit" disabled={pending} className="w-full">

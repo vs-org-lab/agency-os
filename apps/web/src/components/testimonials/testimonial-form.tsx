@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, useTransition } from 'react';
+import { useId, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
@@ -38,6 +38,11 @@ export function TestimonialForm({
   const [consent, setConsent] = useState(initial?.consentPublish ?? false);
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [pending, startTransition] = useTransition();
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const errorId = `${id}-error`;
+  const missingBody = outcome === 'required' && body.trim() === '';
+  const missingName = outcome === 'required' && authorName.trim() === '';
 
   return (
     <form
@@ -47,6 +52,7 @@ export function TestimonialForm({
         event.preventDefault();
         if (body.trim() === '' || authorName.trim() === '') {
           setOutcome('required');
+          (body.trim() === '' ? bodyRef : nameRef).current?.focus();
           return;
         }
         startTransition(async () => {
@@ -67,10 +73,14 @@ export function TestimonialForm({
         <Label htmlFor={`${id}-body`}>{t('body')}</Label>
         <Textarea
           id={`${id}-body`}
+          ref={bodyRef}
+          required
+          aria-required
+          aria-invalid={missingBody ? true : undefined}
           rows={6}
           maxLength={MAX_TESTIMONIAL_LENGTH}
           value={body}
-          aria-describedby={`${id}-count`}
+          aria-describedby={missingBody ? `${id}-count ${errorId}` : `${id}-count`}
           onChange={(event) => setBody(event.target.value)}
         />
         <span id={`${id}-count`} className="text-caption text-text-secondary tabular-nums">
@@ -82,6 +92,11 @@ export function TestimonialForm({
           <Label htmlFor={`${id}-name`}>{t('name')}</Label>
           <Input
             id={`${id}-name`}
+            ref={nameRef}
+            required
+            aria-required
+            aria-invalid={missingName ? true : undefined}
+            aria-describedby={missingName ? errorId : undefined}
             autoComplete="name"
             maxLength={120}
             value={authorName}
@@ -114,7 +129,9 @@ export function TestimonialForm({
       </div>
       {outcome === 'sent' ? <FormMessage tone="success">{t('sent')}</FormMessage> : null}
       {outcome === 'required' || outcome === 'failed' ? (
-        <FormMessage tone="danger">{t(outcome)}</FormMessage>
+        <FormMessage tone="danger" id={errorId}>
+          {t(outcome)}
+        </FormMessage>
       ) : null}
       <div className="md:w-72">
         <Button type="submit" disabled={pending} className="w-full">

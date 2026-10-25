@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, useTransition } from 'react';
+import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
@@ -50,6 +50,14 @@ function ConditionItem({
   const [note, setNote] = useState(condition.note ?? '');
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, startTransition] = useTransition();
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  const feedbackId = `${id}-feedback`;
+  const noteMissing = feedback === 'noteRequired';
+
+  useEffect(() => {
+    if (feedback === 'noteRequired') noteRef.current?.focus();
+  }, [feedback]);
+
   const run = (input: Parameters<RecordCondition>[0]) =>
     startTransition(async () => {
       const result = await record(input).catch(() => ({ ok: false as const, code: 'not_found' }));
@@ -116,6 +124,10 @@ function ConditionItem({
           <Label htmlFor={`${id}-note`}>{t('conditions.note')}</Label>
           <Textarea
             id={`${id}-note`}
+            ref={noteRef}
+            aria-required
+            aria-invalid={noteMissing ? true : undefined}
+            aria-describedby={noteMissing ? feedbackId : undefined}
             maxLength={500}
             value={note}
             onChange={(event) => setNote(event.target.value)}
@@ -128,7 +140,9 @@ function ConditionItem({
       {feedback === 'recorded' ? (
         <FormMessage tone="success">{t('conditions.recorded')}</FormMessage>
       ) : feedback === 'noteRequired' ? (
-        <FormMessage tone="danger">{t('conditions.noteRequired')}</FormMessage>
+        <FormMessage tone="danger" id={feedbackId}>
+          {t('conditions.noteRequired')}
+        </FormMessage>
       ) : feedback ? (
         <FormMessage tone="danger">{t(`errors.${feedback}`)}</FormMessage>
       ) : null}
@@ -156,6 +170,13 @@ export function Conditions({
   const [description, setDescription] = useState('');
   const [feedback, setFeedback] = useState<'added' | OutcomeError | null>(null);
   const [pending, startTransition] = useTransition();
+  const descriptionRef = useRef<HTMLInputElement>(null);
+  const addErrorId = `${id}-add-error`;
+  const addRejected = feedback !== null && feedback !== 'added';
+
+  useEffect(() => {
+    if (feedback !== null && feedback !== 'added') descriptionRef.current?.focus();
+  }, [feedback]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -189,7 +210,10 @@ export function Conditions({
             <Label htmlFor={`${id}-description`}>{t('addLabel')}</Label>
             <Input
               id={`${id}-description`}
+              ref={descriptionRef}
               required
+              aria-invalid={addRejected ? true : undefined}
+              aria-describedby={addRejected ? addErrorId : undefined}
               maxLength={200}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -201,7 +225,9 @@ export function Conditions({
           {feedback === 'added' ? (
             <FormMessage tone="success">{t('added')}</FormMessage>
           ) : feedback ? (
-            <FormMessage tone="danger">{tErrors(feedback)}</FormMessage>
+            <FormMessage tone="danger" id={addErrorId}>
+              {tErrors(feedback)}
+            </FormMessage>
           ) : null}
         </form>
       ) : null}

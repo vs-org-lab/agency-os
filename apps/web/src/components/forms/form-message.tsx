@@ -10,9 +10,18 @@ const toneClasses: Record<Tone, string> = {
   danger: 'bg-danger-bg text-danger',
 };
 
-export function FormMessage({ tone, children }: { tone: Tone; children: ReactNode }) {
+export function FormMessage({
+  tone,
+  id,
+  children,
+}: {
+  tone: Tone;
+  id?: string;
+  children: ReactNode;
+}) {
   return (
     <p
+      id={id}
       role={tone === 'danger' ? 'alert' : 'status'}
       className={cn('rounded-md px-3 py-2 text-body-sm', toneClasses[tone])}
     >

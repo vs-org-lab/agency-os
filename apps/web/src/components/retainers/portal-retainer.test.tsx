@@ -97,6 +97,22 @@ describe('P-10 retainer', () => {
     );
   });
 
+  it('ties a rejected request to the quantity field and focuses it', async () => {
+    const rejecting = actions();
+    rejecting.request.mockResolvedValue({ ok: false as const, code: 'invalid_input' });
+    withIntl(<PortalRetainer view={view(true)} actions={rejecting} />);
+    fireEvent.change(screen.getByLabelText('O que precisa'), { target: { value: 'Série' } });
+    fireEvent.change(screen.getByLabelText('Quantidade'), { target: { value: 'abc' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar pedido' }));
+
+    const alert = await screen.findByRole('alert');
+    const quantity = screen.getByLabelText('Quantidade');
+    expect(quantity.getAttribute('aria-invalid')).toBe('true');
+    expect(quantity.getAttribute('aria-describedby')).toContain(alert.id);
+    expect(screen.getByLabelText('O que precisa').getAttribute('aria-invalid')).toBeNull();
+    expect(document.activeElement).toBe(quantity);
+  });
+
   it('a suspended client sees the notice instead of the form', () => {
     withIntl(<PortalRetainer view={view(true, true)} actions={actions()} />);
     expect(

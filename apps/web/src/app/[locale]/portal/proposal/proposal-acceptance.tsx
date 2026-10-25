@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { currencyFormatOptions } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
@@ -57,8 +57,16 @@ export function ProposalAcceptance({
   const [message, setMessage] = useState('');
   const [changes, setChanges] = useState<'idle' | 'sent' | 'failed'>('idle');
   const [pending, startTransition] = useTransition();
+  const uid = useId();
+  const errorId = `${uid}-error`;
+  const changesErrorId = `${uid}-changes-error`;
+  const firstRadioRef = useRef<HTMLInputElement>(null);
+  const missingChoice = error === 'choose';
   const money = (amount: string) =>
     format.number(Number(amount), currencyFormatOptions(proposal.currency));
+  useEffect(() => {
+    if (error === 'choose') firstRadioRef.current?.focus();
+  }, [error]);
   const validUntil = format.dateTime(new Date(`${proposal.validUntil}T12:00:00Z`), {
     dateStyle: 'long',
   });
@@ -110,16 +118,24 @@ export function ProposalAcceptance({
           <legend className="pb-2 text-title-sm text-text">{t('choose')}</legend>
           <p className="text-body-sm text-text-secondary">{t('intro')}</p>
           <div className="grid gap-3 md:grid-cols-3">
-            {proposal.options.map((option) => (
+            {proposal.options.map((option, index) => (
               <label
                 key={option.id}
-                className="flex cursor-pointer flex-col gap-2 rounded-lg border border-border bg-surface p-4 has-[:checked]:border-2 has-[:checked]:border-text"
+                className="flex cursor-pointer flex-col gap-2 rounded-lg border border-border bg-surface p-4 has-[:checked]:border-text has-[:checked]:ring-1 has-[:checked]:ring-text"
               >
                 <span className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="option"
                     value={option.id}
+                    ref={index === 0 ? firstRadioRef : undefined}
+                    aria-labelledby={`${uid}-${option.id}-name`}
+                    aria-describedby={
+                      missingChoice
+                        ? `${uid}-${option.id}-detail ${errorId}`
+                        : `${uid}-${option.id}-detail`
+                    }
+                    aria-invalid={missingChoice ? true : undefined}
                     disabled={proposal.expired}
                     checked={optionId === option.id}
                     onChange={() => {
@@ -128,36 +144,40 @@ export function ProposalAcceptance({
                     }}
                     className="size-4 accent-current"
                   />
-                  <span className="text-body font-medium text-text">{option.name}</span>
-                </span>
-                <span className="text-title-sm text-text tabular-nums">
-                  {money(option.oneOffAmount)}
-                </span>
-                {option.retainerMonthly && option.retainerMonths ? (
-                  <span className="text-body-sm text-text-secondary">
-                    {t('retainer', {
-                      amount: money(option.retainerMonthly),
-                      months: option.retainerMonths,
-                    })}
+                  <span id={`${uid}-${option.id}-name`} className="text-body font-medium text-text">
+                    {option.name}
                   </span>
-                ) : null}
-                {option.summary ? (
-                  <span className="text-body-sm text-text-secondary">{option.summary}</span>
-                ) : null}
-                <span className="text-label text-text">{t('scope')}</span>
-                <ul className="list-disc pl-5 text-body-sm text-text-secondary">
-                  {option.scope.map((line, index) => (
-                    <li key={index}>{line.text}</li>
-                  ))}
-                </ul>
-                <span className="text-label text-text">{t('payments')}</span>
-                <ul className="text-body-sm text-text-secondary">
-                  {option.paymentPlan.map((step, index) => (
-                    <li key={index}>
-                      {t('payment', { label: step.label, percent: step.percent })}
-                    </li>
-                  ))}
-                </ul>
+                </span>
+                <span id={`${uid}-${option.id}-detail`} className="flex flex-col gap-2">
+                  <span className="text-title-sm text-text tabular-nums">
+                    {money(option.oneOffAmount)}
+                  </span>
+                  {option.retainerMonthly && option.retainerMonths ? (
+                    <span className="text-body-sm text-text-secondary">
+                      {t('retainer', {
+                        amount: money(option.retainerMonthly),
+                        months: option.retainerMonths,
+                      })}
+                    </span>
+                  ) : null}
+                  {option.summary ? (
+                    <span className="text-body-sm text-text-secondary">{option.summary}</span>
+                  ) : null}
+                  <span className="text-label text-text">{t('scope')}</span>
+                  <ul className="list-disc pl-5 text-body-sm text-text-secondary">
+                    {option.scope.map((line, index) => (
+                      <li key={index}>{line.text}</li>
+                    ))}
+                  </ul>
+                  <span className="text-label text-text">{t('payments')}</span>
+                  <ul className="text-body-sm text-text-secondary">
+                    {option.paymentPlan.map((step, index) => (
+                      <li key={index}>
+                        {t('payment', { label: step.label, percent: step.percent })}
+                      </li>
+                    ))}
+                  </ul>
+                </span>
               </label>
             ))}
           </div>
@@ -198,7 +218,11 @@ export function ProposalAcceptance({
                 </div>
               ))}
             </div>
-            {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
+            {error ? (
+              <FormMessage tone="danger" id={errorId}>
+                {t(`errors.${error}`)}
+              </FormMessage>
+            ) : null}
             <div className="md:w-96">
               <Button type="submit" disabled={pending} className="w-full">
                 {t('accept')}
@@ -229,6 +253,9 @@ export function ProposalAcceptance({
             id="proposal-changes"
             rows={3}
             required
+            aria-required
+            aria-invalid={changes === 'failed' ? true : undefined}
+            aria-describedby={changes === 'failed' ? changesErrorId : undefined}
             maxLength={2000}
             value={message}
             onChange={(event) => {
@@ -238,7 +265,9 @@ export function ProposalAcceptance({
           />
           {changes === 'sent' ? <FormMessage tone="success">{t('changesSent')}</FormMessage> : null}
           {changes === 'failed' ? (
-            <FormMessage tone="danger">{t('errors.not_found')}</FormMessage>
+            <FormMessage tone="danger" id={changesErrorId}>
+              {t('errors.not_found')}
+            </FormMessage>
           ) : null}
           <div>
             <Button type="submit" variant="outline" disabled={pending}>

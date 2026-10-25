@@ -59,4 +59,22 @@ describe('TestimonialForm', () => {
     expect(send).not.toHaveBeenCalled();
     expect(screen.getByRole('alert').textContent).toBe('Escreva o testemunho e o seu nome.');
   });
+
+  it('ties the error to the empty fields and focuses the first one', async () => {
+    renderForm();
+    fireEvent.change(screen.getByLabelText('O seu testemunho'), {
+      target: { value: 'Trabalho excelente.' },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Enviar testemunho' }));
+    });
+
+    const name = screen.getByLabelText('Nome');
+    const alert = screen.getByRole('alert');
+    expect(name.getAttribute('aria-invalid')).toBe('true');
+    expect(name.getAttribute('aria-describedby')).toContain(alert.id);
+    expect(screen.getByLabelText('O seu testemunho').getAttribute('aria-invalid')).toBeNull();
+    expect(document.activeElement).toBe(name);
+  });
 });

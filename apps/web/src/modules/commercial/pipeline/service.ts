@@ -237,12 +237,19 @@ export async function applyStageChange(
     };
   }
 
-  await tx.execute(sql`select set_config('app.stage_change_reason', ${reason ?? ''}, true)`);
-  // The stage is not writable by authenticated users: the RN rules above are its only gate. The
-  // update runs as the owner, and the history trigger still reads the caller from the claims.
+  // The stage column is not writable by authenticated users, so a user's update runs as the owner
+  // once the row lock above (which passes the update policy) and an explicit write check agree.
+  // The history trigger still reads the caller from the claims.
   const [{ role } = { role: '' }] = await tx.execute<{ role: string }>(
     sql`select current_user::text as role`,
   );
+  if (role === 'authenticated') {
+    const [{ allowed } = { allowed: false }] = await tx.execute<{ allowed: boolean }>(
+      sql`select app.can_write_pipeline(${deal.organizationId}, ${deal.clientId}) as allowed`,
+    );
+    if (!allowed) return NOT_FOUND;
+  }
+  await tx.execute(sql`select set_config('app.stage_change_reason', ${reason ?? ''}, true)`);
   if (role === 'authenticated') await tx.execute(sql`reset role`);
   await tx
     .update(deals)

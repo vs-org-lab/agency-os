@@ -3110,8 +3110,8 @@
     },
     "details": {
       "payments": "{onTime} de {total} pedidos pagos a tempo",
-      "approvals": "Mediana de {days} dias",
-      "responses": "Mediana de {hours} horas",
+      "approvals": "Mediana de {days, plural, one {# dia} other {# dias}}",
+      "responses": "Mediana de {hours, plural, =0 {menos de 1 hora} one {# hora} other {# horas}}",
       "outcome": "{progress}% da meta com {expected}% do tempo"
     },
     "trend": {

@@ -216,4 +216,39 @@ describe('client report data', () => {
     },
     SLOW,
   );
+
+  it(
+    'cancelled projects stay out of the report',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const rooms = await createRoomFixture(sql, world);
+        const inSeptember = '2026-09-10 11:00+01';
+        await sql`
+          update public.project_steps set status = 'done', completed_at = ${inSeptember}
+          where id = ${rooms.a.visibleStepId}
+        `;
+        await sql`
+          update public.project_updates set created_at = ${inSeptember}
+          where id = ${rooms.a.clientUpdateId}
+        `;
+        await approvedDocument(sql, world, {
+          clientId: world.clients.a,
+          projectId: rooms.a.projectId,
+          title: 'Identidade',
+          approvedAt: '2026-09-20 15:00+01',
+        });
+        await sql`update public.projects set status = 'cancelled' where id = ${rooms.a.projectId}`;
+
+        const data = await system(sql)((tx) =>
+          collectReportData(tx, { clientId: world.clients.a, period: SEPTEMBER }),
+        );
+
+        expect(data.steps).toEqual([]);
+        expect(data.updates).toEqual([]);
+        expect(data.approvals).toEqual([]);
+      });
+    },
+    SLOW,
+  );
 });

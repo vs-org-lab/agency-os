@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import type { ClientHealthView, Signal } from '@/modules/health';
 
@@ -16,7 +16,6 @@ const LEVEL_VARIANT = {
 /** RF-160 on C-01: the client's health score, its level and the four signals behind it. */
 export function HealthCard({ health }: { health: ClientHealthView }) {
   const t = useTranslations('health');
-  const format = useFormatter();
   const headingId = useId();
   const detail = (signal: Signal) => {
     const value = signal.detail;
@@ -25,7 +24,7 @@ export function HealthCard({ health }: { health: ClientHealthView }) {
         return t('details.payments', { onTime: value.onTime, total: value.total });
       case 'approvals':
         return t('details.approvals', {
-          days: format.number(value.medianDays, { maximumFractionDigits: 1 }),
+          days: Math.round(value.medianDays * 10) / 10,
         });
       case 'responses':
         return t('details.responses', { hours: Math.round(value.medianHours) });

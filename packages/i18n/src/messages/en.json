@@ -3110,8 +3110,8 @@
     },
     "details": {
       "payments": "{onTime} of {total} requests paid on time",
-      "approvals": "Median of {days} days",
-      "responses": "Median of {hours} hours",
+      "approvals": "Median of {days, plural, one {# day} other {# days}}",
+      "responses": "Median of {hours, plural, =0 {less than 1 hour} one {# hour} other {# hours}}",
       "outcome": "{progress}% of the target with {expected}% of the time"
     },
     "trend": {

@@ -1,4 +1,4 @@
-import { and, eq, isNull, lte } from 'drizzle-orm';
+import { and, eq, isNull, lte, sql } from 'drizzle-orm';
 import { schema } from '@agency-os/db';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts } from '@/platform/db';
@@ -6,6 +6,12 @@ import type { DbContexts } from '@/platform/db';
 const { approvals } = schema;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** A paused or cancelled project waits for nobody, so its approvals send no reminders. */
+const projectRunning = sql`exists (
+  select 1 from public.projects p
+  where p.id = ${approvals.projectId} and p.status not in ('paused', 'cancelled')
+)`;
 
 /** AUT-15: a pending approval reminds the decision maker after 2 days and alerts the team after 5. */
 export const APPROVAL_REMINDER_DAYS = 2;
@@ -31,6 +37,7 @@ export async function sweepApprovalReminders(
           eq(approvals.status, 'pending'),
           isNull(approvals.alertedAt),
           lte(approvals.requestedAt, alertBefore),
+          projectRunning,
         ),
       )
       .for('update', { skipLocked: true });
@@ -55,6 +62,7 @@ export async function sweepApprovalReminders(
           eq(approvals.status, 'pending'),
           isNull(approvals.remindedAt),
           lte(approvals.requestedAt, remindBefore),
+          projectRunning,
         ),
       )
       .for('update', { skipLocked: true });

@@ -6,6 +6,8 @@ import en from '@agency-os/i18n/messages/en';
 import ptPT from '@agency-os/i18n/messages/pt-PT';
 import '@agency-os/ui/styles/globals.css';
 
+const englishRetry = ` · ${en.states.error.retry}`;
+
 export default function GlobalError({
   error,
   reset,
@@ -33,7 +35,7 @@ export default function GlobalError({
           >
             {ptPT.states.error.retry}
             <span lang="en" className="text-text-tertiary">
-              {` · ${en.states.error.retry}`}
+              {englishRetry}
             </span>
           </button>
         </main>

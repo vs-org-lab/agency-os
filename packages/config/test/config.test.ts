@@ -28,7 +28,8 @@ describe('shared configuration', () => {
     expect(tsconfig.compilerOptions.noUncheckedIndexedAccess).toBe(true);
   });
 
-  it('eslint config forbids explicit any', async () => {
+  // The first lint loads ESLint and the typed rules, which takes longer than 5 s on a busy machine.
+  it('eslint config forbids explicit any', { timeout: 30_000 }, async () => {
     const rules = await lint('export const value: any = 1;\n', 'packages/config/sample.ts');
 
     expect(rules).toContain('@typescript-eslint/no-explicit-any');

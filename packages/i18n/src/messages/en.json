@@ -421,8 +421,7 @@
         "diagnosis": "Diagnosis",
         "documents": "Documents and contracts",
         "billing": "Billing",
-        "approvals": "Approvals",
-        "retainers": "Retainers"
+        "approvals": "Approvals"
       },
       "rules": {
         "same_code": "The deal is already at this code.",

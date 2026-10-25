@@ -421,8 +421,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
-        "approvals": "Aprovações",
-        "retainers": "Retainers"
+        "approvals": "Aprovações"
       },
       "rules": {
         "same_code": "O negócio já está neste código.",

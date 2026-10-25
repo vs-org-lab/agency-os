@@ -43,6 +43,7 @@ jobs:
       PUBLIC_LINK_SECRET: ${{ secrets.PREVIEW_PUBLIC_LINK_SECRET }}
       BRAND_HUB_TOKEN_SECRET: ${{ secrets.PREVIEW_BRAND_HUB_TOKEN_SECRET }}
       PUBLIC_ORGANIZATION_SLUG: e2e-studio
+      APP_BASE_URL: http://localhost:3000
       EMAIL_TRANSPORT: capture
       CALENDAR_PROVIDER: fake
       TRANSCRIPTION_PROVIDER: fake
@@ -78,9 +79,9 @@ jobs:
           NEXT_PUBLIC_OS_URL: http://localhost:3001/os
           NEXT_PUBLIC_OS_PAGES_URL: http://localhost:3000
       - run: pnpm --filter web e2e
-      - if: failure()
+      - if: failure() || cancelled()
         run: tail -200 next.log
-      - if: failure()
+      - if: failure() || cancelled()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report

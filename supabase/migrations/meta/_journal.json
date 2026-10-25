@@ -484,6 +484,13 @@
       "when": 1792953595636,
       "tag": "20261025183955_deal_stage_privilege",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1792957243925,
+      "tag": "20261025194043_proposal_draft_edits",
+      "breakpoints": true
     }
   ]
 }

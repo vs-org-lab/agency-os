@@ -144,7 +144,13 @@ describe('calls', () => {
 
       const result = await recordCallOutcome(
         claimsFor(world.users.founder),
-        { callId: core.a.callId, status: 'completed', outcome: 'advance', reason: null, notes: null },
+        {
+          callId: core.a.callId,
+          status: 'completed',
+          outcome: 'advance',
+          reason: null,
+          notes: null,
+        },
         depsFor(sql),
       );
 

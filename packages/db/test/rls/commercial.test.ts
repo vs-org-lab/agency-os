@@ -117,6 +117,7 @@ describe('commercial access', () => {
       await asUser(sql, world.users.founder);
 
       await sql`select set_config('app.stage_change_reason', 'Lost to a competitor', true)`;
+      await sql`reset role`;
       await sql`update public.deals set pipeline_code = 'X.4' where id = ${fixture.a.dealId}`;
 
       const history = await sql<

@@ -164,7 +164,7 @@ jobs:
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   e2e:
-    name: End-to-end and accessibility
+    name: Staging smoke check
     needs: deploy
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -191,8 +191,10 @@ jobs:
         env:
           NEXT_PUBLIC_OS_URL: http://localhost:3001/os
           NEXT_PUBLIC_OS_PAGES_URL: https://${{ vars.STAGING_DOMAIN }}
-      - name: End-to-end tests without public application writes, fake transcription or captured emails
-        run: pnpm --filter web e2e --grep-invert "@public-writes|@fake-transcription|@captured-email|@fake-domains|@fake-receipts"
+      # The full suite runs on every PR against the app on the runner; staging gets a short check of
+      # sign-in and the room, to keep the Vercel Hobby plan's function CPU within its limit.
+      - name: Smoke check of sign-in and the room
+        run: pnpm --filter web e2e e2e/authentication.spec.ts e2e/rooms.spec.ts --project=desktop --grep-invert "@public-writes|@fake-transcription|@captured-email|@fake-domains|@fake-receipts"
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

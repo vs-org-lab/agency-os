@@ -1,8 +1,14 @@
-name: Deploy preview
+name: End-to-end
 
+# The end-to-end suite runs against the app started on the runner itself (`next build` and
+# `next start`), not a Vercel preview: the Hobby plan's function CPU is kept for staging.
 on:
   pull_request:
     branches: [develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
 
 concurrency:
   group: preview-${{ github.ref }}
@@ -10,97 +16,41 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  deploy:
-    name: Vercel preview
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    outputs:
-      url: ${{ steps.deploy.outputs.url }}
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.PREVIEW_NEXT_PUBLIC_SENTRY_DSN }}
-      NEXT_PUBLIC_VERCEL_ENV: preview
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm add --global vercel@62.4.0
-      - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Remove git metadata
-        run: rm -rf .git
-      - name: Deploy
-        id: deploy
-        timeout-minutes: 10
-        run: |
-          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
-            --env NEXT_PUBLIC_SUPABASE_URL="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}" \
-            --env NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" \
-            --env NEXT_PUBLIC_SENTRY_DSN="${{ secrets.PREVIEW_NEXT_PUBLIC_SENTRY_DSN }}" \
-            --env DATABASE_URL="${{ secrets.PREVIEW_DATABASE_URL }}" \
-            --env SUPABASE_SECRET_KEY="${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}" \
-            --env SESSION_ACTIVITY_SECRET="${{ secrets.PREVIEW_SESSION_ACTIVITY_SECRET }}" \
-            --env INNGEST_EVENT_KEY="${{ secrets.PREVIEW_INNGEST_EVENT_KEY }}" \
-            --env INNGEST_SIGNING_KEY="${{ secrets.PREVIEW_INNGEST_SIGNING_KEY }}" \
-            --env PUBLIC_LINK_SECRET="${{ secrets.PREVIEW_PUBLIC_LINK_SECRET }}" \
-            --env PUBLIC_ORGANIZATION_SLUG=e2e-studio \
-            --env EMAIL_TRANSPORT=capture \
-            --env CALENDAR_PROVIDER=fake \
-            --env TRANSCRIPTION_PROVIDER=fake \
-            --env APPLY_IP_LIMIT_PER_HOUR=1000 \
-            --env DOMAIN_PROVIDER=fake \
-            --env RECEIPT_READER=fake \
-            --env BRAND_HUB_SITE_URL=http://localhost:3001 \
-            --env BRAND_HUB_SITE_ORIGINS=http://localhost:3001 \
-            --env BRAND_HUB_TOKEN_SECRET="${{ secrets.PREVIEW_BRAND_HUB_TOKEN_SECRET }}")
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-      - name: Comment preview URL
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const marker = '<!-- preview-url -->';
-            const body = `${marker}\nPreview: ${{ steps.deploy.outputs.url }}`;
-            const { data: comments } = await github.rest.issues.listComments({
-              ...context.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find((comment) => comment.body?.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
-            } else {
-              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
-            }
-
   e2e:
     name: End-to-end and accessibility
-    needs: deploy
+    # Drafts and forks skip the suite; it runs when the PR is ready for review.
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    # Every preview seeds and signs in against the same dev database, so runs must not overlap.
+    # Every run seeds and signs in against the same dev database, so runs must not overlap.
     concurrency:
       group: e2e-preview-database
       cancel-in-progress: false
     timeout-minutes: 45
     env:
       CI: true
-      E2E_BASE_URL: ${{ needs.deploy.outputs.url }}
-      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      E2E_BASE_URL: http://localhost:3000
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PREVIEW_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      SUPABASE_SECRET_KEY: ${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}
+      NEXT_PUBLIC_VERCEL_ENV: preview
+      DATABASE_URL: ${{ secrets.PREVIEW_DATABASE_URL }}
       DATABASE_DIRECT_URL: ${{ secrets.PREVIEW_DATABASE_DIRECT_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.PREVIEW_SUPABASE_SECRET_KEY }}
+      SESSION_ACTIVITY_SECRET: ${{ secrets.PREVIEW_SESSION_ACTIVITY_SECRET }}
+      INNGEST_EVENT_KEY: ${{ secrets.PREVIEW_INNGEST_EVENT_KEY }}
+      INNGEST_SIGNING_KEY: ${{ secrets.PREVIEW_INNGEST_SIGNING_KEY }}
       PUBLIC_LINK_SECRET: ${{ secrets.PREVIEW_PUBLIC_LINK_SECRET }}
+      BRAND_HUB_TOKEN_SECRET: ${{ secrets.PREVIEW_BRAND_HUB_TOKEN_SECRET }}
+      PUBLIC_ORGANIZATION_SLUG: e2e-studio
+      EMAIL_TRANSPORT: capture
+      CALENDAR_PROVIDER: fake
+      TRANSCRIPTION_PROVIDER: fake
+      APPLY_IP_LIMIT_PER_HOUR: 1000
+      DOMAIN_PROVIDER: fake
+      RECEIPT_READER: fake
+      BRAND_HUB_SITE_URL: http://localhost:3001
+      BRAND_HUB_SITE_ORIGINS: http://localhost:3001
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -110,13 +60,26 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Build the app
+        run: pnpm --filter web build
+      - name: Start the app on the runner
+        run: |
+          pnpm --filter web start > next.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:3000/sign-in && exit 0
+            sleep 2
+          done
+          cat next.log
+          exit 1
       - run: pnpm --filter web e2e:seed
       - name: Build the Brand Hub site for the end-to-end tests
         run: pnpm --filter brand-hub build
         env:
           NEXT_PUBLIC_OS_URL: http://localhost:3001/os
-          NEXT_PUBLIC_OS_PAGES_URL: ${{ needs.deploy.outputs.url }}
+          NEXT_PUBLIC_OS_PAGES_URL: http://localhost:3000
       - run: pnpm --filter web e2e
+      - if: failure()
+        run: tail -200 next.log
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

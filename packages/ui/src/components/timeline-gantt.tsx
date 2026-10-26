@@ -41,10 +41,10 @@ function ganttLayout(rows: readonly GanttRow[], today: string, zoom: GanttZoom) 
   return {
     totalDays,
     pxPerDay: PX_PER_DAY[zoom],
-    bars: rows.map((row, index) => ({
+    bars: rows.map((row) => ({
       id: row.id,
-      leftPct: pct(starts[index]! - first),
-      widthPct: pct(ends[index]! - starts[index]! + 1),
+      leftPct: pct(dayNumber(row.start) - first),
+      widthPct: pct(dayNumber(row.end) - dayNumber(row.start) + 1),
     })),
     todayPct: pct(todayDay - first),
     ticks,
@@ -168,7 +168,8 @@ function TimelineGantt({
             </div>
           </div>
           {rows.map((row, index) => {
-            const bar = layout.bars[index]!;
+            const bar = layout.bars[index];
+            if (!bar) return null;
             return (
               <div
                 key={row.id}

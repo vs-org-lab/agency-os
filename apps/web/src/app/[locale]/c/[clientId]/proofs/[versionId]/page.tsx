@@ -47,6 +47,7 @@ export default async function StaffProofPage({ params }: PageProps) {
         title={version.title}
         number={version.number}
         pages={version.pages}
+        previousVersion={version.previousVersion}
         comments={version.comments}
         audience="team"
         canComment

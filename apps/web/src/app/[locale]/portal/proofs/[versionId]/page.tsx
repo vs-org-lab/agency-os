@@ -51,6 +51,7 @@ export default async function PortalProofPage({ params }: PageProps) {
         title={version.title}
         number={version.number}
         pages={version.pages}
+        previousVersion={version.previousVersion}
         comments={version.comments}
         audience="client"
         canComment

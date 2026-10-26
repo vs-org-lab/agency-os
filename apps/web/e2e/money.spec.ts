@@ -48,6 +48,13 @@ test.describe('Money @fake-receipts', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Dinheiro' })).toBeVisible();
     await expectAccessible(page);
 
+    await page.getByRole('button', { name: /^Período/ }).click();
+    await page.getByRole('button', { name: 'Este mês' }).click();
+    await expect(page).toHaveURL(/[?&]from=\d{4}-\d{2}-01&to=\d{4}-\d{2}-\d{2}/);
+    await page.getByRole('button', { name: /^Período/ }).click();
+    await page.getByRole('button', { name: 'Limpar' }).click();
+    await expect(page).not.toHaveURL(/from=/);
+
     await page.getByRole('button', { name: 'Nova despesa' }).click();
     await page.getByLabel('Recibo (JPEG, PNG, WebP ou PDF, até 10 MB)').setInputFiles({
       name: receiptName,

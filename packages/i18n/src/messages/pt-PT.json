@@ -2025,8 +2025,7 @@
       "status": "Estado",
       "all": "Todos",
       "open": "Por fazer",
-      "done": "Concluídas",
-      "submit": "Filtrar"
+      "done": "Concluídas"
     },
     "form": {
       "heading": "Nova tarefa",

@@ -34,10 +34,11 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={room.clientName}
+        title={t('updates.title')}
+        client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
+        showPreviewLink={room.project !== null}
         basePath={`/c/${clientId}/updates`}
       />
       {room.project ? (
@@ -50,7 +51,7 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
             />
           ) : null}
           <section aria-labelledby="room-updates-title" className="flex flex-col gap-3">
-            <h2 id="room-updates-title" className="text-title-sm text-text">
+            <h2 id="room-updates-title" className="sr-only">
               {t('updates.title')}
             </h2>
             <UpdateFeed updates={room.project.updates} />

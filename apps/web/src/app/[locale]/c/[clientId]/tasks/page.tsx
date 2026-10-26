@@ -5,10 +5,9 @@ import { TaskFilters } from '@/components/tasks/task-filters';
 import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
-import { getPathname } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { parseTaskFilter, taskToday } from '@/modules/tasks';
-import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
+import { loadTaskCounts, loadTaskOptions, loadTasks } from '@/modules/tasks/server';
 import {
   createTaskAction,
   deleteTaskAction,
@@ -34,7 +33,10 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
   if (!options) notFound();
   const query = await searchParams;
   const filter = parseTaskFilter(query);
-  const tasks = await loadTasks(session, { ...filter, clientId });
+  const [tasks, counts] = await Promise.all([
+    loadTasks(session, { ...filter, clientId }),
+    loadTaskCounts(session, { clientId, assigneeId: filter.assigneeId }),
+  ]);
   const clientName = options.clients.find((client) => client.id === clientId)?.name ?? '';
   const t = await getTranslations('tasks');
 
@@ -56,9 +58,9 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
         }
       />
       <TaskFilters
-        action={getPathname({ href: `/c/${clientId}/tasks`, locale })}
         clients={null}
         people={options.people}
+        counts={counts}
         current={{
           clientId,
           assigneeId: filter.assigneeId ?? null,

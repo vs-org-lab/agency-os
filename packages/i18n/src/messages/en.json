@@ -2025,8 +2025,7 @@
       "status": "Status",
       "all": "All",
       "open": "To do",
-      "done": "Done",
-      "submit": "Filter"
+      "done": "Done"
     },
     "form": {
       "heading": "New task",

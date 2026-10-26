@@ -63,13 +63,13 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={`/c/${clientId}/hub`}
       />
-      <h2 className="text-title-sm text-text">{t('title')}</h2>
       {!view ? (
         <EmptyState title={t('title')} description={t('empty.noAccess')} />
       ) : !view.hub ? (

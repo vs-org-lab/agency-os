@@ -3,10 +3,17 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
+import { MotionProvider } from '@agency-os/ui/motion';
 import type { TaskView } from '@/modules/tasks';
 import { TaskFilters } from './task-filters';
 import { TaskEditForm, TaskForm } from './task-form';
 import { TaskList } from './task-list';
+
+vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
+vi.mock('@/i18n/navigation', () => ({
+  usePathname: () => '/tasks',
+  useRouter: () => ({ replace: vi.fn() }),
+}));
 
 afterEach(() => {
   cleanup();
@@ -183,28 +190,28 @@ describe('tasks', () => {
     expect(setStatus).toHaveBeenCalledWith(subject.id, 'done');
   });
 
-  it('filters by client and assignee', () => {
+  it('filters by client and assignee with counts per status', () => {
     renderWithIntl(
-      <TaskFilters
-        action="/tasks"
-        clients={[
-          { id: CLIENT_A, name: 'Atlas Lda' },
-          { id: CLIENT_B, name: 'Boreal SA' },
-        ]}
-        people={[{ id: PERSON, name: 'Rita Gestora' }]}
-        current={{ clientId: CLIENT_B, assigneeId: PERSON, status: 'open' }}
-      />,
+      <MotionProvider>
+        <TaskFilters
+          clients={[
+            { id: CLIENT_A, name: 'Atlas Lda' },
+            { id: CLIENT_B, name: 'Boreal SA' },
+          ]}
+          people={[{ id: PERSON, name: 'Rita Gestora' }]}
+          current={{ clientId: CLIENT_B, assigneeId: PERSON, status: 'open' }}
+          counts={{ open: 4, done: 2, all: 6 }}
+        />
+      </MotionProvider>,
     );
 
-    const client = screen.getByLabelText('Cliente') as HTMLSelectElement;
-    const assignee = screen.getByLabelText('Responsável') as HTMLSelectElement;
-    expect(client.name).toBe('client');
-    expect(client.value).toBe(CLIENT_B);
-    expect(assignee.name).toBe('assignee');
-    expect(assignee.value).toBe(PERSON);
-    expect(
-      screen.getByRole('button', { name: 'Filtrar' }).closest('form')?.getAttribute('action'),
-    ).toBe('/tasks');
+    expect(screen.getByRole('combobox', { name: 'Cliente' }).textContent).toContain('Boreal SA');
+    expect(screen.getByRole('combobox', { name: 'Responsável' }).textContent).toContain(
+      'Rita Gestora',
+    );
+    expect(screen.getByRole('tab', { name: /Por fazer/ }).textContent).toContain('4');
+    expect(screen.getByRole('tab', { name: /Concluídas/ }).textContent).toContain('2');
+    expect(screen.queryByRole('button', { name: 'Filtrar' })).toBeNull();
   });
 
   it('task form keeps values when refused', async () => {

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoomAcademy } from '@/components/academy/room-academy';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -33,13 +33,16 @@ export default async function RoomAcademyPage({ params }: PageProps) {
   const view = await loadClientRoomAcademy(session.claims, clientId);
   if (!view) notFound();
 
+  const t = await getTranslations('academy');
+
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={`/c/${clientId}/academy`}
       />
       <RoomAcademy

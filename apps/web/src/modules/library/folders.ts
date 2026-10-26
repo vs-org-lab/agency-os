@@ -248,7 +248,11 @@ export async function ensureRootFolder(
   if (!name.success) return { ok: false, rule: 'invalid_input' };
 
   return deps.contexts.withSystemContext(async (tx) => {
-    const folder = await childFolder(tx, writer, null, name.data);
+    // A concurrent call may have created the folder between the lookup and the insert; the second
+    // lookup then finds it.
+    const folder =
+      (await childFolder(tx, writer, null, name.data)) ??
+      (await childFolder(tx, writer, null, name.data));
     if (!folder) throw new Error('Root folder was not created');
     if (folder.created) {
       await recordAudit(tx, {

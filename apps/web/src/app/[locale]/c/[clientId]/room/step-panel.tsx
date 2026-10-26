@@ -5,7 +5,9 @@ import { Badge } from '@agency-os/ui/components/badge';
 import { SidePanel } from '@agency-os/ui/components/side-panel';
 import { DateField } from '@/components/forms/date-field';
 import { SelectField } from '@/components/forms/select-field';
+import { FormMessage } from '@/components/forms/form-message';
 import type { Person, StepView } from '@/modules/rooms';
+import type { RoomError } from './room-errors';
 
 export type StepChanges = {
   assigneeId?: string | null;
@@ -22,6 +24,7 @@ export function StepPanel({
   people,
   editable,
   pending,
+  error,
   onClose,
   onChange,
 }: {
@@ -29,6 +32,7 @@ export function StepPanel({
   people: readonly Person[];
   editable: boolean;
   pending: boolean;
+  error: RoomError | null;
   onClose: () => void;
   onChange: (stepId: string, changes: StepChanges) => void;
 }) {
@@ -52,6 +56,7 @@ export function StepPanel({
             {step.shared ? <Badge variant="outline">{t('step.shared')}</Badge> : null}
             {step.reopened ? <Badge variant="outline">{t('step.reopened')}</Badge> : null}
           </div>
+          {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
           {step.chained ? (
             <p className="text-caption text-text-tertiary">{t('step.chained')}</p>
           ) : null}
@@ -71,7 +76,7 @@ export function StepPanel({
               <DateField
                 name="dueOn"
                 label={t('step.due', { name: step.name })}
-                defaultValue={step.dueOn ?? ''}
+                value={step.dueOn ?? ''}
                 disabled={pending}
                 onValueChange={(value) => {
                   const dueOn = value || null;

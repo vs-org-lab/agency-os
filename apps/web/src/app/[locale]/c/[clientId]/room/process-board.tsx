@@ -67,6 +67,7 @@ export function ProcessBoard({
   const [selectedId, setSelectedId] = useState<string | null>(defaultPhase(project.phases));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [openStepId, setOpenStepId] = useState<string | null>(null);
+  const [panelError, setPanelError] = useState<RoomError | null>(null);
   const [pending, startTransition] = useTransition();
   const selected = project.phases.find((phase) => phase.id === selectedId) ?? null;
   const approval = selected
@@ -78,9 +79,15 @@ export function ProcessBoard({
   const openStep = selected?.steps.find((step) => step.id === openStepId) ?? null;
   const [dueOn, setDueOn] = useState(selected?.dueOn ?? '');
 
-  const run = (key: DoneKey, action: () => Promise<ActionResult>) =>
+  const run = (key: DoneKey, action: () => Promise<ActionResult>, panel = false) =>
     startTransition(async () => {
       const result = await action().catch(() => ({ ok: false, code: 'not_found' }) as const);
+      if (panel) {
+        // The panel is modal, so its outcome is reported inside it rather than behind it.
+        setPanelError(result.ok ? null : roomError(result.code));
+        if (result.ok) router.refresh();
+        return;
+      }
       setFeedback(
         result.ok ? { tone: 'success', key } : { tone: 'danger', error: roomError(result.code) },
       );
@@ -222,7 +229,10 @@ export function ProcessBoard({
                   selected.status === 'in_progress'
                 }
                 pending={pending}
-                onOpen={() => setOpenStepId(step.id)}
+                onOpen={() => {
+                  setPanelError(null);
+                  setOpenStepId(step.id);
+                }}
                 onToggle={async (done) => {
                   run('saved', () => actions.setStepStatus(step.id, done ? 'done' : 'in_progress'));
                 }}
@@ -236,9 +246,10 @@ export function ProcessBoard({
         people={people}
         editable={editable}
         pending={pending}
+        error={panelError}
         onClose={() => setOpenStepId(null)}
         onChange={(stepId, changes) =>
-          run('saved', () => actions.updateStep({ stepId, ...changes }))
+          run('saved', () => actions.updateStep({ stepId, ...changes }), true)
         }
       />
     </div>

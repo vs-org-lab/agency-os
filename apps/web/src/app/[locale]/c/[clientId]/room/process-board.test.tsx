@@ -63,7 +63,11 @@ function projectWith(steps: StepView[]): ProjectView {
   };
 }
 
-function board(project: ProjectView, setStepStatus = vi.fn(async () => ({ ok: true }) as const)) {
+function board(
+  project: ProjectView,
+  setStepStatus = vi.fn(async () => ({ ok: true }) as const),
+  updateStep: ProcessActions['updateStep'] = vi.fn(async () => ({ ok: true }) as const),
+) {
   const ok = async () => ({ ok: true }) as const;
   const actions: ProcessActions = {
     startPhase: vi.fn(ok),
@@ -72,7 +76,7 @@ function board(project: ProjectView, setStepStatus = vi.fn(async () => ({ ok: tr
     withdrawApproval: vi.fn(ok),
     updatePhase: vi.fn(ok),
     setStepStatus,
-    updateStep: vi.fn(ok),
+    updateStep,
   };
   render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
@@ -140,6 +144,27 @@ describe('ProcessBoard compact steps', () => {
 
     expect(screen.queryByRole('alertdialog')).toBeNull();
     expect(setStepStatus).toHaveBeenCalledWith('step-1', 'in_progress');
+  });
+
+  it('shows a refused panel edit inside the panel', async () => {
+    const user = userEvent.setup();
+    const updateStep = vi.fn(async () => ({ ok: false, code: 'invalid_state' }) as const);
+    board(projectWith([step({})]), undefined, updateStep);
+
+    await user.click(screen.getByRole('button', { name: 'Questionário de descoberta' }));
+    const panel = await screen.findByRole('dialog');
+    await user.click(within(panel).getByRole('checkbox'));
+
+    expect(await within(panel).findByRole('alert')).toBeTruthy();
+  });
+
+  it('marks a step already shared with the client in the panel', async () => {
+    const user = userEvent.setup();
+    board(projectWith([step({ shared: true })]));
+
+    await user.click(screen.getByRole('button', { name: 'Questionário de descoberta' }));
+
+    expect(within(await screen.findByRole('dialog')).getByText('Enviado ao cliente')).toBeTruthy();
   });
 
   it('opens the side panel from the step name', async () => {

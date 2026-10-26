@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { MotionProvider } from '@agency-os/ui/motion';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { MoneyYearView } from '@/modules/money';
 import { ExpenseForm, type ExpenseFormActions } from './expense-form';
@@ -10,23 +12,40 @@ import { MoneyScreen, type MoneyActions } from './money-screen';
 import { MoneySummary } from './money-summary';
 import { SubscriptionsList } from './subscriptions-list';
 
+const push = vi.hoisted(() => vi.fn());
+
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>
       {children}
     </a>
   ),
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ push, refresh: vi.fn() }),
 }));
 
 afterEach(() => {
   cleanup();
+  push.mockClear();
+});
+
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+    }),
+  });
 });
 
 function withIntl(node: React.ReactNode) {
   return render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      {node}
+      <MotionProvider>{node}</MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -292,5 +311,73 @@ describe('S-09 money', () => {
     fireEvent.change(select, { target: { value: 'request-2' } });
     await screen.findByText('Ligação guardada.');
     expect(tableActions.linkExpense).toHaveBeenCalledWith('expense-1', 'request-2');
+  });
+
+  describe('chart and range', () => {
+    const request = (
+      id: string,
+      sentAt: string,
+      amount: string,
+      status: 'paid' | 'sent' = 'paid',
+    ) => ({
+      id,
+      clientName: 'Atlas',
+      number: id,
+      label: 'Setup',
+      amount,
+      currency: 'EUR' as const,
+      status,
+      sentAt,
+      legalInvoiceNumber: null,
+    });
+    const view: MoneyYearView = {
+      canWrite: false,
+      year: 2026,
+      years: [2026],
+      summary: { received: {}, open: {}, spent: {} },
+      requests: [
+        request('PP-2026-0001', '2026-10-05T10:00:00.000Z', '100.00'),
+        request('PP-2026-0002', '2026-03-05T10:00:00.000Z', '200.00'),
+      ],
+      expenses: [
+        { ...EXPENSE, id: 'in-range', vendor: 'Gráfica Porto', spentOn: '2026-10-02' },
+        { ...EXPENSE, id: 'out-of-range', vendor: 'Papelaria Norte', spentOn: '2026-02-02' },
+      ],
+      subscriptions: [],
+      clients: CLIENTS,
+    };
+
+    it('charts received and expenses by month', () => {
+      const { container } = withIntl(<MoneyScreen view={view} actions={actions()} />);
+
+      expect(container.querySelectorAll('[data-slot="line-chart"] path[data-series]')).toHaveLength(
+        2,
+      );
+      expect(screen.getByRole('img', { name: /Pedidos pagos e despesas de 2026/ })).toBeTruthy();
+    });
+
+    it('range filters requests and expenses', () => {
+      withIntl(
+        <MoneyScreen
+          view={view}
+          actions={actions()}
+          range={{ from: '2026-10-01', to: '2026-10-31' }}
+        />,
+      );
+
+      expect(screen.getByText('PP-2026-0001')).toBeTruthy();
+      expect(screen.queryByText('PP-2026-0002')).toBeNull();
+      expect(screen.getByText('Gráfica Porto')).toBeTruthy();
+      expect(screen.queryByText('Papelaria Norte')).toBeNull();
+    });
+
+    it('choosing a preset puts the range in the url and clearing removes it', async () => {
+      const user = userEvent.setup();
+      withIntl(<MoneyScreen view={view} actions={actions()} range={null} />);
+
+      await user.click(screen.getByRole('button', { name: /Período/ }));
+      await user.click(await screen.findByRole('button', { name: 'Este ano' }));
+      expect(push).toHaveBeenCalledWith('/money?year=2026&from=2026-01-01&to=2026-12-31');
+    });
   });
 });

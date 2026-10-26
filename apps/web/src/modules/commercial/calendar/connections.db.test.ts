@@ -68,6 +68,7 @@ describe('calendar connections', () => {
       expect(await calendarConnectionStatus(claimsFor(world.users.founder), { contexts })).toEqual({
         status: 'active',
         email: 'founder@gmail.com',
+        connectedAt: expect.any(Date),
       });
     });
   });

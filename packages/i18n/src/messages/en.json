@@ -1163,7 +1163,7 @@
   "settings": {
     "integrations": {
       "title": "Integrations",
-      "description": "External services connected to the studio.",
+      "description": "What the OS connects today and what it could connect.",
       "google": {
         "title": "Google Calendar",
         "description": "Reads your availability and creates discovery calls with Google Meet."
@@ -1182,6 +1182,79 @@
         "connected": "Google Calendar connected.",
         "disconnected": "Google Calendar disconnected.",
         "error": "The Google Calendar connection could not be completed. Try again."
+      },
+      "groups": {
+        "account": {
+          "title": "Your account",
+          "description": "Yours alone. Everyone on the team connects their own."
+        },
+        "studio": {
+          "title": "Studio",
+          "description": "Services configured on the server, for the whole team. Read only."
+        },
+        "ideas": {
+          "title": "Ideas to connect",
+          "description": "They do not exist yet. They show what we could connect next."
+        }
+      },
+      "state": {
+        "active": "Active",
+        "test": "Test mode",
+        "missing": "Not configured"
+      },
+      "services": {
+        "payments": {
+          "title": "Payments",
+          "description": "Card payments with Stripe."
+        },
+        "email": {
+          "title": "Email",
+          "description": "Sends the OS emails over SMTP."
+        },
+        "transcription": {
+          "title": "Transcription",
+          "description": "Transcribes calls and audio with Groq."
+        },
+        "receipts": {
+          "title": "Receipt reading",
+          "description": "Suggests the expense fields from a photo of the receipt."
+        },
+        "domains": {
+          "title": "Brand Hub domains",
+          "description": "Verifies and connects the client's domain to the brand site."
+        },
+        "events": {
+          "title": "Events",
+          "description": "Runs automations and reminders in the background with Inngest."
+        }
+      },
+      "soon": "Coming soon",
+      "ideas": {
+        "mcp": {
+          "title": "AI through MCP",
+          "description": "Claude and ChatGPT read clients, phases, tasks and the agenda with the permissions of whoever connects."
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Team notices in the right channel."
+        },
+        "drive": {
+          "title": "Google Drive",
+          "description": "Import files into the Library."
+        },
+        "dropbox": {
+          "title": "Dropbox",
+          "description": "Import files into the Library."
+        },
+        "figma": {
+          "title": "Figma",
+          "description": "Proofs from frames."
+        }
+      },
+      "connected": {
+        "title": "Active connections",
+        "empty": "There are no active connections yet.",
+        "since": "since {date}"
       }
     },
     "nav": {

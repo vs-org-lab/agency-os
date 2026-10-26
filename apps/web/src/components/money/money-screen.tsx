@@ -1,11 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
+import { LineChart } from '@agency-os/ui/components/charts/line-chart';
+import { DateRangeField } from '@agency-os/ui/components/date-range-field';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link, useRouter } from '@/i18n/navigation';
-import type { MoneyExpenseRow, MoneyYearView } from '@/modules/money';
+import {
+  filterByRange,
+  lisbonToday,
+  monthlyTotals,
+  rangePresets,
+  type DateRange,
+  type MoneyExpenseRow,
+  type MoneyYearView,
+} from '@/modules/money';
 import { ExpenseForm, type ExpenseFormActions, type MoneyResult } from './expense-form';
 import { ExpensesTable, type ExpenseRowActions } from './expenses-table';
 import { MoneySummary } from './money-summary';
@@ -51,12 +61,44 @@ function refreshing<A extends unknown[]>(
 }
 
 /** S-09: one year of money, with expenses and subscriptions for whoever writes. */
-export function MoneyScreen({ view, actions }: { view: MoneyYearView; actions: MoneyActions }) {
+export function MoneyScreen({
+  view,
+  actions,
+  range = null,
+}: {
+  view: MoneyYearView;
+  actions: MoneyActions;
+  /** Validated interval inside the year that narrows the request and expense tables. */
+  range?: DateRange | null;
+}) {
   const t = useTranslations('money');
+  const format = useFormatter();
+  const locale = useLocale();
   const router = useRouter();
   const refresh = () => router.refresh();
   const [expenseForm, setExpenseForm] = useState<{ initial: MoneyExpenseRow | null } | null>(null);
   const [subscriptionForm, setSubscriptionForm] = useState(false);
+  const totals = useMemo(() => monthlyTotals(view.requests, view.expenses), [view]);
+  const shown = useMemo(() => filterByRange(view.requests, view.expenses, range), [view, range]);
+  const presets = useMemo(
+    () =>
+      rangePresets(lisbonToday(), view.year).map((preset) => ({
+        ...preset,
+        label: t(`range.presets.${preset.id}`),
+      })),
+    [view.year, t],
+  );
+  const monthLabels = Array.from({ length: 12 }, (_, month) =>
+    format.dateTime(new Date(Date.UTC(view.year, month, 15)), { month: 'short', timeZone: 'UTC' }),
+  );
+  const euro = (value: number) =>
+    format.number(value, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const chooseRange = (next: DateRange | null) =>
+    router.push(
+      next
+        ? `/money?year=${view.year}&from=${next.from}&to=${next.to}`
+        : `/money?year=${view.year}`,
+    );
 
   const rowActions: ExpenseRowActions = {
     deleteExpense: refreshing(actions.deleteExpense, refresh),
@@ -94,10 +136,39 @@ export function MoneyScreen({ view, actions }: { view: MoneyYearView; actions: M
         </nav>
       </header>
 
+      <section aria-label={t('chart.title')} className="flex flex-col gap-2">
+        <h2 className="text-title-sm text-text">{t('chart.title')}</h2>
+        <LineChart
+          series={[
+            { key: 'received', label: t('summary.received'), values: totals.received },
+            { key: 'spent', label: t('summary.spent'), values: totals.spent },
+          ]}
+          labels={monthLabels}
+          formatValue={euro}
+          summary={t('chart.summary', { year: view.year })}
+        />
+        {totals.otherCurrencies ? (
+          <p className="text-body-sm text-text-secondary">{t('chart.otherCurrencies')}</p>
+        ) : null}
+      </section>
+
       <MoneySummary summary={view.summary} />
 
+      <DateRangeField
+        locale={locale}
+        label={t('range.label')}
+        placeholder={t('range.placeholder')}
+        clearLabel={t('range.clear')}
+        value={range}
+        onChange={chooseRange}
+        min={`${view.year}-01-01`}
+        max={`${view.year}-12-31`}
+        presets={presets}
+        className="self-start"
+      />
+
       <Section title={t('requests.title')}>
-        <RequestsTable requests={view.requests} />
+        <RequestsTable requests={shown.requests} />
       </Section>
 
       <Section
@@ -132,7 +203,7 @@ export function MoneyScreen({ view, actions }: { view: MoneyYearView; actions: M
           />
         ) : null}
         <ExpensesTable
-          expenses={view.expenses}
+          expenses={shown.expenses}
           clients={view.clients}
           canWrite={view.canWrite}
           actions={rowActions}

@@ -6,10 +6,11 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
+import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import { canTakeTask, type TaskPerson, type TaskView } from '@/modules/tasks';
 import {
-  TASK_FIELD,
   taskError,
   type TaskActionResult,
   type TaskError,
@@ -60,19 +61,14 @@ function PersonSelect({
 }) {
   const t = useTranslations('tasks.form');
   return (
-    <select
+    <SelectField
       id={id}
-      className={TASK_FIELD}
+      name="assignee"
       value={value}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      <option value="">{t('none')}</option>
-      {people.map((person) => (
-        <option key={person.id} value={person.id}>
-          {person.name}
-        </option>
-      ))}
-    </select>
+      onValueChange={onChange}
+      options={people.map((person) => ({ value: person.id, label: person.name }))}
+      emptyLabel={t('none')}
+    />
   );
 }
 
@@ -148,24 +144,18 @@ export function TaskForm({
       {fixedClientId ? null : (
         <div className="flex flex-col gap-1">
           <Label htmlFor="task-client">{t('form.client')}</Label>
-          <select
+          <SelectField
             id="task-client"
-            className={TASK_FIELD}
+            name="client"
             value={clientId}
-            onChange={(event) => {
-              const next = event.target.value;
+            onValueChange={(next) => {
               setClientId(next);
               const current = people.find((person) => person.id === assigneeId);
               if (current && !canTakeTask(current, next || null)) setAssigneeId('');
             }}
-          >
-            <option value="">{t('form.studio')}</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            options={clients.map((client) => ({ value: client.id, label: client.name }))}
+            emptyLabel={t('form.studio')}
+          />
         </div>
       )}
       <div className="flex flex-col gap-1">
@@ -179,11 +169,12 @@ export function TaskForm({
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="task-due">{t('form.dueOn')}</Label>
-        <Input
+        <DateField
           id="task-due"
-          type="date"
+          name="dueOn"
+          label={t('form.dueOn')}
           value={dueOn}
-          onChange={(event) => setDueOn(event.target.value)}
+          onValueChange={setDueOn}
         />
       </div>
       <div className="flex flex-col gap-1 md:col-span-2">
@@ -285,11 +276,12 @@ export function TaskEditForm({
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor={`${prefix}-due`}>{t('form.dueOn')}</Label>
-        <Input
+        <DateField
           id={`${prefix}-due`}
-          type="date"
+          name="dueOn"
+          label={t('form.dueOn')}
           value={dueOn}
-          onChange={(event) => setDueOn(event.target.value)}
+          onValueChange={setDueOn}
         />
       </div>
       <div className="flex flex-col gap-1 md:col-span-2">

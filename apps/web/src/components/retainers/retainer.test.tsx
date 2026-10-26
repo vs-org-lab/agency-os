@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { RetainerExtraRow, StaffRetainerView } from '@/modules/retainers';
+import { chooseDay, chooseOption, installRadixDomPolyfills } from '../../../test/radix-dom';
 import { ExtraRequests } from './extra-requests';
 import { LimitBars } from './limit-bars';
+import { RetainerForm } from './retainer-form';
 import { RetainerScreen, type RetainerActions } from './retainer-screen';
 import { UsageForm } from './usage-form';
 
@@ -17,6 +20,8 @@ vi.mock('@/i18n/navigation', () => ({
   ),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
+
+beforeAll(installRadixDomPolyfills);
 
 afterEach(() => {
   cleanup();
@@ -121,6 +126,71 @@ describe('C-10 retainer', () => {
       quantity: '3',
       description: 'Carrossel',
     });
+  });
+
+  it('usage form submits the chosen kind as before', async () => {
+    const user = userEvent.setup();
+    const record = vi.fn(async () => ({ ok: true as const }));
+    withIntl(<UsageForm retainerId="retainer-1" limits={LIMITS} record={record} />);
+
+    await chooseOption(user, 'Tipo', 'Horas de manutenção');
+    fireEvent.change(screen.getByLabelText('Descrição'), { target: { value: 'Atualizações' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Registar' }));
+    await screen.findByText('Consumo registado.');
+
+    expect(record).toHaveBeenCalledWith({
+      retainerId: 'retainer-1',
+      kind: 'maintenance_hours',
+      quantity: '1',
+      description: 'Atualizações',
+    });
+  });
+
+  it('retainer form submits the same data as before', async () => {
+    const user = userEvent.setup();
+    const save = vi.fn(async () => ({ ok: true as const }));
+    withIntl(<RetainerForm clientId="client-1" view={view()} save={save} onDone={vi.fn()} />);
+
+    await chooseOption(user, 'Moeda', 'GBP');
+    await chooseOption(user, 'Estado', 'Terminado');
+    await chooseDay(user, /^Início/, 5);
+    await chooseDay(user, /^Revisão anual/, 20);
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar retainer' }));
+    await screen.findByText('Retainer guardado.');
+
+    expect(save).toHaveBeenCalledWith({
+      clientId: 'client-1',
+      projectId: 'project-1',
+      tier: 'Essencial',
+      monthlyFee: '1500.00',
+      currency: 'GBP',
+      startsOn: '2026-07-05',
+      reviewOn: '2027-07-20',
+      status: 'ended',
+      limits: [
+        { kind: 'content_pieces', monthlyLimit: '4' },
+        { kind: 'maintenance_hours', monthlyLimit: '10' },
+      ],
+    });
+  });
+
+  it('retainer form refuses to save without the two dates', async () => {
+    const save = vi.fn(async () => ({ ok: true as const }));
+    withIntl(
+      <RetainerForm
+        clientId="client-1"
+        view={view({ retainer: null, limits: [] })}
+        save={save}
+        onDone={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Nível'), { target: { value: 'Essencial' } });
+    fireEvent.change(screen.getByLabelText('Valor mensal'), { target: { value: '100' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar retainer' }));
+
+    expect(await screen.findByText('Verifique os campos.')).toBeTruthy();
+    expect(save).not.toHaveBeenCalled();
   });
 
   it('quoting an extra request sends the amount', async () => {

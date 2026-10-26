@@ -1,15 +1,23 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ProjectView } from '@/modules/rooms';
+import {
+  chooseDay,
+  chooseOption,
+  installRadixDomPolyfills,
+} from '../../../../../../test/radix-dom';
 import { FinalApprovalCard } from './final-approval';
 import { PlanView } from './plan-view';
 import { ProcessBoard, type ProcessActions } from './process-board';
 import { UpdateComposer, type PublishUpdate } from './update-composer';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
+beforeAll(installRadixDomPolyfills);
 
 afterEach(() => {
   cleanup();
@@ -223,6 +231,68 @@ describe('ProcessBoard approvals and steps', () => {
       );
     });
     expect(setStepStatus).toHaveBeenCalledWith('step-1', 'done');
+  });
+});
+
+describe('ProcessBoard controls submit the same data as before', () => {
+  const PEOPLE = [
+    { id: 'freelancer-1', name: 'Rui Costa' },
+    { id: 'freelancer-2', name: 'Ana Dias' },
+  ];
+
+  function renderBoard(overrides: Partial<ProcessActions>) {
+    const actions = actionsMock(overrides);
+    withIntl(
+      <ProcessBoard
+        project={PROJECT}
+        people={PEOPLE}
+        writable
+        currentUserId="founder-1"
+        actions={actions}
+      />,
+    );
+    return actions;
+  }
+
+  it('saves the phase date as an ISO date', async () => {
+    const user = userEvent.setup();
+    const updatePhase = vi.fn(async () => ({ ok: true }) as const);
+    renderBoard({ updatePhase });
+
+    await chooseDay(user, /^Data prevista da fase/, 15);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar data' }));
+    });
+
+    expect(updatePhase).toHaveBeenCalledWith('phase-1', '2026-10-15');
+  });
+
+  it('assigns and unassigns a step', async () => {
+    const user = userEvent.setup();
+    const updateStep = vi.fn(async () => ({ ok: true }) as const);
+    renderBoard({ updateStep });
+    const select = 'Responsável por Questionário de descoberta';
+
+    await chooseOption(user, select, 'Ana Dias');
+    expect(updateStep).toHaveBeenLastCalledWith({ stepId: 'step-1', assigneeId: 'freelancer-2' });
+
+    await chooseOption(user, select, 'Sem responsável');
+    expect(updateStep).toHaveBeenLastCalledWith({ stepId: 'step-1', assigneeId: null });
+  });
+
+  it('sets a step date as an ISO date', async () => {
+    const user = userEvent.setup();
+    const updateStep = vi.fn(async () => ({ ok: true }) as const);
+    renderBoard({ updateStep });
+
+    await chooseDay(user, /^Data de Questionário de descoberta/, 12);
+
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    expect(updateStep).toHaveBeenCalledWith({
+      stepId: 'step-1',
+      dueOn: `${now.getFullYear()}-${month}-12`,
+    });
   });
 });
 

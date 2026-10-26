@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
-import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { cn } from '@agency-os/ui/lib/utils';
+import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import type { Person, PhaseView, ProjectView, StepStatus } from '@/modules/rooms';
 import { roomError, type ActionResult, type RoomError } from './room-errors';
 
@@ -30,8 +31,6 @@ export type ProcessActions = {
 type DoneKey = 'startPhase' | 'completePhase' | 'requestApproval' | 'withdrawApproval' | 'saved';
 
 type Feedback = { tone: 'success'; key: DoneKey } | { tone: 'danger'; error: RoomError };
-
-const FIELD = 'h-9 rounded-md border border-border bg-surface px-2 text-body-sm text-text';
 
 /** The one change each step status offers: start it, finish it, or reopen it. */
 const NEXT_STATUS: Record<StepStatus, StepStatus> = {
@@ -219,12 +218,12 @@ export function ProcessBoard({
                 >
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="phase-due">{t('phaseDue')}</Label>
-                    <Input
+                    <DateField
                       id="phase-due"
-                      type="date"
-                      className="h-9"
+                      name="dueOn"
+                      label={t('phaseDue')}
                       value={dueOn}
-                      onChange={(event) => setDueOn(event.target.value)}
+                      onValueChange={setDueOn}
                     />
                   </div>
                   <Button type="submit" size="sm" variant="outline" disabled={pending}>
@@ -277,38 +276,35 @@ export function ProcessBoard({
                     ) : null}
                     {editable ? (
                       <>
-                        <select
-                          aria-label={t('step.assignee', { name: step.name })}
-                          className={FIELD}
+                        <SelectField
+                          name="assignee"
+                          label={t('step.assignee', { name: step.name })}
+                          className="w-48"
                           value={step.assigneeId ?? ''}
                           disabled={pending}
-                          onChange={(event) =>
+                          onValueChange={(assigneeId) =>
                             run('saved', () =>
                               actions.updateStep({
                                 stepId: step.id,
-                                assigneeId: event.target.value || null,
+                                assigneeId: assigneeId || null,
                               }),
                             )
                           }
-                        >
-                          <option value="">{t('step.unassigned')}</option>
-                          {people.map((person) => (
-                            <option key={person.id} value={person.id}>
-                              {person.name}
-                            </option>
-                          ))}
-                        </select>
-                        <Input
-                          aria-label={t('step.due', { name: step.name })}
-                          type="date"
-                          className="h-9 w-40"
+                          options={people.map((person) => ({
+                            value: person.id,
+                            label: person.name,
+                          }))}
+                          emptyLabel={t('step.unassigned')}
+                        />
+                        <DateField
+                          name="dueOn"
+                          label={t('step.due', { name: step.name })}
                           defaultValue={step.dueOn ?? ''}
-                          onBlur={(event) => {
-                            const value = event.target.value || null;
-                            if (value !== step.dueOn) {
-                              run('saved', () =>
-                                actions.updateStep({ stepId: step.id, dueOn: value }),
-                              );
+                          disabled={pending}
+                          onValueChange={(value) => {
+                            const dueOn = value || null;
+                            if (dueOn !== step.dueOn) {
+                              run('saved', () => actions.updateStep({ stepId: step.id, dueOn }));
                             }
                           }}
                         />

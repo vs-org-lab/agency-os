@@ -2264,7 +2264,11 @@
     "confirmed": "Confirmed.",
     "confirmAction": "Confirm: {label}",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "datePicker": {
+      "placeholder": "Choose date",
+      "clear": "Clear"
+    }
   },
   "testimonials": {
     "title": "Testimonial",

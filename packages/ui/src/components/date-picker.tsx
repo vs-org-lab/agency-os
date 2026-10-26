@@ -8,8 +8,12 @@ import { Calendar } from '@agency-os/ui/components/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@agency-os/ui/components/popover';
 
 type DatePickerProps = {
-  name: string;
+  id?: string;
+  /** Name of the hidden input that carries the ISO value; omit when the value is read from state. */
+  name?: string;
   defaultValue?: string | null;
+  /** Makes the picker controlled; an empty string or null means no date. */
+  value?: string | null;
   locale: string;
   label: string;
   placeholder: string;
@@ -43,8 +47,10 @@ function formatDisplay(date: Date, locale: string): string {
 
 /** Date field that submits `yyyy-MM-dd` (or an empty string) through a hidden input named `name`. */
 function DatePicker({
+  id,
   name,
   defaultValue,
+  value,
   locale,
   label,
   placeholder,
@@ -54,10 +60,11 @@ function DatePicker({
   className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Date | undefined>(() => parseIso(defaultValue));
+  const [internal, setInternal] = React.useState<Date | undefined>(() => parseIso(defaultValue));
+  const selected = value === undefined ? internal : parseIso(value);
 
   function commit(next: Date | undefined) {
-    setSelected(next);
+    setInternal(next);
     onChange?.(next ? toIso(next) : null);
   }
 
@@ -66,6 +73,7 @@ function DatePicker({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
+            id={id}
             type="button"
             disabled={disabled}
             aria-label={selected ? `${label}: ${formatDisplay(selected, locale)}` : label}
@@ -103,7 +111,7 @@ function DatePicker({
           </div>
         </PopoverContent>
       </Popover>
-      <input type="hidden" name={name} value={selected ? toIso(selected) : ''} />
+      {name ? <input type="hidden" name={name} value={selected ? toIso(selected) : ''} /> : null}
     </div>
   );
 }

@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import { MotionProvider } from '@agency-os/ui/motion';
 import type { TaskView } from '@/modules/tasks';
+import { chooseDay, chooseOption, installRadixDomPolyfills } from '../../../test/radix-dom';
 import { TaskFilters } from './task-filters';
 import { TaskEditForm, TaskForm } from './task-form';
 import { TaskList } from './task-list';
@@ -14,6 +16,8 @@ vi.mock('@/i18n/navigation', () => ({
   usePathname: () => '/tasks',
   useRouter: () => ({ replace: vi.fn() }),
 }));
+
+beforeAll(installRadixDomPolyfills);
 
 afterEach(() => {
   cleanup();
@@ -51,6 +55,13 @@ function task(overrides: Partial<TaskView>): TaskView {
 }
 
 const OK = async () => ({ ok: true as const });
+
+/** The picker opens on the current month when it has no date yet. */
+function monthDay(day: number): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${String(day).padStart(2, '0')}`;
+}
 
 const FOUNDER = {
   id: '3e8b0c43-4f4d-4d1b-8d88-5c9d3e4f5061',
@@ -106,7 +117,8 @@ describe('tasks', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('task form offers only people who may take the chosen client task', () => {
+  it('task form offers only people who may take the chosen client task', async () => {
+    const user = userEvent.setup();
     renderWithIntl(
       <TaskForm
         clients={[
@@ -118,15 +130,17 @@ describe('tasks', () => {
         create={OK}
       />,
     );
-    const assigneeNames = () =>
-      Array.from((screen.getByLabelText('Responsável') as HTMLSelectElement).options).map(
-        (option) => option.text,
-      );
+    const assigneeNames = async () => {
+      await user.click(screen.getByRole('combobox', { name: 'Responsável' }));
+      const names = screen.getAllByRole('option').map((option) => option.textContent);
+      await user.keyboard('{Escape}');
+      return names;
+    };
 
-    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: CLIENT_B } });
-    expect(assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora']);
-    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: CLIENT_A } });
-    expect(assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora', 'Rui Freelancer']);
+    await chooseOption(user, 'Cliente', 'Boreal SA');
+    expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora']);
+    await chooseOption(user, 'Cliente', 'Atlas Lda');
+    expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora', 'Rui Freelancer']);
   });
 
   it('groups tasks by today, this week and later', () => {
@@ -229,7 +243,7 @@ describe('tasks', () => {
     fireEvent.change(screen.getByLabelText('Subtarefas'), {
       target: { value: 'Cores\n\nTipografia' },
     });
-    fireEvent.change(screen.getByLabelText('Data'), { target: { value: '2026-10-14' } });
+    await chooseDay(userEvent.setup(), /^Data/, 14);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Criar tarefa' }));
     });
@@ -239,11 +253,90 @@ describe('tasks', () => {
       notes: '',
       clientId: null,
       assigneeId: null,
-      dueOn: '2026-10-14',
+      dueOn: monthDay(14),
       items: ['Cores', 'Tipografia'],
     });
     expect(screen.getByText('Verifique os campos e tente de novo.')).toBeTruthy();
     expect((screen.getByLabelText('Título') as HTMLInputElement).value).toBe('Rever logótipo');
+  });
+
+  it('task form submits the same data as before with a chosen client, assignee and date', async () => {
+    const user = userEvent.setup();
+    const create = vi.fn(OK);
+    renderWithIntl(
+      <TaskForm
+        clients={[
+          { id: CLIENT_A, name: 'Atlas Lda' },
+          { id: CLIENT_B, name: 'Boreal SA' },
+        ]}
+        people={[FOUNDER, FREELANCER]}
+        fixedClientId={null}
+        create={create}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Rever' } });
+    await chooseOption(user, 'Cliente', 'Atlas Lda');
+    await chooseOption(user, 'Responsável', 'Rui Freelancer');
+    await chooseDay(user, /^Data/, 9);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Criar tarefa' }));
+    });
+
+    expect(create).toHaveBeenCalledWith({
+      title: 'Rever',
+      notes: '',
+      clientId: CLIENT_A,
+      assigneeId: PERSON,
+      dueOn: monthDay(9),
+      items: [],
+    });
+  });
+
+  it('task edit form submits the same data as before', async () => {
+    const user = userEvent.setup();
+    const update = vi.fn(OK);
+    renderWithIntl(
+      <TaskEditForm
+        task={task({ id: 'task-1', title: 'Rever', dueOn: '2026-10-14' })}
+        people={[FOUNDER, FREELANCER]}
+        update={update}
+      />,
+    );
+
+    await chooseOption(user, 'Responsável', 'Ana Fundadora');
+    await chooseDay(user, /^Data/, 20);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      taskId: 'task-1',
+      title: 'Rever',
+      notes: '',
+      assigneeId: FOUNDER.id,
+      dueOn: '2026-10-20',
+    });
+  });
+
+  it('task form clears the date with the clear button', async () => {
+    const user = userEvent.setup();
+    const update = vi.fn(OK);
+    renderWithIntl(
+      <TaskEditForm
+        task={task({ id: 'task-1', title: 'Rever', dueOn: '2026-10-14' })}
+        people={[]}
+        update={update}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /^Data/ }));
+    await user.click(await screen.findByRole('button', { name: 'Limpar' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    });
+
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ dueOn: null }));
   });
 
   describe('inside an overlay (onDone given)', () => {

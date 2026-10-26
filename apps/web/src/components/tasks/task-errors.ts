@@ -9,6 +9,3 @@ export function taskError(code: string): TaskError {
 }
 
 export type TaskOptionView = { id: string; name: string };
-
-export const TASK_FIELD =
-  'h-11 rounded-md border border-border bg-surface px-3 text-body text-text md:h-9';

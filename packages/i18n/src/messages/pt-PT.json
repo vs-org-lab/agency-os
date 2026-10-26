@@ -446,6 +446,28 @@
       "documents": {
         "title": "Documentos recentes"
       }
+    },
+    "onboarding": {
+      "label": "Boas-vindas ao portal",
+      "step": "Passo {current} de {total}",
+      "next": "Seguinte",
+      "previous": "Anterior",
+      "skip": "Saltar",
+      "start": "Começar",
+      "steps": {
+        "work": {
+          "title": "Onde vê o seu trabalho",
+          "body": "O Início mostra o que precisa de si, o que resta do seu plano e em que ponto está cada pedido."
+        },
+        "approve": {
+          "title": "Como aprova",
+          "body": "Aprovações e provas aparecem em \"A sua ação\". Abra, reveja e decida; a equipa é avisada logo."
+        },
+        "request": {
+          "title": "Como pede trabalho",
+          "body": "Use \"Pedir trabalho\" e diga o que precisa. Se couber no plano deste mês, a equipa começa de imediato."
+        }
+      }
     }
   },
   "commercial": {

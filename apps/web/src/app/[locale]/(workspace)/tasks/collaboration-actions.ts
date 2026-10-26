@@ -7,7 +7,6 @@ import {
   attachStudioTaskFile,
   deleteStudioTaskComment,
   detachStudioTaskFile,
-  loadStudioTaskDetail,
   loadStudioTaskFilePreviews,
   loadStudioTaskUploadFolder,
   removeStudioTaskLink,
@@ -28,11 +27,6 @@ async function run<T extends object>(
   if (!result.ok) return { ok: false, code: result.rule };
   if (revalidate) revalidatePath('/', 'layout');
   return result;
-}
-
-export async function loadTaskDetailAction(taskId: string) {
-  const claims = await getVerifiedClaims();
-  return claims ? loadStudioTaskDetail({ claims }, taskId) : null;
 }
 
 export async function addTaskCommentAction(taskId: string, body: string) {

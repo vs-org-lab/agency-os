@@ -33,7 +33,7 @@ test.describe('Room documents', () => {
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/docs`);
-    await page.getByRole('button', { name: 'Novo documento' }).click();
+    await page.getByRole('button', { name: 'Novo documento' }).first().click();
     await page.getByLabel('Título').fill(title);
     await page.getByLabel('PDF', { exact: true }).check();
     await page.locator('form input[type="file"]').setInputFiles({

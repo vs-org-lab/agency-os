@@ -24,7 +24,7 @@ test.describe('Academy', () => {
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/academy`);
-    await expect(page.getByRole('heading', { level: 2, name: 'Academia' })).toBeVisible({
+    await expect(page.getByRole('heading', { level: 1, name: 'Academia' })).toBeVisible({
       timeout: 30_000,
     });
     await page.getByRole('button', { name: 'Novo item' }).click();

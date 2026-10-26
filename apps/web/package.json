@@ -11,7 +11,8 @@
     "bootstrap:founder": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/bootstrap-founder.ts",
     "icons:generate": "tsx scripts/generate-icons.ts",
     "e2e": "playwright test",
-    "e2e:seed": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seed-e2e.ts"
+    "e2e:seed": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seed-e2e.ts",
+    "seed:demo": "tsx --tsconfig tsconfig.json --import ./scripts/allow-server-only.mjs scripts/seed-demo.ts"
   },
   "dependencies": {
     "@agency-os/brand-hub-view": "workspace:*",

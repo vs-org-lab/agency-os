@@ -8,7 +8,9 @@ import { AnimatePresence, m, useReducedMotion } from '@agency-os/ui/motion';
 /** A dropped folder arrives as an empty entry in `files`; the item entries tell it apart. */
 function isFolder(event: DragEvent, index: number, file: File): boolean {
   const entry = event.dataTransfer.items?.[index]?.webkitGetAsEntry?.();
-  return entry ? entry.isDirectory : file.size === 0 && file.type === '' && !file.name.includes('.');
+  return entry
+    ? entry.isDirectory
+    : file.size === 0 && file.type === '' && !file.name.includes('.');
 }
 
 const carriesFiles = (event: DragEvent) => Array.from(event.dataTransfer.types).includes('Files');

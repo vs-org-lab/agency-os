@@ -54,6 +54,7 @@ export function RetainerForm({
   const [limits, setLimits] = useState<Record<string, string>>(() =>
     Object.fromEntries(view.limits.map((limit) => [limit.kind, String(limit.limit)])),
   );
+  const [missing, setMissing] = useState<'startsOn' | 'reviewOn' | null>(null);
   const [message, setMessage] = useState<'saved' | RetainerError | null>(null);
   const [pending, startTransition] = useTransition();
   const field = (name: string) => `${id}-${name}`;
@@ -65,10 +66,14 @@ export function RetainerForm({
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
       onSubmit={(event) => {
         event.preventDefault();
-        if (!fields.startsOn || !fields.reviewOn) {
+        const absent = !fields.startsOn ? 'startsOn' : !fields.reviewOn ? 'reviewOn' : null;
+        if (absent) {
+          setMissing(absent);
           setMessage('invalid_input');
+          document.getElementById(field(absent === 'startsOn' ? 'starts' : 'review'))?.focus();
           return;
         }
+        setMissing(null);
         startTransition(async () => {
           const result = await save({
             clientId,
@@ -149,8 +154,15 @@ export function RetainerForm({
             name="startsOn"
             label={t('form.startsOn')}
             value={fields.startsOn}
+            invalid={!fields.startsOn && missing !== null}
+            describedBy={!fields.startsOn && missing !== null ? field('starts-error') : undefined}
             onValueChange={set('startsOn')}
           />
+          {!fields.startsOn && missing !== null ? (
+            <p id={field('starts-error')} className="text-caption text-danger">
+              {t('form.dateRequired')}
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('review')}>{t('form.reviewOn')}</Label>
@@ -159,8 +171,15 @@ export function RetainerForm({
             name="reviewOn"
             label={t('form.reviewOn')}
             value={fields.reviewOn}
+            invalid={!fields.reviewOn && missing !== null}
+            describedBy={!fields.reviewOn && missing !== null ? field('review-error') : undefined}
             onValueChange={set('reviewOn')}
           />
+          {!fields.reviewOn && missing !== null ? (
+            <p id={field('review-error')} className="text-caption text-danger">
+              {t('form.dateRequired')}
+            </p>
+          ) : null}
         </div>
       </div>
       <fieldset className="flex flex-col gap-2">

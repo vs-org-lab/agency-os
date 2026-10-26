@@ -19,6 +19,8 @@ type DatePickerProps = {
   placeholder: string;
   clearLabel: string;
   disabled?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
   onChange?: (value: string | null) => void;
   className?: string;
 };
@@ -56,6 +58,8 @@ function DatePicker({
   placeholder,
   clearLabel,
   disabled,
+  invalid,
+  describedBy,
   onChange,
   className,
 }: DatePickerProps) {
@@ -76,6 +80,8 @@ function DatePicker({
             id={id}
             type="button"
             disabled={disabled}
+            aria-invalid={invalid || undefined}
+            aria-describedby={describedBy}
             aria-label={selected ? `${label}: ${formatDisplay(selected, locale)}` : label}
             className={cn(
               'flex h-9 w-full min-w-40 items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',

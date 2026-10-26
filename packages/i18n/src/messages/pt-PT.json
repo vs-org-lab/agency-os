@@ -2985,6 +2985,7 @@
       "currency": "Moeda",
       "startsOn": "Início",
       "reviewOn": "Revisão anual",
+      "dateRequired": "Indique a data.",
       "status": "Estado",
       "statuses": {
         "active": "Ativo",

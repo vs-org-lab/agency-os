@@ -12,6 +12,8 @@ export function DateField({
   defaultValue,
   onValueChange,
   disabled,
+  invalid,
+  describedBy,
   className,
 }: {
   id?: string;
@@ -24,6 +26,8 @@ export function DateField({
   defaultValue?: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
   className?: string;
 }) {
   const t = useTranslations('interaction.datePicker');
@@ -40,6 +44,8 @@ export function DateField({
       placeholder={t('placeholder')}
       clearLabel={t('clear')}
       disabled={disabled}
+      invalid={invalid}
+      describedBy={describedBy}
       onChange={(next) => onValueChange(next ?? '')}
       className={className}
     />

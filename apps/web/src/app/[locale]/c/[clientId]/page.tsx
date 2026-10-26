@@ -8,6 +8,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
+import { phaseTimeline } from '@/modules/rooms';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
 import {
   completePhaseAction,
@@ -35,6 +36,7 @@ import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
+import { TimelineView } from './room/timeline-view';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +63,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
       })
     : [];
   const t = await getTranslations('rooms');
+  const timeline = room.project ? phaseTimeline(room.project.phases, room.project.startsOn) : null;
   const tp = await getTranslations('proofing.section');
   const [proofs, rounds] = room.project
     ? await Promise.all([
@@ -95,6 +98,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             <TabsList>
               <TabsTrigger value="steps">{t('tabs.steps')}</TabsTrigger>
               <TabsTrigger value="plan">{t('tabs.plan')}</TabsTrigger>
+              <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
               <TabsTrigger value="proofs">{tp('title')}</TabsTrigger>
             </TabsList>
             <TabsContent value="steps" className="pt-4">
@@ -125,6 +129,15 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             </TabsContent>
             <TabsContent value="plan" className="pt-4">
               <PlanView phases={room.project.phases} startsOn={room.project.startsOn} />
+            </TabsContent>
+            <TabsContent value="timeline" className="pt-4">
+              <TimelineView
+                rows={timeline?.rows ?? []}
+                undated={(timeline?.undated ?? []).map(
+                  (id) => room.project?.phases.find((phase) => phase.id === id)?.name ?? id,
+                )}
+                today={new Date().toISOString().slice(0, 10)}
+              />
             </TabsContent>
             <TabsContent value="proofs" className="pt-4">
               <ProofsSection

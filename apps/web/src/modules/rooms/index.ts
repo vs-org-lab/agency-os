@@ -14,6 +14,7 @@ export {
 } from './domain/phases';
 export { nextChainedStep, type StepState, type StepStatus } from './domain/steps';
 export { planWeeks } from './domain/plan';
+export { phaseTimeline, type TimelineRow } from './domain/timeline';
 export { ORBIT_PROCESS, ORBIT_TEMPLATE_KEY } from './templates/defaults';
 export { getClientApprovals, type ClientPendingApproval } from './portal';
 export type {

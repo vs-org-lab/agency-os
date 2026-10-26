@@ -376,6 +376,75 @@
         "invalid_input": "Confirme o comentário."
       },
       "projectSelector": "Projeto"
+    },
+    "dashboard": {
+      "greeting": "Olá, {name}",
+      "greetingAnonymous": "Olá",
+      "action": {
+        "title": "A sua ação",
+        "due": "Até {date}",
+        "kinds": {
+          "approval": "Aprovação",
+          "proof": "Prova",
+          "proposal": "Proposta",
+          "contract": "Contrato",
+          "payment": "Pagamento"
+        },
+        "cta": {
+          "approval": "Decidir",
+          "proof": "Rever",
+          "proposal": "Ver a proposta",
+          "contract": "Assinar",
+          "payment": "Pagar"
+        }
+      },
+      "plan": {
+        "title": "O seu plano",
+        "tier": "Nível {tier}",
+        "includes": "O que inclui",
+        "perMonth": "{count} por mês",
+        "rules": "Regras",
+        "carry": "Até {share}% do que não usar num mês passa para o mês seguinte, uma só vez.",
+        "expires": "O que passou e não é usado no mês seguinte expira.",
+        "extra": "O trabalho acima do disponível pede um orçamento, que aprova antes de começar."
+      },
+      "requestWork": {
+        "label": "Pedir trabalho",
+        "title": "Pedir trabalho",
+        "description": "Diga-nos o que precisa. Se couber no plano deste mês, a equipa começa logo."
+      },
+      "board": {
+        "title": "O seu trabalho",
+        "seeAll": "Ver tudo",
+        "empty": "Ainda não pediu trabalho.",
+        "columns": {
+          "received": "Recebido",
+          "in_progress": "Em curso",
+          "done": "Feito este mês"
+        },
+        "emptyColumn": {
+          "received": "Nada à espera.",
+          "in_progress": "Nada em curso.",
+          "done": "Nada concluído este mês."
+        },
+        "requestedOn": "Pedido a {date}",
+        "views": {
+          "label": "Vista",
+          "board": "Quadro",
+          "list": "Lista"
+        }
+      },
+      "project": {
+        "title": "O seu projeto",
+        "phases": "Fases do projeto",
+        "current": "Fase atual",
+        "nextStep": "Próximo passo: {name}",
+        "dueOn": "Previsto para {date}",
+        "open": "Abrir a sala"
+      },
+      "documents": {
+        "title": "Documentos recentes"
+      }
     }
   },
   "commercial": {
@@ -2442,9 +2511,19 @@
     "title": "Paleta de comandos",
     "description": "Vá a uma página, crie algo ou procure clientes, negócios e tarefas.",
     "placeholder": "Escreva um comando ou procure…",
-    "groups": { "goTo": "Ir para", "create": "Criar", "search": "Procurar" },
-    "create": { "newTask": "Nova tarefa" },
-    "kind": { "client": "Cliente", "deal": "Negócio", "task": "Tarefa" },
+    "groups": {
+      "goTo": "Ir para",
+      "create": "Criar",
+      "search": "Procurar"
+    },
+    "create": {
+      "newTask": "Nova tarefa"
+    },
+    "kind": {
+      "client": "Cliente",
+      "deal": "Negócio",
+      "task": "Tarefa"
+    },
     "empty": "Sem resultados.",
     "searching": "A procurar…",
     "error": "A procura não está disponível."
@@ -2515,7 +2594,11 @@
     "dropHere": "Largue os ficheiros para carregar",
     "dropFolders": "Pastas não são suportadas; largue ficheiros",
     "progressLabel": "Carregamentos",
-    "fileStatus": { "pending": "A carregar", "done": "Concluído", "failed": "Falhou" },
+    "fileStatus": {
+      "pending": "A carregar",
+      "done": "Concluído",
+      "failed": "Falhou"
+    },
     "downloadAll": "Descarregar tudo",
     "downloadFolder": "Descarregar pasta",
     "preparingZip": "A preparar o ZIP…",

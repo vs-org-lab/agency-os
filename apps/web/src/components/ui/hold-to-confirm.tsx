@@ -118,7 +118,7 @@ export function HoldToConfirm({
           aria-hidden="true"
           className={cn(
             'absolute inset-0 origin-left bg-danger-bg motion-safe:transition-transform motion-safe:ease-linear',
-            holding ? 'motion-safe:duration-(--hold-duration)' : 'motion-safe:duration-120',
+            holding ? 'motion-safe:duration-(--hold-duration)' : 'motion-safe:duration-(--duration-fast)',
           )}
           style={
             {

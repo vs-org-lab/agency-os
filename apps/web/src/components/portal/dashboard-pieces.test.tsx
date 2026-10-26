@@ -78,8 +78,9 @@ describe('ActionList', () => {
       '/portal/invoices',
       '/portal/proofs/v1',
     ]);
-    expect(within(rows[0]!).getByText('Fase de design')).toBeTruthy();
-    expect(within(rows[0]!).getByText(/Até/)).toBeTruthy();
+    const first = within(rows[0] as HTMLElement);
+    expect(first.getByText('Fase de design')).toBeTruthy();
+    expect(first.getByText(/Até/)).toBeTruthy();
   });
 });
 

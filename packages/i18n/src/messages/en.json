@@ -2337,6 +2337,7 @@
     "uploadHint": "Images, videos, PDF, Word, Excel, PowerPoint, ZIP, PSD and fonts, up to 50 MB each.",
     "openFolderToUpload": "Open or create a folder to upload files.",
     "dropHere": "Drop files to upload",
+    "dropFolders": "Folders are not supported; drop files",
     "progressLabel": "Uploads",
     "fileStatus": { "pending": "Uploading", "done": "Done", "failed": "Failed" },
     "downloadAll": "Download all",

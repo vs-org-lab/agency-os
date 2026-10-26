@@ -480,6 +480,7 @@ export function LibraryBrowser({
       enabled={canUpload}
       onFiles={(files) => void uploads.upload(files)}
       label={t('dropHere')}
+      folderNotice={t('dropFolders')}
     >
       <div className="flex flex-col gap-4">
         <nav aria-label={t('breadcrumb')}>

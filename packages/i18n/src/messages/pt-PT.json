@@ -2337,6 +2337,7 @@
     "uploadHint": "Imagens, vídeos, PDF, Word, Excel, PowerPoint, ZIP, PSD e fontes, até 50 MB cada.",
     "openFolderToUpload": "Abra ou crie uma pasta para carregar ficheiros.",
     "dropHere": "Largue os ficheiros para carregar",
+    "dropFolders": "Pastas não são suportadas; largue ficheiros",
     "progressLabel": "Carregamentos",
     "fileStatus": { "pending": "A carregar", "done": "Concluído", "failed": "Falhou" },
     "downloadAll": "Descarregar tudo",

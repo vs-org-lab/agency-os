@@ -572,7 +572,8 @@
           "invalid_input": "Check the contact fields.",
           "not_found": "The contact could not be saved."
         },
-        "saved": "Contact saved."
+        "saved": "Contact saved.",
+        "editLabel": "Edit {name}"
       },
       "application": {
         "empty": "This deal has no application.",
@@ -702,6 +703,7 @@
       "description": "Target companies by sector, approach notes and messages ready to copy.",
       "add": "New target company",
       "edit": "Edit",
+      "editLabel": "Edit {name}",
       "form": {
         "companyName": "Company",
         "sector": "Sector",
@@ -1269,7 +1271,8 @@
       "save": "Save template",
       "saved": "Template saved.",
       "invalid": "Check the template fields.",
-      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
+      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up.",
+      "editLabel": "Edit {name}"
     },
     "coreTemplates": {
       "title": "Core templates",
@@ -1338,7 +1341,8 @@
       "cancel": "Cancel",
       "saved": "Entity saved.",
       "error": "The entity could not be saved. Check the fields.",
-      "summary": "{taxId} · {address} · {representative} ({role})"
+      "summary": "{taxId} · {address} · {representative} ({role})",
+      "editLabel": "Edit {name}"
     },
     "contractTemplates": {
       "title": "Contracts",
@@ -2045,7 +2049,8 @@
       "invalid_input": "Check the fields and try again."
     },
     "delete": "Delete",
-    "deleteLabel": "Delete task {title}"
+    "deleteLabel": "Delete task {title}",
+    "editLabel": "Edit task {title}"
   },
   "team": {
     "title": "Team",

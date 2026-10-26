@@ -193,6 +193,7 @@ export function EntityDialog({
   return (
     <CreateDialog
       label={entity ? t('edit') : t('add')}
+      triggerLabel={entity ? t('editLabel', { name: entity.legalName }) : undefined}
       title={entity ? entity.legalName : t('add')}
       variant={entity ? 'outline' : 'default'}
       icon={entity ? <Pencil aria-hidden /> : undefined}

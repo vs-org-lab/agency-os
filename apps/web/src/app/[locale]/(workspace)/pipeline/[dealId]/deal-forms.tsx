@@ -338,6 +338,7 @@ export function ContactDialog({
   return (
     <CreateDialog
       label={defaults ? t('edit') : t('add')}
+      triggerLabel={defaults ? t('editLabel', { name: defaults.fullName }) : undefined}
       title={defaults ? defaults.fullName : t('add')}
       variant="outline"
       icon={defaults ? <Pencil aria-hidden /> : undefined}

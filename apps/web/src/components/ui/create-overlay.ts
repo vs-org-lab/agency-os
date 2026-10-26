@@ -4,6 +4,8 @@ export type CreateResult = { message: string };
 
 export type CreateOverlayProps = {
   label: string;
+  /** Accessible name of the trigger when the visible label is not unique on the page. */
+  triggerLabel?: string;
   title: string;
   description?: string;
   icon?: ReactNode;

@@ -131,6 +131,7 @@ function TaskRow({
         <div className="flex flex-wrap items-center gap-2 pl-7">
           <CreateDialog
             label={t('edit')}
+            triggerLabel={t('editLabel', { title: task.title })}
             title={task.title}
             icon={<Pencil aria-hidden />}
             variant="outline"

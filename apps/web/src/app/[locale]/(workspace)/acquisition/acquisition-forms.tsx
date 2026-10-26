@@ -132,6 +132,7 @@ export function TargetDialog({
   return (
     <CreateDialog
       label={defaults ? t('edit') : t('add')}
+      triggerLabel={defaults ? t('editLabel', { name: defaults.companyName }) : undefined}
       title={defaults ? defaults.companyName : t('add')}
       variant={defaults ? 'outline' : 'default'}
       icon={defaults ? <Pencil aria-hidden /> : undefined}

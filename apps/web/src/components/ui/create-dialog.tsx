@@ -26,6 +26,7 @@ function originFrom(trigger: HTMLElement): CSSProperties {
 
 export function CreateDialog({
   label,
+  triggerLabel,
   title,
   description,
   icon,
@@ -48,6 +49,7 @@ export function CreateDialog({
         <Button
           type="button"
           variant={variant}
+          aria-label={triggerLabel}
           onClick={(event) => setOrigin(originFrom(event.currentTarget))}
         >
           {icon ?? <Plus aria-hidden />}

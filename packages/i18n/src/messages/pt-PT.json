@@ -572,7 +572,8 @@
           "invalid_input": "Verifique os campos do contacto.",
           "not_found": "Não foi possível guardar o contacto."
         },
-        "saved": "Contacto guardado."
+        "saved": "Contacto guardado.",
+        "editLabel": "Editar {name}"
       },
       "application": {
         "empty": "Este negócio não tem candidatura.",
@@ -702,6 +703,7 @@
       "description": "Empresas-alvo por setor, notas de abordagem e mensagens prontas a copiar.",
       "add": "Nova empresa-alvo",
       "edit": "Editar",
+      "editLabel": "Editar {name}",
       "form": {
         "companyName": "Empresa",
         "sector": "Setor",
@@ -1269,7 +1271,8 @@
       "save": "Guardar modelo",
       "saved": "Modelo guardado.",
       "invalid": "Verifique os campos do modelo.",
-      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
+      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento.",
+      "editLabel": "Editar {name}"
     },
     "coreTemplates": {
       "title": "Modelos do Core",
@@ -1338,7 +1341,8 @@
       "cancel": "Cancelar",
       "saved": "Entidade guardada.",
       "error": "Não foi possível guardar. Confirme os campos.",
-      "summary": "{taxId} · {address} · {representative} ({role})"
+      "summary": "{taxId} · {address} · {representative} ({role})",
+      "editLabel": "Editar {name}"
     },
     "contractTemplates": {
       "title": "Contratos",
@@ -2045,7 +2049,8 @@
       "invalid_input": "Verifique os campos e tente de novo."
     },
     "delete": "Apagar",
-    "deleteLabel": "Apagar tarefa {title}"
+    "deleteLabel": "Apagar tarefa {title}",
+    "editLabel": "Editar tarefa {title}"
   },
   "team": {
     "title": "Equipa",

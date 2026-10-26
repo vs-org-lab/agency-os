@@ -257,6 +257,7 @@ export function TemplateSheet({
   return (
     <CreateSheet
       label={defaults ? t('edit') : t('new')}
+      triggerLabel={defaults ? t('editLabel', { name: defaults.name }) : undefined}
       title={defaults ? defaults.name : t('new')}
       variant={defaults ? 'outline' : 'default'}
       icon={defaults ? <Pencil aria-hidden /> : undefined}

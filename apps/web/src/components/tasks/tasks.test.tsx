@@ -89,7 +89,7 @@ describe('tasks', () => {
     );
 
     expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Editar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Editar tarefa Minha sala' }));
     const dialog = screen.getByRole('dialog', { name: 'Minha sala' });
     await act(async () => {
       fireEvent.click(within(dialog).getByRole('button', { name: 'Guardar' }));

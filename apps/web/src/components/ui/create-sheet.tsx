@@ -10,6 +10,7 @@ import type { CreateOverlayProps, CreateResult } from './create-overlay';
 
 export function CreateSheet({
   label,
+  triggerLabel,
   title,
   description,
   icon,
@@ -50,7 +51,7 @@ export function CreateSheet({
       description={description}
       closeLabel={t('close')}
       trigger={
-        <Button type="button" variant={variant}>
+        <Button type="button" variant={variant} aria-label={triggerLabel}>
           {icon ?? <Plus aria-hidden />}
           {label}
         </Button>

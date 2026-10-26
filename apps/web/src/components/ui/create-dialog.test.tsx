@@ -125,6 +125,15 @@ describe.each([
     expect(document.activeElement).toBe(trigger);
   });
 
+  it('names the trigger with triggerLabel when given', () => {
+    wrap(
+      <Component label="Editar" triggerLabel="Editar Atlas" title="Atlas">
+        {() => <p>Formulário</p>}
+      </Component>,
+    );
+    expect(screen.getByRole('button', { name: 'Editar Atlas' })).toBeTruthy();
+  });
+
   it('opens initially when defaultOpen', () => {
     wrap(
       <Component label="Nova tarefa" title="Criar tarefa" defaultOpen>

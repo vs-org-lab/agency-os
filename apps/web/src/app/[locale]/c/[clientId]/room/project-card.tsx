@@ -47,7 +47,9 @@ export function ProjectCard({
         <p className="text-caption text-text-secondary">
           {t('card.healthLine', { score: health.score, level: th(`levels.${health.level}`) })}
         </p>
-      ) : null}
+      ) : (
+        <p className="text-caption text-text-secondary">{t('card.healthEmpty')}</p>
+      )}
     </section>
   );
 }

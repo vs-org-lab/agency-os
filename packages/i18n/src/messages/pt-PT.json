@@ -1892,7 +1892,8 @@
       "noEnd": "Por definir",
       "people": "Pessoas",
       "nobody": "Ninguém atribuído",
-      "healthLine": "Saúde: {score} de 100, {level}"
+      "healthLine": "Saúde: {score} de 100, {level}",
+      "healthEmpty": "Saúde: ainda sem dados suficientes"
     },
     "phases": "Fases",
     "phaseDue": "Data prevista da fase",

@@ -1892,7 +1892,8 @@
       "noEnd": "To be set",
       "people": "People",
       "nobody": "Nobody assigned",
-      "healthLine": "Health: {score} of 100, {level}"
+      "healthLine": "Health: {score} of 100, {level}",
+      "healthEmpty": "Health: not enough data yet"
     },
     "phases": "Phases",
     "phaseDue": "Phase due date",

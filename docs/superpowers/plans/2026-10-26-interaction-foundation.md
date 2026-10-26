@@ -36,6 +36,7 @@
 ### Task 1: Movimento base
 
 **Files:**
+
 - Modify: `packages/ui/package.json` (dependência `motion` 14.1.0, export `"./motion": "./src/motion/index.ts"`)
 - Create: `packages/ui/src/motion/transitions.ts`, `packages/ui/src/motion/motion-provider.tsx`, `packages/ui/src/motion/index.ts`
 - Modify: `packages/ui/src/styles/tokens.css` (`--duration-morph: 300ms`, e `0ms` no bloco de reduced motion)
@@ -43,6 +44,7 @@
 - Test: `packages/ui/src/motion/motion-provider.test.tsx`
 
 **Interfaces:**
+
 - Produces: `transitions: { fast; base; slow; morph }` (objetos `Transition` do `motion`: fast/base/slow como tween `ease: [0, 0, 0.2, 1]` com 0.12/0.18/0.24 s; morph a mola acima); `MotionProvider({ children }: { children: ReactNode })`; re-exporta `m`, `AnimatePresence`, `LayoutGroup`, `useReducedMotion` do `motion/react`.
 
 - [ ] **Step 1: Failing test** — `motion-provider.test.tsx`: `renders children` (o texto filho aparece); `uses reduced motion from the user setting` (com `matchMedia('(prefers-reduced-motion: reduce)')` a `true`, um componente filho que lê `useReducedMotion()` renderiza `"reduced"`).
@@ -54,11 +56,13 @@
 ### Task 2: Separadores e menu com indicador partilhado
 
 **Files:**
+
 - Modify: `packages/ui/src/components/tabs.tsx`
 - Modify: `apps/web/src/components/shell/app-sidebar.tsx` (item ativo)
 - Test: `packages/ui/src/components/tabs.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `m`, `transitions.morph` do Task 1.
 - Produces: `TabsList` cria um `LayoutGroup` com `id = useId()`; `TabsTrigger` renderiza, quando ativo, `<m.span data-slot="tabs-indicator" layoutId="tabs-indicator" aria-hidden className="absolute inset-0 -z-10 rounded-md bg-surface …" transition={transitions.morph} />`. A API pública dos Tabs não muda.
 
@@ -71,10 +75,12 @@
 ### Task 3: Collapsible e PageHeader
 
 **Files:**
+
 - Create: `packages/ui/src/components/collapsible.tsx`, `packages/ui/src/components/page-header.tsx`
 - Test: `packages/ui/src/components/collapsible.test.tsx`, `packages/ui/src/components/page-header.test.tsx`
 
 **Interfaces:**
+
 - Produces: `Collapsible`, `CollapsibleTrigger` (botão com chevron que roda 90°, props `children`), `CollapsibleContent` (altura animada com `AnimatePresence` + `m.div` `height: 0 → 'auto'`, `transitions.slow`, `overflow-hidden`), sobre `radix-ui` Collapsible; aceita `defaultOpen`/`open`/`onOpenChange`.
 - Produces: `PageHeader({ title: string; description?: string; context?: ReactNode; actions?: ReactNode; headingLevel?: 1 | 2 })` — `<header>` com `h1.text-title` (ou `h2`), descrição `text-body text-text-secondary`, `actions` alinhadas à direita em ecrãs `md+`, por baixo no telemóvel.
 
@@ -87,6 +93,7 @@
 ### Task 4: SidePanel, CreateDialog, CreateSheet e notificações
 
 **Files:**
+
 - Create: `packages/ui/src/components/side-panel.tsx`
 - Create: `apps/web/src/components/ui/create-dialog.tsx`, `apps/web/src/components/ui/create-sheet.tsx`, `apps/web/src/components/ui/notify.ts`
 - Modify: `packages/ui/src/components/sonner.tsx` (tokens, posição `bottom-right`, `expand` no hover, raio 12 px)
@@ -94,6 +101,7 @@
 - Test: `apps/web/src/components/ui/create-dialog.test.tsx`, `apps/web/src/components/ui/notify.test.ts`, `packages/ui/src/components/side-panel.test.tsx`
 
 **Interfaces:**
+
 - Produces: `SidePanel({ open; onOpenChange; title: string; actions?: ReactNode; tabs?: ReactNode; children })` sobre `Sheet` (lado direito, `w-full md:w-[480px]`, corpo com scroll próprio).
 - Produces: `CreateDialog({ label: string; title: string; description?: string; icon?: ReactNode; variant?: 'default' | 'outline'; defaultOpen?: boolean; children: (close: (result?: { message: string }) => void) => ReactNode })`. O gatilho é um `Button` com `+` (Lucide `Plus`) e `label`; o conteúdo anima de `scale: 0.96, opacity: 0` para `1` com `transformOrigin` calculado a partir do `getBoundingClientRect()` do gatilho relativo ao centro do diálogo. `close({ message })` fecha e chama `notify.success(message)`; `close()` fecha sem notificar. O foco volta ao gatilho.
 - Produces: `CreateSheet` com a mesma API, renderizado num `SidePanel`.
@@ -108,11 +116,13 @@
 ### Task 5: Estado vazio v2
 
 **Files:**
+
 - Create: `packages/ui/src/components/states/empty.tsx`
 - Modify: `packages/ui/src/components/states/empty-state.tsx` (atalho retrocompatível)
 - Test: `packages/ui/src/components/states/empty.test.tsx`
 
 **Interfaces:**
+
 - Produces: `Empty`, `EmptyMedia({ icons: ReactNode[] })` (1 a 3 ícones; com 3, os laterais `-rotate-6`/`rotate-6`, `opacity-60`, e no `group-hover` do `Empty` afastam-se 4 px com `transition-transform duration-(--duration-morph)`), `EmptyTitle`, `EmptyDescription`, `EmptyActions`, `EmptyRows({ count?: number })` (linhas fantasma estáticas com máscara em gradiente para o fundo, `aria-hidden`).
 - Produces: `EmptyState(props: StateProps & { icons?: ReactNode[]; variant?: 'plain' | 'rows' })` — o `icon` antigo continua aceite e é tratado como `icons: [icon]`.
 
@@ -125,12 +135,14 @@
 ### Task 6: Skeletons e carregamento por rota
 
 **Files:**
+
 - Create: `packages/ui/src/components/states/skeletons.tsx`
 - Modify: `packages/ui/src/components/skeleton.tsx` (brilho em CSS com `@keyframes` em `globals.css`, desligado em reduced motion; cor `bg-surface-muted`)
 - Create `loading.tsx` em: `(workspace)/tasks`, `(workspace)/pipeline`, `(workspace)/pipeline/[dealId]`, `(workspace)/money`, `(workspace)/reports`, `(workspace)/calendar`, `(workspace)/updates`, `c/[clientId]/tasks`, `c/[clientId]/docs`, `c/[clientId]/library`, `c/[clientId]/retainer`, `c/[clientId]/hub`, `portal/docs`, `portal/library`, `portal/invoices` (todos sob `apps/web/src/app/[locale]/`). Rever os três `loading.tsx` existentes para usarem as novas peças.
 - Test: `packages/ui/src/components/states/skeletons.test.tsx`
 
 **Interfaces:**
+
 - Produces: `SkeletonHeader({ actions?: boolean })`, `SkeletonRows({ rows?: number; columns?: number })`, `SkeletonCards({ count?: number })`, `SkeletonPanel()`; cada um com `role="status"`, `aria-busy="true"` e texto `sr-only` passado por prop `label: string` (a página passa a tradução de `common.loading`).
 
 - [ ] **Step 1: Failing tests** — `each skeleton announces loading` (role status + label); `rows renders the requested count`.
@@ -142,12 +154,14 @@
 ### Task 7: Números animados
 
 **Files:**
+
 - Modify: `packages/ui/package.json` (`@number-flow/react` 0.6.2)
 - Create: `packages/ui/src/components/animated-number.tsx`
 - Modify: `apps/web/src/components/shell/navigation-counter.tsx`
 - Test: `packages/ui/src/components/animated-number.test.tsx`, `apps/web/src/components/shell/navigation-counter.test.tsx`
 
 **Interfaces:**
+
 - Produces: `AnimatedNumber({ value: number; locale: string; format?: Intl.NumberFormatOptions; className?: string })` sobre `NumberFlow`, `tabular-nums`, `animated={!reducedMotion}`, sem animação no primeiro render.
 
 - [ ] **Step 1: Failing tests** — `formats with the locale` (`1234.5`, `pt-PT`, `{ style: 'currency', currency: 'EUR' }` → texto acessível contém `1234,50 €` como devolvido por `Intl.NumberFormat`); `does not animate with reduced motion`. Contador: `shows 9+ above nine without an animated number`; `animates numeric counts up to nine`.
@@ -159,6 +173,7 @@
 ### Task 8: Paleta de comandos ⌘K
 
 **Files:**
+
 - Modify: `apps/web/package.json` (`cmdk` 1.1.1)
 - Create: `packages/ui/src/components/command.tsx` (shadcn Command sobre `cmdk`, com os tokens)
 - Create: `apps/web/src/components/command/command-palette.tsx`, `apps/web/src/components/command/search.ts` (server), `apps/web/src/components/command/actions.ts` (`'use server'`)
@@ -167,6 +182,7 @@
 - Test: `apps/web/src/components/command/search.db.test.ts`, `apps/web/src/components/command/command-palette.test.tsx`
 
 **Interfaces:**
+
 - Produces: `searchWorkspace(claims: VerifiedClaims, query: string, deps: { contexts: Pick<DbContexts, 'withUserContext'> }): Promise<{ ok: true; results: CommandResult[] } | { ok: false; rule: 'forbidden' | 'invalid_input' }>` com `CommandResult = { kind: 'client' | 'deal' | 'task'; id: string; title: string; context: string | null; href: string }`. Zod: `query` com `trim`, 2–80 caracteres. Escapar `\`, `%`, `_` e usar `ilike … escape '\'`. Máximo 5 por tipo, ordenado por `updated_at desc`. Clientes e negócios arquivados excluídos; tarefas `done` excluídas. `forbidden` se `user_kind !== 'internal'` ou `aal !== 'aal2'`.
 - Produces: `searchWorkspaceAction(query: string)` (server action com `getVerifiedClaims`).
 - Produces: `CommandPalette({ navigation: NavItem[]; createActions: { labelKey: string; href: string }[] })` — abre com ⌘K/Ctrl+K, grupos "Ir para", "Criar", "Procurar"; debounce 200 ms; descarta respostas de consultas antigas.
@@ -183,6 +199,7 @@
 ### Task 9: Criação por botões e divulgação animada
 
 **Files (modify):**
+
 - `apps/web/src/app/[locale]/(workspace)/tasks/page.tsx`, `apps/web/src/app/[locale]/c/[clientId]/tasks/page.tsx` → `PageHeader` + `CreateSheet` (`label` = `t('form.heading')`, `defaultOpen={query.new === '1' && options.canCreate}`)
 - `apps/web/src/app/[locale]/c/[clientId]/page.tsx` → `CreateSheet` "Novo projeto" nas ações do cabeçalho
 - `apps/web/src/app/[locale]/c/[clientId]/room/proofs-section.tsx` → `CreateDialog` `t('newFile')`
@@ -198,6 +215,7 @@
 - Test: os testes de componente existentes dos ecrãs tocados (`tasks.test.tsx`, etc.) atualizados; novo `apps/web/src/components/tasks/task-create.test.tsx`.
 
 **Interfaces:**
+
 - Consumes: `PageHeader`, `Collapsible*` (Task 3), `CreateDialog`, `CreateSheet` (Task 4).
 
 - [ ] **Step 1: Failing tests** — `task-create.test.tsx`: `opens the task sheet from the New task button`; `opens automatically with new=1 when the user can create`; `does not render the button or open when the user cannot create`; `closes and notifies after the task is created`.
@@ -210,6 +228,7 @@
 ### Task 10: Documentação e verificação final
 
 **Files:**
+
 - Modify: `docs/product/05 Design system.md` (tabela de movimento com o token `morph`, regra 2 de "Bibliotecas de UI" conforme a spec, inventário: Paleta de comandos com `cmdk`, Estado vazio v2, Painel lateral, CreateDialog; regra "criar = botão identificado")
 - Modify: `apps/web/src/components/INVENTORY.md` (`motion` 14.1.0 MIT; `@number-flow/react` 0.6.2 MIT; `cmdk` 1.1.1 MIT; Radix Collapsible; estado vazio inspirado em cnippet-empty, empty-state Serafim e empty-state-04, todos MIT; CreateDialog padrão próprio)
 - Modify: `docs/STATUS.md` (UX-0 em "Feito" com a referência do PR; programa continua em "Em curso")

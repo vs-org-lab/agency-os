@@ -23,13 +23,13 @@ Entra a biblioteca `motion` (MIT), carregada com `LazyMotion` e `domAnimation` e
 
 A regra 2 de "Bibliotecas de UI" e a tabela de movimento do `05 Design system.md` passam a:
 
-| Token | Duração | Uso |
-| --- | --- | --- |
-| fast | 120 ms | Hover, pressionar |
-| base | 180 ms | Menus, popovers, tooltips, separadores |
-| slow | 240 ms | Painéis laterais, diálogos, troca de pergunta no workshop |
-| morph | 300 ms, mola sem ressalto | Elementos partilhados: indicador de separador, item ativo do menu, botão que abre o seu painel, listas que se reordenam, números que rolam |
-| moment | 600 ms a 1,2 s | Só momentos do cliente: aprovação final, pagamento, publicação do hub |
+| Token  | Duração                   | Uso                                                                                                                                        |
+| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| fast   | 120 ms                    | Hover, pressionar                                                                                                                          |
+| base   | 180 ms                    | Menus, popovers, tooltips, separadores                                                                                                     |
+| slow   | 240 ms                    | Painéis laterais, diálogos, troca de pergunta no workshop                                                                                  |
+| morph  | 300 ms, mola sem ressalto | Elementos partilhados: indicador de separador, item ativo do menu, botão que abre o seu painel, listas que se reordenam, números que rolam |
+| moment | 600 ms a 1,2 s            | Só momentos do cliente: aprovação final, pagamento, publicação do hub                                                                      |
 
 - Nos ecrãs de trabalho o movimento é sempre funcional: mostra de onde vem e para onde vai cada coisa. Nada anima em ciclo, nada atrasa uma ação.
 - No portal: micro-interações e um momento por evento.
@@ -60,18 +60,18 @@ Todas vivem em `packages/ui` (genéricas) ou em `apps/web/src/components/ui` (co
 
 Conversão dos `<details>`:
 
-| Ecrã | Hoje | Passa a |
-| --- | --- | --- |
-| Tarefas (`/tasks`, `c/[clientId]/tasks`) | `<details>` "Nova tarefa", aberto com `?new=1` | `PageHeader` + `CreateSheet`; `?new=1` abre o painel |
-| Sala do cliente | "Novo projeto" | `PageHeader` + `CreateSheet` |
-| Proofing da sala | "Novo ficheiro" | Botão "+ Novo ficheiro" + `CreateDialog` |
-| Aquisição | "Adicionar" e "Editar" por alvo | Botão principal + `CreateDialog`; "Editar" na linha abre o mesmo diálogo |
-| Negócio | "Adicionar contacto" e "Editar contactos" | Botão + `CreateDialog` |
-| Organização | "Adicionar" entidade e "Editar" | Botão + `CreateDialog` |
-| Modelos | "Novo modelo", "Novo" e "Editar" | Botões + `CreateSheet` (editores longos) |
-| Tarefa (lista) | "Editar" | Botão "Editar" + `CreateDialog` em modo de edição |
-| Contrato no negócio | "Ler" e "Anular" | "Ler" passa a `Collapsible`; "Anular" passa a botão destrutivo + diálogo de confirmação |
-| Modelos: guia, grelha, editores por idioma e por processo; ajuda do editor de contrato | Divulgação | Ficam como divulgação, com o `Collapsible` animado |
+| Ecrã                                                                                   | Hoje                                           | Passa a                                                                                 |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Tarefas (`/tasks`, `c/[clientId]/tasks`)                                               | `<details>` "Nova tarefa", aberto com `?new=1` | `PageHeader` + `CreateSheet`; `?new=1` abre o painel                                    |
+| Sala do cliente                                                                        | "Novo projeto"                                 | `PageHeader` + `CreateSheet`                                                            |
+| Proofing da sala                                                                       | "Novo ficheiro"                                | Botão "+ Novo ficheiro" + `CreateDialog`                                                |
+| Aquisição                                                                              | "Adicionar" e "Editar" por alvo                | Botão principal + `CreateDialog`; "Editar" na linha abre o mesmo diálogo                |
+| Negócio                                                                                | "Adicionar contacto" e "Editar contactos"      | Botão + `CreateDialog`                                                                  |
+| Organização                                                                            | "Adicionar" entidade e "Editar"                | Botão + `CreateDialog`                                                                  |
+| Modelos                                                                                | "Novo modelo", "Novo" e "Editar"               | Botões + `CreateSheet` (editores longos)                                                |
+| Tarefa (lista)                                                                         | "Editar"                                       | Botão "Editar" + `CreateDialog` em modo de edição                                       |
+| Contrato no negócio                                                                    | "Ler" e "Anular"                               | "Ler" passa a `Collapsible`; "Anular" passa a botão destrutivo + diálogo de confirmação |
+| Modelos: guia, grelha, editores por idioma e por processo; ajuda do editor de contrato | Divulgação                                     | Ficam como divulgação, com o `Collapsible` animado                                      |
 
 - `Collapsible` (`packages/ui`, sobre o Radix Collapsible): altura animada com o token `slow`, chevron que roda, mesmo marcador acessível que hoje.
 - Os textos dos botões são os rótulos que os `<summary>` já usam, para não mexer nas traduções nem nos seletores das e2e mais do que o necessário.

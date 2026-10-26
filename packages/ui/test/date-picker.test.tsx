@@ -59,6 +59,23 @@ describe('DatePicker', () => {
     expect(changes).toEqual([null]);
   });
 
+  it('keeps the date when the selected day is clicked again', async () => {
+    const user = userEvent.setup();
+    const changes: Array<string | null> = [];
+    renderPicker({ defaultValue: '2026-10-31', onChange: (value) => changes.push(value) });
+
+    await user.click(screen.getByRole('button', { name: /Data/ }));
+    await user.click(await screen.findByRole('button', { name: /31.*outubro/i }));
+
+    expect(hiddenValue()).toBe('2026-10-31');
+    expect(changes).toEqual([]);
+  });
+
+  it('does not submit a value while disabled', () => {
+    renderPicker({ defaultValue: '2026-10-31', disabled: true });
+    expect(new FormData(screen.getByTestId('form') as HTMLFormElement).has('dueDate')).toBe(false);
+  });
+
   it('submits an empty value when nothing is chosen', () => {
     renderPicker();
     expect(hiddenValue()).toBe('');

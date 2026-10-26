@@ -35,6 +35,24 @@ describe('AllowanceRing', () => {
     );
   });
 
+  it('stays neutral however far along it is when asked to', () => {
+    installMatchMedia(false);
+    const { container } = render(
+      <AllowanceRing
+        neutral
+        used={29}
+        limit={30}
+        locale="pt-PT"
+        label="Período"
+        remainingLabel={() => 'x'}
+        usedLabel={() => 'y'}
+      />,
+    );
+    expect(container.querySelector('[data-slot="allowance-ring"]')?.getAttribute('data-tone')).toBe(
+      'neutral',
+    );
+  });
+
   it('uses warning at 80%', () => {
     const { container } = renderRing(8, 10);
     expect(container.querySelector('[data-slot="allowance-ring"]')?.getAttribute('data-tone')).toBe(

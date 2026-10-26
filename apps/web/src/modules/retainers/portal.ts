@@ -4,7 +4,7 @@ import { clientPaymentsSuspended } from '@/modules/billing/server';
 import type { VerifiedClaims } from '@/platform/db';
 import { nowOf, type RetainersDeps } from './access';
 import type { RetainerLimitKind } from './domain/kinds';
-import { lisbonDay, lisbonMonth } from './domain/months';
+import { lisbonDay, lisbonMonth, monthProgress, type MonthProgress } from './domain/months';
 import { limitMonths, type LimitMonth } from './month';
 import type { RetainerExtraRow } from './readers';
 
@@ -14,6 +14,7 @@ export type PortalRetainerView = {
   /** RN-62: a payment more than 30 days overdue puts new requests on hold. */
   suspended: boolean;
   month: string;
+  period: MonthProgress;
   retainer: { id: string; tier: string; status: 'active' | 'ended' };
   limits: LimitMonth[];
   extraRequests: RetainerExtraRow[];
@@ -75,6 +76,7 @@ export async function loadPortalRetainer(
     decides: seen.retainer.decides,
     suspended,
     month,
+    period: monthProgress(now),
     retainer: { id: seen.retainer.id, tier: seen.retainer.tier, status: seen.retainer.status },
     limits,
     extraRequests: seen.extras.map((row) => ({

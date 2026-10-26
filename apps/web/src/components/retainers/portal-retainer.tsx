@@ -233,7 +233,7 @@ export function PortalRetainer({
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3" aria-label={t('month', { month: monthLabel })}>
         <h2 className="text-title-sm text-text">{t('month', { month: monthLabel })}</h2>
-        <LimitRings limits={view.limits} />
+        <LimitRings limits={view.limits} period={view.period} />
       </section>
       {view.retainer.status !== 'active' ? null : view.suspended ? (
         <FormMessage tone="danger">{t('portal.suspended')}</FormMessage>

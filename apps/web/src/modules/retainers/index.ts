@@ -7,6 +7,7 @@ export {
 } from './domain/allowance';
 export { RETAINER_LIMIT_KINDS, type RetainerLimitKind } from './domain/kinds';
 export { firstOfMonth, lisbonMonth, monthProgress, previousMonth } from './domain/months';
+export type { MonthProgress } from './domain/months';
 export type { LimitMonth } from './month';
 export type { PortalRetainerView } from './portal';
 export type { RetainerExtraRow, RetainerUsageRow, StaffRetainerView } from './readers';

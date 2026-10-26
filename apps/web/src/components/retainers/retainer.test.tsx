@@ -59,6 +59,8 @@ function withIntl(node: React.ReactNode) {
   );
 }
 
+const PERIOD = { day: 26, total: 31, left: 5 };
+
 const LIMITS: StaffRetainerView['limits'] = [
   {
     kind: 'content_pieces',
@@ -96,6 +98,7 @@ function view(overrides: Partial<StaffRetainerView> = {}): StaffRetainerView {
     canWrite: true,
     canSeeFee: true,
     month: '2026-10-01',
+    period: { day: 26, total: 31, left: 5 },
     projects: [{ id: 'project-1', name: 'Retainer Bloom' }],
     retainer: {
       id: 'retainer-1',
@@ -125,7 +128,7 @@ function actions(): RetainerActions {
 
 describe('C-10 retainer', () => {
   it('shows one ring per limit kind with remaining', () => {
-    withIntl(<LimitRings limits={LIMITS} />);
+    withIntl(<LimitRings limits={LIMITS} period={PERIOD} />);
     const pieces = screen.getByRole('group', { name: 'Peças de conteúdo' });
     expect(within(pieces).getByText('Disponível: 2,8')).toBeTruthy();
     expect(within(pieces).getByText('2 de 4,8')).toBeTruthy();
@@ -136,14 +139,16 @@ describe('C-10 retainer', () => {
   });
 
   it('shows the days left until the month closes in Lisbon', () => {
-    withIntl(<LimitRings limits={LIMITS} />);
+    withIntl(<LimitRings limits={LIMITS} period={PERIOD} />);
     const period = screen.getByRole('group', { name: 'Período' });
     expect(within(period).getByText('5 dias para o fecho')).toBeTruthy();
+    expect(period.getAttribute('data-tone')).toBe('neutral');
   });
 
   it('over limit shows zero remaining in danger', () => {
     withIntl(
       <LimitRings
+        period={PERIOD}
         limits={[
           {
             kind: 'campaigns',

@@ -11,10 +11,12 @@ type AllowanceRingProps = {
   remainingLabel: (remaining: string) => string;
   usedLabel: (used: string, limit: string) => string;
   size?: 40 | 56;
+  /** Neutral rings show progress that is not a consumption limit, so they never warn. */
+  neutral?: boolean;
   className?: string;
 };
 
-type Tone = 'accent' | 'warning' | 'danger';
+type Tone = 'accent' | 'warning' | 'danger' | 'neutral';
 
 function toneFor(used: number, limit: number): Tone {
   if (used > limit) return 'danger';
@@ -26,6 +28,7 @@ const STROKE: Record<Tone, string> = {
   accent: 'stroke-brand',
   warning: 'stroke-warning',
   danger: 'stroke-danger',
+  neutral: 'stroke-neutral',
 };
 
 /** Circular consumption indicator: remaining is never negative and an over-limit ring is full. */
@@ -37,11 +40,12 @@ function AllowanceRing({
   remainingLabel,
   usedLabel,
   size = 56,
+  neutral = false,
   className,
 }: AllowanceRingProps) {
   const format = new Intl.NumberFormat(locale);
   const remaining = Math.max(limit - used, 0);
-  const tone = toneFor(used, limit);
+  const tone = neutral ? 'neutral' : toneFor(used, limit);
   const fraction = limit > 0 ? Math.min(used / limit, 1) : used > 0 ? 1 : 0;
   const strokeWidth = size === 56 ? 5 : 4;
   const radius = (size - strokeWidth) / 2;

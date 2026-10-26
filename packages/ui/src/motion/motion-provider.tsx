@@ -2,14 +2,17 @@
 
 import type { ReactNode } from 'react';
 import { LazyMotion, MotionConfig } from 'motion/react';
+import { motionFeatures } from './features';
 import { transitions } from './transitions';
 
-/** Layout and shared-element animations need the full feature set; it loads after first paint. */
-export const loadMotionFeatures = () => import('./features').then((module) => module.default);
-
+/**
+ * Features load synchronously: loading them later updates the LazyMotion context during hydration,
+ * which makes React drop server HTML of pending streamed boundaries and render them again on the
+ * client.
+ */
 export function MotionProvider({ children }: { children: ReactNode }) {
   return (
-    <LazyMotion features={loadMotionFeatures} strict>
+    <LazyMotion features={motionFeatures} strict>
       <MotionConfig reducedMotion="user" transition={transitions.base}>
         {children}
       </MotionConfig>

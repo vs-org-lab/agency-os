@@ -182,3 +182,33 @@ export const retainerAlerts = pgTable(
     check('retainer_alerts_threshold', sql`${table.threshold} in (80, 100)`),
   ],
 ).enableRLS();
+
+/**
+ * A client's request for work within the allowance (US-19). It outlives the team task it created
+ * so the client can follow its state without ever reading the task.
+ */
+export const retainerRequests = pgTable(
+  'retainer_requests',
+  {
+    id: id(),
+    organizationId: uuid('organization_id').notNull(),
+    clientId: uuid('client_id').notNull(),
+    retainerId: uuid('retainer_id').notNull(),
+    taskId: uuid('task_id').references(() => tasks.id, { onDelete: 'set null' }),
+    description: text('description').notNull(),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.retainerId, table.clientId],
+      foreignColumns: [retainers.id, retainers.clientId],
+      name: 'retainer_requests_retainer_client_fk',
+    }).onDelete('cascade'),
+    index('retainer_requests_client_idx').on(table.clientId, table.createdAt),
+    check(
+      'retainer_requests_description_length',
+      sql`char_length(${table.description}) between 1 and 2000`,
+    ),
+  ],
+).enableRLS();

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -87,6 +87,43 @@ describe('room documents', () => {
     expect(screen.getByText('Contrato')).toBeTruthy();
     expect(screen.getByText('Assinado')).toBeTruthy();
     expect(screen.getByText('Tudo pago')).toBeTruthy();
+  });
+
+  it('renders commercial row before project documents', () => {
+    withIntl(<RoomDocumentCards clientId="client-1" view={ROOM} />);
+
+    const commercial = screen.getByRole('heading', { name: 'Comercial' });
+    const project = screen.getByRole('heading', { name: 'Documentos do projeto' });
+    expect(
+      commercial.compareDocumentPosition(project) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('each card shows icon, status and source', () => {
+    withIntl(<RoomDocumentCards clientId="client-1" view={ROOM} />);
+
+    const strategy = screen.getByRole('link', { name: /Estratégia/ });
+    expect(strategy.querySelector('[data-icon="file-text"]')).toBeTruthy();
+    expect(within(strategy).getByText('Com o cliente')).toBeTruthy();
+    expect(within(strategy).getByText('PDF · Versão 2')).toBeTruthy();
+
+    const contract = screen.getByRole('listitem', { name: 'Contrato' });
+    expect(contract.querySelector('[data-icon="pen-line"]')).toBeTruthy();
+    expect(within(contract).getByText('Assinado')).toBeTruthy();
+    expect(within(contract).getByText('Negócio')).toBeTruthy();
+  });
+
+  it('empty project documents show the create action', () => {
+    withIntl(
+      <RoomDocumentCards
+        clientId="client-1"
+        view={{ ...ROOM, documents: [] }}
+        createAction={<button type="button">Novo documento</button>}
+      />,
+    );
+
+    expect(screen.getByText('Ainda não há documentos neste projeto.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Novo documento' })).toBeTruthy();
   });
 
   it('the viewer renders each kind', () => {

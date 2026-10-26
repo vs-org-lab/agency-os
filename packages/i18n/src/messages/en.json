@@ -1918,14 +1918,8 @@
         "in_progress": "Mark as done: {name}",
         "done": "Reopen: {name}"
       },
-      "nextShort": {
-        "todo": "Start",
-        "in_progress": "Mark as done",
-        "done": "Reopen"
-      },
       "noDate": "No date",
       "panelClose": "Close step panel",
-      "status": "Status",
       "reopenTitle": "Reopen this step?",
       "reopenBody": "The client has already seen this step. Reopening it shows it as in progress again.",
       "reopenConfirm": "Reopen step",

@@ -1918,14 +1918,8 @@
         "in_progress": "Marcar como feito: {name}",
         "done": "Reabrir: {name}"
       },
-      "nextShort": {
-        "todo": "Começar",
-        "in_progress": "Marcar como feito",
-        "done": "Reabrir"
-      },
       "noDate": "Sem data",
       "panelClose": "Fechar painel do passo",
-      "status": "Estado",
       "reopenTitle": "Reabrir este passo?",
       "reopenBody": "O cliente já viu este passo. Ao reabri-lo, volta a aparecer como em curso.",
       "reopenConfirm": "Reabrir passo",

@@ -1872,7 +1872,8 @@
     "createProject": "Criar projeto",
     "tabs": {
       "steps": "Passos",
-      "plan": "Plano"
+      "plan": "Plano",
+      "timeline": "Cronograma"
     },
     "projectStatus": {
       "active": "Em curso",
@@ -1939,6 +1940,16 @@
       "title": "Plano",
       "week": "Semana {start}",
       "weeks": "Semanas {start} a {end}"
+    },
+    "timeline": {
+      "title": "Cronograma",
+      "today": "Hoje",
+      "zoom": "Escala",
+      "week": "Semana",
+      "month": "Mês",
+      "row": "{name}, de {start} a {end}",
+      "empty": "Ainda não há datas nas fases para desenhar o cronograma.",
+      "undated": "Sem datas e fora do cronograma: {names}."
     },
     "updates": {
       "title": "Atualizações",

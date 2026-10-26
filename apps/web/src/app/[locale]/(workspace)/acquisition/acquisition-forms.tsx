@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import {
@@ -14,6 +15,8 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { useSavedNotice } from '@/components/forms/use-saved-notice';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import { SubmitButton } from '@/components/forms/submit-button';
 import type { AcquisitionFormState } from './actions';
 
@@ -30,6 +33,7 @@ export function TargetForm({
   action,
   defaults,
   idPrefix,
+  onDone,
 }: {
   action: BoundAction;
   defaults: {
@@ -40,11 +44,14 @@ export function TargetForm({
     status: string;
   } | null;
   idPrefix: string;
+  /** Called once with the success message when the target has been saved. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('commercial.acquisition');
   const [state, formAction] = useActionState<AcquisitionFormState, FormData>(action, {
     status: 'idle',
   });
+  useSavedNotice(state, onDone, t('form.saved'));
 
   return (
     <form action={formAction} className="grid gap-3 md:grid-cols-2">
@@ -108,6 +115,36 @@ export function TargetForm({
         </div>
       </div>
     </form>
+  );
+}
+
+/** The "add" button or the per-row "edit" button, each opening the target form in a dialog. */
+export function TargetDialog({
+  action,
+  defaults,
+  idPrefix,
+}: {
+  action: BoundAction;
+  defaults: Parameters<typeof TargetForm>[0]['defaults'];
+  idPrefix: string;
+}) {
+  const t = useTranslations('commercial.acquisition');
+  return (
+    <CreateDialog
+      label={defaults ? t('edit') : t('add')}
+      title={defaults ? defaults.companyName : t('add')}
+      variant={defaults ? 'outline' : 'default'}
+      icon={defaults ? <Pencil aria-hidden /> : undefined}
+    >
+      {(close) => (
+        <TargetForm
+          action={action}
+          defaults={defaults}
+          idPrefix={idPrefix}
+          onDone={(message) => close({ message })}
+        />
+      )}
+    </CreateDialog>
   );
 }
 

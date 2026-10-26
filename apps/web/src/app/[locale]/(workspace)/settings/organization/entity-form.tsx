@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
@@ -8,6 +9,7 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import type { LegalEntity, LegalEntityInput } from '@/modules/contracts/server';
 import type { EntityActionResult } from './actions';
 
@@ -45,10 +47,13 @@ export function EntityForm({
   entity,
   idPrefix,
   save,
+  onDone,
 }: {
   entity: LegalEntity | null;
   idPrefix: string;
   save: (input: LegalEntityInput) => Promise<EntityActionResult>;
+  /** Called once with the success message when the entity has been saved. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('settings.organization');
   const [values, setValues] = useState<Record<TextField, string>>({
@@ -90,6 +95,7 @@ export function EntityForm({
             setCountry('PT');
             setIsDefault(false);
           }
+          if (result.ok) onDone?.(t('saved'));
           setResult(result);
         });
       }}
@@ -170,5 +176,35 @@ export function EntityForm({
         </div>
       </div>
     </form>
+  );
+}
+
+/** The "add entity" button or an entity's "edit" button, each opening the form in a dialog. */
+export function EntityDialog({
+  entity,
+  idPrefix,
+  save,
+}: {
+  entity: LegalEntity | null;
+  idPrefix: string;
+  save: (input: LegalEntityInput) => Promise<EntityActionResult>;
+}) {
+  const t = useTranslations('settings.organization');
+  return (
+    <CreateDialog
+      label={entity ? t('edit') : t('add')}
+      title={entity ? entity.legalName : t('add')}
+      variant={entity ? 'outline' : 'default'}
+      icon={entity ? <Pencil aria-hidden /> : undefined}
+    >
+      {(close) => (
+        <EntityForm
+          entity={entity}
+          idPrefix={idPrefix}
+          save={save}
+          onDone={(message) => close({ message })}
+        />
+      )}
+    </CreateDialog>
   );
 }

@@ -21,7 +21,7 @@ import {
   updateTrackingAction,
 } from './actions';
 import {
-  ContactForm,
+  ContactDialog,
   CopyMessageButton,
   DealMove,
   OutcomeForm,
@@ -171,36 +171,26 @@ export default async function DealPage({ params }: PageProps) {
                           .join(' · ')}
                       </span>
                       {writable ? (
-                        <details className="pt-2">
-                          <summary className="cursor-pointer text-body-sm text-link">
-                            {t('deal.contacts.edit')}
-                          </summary>
-                          <div className="pt-3">
-                            <ContactForm
-                              action={saveContactAction.bind(null, deal.id, client.id, contact.id)}
-                              defaults={contact}
-                              submitLabel={t('deal.contacts.save')}
-                            />
-                          </div>
-                        </details>
+                        <div className="pt-2">
+                          <ContactDialog
+                            action={saveContactAction.bind(null, deal.id, client.id, contact.id)}
+                            defaults={contact}
+                            submitLabel={t('deal.contacts.save')}
+                          />
+                        </div>
                       ) : null}
                     </li>
                   ))}
                 </ul>
               )}
               {writable ? (
-                <details>
-                  <summary className="cursor-pointer text-body-sm text-link">
-                    {t('deal.contacts.add')}
-                  </summary>
-                  <div className="pt-3">
-                    <ContactForm
-                      action={saveContactAction.bind(null, deal.id, client.id, null)}
-                      defaults={null}
-                      submitLabel={t('deal.contacts.save')}
-                    />
-                  </div>
-                </details>
+                <div>
+                  <ContactDialog
+                    action={saveContactAction.bind(null, deal.id, client.id, null)}
+                    defaults={null}
+                    submitLabel={t('deal.contacts.save')}
+                  />
+                </div>
               ) : null}
             </section>
           </TabsContent>

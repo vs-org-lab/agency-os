@@ -571,7 +571,8 @@
           "duplicate_email": "Já existe um contacto com este email.",
           "invalid_input": "Verifique os campos do contacto.",
           "not_found": "Não foi possível guardar o contacto."
-        }
+        },
+        "saved": "Contacto guardado."
       },
       "application": {
         "empty": "Este negócio não tem candidatura.",
@@ -708,7 +709,8 @@
         "notes": "Notas de abordagem",
         "status": "Estado",
         "save": "Guardar",
-        "error": "Verifique os campos e tente de novo."
+        "error": "Verifique os campos e tente de novo.",
+        "saved": "Empresa-alvo guardada."
       },
       "statuses": {
         "to_contact": "Por contactar",
@@ -1737,7 +1739,8 @@
         "invalid_input": "Escreva o motivo.",
         "invalid_state": "O contrato já não pode ser anulado.",
         "not_found": "Não foi possível concluir a ação."
-      }
+      },
+      "voided": "Contrato anulado."
     }
   },
   "billing": {

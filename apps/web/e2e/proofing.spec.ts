@@ -76,7 +76,7 @@ test.describe('File proofing', () => {
 
     await signInWithPassword(page, credentials.founder);
     await openProofsTab(page, seeded.clientId);
-    await page.getByText('Novo ficheiro').click();
+    await page.getByRole('button', { name: 'Novo ficheiro' }).click();
     await page.getByLabel('Título').fill(title);
     await page.getByLabel('Ficheiro', { exact: true }).setInputFiles({
       name: 'logotipo.png',
@@ -147,7 +147,7 @@ test.describe('File proofing', () => {
 
     await signInWithPassword(page, credentials.founder);
     await openProofsTab(page, seeded.clientId);
-    await page.getByText('Novo ficheiro').click();
+    await page.getByRole('button', { name: 'Novo ficheiro' }).click();
     await page.getByLabel('Título').fill(title);
     await page.getByLabel('Ficheiro', { exact: true }).setInputFiles({
       name: 'guia.pdf',

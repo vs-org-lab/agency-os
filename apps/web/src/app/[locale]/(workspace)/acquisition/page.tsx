@@ -1,12 +1,13 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Badge } from '@agency-os/ui/components/badge';
+import { PageHeader } from '@agency-os/ui/components/page-header';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { requireLocale } from '@/i18n/require-locale';
 import { isFounderActor, type AcquisitionTarget } from '@/modules/commercial';
 import { commercialSession, loadAcquisition } from '@/modules/commercial/server';
 import { getVerifiedClaims } from '@/platform/session';
-import { CopyTemplate, ConvertTarget, TargetForm } from './acquisition-forms';
+import { CopyTemplate, ConvertTarget, TargetDialog } from './acquisition-forms';
 import { convertTargetAction, saveTargetAction } from './actions';
 import { pageMetadata } from '@/i18n/page-title';
 
@@ -35,23 +36,19 @@ export default async function AcquisitionPage({ params }: PageProps) {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="flex min-w-0 flex-col gap-6">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-title text-text">{t('title')}</h1>
-          <p className="text-body text-text-secondary">{t('description')}</p>
-        </header>
-
-        {writable ? (
-          <details className="rounded-lg border border-border bg-surface p-4">
-            <summary className="cursor-pointer text-label text-text">{t('add')}</summary>
-            <div className="pt-4">
-              <TargetForm
+        <PageHeader
+          title={t('title')}
+          description={t('description')}
+          actions={
+            writable ? (
+              <TargetDialog
                 action={saveTargetAction.bind(null, null)}
                 defaults={null}
                 idPrefix="new-target"
               />
-            </div>
-          </details>
-        ) : null}
+            ) : null
+          }
+        />
 
         {targets.length === 0 ? (
           <EmptyState title={t('empty.title')} description={t('empty.description')} />
@@ -94,18 +91,11 @@ export default async function AcquisitionPage({ params }: PageProps) {
                           action={convertTargetAction.bind(null, target.id)}
                           companyName={target.companyName}
                         />
-                        <details className="w-full">
-                          <summary className="cursor-pointer text-body-sm text-link">
-                            {t('edit')}
-                          </summary>
-                          <div className="pt-3">
-                            <TargetForm
-                              action={saveTargetAction.bind(null, target.id)}
-                              defaults={target}
-                              idPrefix={`target-${target.id}`}
-                            />
-                          </div>
-                        </details>
+                        <TargetDialog
+                          action={saveTargetAction.bind(null, target.id)}
+                          defaults={target}
+                          idPrefix={`target-${target.id}`}
+                        />
                       </div>
                     ) : null}
                     {target.convertedClientId ? (

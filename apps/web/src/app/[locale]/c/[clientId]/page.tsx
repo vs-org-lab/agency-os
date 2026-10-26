@@ -28,7 +28,7 @@ import {
   withdrawProofApprovalAction,
 } from './proof-actions';
 import { FinalApprovalCard } from './room/final-approval';
-import { NewProjectForm } from './room/new-project-form';
+import { NewProjectSheet } from './room/new-project-form';
 import { PlanView } from './room/plan-view';
 import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
@@ -76,6 +76,15 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
         projects={room.projects}
         selectedId={room.project?.id ?? null}
         basePath={`/c/${clientId}`}
+        actions={
+          writable && templates.length > 0 ? (
+            <NewProjectSheet
+              clientId={clientId}
+              templates={templates.map((template) => ({ key: template.key, name: template.name }))}
+              create={createProjectAction}
+            />
+          ) : null
+        }
       />
       {health ? <HealthCard health={health} /> : null}
 
@@ -139,19 +148,6 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
       ) : (
         <EmptyState title={t('noProject')} description={t('noProjectHint')} />
       )}
-
-      {writable && templates.length > 0 ? (
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{t('newProject')}</summary>
-          <div className="pt-4">
-            <NewProjectForm
-              clientId={clientId}
-              templates={templates.map((template) => ({ key: template.key, name: template.name }))}
-              create={createProjectAction}
-            />
-          </div>
-        </details>
-      ) : null}
     </div>
   );
 }

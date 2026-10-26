@@ -8,7 +8,7 @@ import { commercialSession } from '@/modules/commercial/server';
 import { loadLegalEntities } from '@/modules/contracts/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { archiveEntityAction, saveEntityAction } from './actions';
-import { EntityForm } from './entity-form';
+import { EntityDialog } from './entity-form';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
@@ -61,16 +61,11 @@ export default async function OrganizationSettingsPage({ params }: PageProps) {
                   })}
                 </p>
                 <div className="flex flex-wrap items-start gap-3">
-                  <details className="flex-1">
-                    <summary className="cursor-pointer text-body-sm text-link">{t('edit')}</summary>
-                    <div className="pt-3">
-                      <EntityForm
-                        entity={entity}
-                        idPrefix={`entity-${entity.id}`}
-                        save={saveEntityAction}
-                      />
-                    </div>
-                  </details>
+                  <EntityDialog
+                    entity={entity}
+                    idPrefix={`entity-${entity.id}`}
+                    save={saveEntityAction}
+                  />
                   <form action={archiveEntityAction.bind(null, entity.id)}>
                     <Button type="submit" variant="ghost" size="sm">
                       {t('archive')}
@@ -82,12 +77,9 @@ export default async function OrganizationSettingsPage({ params }: PageProps) {
           </ul>
         )}
 
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{t('add')}</summary>
-          <div className="pt-4">
-            <EntityForm entity={null} idPrefix="new-entity" save={saveEntityAction} />
-          </div>
-        </details>
+        <div>
+          <EntityDialog entity={null} idPrefix="new-entity" save={saveEntityAction} />
+        </div>
       </section>
     </div>
   );

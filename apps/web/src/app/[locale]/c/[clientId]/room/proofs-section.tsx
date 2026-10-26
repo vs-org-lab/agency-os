@@ -7,6 +7,7 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import {
   proofError,
   type ProofActionResult,
@@ -81,7 +82,15 @@ function statusKey(version: ProofVersionSummary) {
   return version.approval?.status ?? 'noRequest';
 }
 
-function NewFileForm({ projectId, actions }: { projectId: string; actions: ProofsActions }) {
+function NewFileForm({
+  projectId,
+  actions,
+  onDone,
+}: {
+  projectId: string;
+  actions: ProofsActions;
+  onDone?: (message: string) => void;
+}) {
   const t = useTranslations('proofing.section');
   const id = useId();
   const [title, setTitle] = useState('');
@@ -89,7 +98,7 @@ function NewFileForm({ projectId, actions }: { projectId: string; actions: Proof
   const { outcome, setOutcome, pending, run } = useProofAction();
   return (
     <form
-      className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
+      className="flex flex-col gap-3"
       onSubmit={(event) => {
         event.preventDefault();
         if (!file) return;
@@ -103,6 +112,7 @@ function NewFileForm({ projectId, actions }: { projectId: string; actions: Proof
             setTitle('');
             setFile(null);
             event.currentTarget?.reset();
+            onDone?.(t('uploaded'));
           }
           return result;
         });
@@ -133,10 +143,10 @@ function NewFileForm({ projectId, actions }: { projectId: string; actions: Proof
       <Button type="submit" disabled={pending || !file}>
         {pending ? t('uploading') : t('upload')}
       </Button>
-      <p id={`${id}-hint`} className="text-caption text-text-secondary md:col-span-3">
+      <p id={`${id}-hint`} className="text-caption text-text-secondary">
         {t('fileHint')}
       </p>
-      <div className="md:col-span-3">
+      <div>
         <OutcomeMessage outcome={outcome} />
       </div>
     </form>
@@ -267,12 +277,17 @@ export function ProofsSection({
         ) : null}
       </div>
       {writable ? (
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{t('newFile')}</summary>
-          <div className="pt-4">
-            <NewFileForm projectId={projectId} actions={actions} />
-          </div>
-        </details>
+        <div>
+          <CreateDialog label={t('newFile')} title={t('newFile')}>
+            {(close) => (
+              <NewFileForm
+                projectId={projectId}
+                actions={actions}
+                onDone={(message) => close({ message })}
+              />
+            )}
+          </CreateDialog>
+        </div>
       ) : null}
       {files.length === 0 ? (
         <p className="text-body-sm text-text-secondary">{t('empty')}</p>

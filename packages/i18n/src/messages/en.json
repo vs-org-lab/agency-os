@@ -571,7 +571,8 @@
           "duplicate_email": "A contact with this email already exists.",
           "invalid_input": "Check the contact fields.",
           "not_found": "The contact could not be saved."
-        }
+        },
+        "saved": "Contact saved."
       },
       "application": {
         "empty": "This deal has no application.",
@@ -708,7 +709,8 @@
         "notes": "Approach notes",
         "status": "Status",
         "save": "Save",
-        "error": "Check the fields and try again."
+        "error": "Check the fields and try again.",
+        "saved": "Target saved."
       },
       "statuses": {
         "to_contact": "To contact",
@@ -1737,7 +1739,8 @@
         "invalid_input": "Write the reason.",
         "invalid_state": "The agreement can no longer be voided.",
         "not_found": "The action could not be completed."
-      }
+      },
+      "voided": "Contract voided."
     }
   },
   "billing": {

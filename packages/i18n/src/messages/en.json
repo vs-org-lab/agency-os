@@ -3265,6 +3265,11 @@
     }
   },
   "reports": {
+    "charts": {
+      "revenue": "Revenue by month in {year}, one line per currency: {currencies}.",
+      "pipeline": "Deals by stage and code.",
+      "load": "Tasks this week and active projects per person."
+    },
     "title": "Reports",
     "year": "Year {year}",
     "previousYear": "Previous year",

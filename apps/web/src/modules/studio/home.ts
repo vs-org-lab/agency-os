@@ -84,7 +84,7 @@ async function commercialItems(
   timeZone: string,
 ): Promise<HomeItem[]> {
   if (!canSeePipeline(actor)) return [];
-  const items = await listTodayItems(tx, { now, timeZone });
+  const items = await listTodayItems(tx, { now, timeZone, organizationId: actor.organizationId });
   return items.map((item) => ({
     kind: item.kind,
     id: item.id,
@@ -115,6 +115,7 @@ async function roomItems(
     .leftJoin(clients, eq(clients.id, tasks.clientId))
     .where(
       and(
+        eq(tasks.organizationId, actor.organizationId),
         eq(tasks.status, 'open'),
         lte(tasks.dueOn, today),
         or(eq(tasks.assigneeId, actor.userId), isNull(tasks.assigneeId)),
@@ -133,6 +134,8 @@ async function roomItems(
     .innerJoin(clients, eq(clients.id, projectSteps.clientId))
     .where(
       and(
+        eq(projectSteps.organizationId, actor.organizationId),
+        eq(projects.organizationId, actor.organizationId),
         ne(projectSteps.status, 'done'),
         lt(projectSteps.dueOn, today),
         eq(projects.status, 'active'),
@@ -151,6 +154,8 @@ async function roomItems(
     .innerJoin(projectPhases, eq(projectPhases.id, approvals.subjectId))
     .where(
       and(
+        eq(approvals.organizationId, actor.organizationId),
+        eq(projectPhases.organizationId, actor.organizationId),
         eq(approvals.status, 'changes_requested'),
         gte(approvals.decidedAt, new Date(now.getTime() - CHANGE_REQUEST_DAYS * DAY_MS)),
         eq(projectPhases.status, 'in_progress'),
@@ -209,14 +214,25 @@ async function billingFigures(
     })
     .from(paymentRequests)
     .innerJoin(clients, eq(clients.id, paymentRequests.clientId))
-    .where(and(eq(paymentRequests.status, 'sent'), lt(paymentRequests.dueDate, today)));
+    .where(
+      and(
+        eq(paymentRequests.organizationId, actor.organizationId),
+        eq(paymentRequests.status, 'sent'),
+        lt(paymentRequests.dueDate, today),
+      ),
+    );
   const receivable = await tx
     .select({
       currency: paymentRequests.currency,
       amount: sql<string>`sum(${paymentRequests.amount})::text`,
     })
     .from(paymentRequests)
-    .where(eq(paymentRequests.status, 'sent'))
+    .where(
+      and(
+        eq(paymentRequests.organizationId, actor.organizationId),
+        eq(paymentRequests.status, 'sent'),
+      ),
+    )
     .groupBy(paymentRequests.currency)
     .orderBy(asc(paymentRequests.currency));
   return {
@@ -238,7 +254,7 @@ async function billingFigures(
   };
 }
 
-async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
+async function clientProgress(tx: DbTransaction, organizationId: string): Promise<HomeClient[]> {
   const active = await tx
     .select({
       projectId: projects.id,
@@ -247,18 +263,28 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
     })
     .from(projects)
     .innerJoin(clients, eq(clients.id, projects.clientId))
-    .where(eq(projects.status, 'active'))
+    .where(and(eq(projects.organizationId, organizationId), eq(projects.status, 'active')))
     .orderBy(asc(clients.name), asc(projects.createdAt));
   if (active.length === 0) return [];
   const projectIds = active.map((row) => row.projectId);
   const phases = await tx
     .select({ projectId: projectPhases.projectId, status: projectPhases.status })
     .from(projectPhases)
-    .where(inArray(projectPhases.projectId, projectIds));
+    .where(
+      and(
+        eq(projectPhases.organizationId, organizationId),
+        inArray(projectPhases.projectId, projectIds),
+      ),
+    );
   const activity = await tx
     .select({ projectId: projectUpdates.projectId, at: max(projectUpdates.createdAt) })
     .from(projectUpdates)
-    .where(inArray(projectUpdates.projectId, projectIds))
+    .where(
+      and(
+        eq(projectUpdates.organizationId, organizationId),
+        inArray(projectUpdates.projectId, projectIds),
+      ),
+    )
     .groupBy(projectUpdates.projectId);
 
   const byClient = new Map<string, HomeClient>();
@@ -281,14 +307,25 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
   const withRetainer = await tx
     .select({ clientId: retainers.clientId })
     .from(retainers)
-    .where(and(inArray(retainers.clientId, clientIds), eq(retainers.status, 'active')));
+    .where(
+      and(
+        eq(retainers.organizationId, organizationId),
+        inArray(retainers.clientId, clientIds),
+        eq(retainers.status, 'active'),
+      ),
+    );
   const latest = await tx
     .selectDistinctOn([clientHealthSnapshots.clientId], {
       clientId: clientHealthSnapshots.clientId,
       level: clientHealthSnapshots.level,
     })
     .from(clientHealthSnapshots)
-    .where(inArray(clientHealthSnapshots.clientId, clientIds))
+    .where(
+      and(
+        eq(clientHealthSnapshots.organizationId, organizationId),
+        inArray(clientHealthSnapshots.clientId, clientIds),
+      ),
+    )
     .orderBy(clientHealthSnapshots.clientId, sql`${clientHealthSnapshots.day} desc`);
   for (const row of withRetainer) {
     const client = byClient.get(row.clientId);
@@ -326,14 +363,16 @@ export async function loadHome(
         commercialItems(tx, actor, now, timeZone),
         roomItems(tx, actor, now, today),
         billingFigures(tx, actor, today),
-        clientProgress(tx),
+        clientProgress(tx, actor.organizationId),
         tx
           .select({
             total: count(),
             clients: sql<number>`count(distinct ${projects.clientId})::int`,
           })
           .from(projects)
-          .where(eq(projects.status, 'active')),
+          .where(
+            and(eq(projects.organizationId, actor.organizationId), eq(projects.status, 'active')),
+          ),
       ]);
 
       const todayItems = sortByUrgency([...commercial, ...rooms, ...billing.items]);

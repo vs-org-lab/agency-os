@@ -59,7 +59,11 @@ describe('listTodayItems', () => {
       const { withUserContext } = createDbContexts(testDatabase(sql));
 
       const items = await withUserContext(claimsFor(world.users.founder), (tx) =>
-        listTodayItems(tx, { now: NOW, timeZone: 'Europe/Lisbon' }),
+        listTodayItems(tx, {
+          now: NOW,
+          timeZone: 'Europe/Lisbon',
+          organizationId: world.organizationId,
+        }),
       );
 
       expect(items[0]).toMatchObject({
@@ -78,7 +82,11 @@ describe('listTodayItems', () => {
       const { withUserContext } = createDbContexts(testDatabase(sql));
 
       const items = await withUserContext(claimsFor(world.users.founder), (tx) =>
-        listTodayItems(tx, { now: NOW, timeZone: 'Europe/Lisbon' }),
+        listTodayItems(tx, {
+          now: NOW,
+          timeZone: 'Europe/Lisbon',
+          organizationId: world.organizationId,
+        }),
       );
 
       const calls = items.filter((item) => item.kind === 'call');
@@ -93,7 +101,11 @@ describe('listTodayItems', () => {
       const { withUserContext } = createDbContexts(testDatabase(sql));
 
       const items = await withUserContext(claimsFor(world.users.founder), (tx) =>
-        listTodayItems(tx, { now: NOW, timeZone: 'Europe/Lisbon' }),
+        listTodayItems(tx, {
+          now: NOW,
+          timeZone: 'Europe/Lisbon',
+          organizationId: world.organizationId,
+        }),
       );
 
       expect(items.find((item) => item.kind === 'queue_b')).toMatchObject({
@@ -110,7 +122,11 @@ describe('listTodayItems', () => {
       const { withUserContext } = createDbContexts(testDatabase(sql));
 
       const items = await withUserContext(claimsFor(world.users.freelancer), (tx) =>
-        listTodayItems(tx, { now: NOW, timeZone: 'Europe/Lisbon' }),
+        listTodayItems(tx, {
+          now: NOW,
+          timeZone: 'Europe/Lisbon',
+          organizationId: world.organizationId,
+        }),
       );
 
       expect(items).toEqual([]);

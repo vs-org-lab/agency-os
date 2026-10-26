@@ -52,7 +52,7 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
         selectedId={view?.projectId ?? null}
         showPreviewLink={Boolean(view?.projectId)}
         basePath={basePath}
-        actions={createControl}
+        actions={view && view.documents.length > 0 ? createControl : null}
       />
       {view?.projectId ? (
         <RoomDocumentCards clientId={clientId} view={view} createAction={createControl} />

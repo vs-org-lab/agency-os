@@ -131,6 +131,22 @@ describe('RequestBoard', () => {
   });
 });
 
+describe('RequestBoard list view', () => {
+  it('lists every visible request with its state', () => {
+    intl(
+      <RequestBoard
+        month={NOW_MONTH}
+        view="list"
+        requests={[request('a', 'received'), request('d', 'done', '2026-09-28T10:00:00.000Z')]}
+      />,
+    );
+
+    const rows = screen.getAllByRole('listitem');
+    expect(rows).toHaveLength(1);
+    expect(within(rows[0] as HTMLElement).getByText('Recebido')).toBeTruthy();
+  });
+});
+
 describe('PlanPanel', () => {
   it('plan panel shows limits and rules', () => {
     intl(

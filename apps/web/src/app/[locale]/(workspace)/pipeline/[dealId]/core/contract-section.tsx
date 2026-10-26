@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ban } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -105,6 +105,15 @@ export function ContractSection({
   };
   const studioSigned = contract.signatures.some((entry) => entry.party === 'studio');
   const awaiting = contract.status === 'awaiting_signatures';
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const wasVoid = useRef(contract.status === 'void');
+
+  // Voiding removes the control that held focus; the section heading takes it over.
+  useEffect(() => {
+    const isVoid = contract.status === 'void';
+    if (isVoid && !wasVoid.current) headingRef.current?.focus();
+    wasVoid.current = isVoid;
+  }, [contract.status]);
 
   return (
     <section
@@ -112,7 +121,12 @@ export function ContractSection({
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
     >
       <header className="flex flex-wrap items-center gap-2">
-        <h2 id="contract-title" className="text-title-sm text-text">
+        <h2
+          id="contract-title"
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-title-sm text-text outline-none"
+        >
           {t('title')}
         </h2>
         <Badge variant={contract.status === 'signed' ? 'default' : 'secondary'}>

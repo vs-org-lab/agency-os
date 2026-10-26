@@ -89,6 +89,20 @@ describe('ContractSection', () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
+  it('moves focus to the section heading once the contract is voided', async () => {
+    const actions = { sign: vi.fn(), void: vi.fn() };
+    const view = (contract: ContractView) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <ContractSection contract={contract} dealId="deal-1" founder actions={actions} />
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(view(CONTRACT));
+    rerender(view({ ...CONTRACT, status: 'void' }));
+    await vi.waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Contrato' })),
+    );
+  });
+
   it('reveals the contract text from the read disclosure', () => {
     renderSection({ sign: vi.fn(), void: vi.fn() });
     expect(screen.getByText(/Texto./).closest('[hidden]')).not.toBeNull();

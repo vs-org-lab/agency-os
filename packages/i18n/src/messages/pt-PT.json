@@ -2960,6 +2960,21 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "chart": {
+      "title": "Recebido e despesas por mês",
+      "summary": "Pedidos pagos e despesas de {year} em euros, por mês.",
+      "otherCurrencies": "Só os montantes em EUR entram no gráfico; as outras moedas estão nas tabelas."
+    },
+    "range": {
+      "label": "Período",
+      "placeholder": "Todo o ano",
+      "clear": "Limpar",
+      "presets": {
+        "month": "Este mês",
+        "quarter": "Último trimestre",
+        "year": "Este ano"
+      }
+    },
     "title": "Dinheiro",
     "description": "O que entrou, o que está em aberto e o que saiu, por ano.",
     "year": "Ano",

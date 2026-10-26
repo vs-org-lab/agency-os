@@ -15,3 +15,12 @@ export type {
   MoneySubscriptionRow,
   MoneyYearView,
 } from './readers';
+export {
+  filterByRange,
+  lisbonToday,
+  monthlyTotals,
+  parseRange,
+  rangePresets,
+  type DateRange,
+  type RangePresetId,
+} from './domain/monthly';

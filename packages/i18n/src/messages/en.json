@@ -2960,6 +2960,21 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "chart": {
+      "title": "Received and expenses by month",
+      "summary": "Paid requests and expenses of {year} in euros, by month.",
+      "otherCurrencies": "Only EUR amounts are charted; other currencies are in the tables."
+    },
+    "range": {
+      "label": "Period",
+      "placeholder": "Whole year",
+      "clear": "Clear",
+      "presets": {
+        "month": "This month",
+        "quarter": "Last quarter",
+        "year": "This year"
+      }
+    },
     "title": "Money",
     "description": "What came in, what is open and what went out, per year.",
     "year": "Year",

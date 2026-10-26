@@ -41,11 +41,11 @@ import {
   SidebarSeparator,
 } from '@agency-os/ui/components/sidebar';
 import { ThemeToggle } from '@agency-os/ui/theme-toggle';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitcher } from './locale-switcher';
 import type { NavigationCounter, NavigationIcon } from './navigation';
-import { formatCounter, useLiveCounter } from './navigation-counter';
+import { CounterValue, formatCounter, useLiveCounter } from './navigation-counter';
 import { signOutAction } from './sign-out-action';
 
 export type ResolvedNavigationItem = {
@@ -112,6 +112,7 @@ function NavigationItemLink({
   source: CounterSource | undefined;
 }) {
   const t = useTranslations('shell');
+  const locale = useLocale();
   const count = useLiveCounter(source?.initial ?? 0, source?.refresh ?? noCount);
   const display = source ? formatCounter(count) : null;
   const Icon = ICONS[item.icon];
@@ -145,7 +146,7 @@ function NavigationItemLink({
       {display ? (
         <>
           <SidebarMenuBadge aria-hidden className="rounded-full bg-info-bg text-info">
-            {display}
+            <CounterValue count={count} locale={locale} />
           </SidebarMenuBadge>
           <span
             aria-hidden

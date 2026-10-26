@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { AnimatedNumber } from '@agency-os/ui/components/animated-number';
 import { usePathname } from '@/i18n/navigation';
 
 export const COUNTER_REFRESH_EVENT = 'navigation-counters:refresh';
@@ -10,6 +11,14 @@ const MAX_DISPLAYED = 9;
 export function formatCounter(count: number): string | null {
   if (count <= 0) return null;
   return count > MAX_DISPLAYED ? `${MAX_DISPLAYED}+` : String(count);
+}
+
+/** Counter text; only the plain numeric range animates, the capped form is static text. */
+export function CounterValue({ count, locale }: { count: number; locale: string }) {
+  const display = formatCounter(count);
+  if (display === null) return null;
+  if (count > MAX_DISPLAYED) return <>{display}</>;
+  return <AnimatedNumber value={count} locale={locale} />;
 }
 
 /**

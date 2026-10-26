@@ -35,7 +35,7 @@ export type {
 } from './queries';
 export type { FindingEvidenceInput } from './findings';
 export { getPortalCore, type PortalCore } from './portal';
-export { transcribeDeps } from './recording-runtime';
+export { transcribeDeps, transcribesInline, transcriptionPort } from './recording-runtime';
 export {
   finishTranscription,
   markRecordingFailed,

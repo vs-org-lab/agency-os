@@ -61,6 +61,7 @@
 ### Task 4: Boas-vindas no primeiro acesso
 
 **Files:** migração custom (novo valor `portal_onboarding` em `app.seen_area`); `apps/web/src/modules/...` (serviço de marcador, seguindo `commercial/applications/unseen.ts`); Create `apps/web/src/components/portal/onboarding-dialog.tsx`; test `onboarding-dialog.test.tsx` + DB test do marcador.
+
 - 3 passos com indicador (morph do ponto ativo), "Seguinte", "Anterior", "Saltar" e "Começar"; teclado (Esc = saltar); grava o marcador ao fechar.
 - Nunca na pré-visualização da equipa (`/c/[clientId]/preview`).
 - [ ] **Step 1: Failing tests** — `shows once until dismissed`; `skip marks it seen`; `never renders in staff preview`; DB `marker is per user`.
@@ -69,6 +70,7 @@
 ### Task 5: Momento de pagamento
 
 **Files:** Create `apps/web/src/components/portal/receipt-moment.tsx`; `apps/web/src/app/[locale]/portal/invoices/page.tsx` (lê `?paid=1`, já usado como `successUrl` em `modules/billing/stripe-events.ts`); "momento visto" guardado no `localStorage` com a chave `payment-moment:<requestId>`, lido e escrito dentro de `try/catch` (sem armazenamento, o recibo aparece estático). Noutro dispositivo o momento repete-se, o que é aceitável para um efeito visual e evita uma migração.
+
 - Recibo com o código do pedido (`PP-AAAA-NNNN`), valor e data; animação de saída de ranhura com `m` (translateY + clip), token `moment`; "reduzir movimento" → estático.
 - [ ] **Step 1: Failing tests** — `prints once for a paid request`; `reduced motion shows the receipt without animation`; `does not run for unpaid requests`.
 - [ ] **Step 2–4:** FAIL → implementar → PASS. **Step 5:** commit `feat(web): payment receipt moment in the portal`.
@@ -76,6 +78,7 @@
 ### Task 6: Comparar versões de uma prova
 
 **Files:** Create `packages/ui/src/components/image-compare.tsx`; `apps/web/src/components/proofing/*` (visualizador da equipa e do portal); `modules/proofing` (a leitura da versão passa a incluir a versão anterior, se for imagem e legível, com URL assinado das mesmas regras); tests `packages/ui/test/image-compare.test.tsx` e do visualizador.
+
 - `ImageCompare({ before: { src; alt }; after: { src; alt }; label: string })` — divisória arrastável (pointer), `role="slider"` com `aria-valuenow` 0–100, setas ±5, Home/End; sem animação contínua.
 - Botão "Comparar com a versão anterior" só quando as duas versões são imagens.
 - [ ] **Step 1: Failing tests** — `arrow keys move the divider and update aria-valuenow`; `compare button only with two image versions`.

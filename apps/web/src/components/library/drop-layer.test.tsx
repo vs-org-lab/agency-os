@@ -6,11 +6,11 @@ import { DropLayer } from './drop-layer';
 
 afterEach(cleanup);
 
-function setup(enabled = true) {
+function setup(enabled = true, folderNotice = 'Pastas não são suportadas; largue ficheiros') {
   const onFiles = vi.fn();
   render(
     <MotionProvider>
-      <DropLayer enabled={enabled} onFiles={onFiles} label="Largue aqui">
+      <DropLayer enabled={enabled} onFiles={onFiles} label="Largue aqui" folderNotice={folderNotice}>
         <p data-testid="area">content</p>
       </DropLayer>
     </MotionProvider>,
@@ -21,6 +21,27 @@ function setup(enabled = true) {
 const files = (list: File[] = []) => ({ dataTransfer: { types: ['Files'], files: list } });
 
 describe('DropLayer', () => {
+  it('skips dropped folders and says why instead of counting them as files', () => {
+    const { area, onFiles } = setup();
+    const folder = new File([], 'Marca');
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    const items = [
+      { webkitGetAsEntry: () => ({ isDirectory: true }) },
+      { webkitGetAsEntry: () => ({ isDirectory: false }) },
+    ];
+
+    fireEvent.drop(area, { dataTransfer: { types: ['Files'], files: [folder, file], items } });
+
+    expect(onFiles).toHaveBeenCalledWith([file]);
+    expect(screen.getByText('Pastas não são suportadas; largue ficheiros')).toBeTruthy();
+  });
+
+  it('uses the accent dashed border for the overlay', () => {
+    const { area } = setup();
+    fireEvent.dragEnter(area, files());
+    expect(screen.getByText('Largue aqui').className).toContain('border-accent');
+  });
+
   it('stays visible while the pointer moves between child elements', async () => {
     const { area } = setup();
     fireEvent.dragEnter(area, files());

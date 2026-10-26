@@ -6,12 +6,13 @@ import { m, transitions, useReducedMotion } from '@agency-os/ui/motion';
 type StackedRow = {
   key: string;
   label: string;
-  segments: Array<{ key: string; value: number }>;
+  /** `label` names a segment that has no legend entry; its colour then follows its position in the row. */
+  segments: Array<{ key: string; value: number; label?: string }>;
 };
 
 type StackedBarsProps = {
   rows: StackedRow[];
-  /** Segment key to display label; the key order fixes each segment's colour. */
+  /** Legend entries: segment key to display label; the key order fixes each segment's colour. */
   segmentLabels: Record<string, string>;
   formatValue: (value: number) => string;
   /** Plain-language description of the data, read by assistive technology. */
@@ -25,7 +26,12 @@ const total = (row: StackedRow) => row.segments.reduce((sum, segment) => sum + s
 function StackedBars({ rows, segmentLabels, formatValue, summary, className }: StackedBarsProps) {
   const reduceMotion = useReducedMotion();
   const segmentKeys = Object.keys(segmentLabels);
-  const colorOf = (key: string) => `var(--chart-${(segmentKeys.indexOf(key) % 5) + 1})`;
+  const colorOf = (key: string, position: number) => {
+    const index = segmentKeys.indexOf(key);
+    return `var(--chart-${((index >= 0 ? index : position) % 5) + 1})`;
+  };
+  const nameOf = (segment: { key: string; label?: string }) =>
+    segment.label ?? segmentLabels[segment.key] ?? segment.key;
   const largest = Math.max(...rows.map(total), 0);
 
   return (
@@ -47,62 +53,61 @@ function StackedBars({ rows, segmentLabels, formatValue, summary, className }: S
               aria-hidden="true"
               className="flex h-3 gap-0.5 overflow-hidden rounded-sm bg-surface-muted"
             >
-              {row.segments
-                .filter((segment) => segment.value > 0)
-                .map((segment) => {
-                  const width = Math.round((segment.value / largest) * 10000) / 100;
-                  const common = {
-                    'data-segment': segment.key,
-                    'data-width': String(width),
-                    className: 'h-full rounded-sm',
-                    style: { backgroundColor: colorOf(segment.key) },
-                  };
-                  return reduceMotion ? (
-                    <div
-                      key={segment.key}
-                      {...common}
-                      style={{ ...common.style, width: `${width}%` }}
-                    />
-                  ) : (
-                    <m.div
-                      key={segment.key}
-                      {...common}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${width}%` }}
-                      transition={transitions.slow}
-                    />
-                  );
-                })}
+              {row.segments.map((segment, position) => {
+                if (segment.value <= 0) return null;
+                const width = Math.round((segment.value / largest) * 10000) / 100;
+                const common = {
+                  'data-segment': segment.key,
+                  'data-width': String(width),
+                  title: `${nameOf(segment)}: ${formatValue(segment.value)}`,
+                  className: 'h-full rounded-sm',
+                  style: { backgroundColor: colorOf(segment.key, position) },
+                };
+                return reduceMotion ? (
+                  <div
+                    key={segment.key}
+                    {...common}
+                    style={{ ...common.style, width: `${width}%` }}
+                  />
+                ) : (
+                  <m.div
+                    key={segment.key}
+                    {...common}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${width}%` }}
+                    transition={transitions.slow}
+                  />
+                );
+              })}
             </div>
             <span className="text-text tabular-nums">{formatValue(total(row))}</span>
             <span className="sr-only">
               {row.segments
-                .map(
-                  (segment) =>
-                    `${segmentLabels[segment.key] ?? segment.key}: ${formatValue(segment.value)}`,
-                )
+                .map((segment) => `${nameOf(segment)}: ${formatValue(segment.value)}`)
                 .join(', ')}
             </span>
           </li>
         ))}
       </ul>
-      <figcaption>
-        <ul
-          data-slot="legend"
-          className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
-        >
-          {segmentKeys.map((key) => (
-            <li key={key} className="inline-flex items-center gap-1.5">
-              <span
-                aria-hidden="true"
-                className="size-2.5 rounded-sm"
-                style={{ backgroundColor: colorOf(key) }}
-              />
-              {segmentLabels[key]}
-            </li>
-          ))}
-        </ul>
-      </figcaption>
+      {segmentKeys.length > 0 ? (
+        <figcaption>
+          <ul
+            data-slot="legend"
+            className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
+          >
+            {segmentKeys.map((key) => (
+              <li key={key} className="inline-flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="size-2.5 rounded-sm"
+                  style={{ backgroundColor: colorOf(key, 0) }}
+                />
+                {segmentLabels[key]}
+              </li>
+            ))}
+          </ul>
+        </figcaption>
+      ) : null}
     </figure>
   );
 }

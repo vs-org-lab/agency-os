@@ -73,3 +73,36 @@ describe('StackedBars', () => {
     expect(screen.getAllByText('0 tarefas')).toHaveLength(2);
   });
 });
+
+describe('StackedBars without legend entries', () => {
+  it('colours unlisted segments by position and names them on hover', () => {
+    installMatchMedia(false);
+    const { container } = render(
+      <MotionProvider>
+        <StackedBars
+          rows={[
+            {
+              key: 'core',
+              label: 'Core',
+              segments: [
+                { key: '1.1', value: 1, label: '1.1' },
+                { key: '1.2', value: 3, label: '1.2' },
+              ],
+            },
+          ]}
+          segmentLabels={{}}
+          formatValue={String}
+          summary="Negócios"
+        />
+      </MotionProvider>,
+    );
+    const segments = [...container.querySelectorAll<HTMLElement>('[data-segment]')];
+
+    expect(segments.map((node) => node.style.backgroundColor)).toEqual([
+      'var(--chart-1)',
+      'var(--chart-2)',
+    ]);
+    expect(segments[1]?.getAttribute('title')).toBe('1.2: 3');
+    expect(container.querySelector('[data-slot="legend"]')).toBeNull();
+  });
+});

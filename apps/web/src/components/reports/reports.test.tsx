@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { MotionProvider } from '@agency-os/ui/motion';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ReportsView } from '@/modules/reports';
 import { ReportsScreen } from './reports-screen';
@@ -18,10 +19,26 @@ afterEach(() => {
   cleanup();
 });
 
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+    }),
+  });
+});
+
 function show(view: ReportsView) {
   return render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      <ReportsScreen view={view} />
+      <MotionProvider>
+        <ReportsScreen view={view} />
+      </MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -60,7 +77,7 @@ describe('S-11 reports', () => {
       const link = within(section).getByRole('link', { name: 'Descarregar CSV' });
       expect(link.getAttribute('href')).toBe(`/api/reports/${panel}.csv?year=2026`);
     }
-    expect(screen.getByText('Ana Costa')).toBeTruthy();
+    expect(screen.getByRole('rowheader', { name: 'Ana Costa' })).toBeTruthy();
     expect(screen.getByText('Bloom')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Ano anterior' }).getAttribute('href')).toBe(
       '/reports?year=2025',
@@ -86,5 +103,36 @@ describe('S-11 reports', () => {
     show(FULL);
     const link = screen.getByRole('link', { name: 'Descarregar PDF' });
     expect(link.getAttribute('href')).toBe('/api/reports/pdf?year=2026');
+  });
+
+  it('revenue panel shows a line per currency', () => {
+    show({
+      ...FULL,
+      revenue: [
+        ...FULL.revenue,
+        { currency: 'USD', months: months({ 3: '250.00' }), total: '250.00' },
+      ],
+    });
+    const section = screen.getByRole('region', { name: 'Receita por mês' });
+
+    expect(section.querySelectorAll('[data-slot="line-chart"] path[data-series]')).toHaveLength(2);
+    expect(within(section).getByRole('img', { name: /Receita por mês/ })).toBeTruthy();
+  });
+
+  it('pipeline and load show stacked bars', () => {
+    show(FULL);
+
+    const pipeline = screen.getByRole('region', { name: 'Negócios por código' });
+    const load = screen.getByRole('region', { name: 'Carga da equipa' });
+    expect(pipeline.querySelector('[data-row="core"] [data-segment="1.2"]')).toBeTruthy();
+    expect(load.querySelector('[data-row="u1"] [data-segment="tasks"]')).toBeTruthy();
+    expect(load.querySelector('[data-row="u1"] [data-segment="projects"]')).toBeTruthy();
+  });
+
+  it('no chart without data', () => {
+    const { container } = show({ ...FULL, revenue: [], pipeline: [], load: [] });
+
+    expect(container.querySelector('[data-slot="line-chart"]')).toBeNull();
+    expect(container.querySelector('[data-slot="stacked-bars"]')).toBeNull();
   });
 });

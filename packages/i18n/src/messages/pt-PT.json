@@ -1590,6 +1590,7 @@
       "confirmOverwrite": "Já há notas em: {blocks}. Substituir?",
       "overwrite": "Substituir",
       "applied": "Guardado.",
+      "thinking": "A pensar…",
       "narrative": "Narrativa guardada",
       "needsTranscript": "Guarde a transcrição antes de pedir o briefing.",
       "errors": {

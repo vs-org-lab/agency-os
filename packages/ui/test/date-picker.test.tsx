@@ -77,4 +77,35 @@ describe('DatePicker', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(document.activeElement).toBe(trigger);
   });
+
+  it('follows a controlled value, including a reset to empty', () => {
+    const { rerender } = render(
+      <form data-testid="form">
+        <DatePicker
+          name="dueDate"
+          locale="pt-PT"
+          label="Data"
+          placeholder="Escolher data"
+          clearLabel="Limpar"
+          value="2026-10-31"
+        />
+      </form>,
+    );
+    expect(hiddenValue()).toBe('2026-10-31');
+
+    rerender(
+      <form data-testid="form">
+        <DatePicker
+          name="dueDate"
+          locale="pt-PT"
+          label="Data"
+          placeholder="Escolher data"
+          clearLabel="Limpar"
+          value=""
+        />
+      </form>,
+    );
+    expect(hiddenValue()).toBe('');
+    expect(screen.getByRole('button', { name: /Data/ }).textContent).toContain('Escolher data');
+  });
 });

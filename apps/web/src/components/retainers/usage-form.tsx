@@ -6,8 +6,9 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import type { LimitMonth } from '@/modules/retainers';
-import { decimal, retainerError, SELECT, type RetainerError, type RetainerResult } from './shared';
+import { decimal, retainerError, type RetainerError, type RetainerResult } from './shared';
 
 export type RecordUsage = (input: {
   retainerId: string;
@@ -57,18 +58,16 @@ export function UsageForm({
       <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${id}-kind`}>{t('usage.kind')}</Label>
-          <select
+          <SelectField
             id={`${id}-kind`}
+            name="kind"
             value={kind}
-            onChange={(event) => setKind(event.target.value)}
-            className={SELECT}
-          >
-            {limits.map((limit) => (
-              <option key={limit.kind} value={limit.kind}>
-                {t(`kinds.${limit.kind}`)}
-              </option>
-            ))}
-          </select>
+            onValueChange={setKind}
+            options={limits.map((limit) => ({
+              value: limit.kind,
+              label: t(`kinds.${limit.kind}`),
+            }))}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${id}-quantity`}>{t('usage.quantity')}</Label>

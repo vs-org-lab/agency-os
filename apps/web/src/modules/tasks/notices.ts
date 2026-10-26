@@ -80,3 +80,72 @@ export async function sendTaskAssignedNotice(
   });
   return true;
 }
+
+/**
+ * Tells the assignee that someone else commented on their open task. The email names the author
+ * and links to the task; the comment itself is never sent (08: minimise data in external channels).
+ */
+export async function sendTaskCommentNotice(
+  input: { taskId: string; assigneeId: string; authorId: string },
+  deps: TaskNoticeDeps,
+): Promise<boolean> {
+  if (input.assigneeId === input.authorId) return false;
+  const context = await deps.contexts.withSystemContext(async (tx) => {
+    const [task] = await tx
+      .select({
+        organizationId: tasks.organizationId,
+        title: tasks.title,
+        clientId: tasks.clientId,
+        assigneeName: profiles.fullName,
+      })
+      .from(tasks)
+      .innerJoin(profiles, eq(profiles.id, tasks.assigneeId))
+      .innerJoin(
+        organizationMemberships,
+        and(
+          eq(organizationMemberships.organizationId, tasks.organizationId),
+          eq(organizationMemberships.userId, tasks.assigneeId),
+          eq(organizationMemberships.status, 'active'),
+        ),
+      )
+      .where(
+        and(
+          eq(tasks.id, input.taskId),
+          eq(tasks.assigneeId, input.assigneeId),
+          eq(tasks.status, 'open'),
+        ),
+      );
+    if (!task) return null;
+    const [author] = await tx
+      .select({ fullName: profiles.fullName })
+      .from(profiles)
+      .where(eq(profiles.id, input.authorId));
+    const rows = await tx.execute<{ email: string | null }>(
+      sql`select email from auth.users where id = ${input.assigneeId}::uuid`,
+    );
+    return {
+      task,
+      authorName: author?.fullName ?? '',
+      to: rows[0]?.email ?? null,
+      sender: await organizationSender(tx, task.organizationId),
+    };
+  });
+  if (!context?.to) return false;
+  const { task, sender } = context;
+  const rendered = renderEmail('team.task_comment', sender.defaultLocale, {
+    fullName: task.assigneeName,
+    title: task.title,
+    authorName: context.authorName,
+    taskUrl: `${deps.appBaseUrl}${task.clientId ? `/c/${task.clientId}/tasks` : '/tasks'}?task=${input.taskId}`,
+  });
+  await deps.email.send({
+    to: context.to,
+    template: 'team.task_comment',
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+    fromName: sender.fromName,
+    organizationId: task.organizationId,
+  });
+  return true;
+}

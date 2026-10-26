@@ -5,3 +5,5 @@ export { canCreateTasks } from './domain/creators';
 export { canTakeTask, type TaskPerson } from './domain/people';
 export type { TaskOption, TaskOptions } from './options';
 export type { TaskCounts, TaskInput, TaskItemView, TaskView } from './service';
+export type { TaskDetail } from './detail';
+export { TASK_UPLOAD_FOLDER, type CollaborationFailure } from './collaboration';

@@ -2,8 +2,20 @@ import 'server-only';
 import type { UpdateVisibility } from '@agency-os/db';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import type { LibraryDeps } from './access';
-import { libraryFileUrl, confirmUpload, deleteFile, requestUploads } from './files';
-import { createFolder, deleteFolder, renameFolder, setFolderVisibility } from './folders';
+import {
+  confirmUpload,
+  deleteFile,
+  libraryFileUrl,
+  readableFileIds,
+  requestUploads,
+} from './files';
+import {
+  createFolder,
+  deleteFolder,
+  ensureRootFolder,
+  renameFolder,
+  setFolderVisibility,
+} from './folders';
 import { attachableFiles, loadLibrary } from './readers';
 import { createSupabaseLibraryStorage } from './supabase-storage';
 import type { LibraryQuery } from './views';
@@ -76,3 +88,6 @@ export function libraryZip(claims: VerifiedClaims, projectId: string, folderId: 
 export { LIBRARY_FUNCTIONS } from './automations';
 export { fitsStorage } from './quota';
 export { createSupabaseLibraryStorage } from './supabase-storage';
+
+/** For modules that already hold their own database contexts: they need no storage. */
+export { ensureRootFolder, readableFileIds };

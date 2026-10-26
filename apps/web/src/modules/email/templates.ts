@@ -46,6 +46,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'team.invitation',
   'client.invitation',
   'team.task_assigned',
+  'team.task_comment',
   'founder.proof_comment',
   'founder.rounds_warning',
   'founder.extra_round',
@@ -170,6 +171,12 @@ export type EmailParams = {
     due: string;
     taskUrl: string;
   };
+  'team.task_comment': {
+    fullName: string;
+    title: string;
+    authorName: string;
+    taskUrl: string;
+  };
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -217,6 +224,7 @@ const ACTION_URL: { [K in EmailTemplateKey]: keyof EmailParams[K] } = {
   'team.invitation': 'inviteUrl',
   'client.invitation': 'inviteUrl',
   'team.task_assigned': 'taskUrl',
+  'team.task_comment': 'taskUrl',
   'founder.proof_comment': 'roomUrl',
   'founder.rounds_warning': 'roomUrl',
   'founder.extra_round': 'roomUrl',

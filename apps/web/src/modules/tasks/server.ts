@@ -1,6 +1,16 @@
 import 'server-only';
 import type { TaskStatus } from '@agency-os/db';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
+import {
+  addTaskComment,
+  addTaskLink,
+  attachTaskFile,
+  deleteTaskComment,
+  detachTaskFile,
+  removeTaskLink,
+  taskUploadFolder,
+} from './collaboration';
+import { loadTaskDetail } from './detail';
 import { listTaskOptions } from './options';
 import {
   countTasksByStatus,
@@ -68,3 +78,38 @@ export function setStudioTaskItem(session: TaskSession, itemId: string, done: bo
 }
 
 export { TASK_FUNCTIONS } from './automations';
+
+export function loadStudioTaskDetail(session: TaskSession, taskId: string) {
+  return loadTaskDetail(session.claims, taskId, deps());
+}
+
+export function addStudioTaskComment(session: TaskSession, taskId: string, body: string) {
+  return addTaskComment(session.claims, { taskId, body }, deps());
+}
+
+export function deleteStudioTaskComment(session: TaskSession, commentId: string) {
+  return deleteTaskComment(session.claims, { commentId }, deps());
+}
+
+export function addStudioTaskLink(
+  session: TaskSession,
+  input: { taskId: string; url: string; title?: string | null },
+) {
+  return addTaskLink(session.claims, input, deps());
+}
+
+export function removeStudioTaskLink(session: TaskSession, linkId: string) {
+  return removeTaskLink(session.claims, { linkId }, deps());
+}
+
+export function attachStudioTaskFile(session: TaskSession, taskId: string, libraryFileId: string) {
+  return attachTaskFile(session.claims, { taskId, libraryFileId }, deps());
+}
+
+export function detachStudioTaskFile(session: TaskSession, taskId: string, libraryFileId: string) {
+  return detachTaskFile(session.claims, { taskId, libraryFileId }, deps());
+}
+
+export function loadStudioTaskUploadFolder(session: TaskSession, taskId: string) {
+  return taskUploadFolder(session.claims, { taskId }, deps());
+}

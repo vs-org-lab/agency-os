@@ -72,9 +72,7 @@ test.describe('Rooms', () => {
     await client.goto('/portal');
     await dismissPortalWelcome(client);
     await expect(
-      client
-        .getByRole('list', { name: 'Fases do projeto' })
-        .getByText('Descoberta e arquitetura'),
+      client.getByRole('list', { name: 'Fases do projeto' }).getByText('Descoberta e arquitetura'),
     ).toBeVisible();
     await client.getByRole('link', { name: 'Decidir' }).click();
     await expectAccessible(client);

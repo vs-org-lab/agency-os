@@ -44,11 +44,7 @@ test.describe('Portal dashboard', () => {
     await page.getByRole('button', { name: `Pedido do cliente: ${description}` }).click();
     const panel = page.getByRole('dialog');
     await panel.getByRole('combobox', { name: 'Responsável' }).click();
-    await page
-      .getByRole('option')
-      .filter({ hasNotText: 'Sem responsável' })
-      .first()
-      .click();
+    await page.getByRole('option').filter({ hasNotText: 'Sem responsável' }).first().click();
     await expect(panel.getByRole('combobox', { name: 'Responsável' })).not.toContainText(
       'Sem responsável',
     );

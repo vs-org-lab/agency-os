@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { FilterBar, type FilterSelect } from '@/components/filters/filter-bar';
+import { MineFilter } from './mine-filter';
 import type { TaskCounts } from '@/modules/tasks';
 import type { TaskOptionView } from './task-errors';
 
@@ -17,11 +18,13 @@ export function TaskFilters({
   people,
   current,
   counts,
+  currentUserId,
 }: {
   clients: TaskOptionView[] | null;
   people: TaskOptionView[];
   current: TaskFilterValues;
   counts: TaskCounts;
+  currentUserId: string;
 }) {
   const t = useTranslations('tasks.filters');
   const options = (items: TaskOptionView[]) =>
@@ -49,18 +52,21 @@ export function TaskFilters({
   ];
 
   return (
-    <FilterBar
-      segments={{
-        param: 'status',
-        value: current.status,
-        options: [
-          { value: 'open', label: t('open'), count: counts.open },
-          { value: 'done', label: t('done'), count: counts.done },
-          { value: 'all', label: t('allTasks'), count: counts.all },
-        ],
-      }}
-      selects={selects}
-      controls={TASK_LIST_ID}
-    />
+    <div className="flex flex-wrap items-end gap-3">
+      <FilterBar
+        segments={{
+          param: 'status',
+          value: current.status,
+          options: [
+            { value: 'open', label: t('open'), count: counts.open },
+            { value: 'done', label: t('done'), count: counts.done },
+            { value: 'all', label: t('allTasks'), count: counts.all },
+          ],
+        }}
+        selects={selects}
+        controls={TASK_LIST_ID}
+      />
+      <MineFilter userId={currentUserId} assigneeId={current.assigneeId} controls={TASK_LIST_ID} />
+    </div>
   );
 }

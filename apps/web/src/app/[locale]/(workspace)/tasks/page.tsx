@@ -58,6 +58,7 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
         clients={options.clients}
         people={options.people}
         counts={counts}
+        currentUserId={session.claims.sub}
         current={{
           clientId: filter.clientId ?? null,
           assigneeId: filter.assigneeId ?? null,

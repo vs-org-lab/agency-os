@@ -13,6 +13,7 @@ import {
 import { loadTaskDetail } from './detail';
 import { listTaskOptions } from './options';
 import {
+  addTaskItem,
   countTasksByStatus,
   createTask,
   deleteTask,
@@ -75,6 +76,10 @@ export function setStudioTaskStatus(session: TaskSession, taskId: string, status
 
 export function setStudioTaskItem(session: TaskSession, itemId: string, done: boolean) {
   return setTaskItem(session.claims, { itemId, done }, deps());
+}
+
+export function addStudioTaskItem(session: TaskSession, taskId: string, title: string) {
+  return addTaskItem(session.claims, { taskId, title }, deps());
 }
 
 export { TASK_FUNCTIONS } from './automations';

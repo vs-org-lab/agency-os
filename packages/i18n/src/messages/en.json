@@ -2040,7 +2040,8 @@
       "all": "All",
       "open": "To do",
       "done": "Done",
-      "allTasks": "All"
+      "allTasks": "All",
+      "mine": "Mine"
     },
     "form": {
       "heading": "New task",
@@ -2058,9 +2059,34 @@
       "created": "Task created.",
       "saved": "Changes saved."
     },
+    "table": {
+      "label": "Tasks",
+      "noPhase": "—",
+      "noValue": "—",
+      "subtaskRatio": "{done}/{total}",
+      "expand": "Show subtasks of {title}",
+      "collapse": "Hide subtasks of {title}",
+      "subtasksOf": "Subtasks of {title}",
+      "addSubtask": "Add subtask",
+      "subtaskTitle": "Subtask title",
+      "subtaskPlaceholder": "New subtask — Enter saves, Esc cancels",
+      "columns": {
+        "done": "Done",
+        "title": "Task",
+        "client": "Client",
+        "phase": "Phase",
+        "assignee": "Assignee",
+        "due": "Due",
+        "subtasks": "Subtasks",
+        "comments": "Comments",
+        "created": "Created"
+      },
+      "commentCount": "{count, plural, one {# comment} other {# comments}}"
+    },
     "errors": {
       "not_found": "You are not allowed to do this.",
-      "invalid_input": "Check the fields and try again."
+      "invalid_input": "Check the fields and try again.",
+      "forbidden": "You do not have access to this task."
     },
     "delete": "Delete",
     "deleteLabel": "Delete task {title}",

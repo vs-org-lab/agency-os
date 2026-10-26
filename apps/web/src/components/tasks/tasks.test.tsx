@@ -53,6 +53,8 @@ function task(overrides: Partial<TaskView>): TaskView {
     itemsTotal: 0,
     commentCount: 0,
     fileCount: 0,
+    phaseName: null,
+    createdAt: '2026-10-01T09:00:00.000Z',
     canEdit: true,
     ...overrides,
   };
@@ -219,6 +221,7 @@ describe('tasks', () => {
           people={[{ id: PERSON, name: 'Rita Gestora' }]}
           current={{ clientId: CLIENT_B, assigneeId: PERSON, status: 'open' }}
           counts={{ open: 4, done: 2, all: 6 }}
+          currentUserId={PERSON}
         />
       </MotionProvider>,
     );
@@ -230,6 +233,9 @@ describe('tasks', () => {
     expect(screen.getByRole('tab', { name: /Por fazer/ }).textContent).toContain('4');
     expect(screen.getByRole('tab', { name: /Concluídas/ }).textContent).toContain('2');
     expect(screen.queryByRole('button', { name: 'Filtrar' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Minhas' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    );
   });
 
   it('task form keeps values when refused', async () => {

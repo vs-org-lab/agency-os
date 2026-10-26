@@ -82,7 +82,9 @@ export function NewProjectForm({
         {result?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${result.error}`)}</FormMessage>
         ) : null}
-        {result?.ok ? <FormMessage tone="success">{t('done.created')}</FormMessage> : null}
+        {result?.ok && !onDone ? (
+          <FormMessage tone="success">{t('done.created')}</FormMessage>
+        ) : null}
       </div>
     </form>
   );

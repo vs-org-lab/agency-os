@@ -168,7 +168,7 @@ export function EntityForm({
       </div>
       <div className="flex flex-col gap-2 md:col-span-2">
         {result?.ok === false ? <FormMessage tone="danger">{t('error')}</FormMessage> : null}
-        {result?.ok ? <FormMessage tone="success">{t('saved')}</FormMessage> : null}
+        {result?.ok && !onDone ? <FormMessage tone="success">{t('saved')}</FormMessage> : null}
         <div className="md:w-56">
           <Button type="submit" disabled={pending} className="w-full">
             {t('save')}

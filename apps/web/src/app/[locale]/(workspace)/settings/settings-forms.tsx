@@ -231,7 +231,9 @@ export function TemplateForm({
         />
       </div>
       <div className="flex flex-col gap-2 md:col-span-2">
-        {state.status === 'saved' ? <FormMessage tone="success">{t('saved')}</FormMessage> : null}
+        {state.status === 'saved' && !onDone ? (
+          <FormMessage tone="success">{t('saved')}</FormMessage>
+        ) : null}
         {state.status === 'error' ? <FormMessage tone="danger">{t('invalid')}</FormMessage> : null}
         <div className="md:w-48">
           <SubmitButton>{t('save')}</SubmitButton>

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { TaskView } from '@/modules/tasks';
 import { TaskFilters } from './task-filters';
-import { TaskForm } from './task-form';
+import { TaskEditForm, TaskForm } from './task-form';
 import { TaskList } from './task-list';
 
 afterEach(() => {
@@ -237,5 +237,32 @@ describe('tasks', () => {
     });
     expect(screen.getByText('Verifique os campos e tente de novo.')).toBeTruthy();
     expect((screen.getByLabelText('Título') as HTMLInputElement).value).toBe('Rever logótipo');
+  });
+
+  describe('inside an overlay (onDone given)', () => {
+    it('reports creation through onDone without an inline success message', async () => {
+      const onDone = vi.fn();
+      renderWithIntl(
+        <TaskForm clients={[]} people={[]} fixedClientId={null} create={OK} onDone={onDone} />,
+      );
+      fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Rever' } });
+      await act(async () => {
+        fireEvent.submit(screen.getByRole('form'));
+      });
+      expect(onDone).toHaveBeenCalledWith('Tarefa criada.');
+      expect(screen.queryByRole('status')).toBeNull();
+    });
+
+    it('reports edits through onDone without an inline success message', async () => {
+      const onDone = vi.fn();
+      renderWithIntl(
+        <TaskEditForm task={task({ title: 'Rever' })} people={[]} update={OK} onDone={onDone} />,
+      );
+      await act(async () => {
+        fireEvent.submit(screen.getByLabelText('Título').closest('form') as HTMLFormElement);
+      });
+      expect(onDone).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('status')).toBeNull();
+    });
   });
 });

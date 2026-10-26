@@ -216,7 +216,9 @@ export function TaskForm({
         {outcome?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
         ) : null}
-        {outcome?.ok ? <FormMessage tone="success">{t('form.created')}</FormMessage> : null}
+        {outcome?.ok && !onDone ? (
+          <FormMessage tone="success">{t('form.created')}</FormMessage>
+        ) : null}
       </div>
     </form>
   );
@@ -307,7 +309,9 @@ export function TaskEditForm({
         {outcome?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
         ) : null}
-        {outcome?.ok ? <FormMessage tone="success">{t('form.saved')}</FormMessage> : null}
+        {outcome?.ok && !onDone ? (
+          <FormMessage tone="success">{t('form.saved')}</FormMessage>
+        ) : null}
       </div>
     </form>
   );

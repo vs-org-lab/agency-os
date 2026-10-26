@@ -69,11 +69,18 @@ async function uploadVersion(
   return finish(started.versionId);
 }
 
-function OutcomeMessage({ outcome }: { outcome: Outcome }) {
+function OutcomeMessage({
+  outcome,
+  hideSuccess = false,
+}: {
+  outcome: Outcome;
+  hideSuccess?: boolean;
+}) {
   const t = useTranslations('proofing');
   if (outcome?.ok === false)
     return <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>;
-  if (outcome?.ok) return <FormMessage tone="success">{t(`section.${outcome.key}`)}</FormMessage>;
+  if (outcome?.ok && !hideSuccess)
+    return <FormMessage tone="success">{t(`section.${outcome.key}`)}</FormMessage>;
   return null;
 }
 
@@ -147,7 +154,7 @@ function NewFileForm({
         {t('fileHint')}
       </p>
       <div>
-        <OutcomeMessage outcome={outcome} />
+        <OutcomeMessage outcome={outcome} hideSuccess={Boolean(onDone)} />
       </div>
     </form>
   );

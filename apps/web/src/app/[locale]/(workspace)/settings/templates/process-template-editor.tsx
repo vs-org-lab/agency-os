@@ -106,11 +106,13 @@ export function ProcessTemplateEditor({
             makeDefault,
           }).catch(() => ({ ok: false, rule: 'not_found' }) as const);
           if (result.ok) onDone?.(tp('published', { version: result.version }));
-          setMessage(
-            result.ok
-              ? { tone: 'success', text: tp('published', { version: result.version }) }
-              : { tone: 'danger', text: tp('invalid') },
-          );
+          if (!result.ok) setMessage({ tone: 'danger', text: tp('invalid') });
+          else
+            setMessage(
+              onDone
+                ? null
+                : { tone: 'success', text: tp('published', { version: result.version }) },
+            );
         });
       }}
     >

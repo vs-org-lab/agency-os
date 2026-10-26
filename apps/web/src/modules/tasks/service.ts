@@ -40,6 +40,10 @@ export type TaskView = {
   dueOn: string | null;
   status: TaskStatus;
   items: TaskItemView[];
+  itemsDone: number;
+  itemsTotal: number;
+  commentCount: number;
+  fileCount: number;
   /** Whether the reader may edit or delete the task, beyond completing it. */
   canEdit: boolean;
 };
@@ -330,7 +334,7 @@ export async function setTaskItem(
 /** S-03 and C-03: the tasks the caller can read, with their items, client and assignee. */
 export async function listTasks(
   tx: DbTransaction,
-  filter: { clientId?: string; assigneeId?: string; status?: TaskStatus },
+  filter: { taskId?: string; clientId?: string; assigneeId?: string; status?: TaskStatus },
 ): Promise<TaskView[]> {
   const rows = await tx.execute<{
     id: string;
@@ -344,6 +348,10 @@ export async function listTasks(
     due_on: string | null;
     status: TaskStatus;
     can_edit: boolean;
+    items_done: number;
+    items_total: number;
+    comment_count: number;
+    file_count: number;
   }>(sql`
     select t.id, t.title, t.notes, t.client_id, c.name as client_name, t.project_id, t.assignee_id,
            p.full_name as assignee_name, t.due_on::text as due_on, t.status::text as status,
@@ -352,11 +360,16 @@ export async function listTasks(
                t.organization_id, array['founder', 'project_manager']::app.org_role[]
              )
              else app.can_write_rooms(t.organization_id, t.client_id)
-           end as can_edit
+           end as can_edit,
+           (select count(*) filter (where i.done) from public.task_items i where i.task_id = t.id)::int as items_done,
+           (select count(*) from public.task_items i where i.task_id = t.id)::int as items_total,
+           (select count(*) from public.task_comments k where k.task_id = t.id)::int as comment_count,
+           (select count(*) from public.task_files f where f.task_id = t.id)::int as file_count
     from public.tasks t
     left join public.clients c on c.id = t.client_id
     left join public.profiles p on p.id = t.assignee_id
-    where (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
+    where (${filter.taskId ?? null}::uuid is null or t.id = ${filter.taskId ?? null}::uuid)
+      and (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
       and (${filter.assigneeId ?? null}::uuid is null or t.assignee_id = ${filter.assigneeId ?? null}::uuid)
       and (${filter.status ?? null}::text is null or t.status::text = ${filter.status ?? null}::text)
     order by t.due_on nulls last, t.created_at
@@ -381,6 +394,10 @@ export async function listTasks(
     dueOn: row.due_on,
     status: row.status,
     canEdit: row.can_edit,
+    itemsDone: row.items_done,
+    itemsTotal: row.items_total,
+    commentCount: row.comment_count,
+    fileCount: row.file_count,
     items: items
       .filter((item) => item.taskId === row.id)
       .map((item) => ({

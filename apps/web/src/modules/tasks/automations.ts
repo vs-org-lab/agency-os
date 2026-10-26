@@ -2,7 +2,7 @@ import 'server-only';
 import { failureHandler, notificationDeps, RETRIES } from '@/modules/commercial/server';
 import { inngest } from '@/modules/events';
 import { withSystemContext, withUserContext } from '@/platform/db';
-import { sendTaskAssignedNotice } from './notices';
+import { sendTaskAssignedNotice, sendTaskCommentNotice } from './notices';
 import { createKickoffTasks } from './service';
 
 type ProjectCreatedData = { payload: { projectId?: string; dealId?: string | null } };
@@ -49,4 +49,34 @@ const assignedNotice = inngest.createFunction(
   },
 );
 
-export const TASK_FUNCTIONS = [kickoffTasks, assignedNotice];
+type TaskCommentedData = {
+  payload: { taskId?: string; assigneeId?: string; authorId?: string };
+};
+
+/** A comment from someone else on a task reaches its assignee by email, without the comment text. */
+const commentedNotice = inngest.createFunction(
+  {
+    id: 'tasks-commented-notice',
+    triggers: [{ event: 'tasks.task.commented' }],
+    retries: RETRIES,
+    onFailure: failureHandler('tasks-commented-notice'),
+  },
+  async ({ event, step }) => {
+    const { taskId, assigneeId, authorId } = (event.data as TaskCommentedData).payload;
+    if (!taskId || !assigneeId || !authorId) return { sent: false };
+    const sent = await step.run('send-task-comment', () => {
+      const deps = notificationDeps();
+      return sendTaskCommentNotice(
+        { taskId, assigneeId, authorId },
+        {
+          contexts: { withSystemContext },
+          email: deps.email,
+          appBaseUrl: deps.appBaseUrl,
+        },
+      );
+    });
+    return { sent };
+  },
+);
+
+export const TASK_FUNCTIONS = [kickoffTasks, assignedNotice, commentedNotice];

@@ -232,3 +232,33 @@ export async function deleteFolder(
   await deps.storage.removeMany(paths);
   return { ok: true, removed: paths.length };
 }
+
+/**
+ * The root folder of the project with this name for the team, created internal on first use and
+ * reused afterwards (ignoring case).
+ */
+export async function ensureRootFolder(
+  claims: VerifiedClaims,
+  input: { projectId: string; name: string },
+  deps: Pick<LibraryDeps, 'contexts'>,
+): Promise<{ ok: true; folderId: string } | NotFound | InvalidInput> {
+  const writer = await libraryWriter(claims, input.projectId, deps);
+  if (!writer || writer.role !== 'team') return NOT_FOUND;
+  const name = nameSchema.safeParse(input.name);
+  if (!name.success) return { ok: false, rule: 'invalid_input' };
+
+  return deps.contexts.withSystemContext(async (tx) => {
+    const folder = await childFolder(tx, writer, null, name.data);
+    if (!folder) throw new Error('Root folder was not created');
+    if (folder.created) {
+      await recordAudit(tx, {
+        organizationId: writer.organizationId,
+        action: 'library.folder_created',
+        resourceType: 'library_folder',
+        resourceId: folder.id,
+        clientId: writer.clientId,
+      });
+    }
+    return { ok: true as const, folderId: folder.id };
+  });
+}

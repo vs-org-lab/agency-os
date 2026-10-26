@@ -1066,6 +1066,12 @@
         "heading": "Tem uma tarefa nova",
         "body": "Olá {fullName}, ficou responsável pela tarefa «{title}» {scope, select, client {do cliente {clientName}} other {do estúdio}}, {due, select, none {sem data definida} other {para {due}}}.",
         "action": "Abrir a tarefa"
+      },
+      "task_comment": {
+        "subject": "Novo comentário em: {title}",
+        "heading": "Novo comentário na sua tarefa",
+        "body": "Olá {fullName}, {authorName} comentou a tarefa «{title}». Abra a tarefa para o ler.",
+        "action": "Abrir a tarefa"
       }
     },
     "client": {

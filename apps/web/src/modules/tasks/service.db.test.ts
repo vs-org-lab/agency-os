@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createLibraryFixture,
   createRoomFixture,
   createTeamFixture,
   withTestTransaction,
@@ -15,6 +16,7 @@ import {
   setTaskStatus,
   updateTask,
 } from './service';
+import { addTaskComment, attachTaskFile } from './collaboration';
 import { listTaskOptions } from './options';
 import { taskClaims, taskDeps } from './testing';
 
@@ -324,6 +326,49 @@ describe('tasks', () => {
         where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
       `;
       expect(events).toHaveLength(0);
+    });
+  });
+
+  it('list counts items, comments and files', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const busy = await createTask(
+        founder,
+        {
+          title: 'Com movimento',
+          clientId: world.clients.a,
+          projectId: library.a.projectId,
+          items: ['Um', 'Dois', 'Três'],
+        },
+        deps,
+      );
+      const quiet = await createTask(founder, { title: 'Sem nada' }, deps);
+      if (!busy.ok || !quiet.ok) throw new Error('Tasks were not created');
+      await sql`
+        update public.task_items set done = true
+        where task_id = ${busy.taskId} and position in (1, 2)
+      `;
+      await addTaskComment(founder, { taskId: busy.taskId, body: 'Um' }, deps);
+      await addTaskComment(founder, { taskId: busy.taskId, body: 'Dois' }, deps);
+      await attachTaskFile(
+        founder,
+        { taskId: busy.taskId, libraryFileId: library.a.rootFileId },
+        deps,
+      );
+
+      const tasks = await deps.contexts.withUserContext(founder, (tx) => listTasks(tx, {}));
+
+      expect(
+        Object.fromEntries(
+          tasks.map((task) => [
+            task.title,
+            [task.itemsDone, task.itemsTotal, task.commentCount, task.fileCount],
+          ]),
+        ),
+      ).toEqual({ 'Com movimento': [2, 3, 2, 1], 'Sem nada': [0, 0, 0, 0] });
     });
   });
 });

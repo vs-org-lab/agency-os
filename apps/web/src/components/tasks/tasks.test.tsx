@@ -49,6 +49,10 @@ function task(overrides: Partial<TaskView>): TaskView {
     dueOn: null,
     status: 'open',
     items: [],
+    itemsDone: 0,
+    itemsTotal: 0,
+    commentCount: 0,
+    fileCount: 0,
     canEdit: true,
     ...overrides,
   };

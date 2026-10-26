@@ -1066,6 +1066,12 @@
         "heading": "You have a new task",
         "body": "Hello {fullName}, you are now responsible for the task \"{title}\" {scope, select, client {for {clientName}} other {for the studio}}, {due, select, none {with no date set} other {due {due}}}.",
         "action": "Open the task"
+      },
+      "task_comment": {
+        "subject": "New comment on: {title}",
+        "heading": "New comment on your task",
+        "body": "Hello {fullName}, {authorName} commented on the task \"{title}\". Open the task to read it.",
+        "action": "Open the task"
       }
     },
     "client": {

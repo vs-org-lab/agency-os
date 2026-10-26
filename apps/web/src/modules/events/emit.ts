@@ -34,6 +34,7 @@ export const DOMAIN_EVENTS = [
   'rooms.approval.reminded',
   'rooms.approval.overdue',
   'tasks.task.assigned',
+  'tasks.task.commented',
   'proofing.comment.added',
   'proofing.round.extra',
   'testimonials.received',

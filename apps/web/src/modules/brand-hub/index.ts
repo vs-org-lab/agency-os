@@ -5,7 +5,7 @@ export {
   type BlockContentMap,
   type HubBlock,
 } from './domain/blocks';
-export { contrastWarning } from './domain/contrast';
+export { contrastRatio, contrastWarning } from './domain/contrast';
 export {
   DEFAULT_HUB_DESIGN,
   HUB_LAYOUTS,

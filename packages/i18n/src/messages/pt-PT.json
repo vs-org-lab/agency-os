@@ -2822,10 +2822,16 @@
         "compact": "Compacto"
       },
       "contrast": "O texto e a superfície ficam abaixo do contraste AA. A marca é do cliente, por isso pode guardar na mesma.",
+      "contrastRatio": "{ratio}:1 · {level}",
+      "contrastFail": "abaixo de AA",
       "save": "Guardar design",
       "saved": "Design guardado."
     },
     "assets": {
+      "aspect": {
+        "label": "Proporção da pré-visualização",
+        "original": "Original"
+      },
       "title": "Ficheiros",
       "upload": "Carregar ficheiros",
       "uploading": "A carregar {done} de {total}…",

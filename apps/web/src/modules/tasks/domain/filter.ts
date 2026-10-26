@@ -8,7 +8,7 @@ export type TaskFilter = {
 
 const LISBON_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' });
 
-/** The calendar date task groups are measured against; the week runs Monday to Sunday in Lisbon. */
+/** The calendar date task due dates are measured against; the week runs Monday to Sunday in Lisbon. */
 export function taskToday(now: Date): string {
   return LISBON_DATE.format(now);
 }

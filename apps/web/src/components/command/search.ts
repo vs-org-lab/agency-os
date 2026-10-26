@@ -93,7 +93,7 @@ export async function searchWorkspace(
         id: row.id,
         title: row.title,
         context: row.clientName,
-        href: row.clientId ? `/c/${row.clientId}/tasks` : '/tasks',
+        href: row.clientId ? `/c/${row.clientId}/tasks?task=${row.id}` : `/tasks?task=${row.id}`,
       })),
     ];
   });

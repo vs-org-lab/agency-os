@@ -11,7 +11,9 @@ import { FormMessage } from '@/components/forms/form-message';
 import { LimitRings } from '@/components/retainers/limit-rings';
 import { RequestForm, type PortalRetainerActions } from '@/components/retainers/portal-retainer';
 import { CreateDialog } from '@/components/ui/create-dialog';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
+import { CardTabs } from '@agency-os/ui/components/card-tabs';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import type { ClientRetainerRequest, PortalRetainerView } from '@/modules/retainers';
 import { PlanPanel } from './plan-panel';
 import { RequestBoard } from './request-board';
@@ -28,6 +30,9 @@ export function RetainerSection({ retainer }: { retainer: PortalRetainerHome }) 
   const tRetainers = useTranslations('retainers');
   const router = useRouter();
   const planId = useId();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const layout = params.get('view') === 'list' ? 'list' : 'board';
   const { view, requests } = retainer;
   const canRequest = view.retainer.status === 'active' && !view.suspended;
 
@@ -76,16 +81,21 @@ export function RetainerSection({ retainer }: { retainer: PortalRetainerHome }) 
           </CollapsibleContent>
         </Collapsible>
       </section>
-      <section aria-labelledby="portal-work" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="portal-work" className="text-title-sm text-text">
-            {t('board.title')}
-          </h2>
-          <Link href="/portal/progress" className="text-body-sm text-link hover:underline">
-            {t('board.seeAll')}
-          </Link>
-        </div>
-        <RequestBoard requests={requests} month={view.month} />
+      <section aria-label={t('board.title')} className="flex flex-col gap-2">
+        <CardTabs
+          title={t('board.title')}
+          tabs={[
+            { value: 'board', label: t('board.views.board') },
+            { value: 'list', label: t('board.views.list') },
+          ]}
+          value={layout}
+          onValueChange={(next) => router.replace(`${pathname}?view=${next}`, { scroll: false })}
+        >
+          <RequestBoard requests={requests} month={view.month} view={layout} />
+        </CardTabs>
+        <Link href="/portal/progress" className="self-end text-body-sm text-link hover:underline">
+          {t('board.seeAll')}
+        </Link>
       </section>
     </>
   );

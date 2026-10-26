@@ -6,6 +6,7 @@ import {
   createFixtureWorld,
   createRetainerBillingFixture,
   createRetainerFixture,
+  addOrganizationMember,
   createRoomFixture,
   testDatabase,
   withTestTransaction,
@@ -29,6 +30,42 @@ function claimsFor(userId: string): VerifiedClaims {
 }
 
 describe('studio home', () => {
+  it('never lists rows of another organisation where the membership is revoked', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const other = await createFixtureWorld(sql);
+      const otherBilling = await createBillingFixture(sql, other);
+      const otherRooms = await createRoomFixture(sql, other);
+      await addOrganizationMember(sql, {
+        organizationId: other.organizationId,
+        userId: world.users.founder,
+        role: 'founder',
+        status: 'revoked',
+      });
+      await sql`
+        update public.payment_requests set due_date = current_date - 3
+        where id = ${otherBilling.a.sentRequestId}
+      `;
+      await sql`
+        update public.project_steps set status = 'todo', due_on = current_date - 2
+        where id = ${otherRooms.a.visibleStepId}
+      `;
+      await sql`
+        insert into public.tasks (organization_id, client_id, title, due_on, created_by)
+        values (${other.organizationId}, ${other.clients.a}, 'Outra organização', current_date - 1,
+                ${other.users.founder})
+      `;
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const home = await loadHome(claimsFor(world.users.founder), new Date(), { contexts });
+
+      expect(home?.today).toEqual([]);
+      expect(home?.clients).toEqual([]);
+      expect(home?.indicators.activeProjects).toBe(0);
+      expect(home?.indicators.receivable).toEqual([]);
+    });
+  });
+
   it('today merges tasks, late steps, changes requested and overdue requests', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

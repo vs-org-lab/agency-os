@@ -36,7 +36,7 @@ function startOfLocalDate(date: string, timeZone: string): Date {
 
 export async function listTodayItems(
   tx: DbTransaction,
-  input: { now: Date; timeZone: string },
+  input: { now: Date; timeZone: string; organizationId: string },
 ): Promise<TodayItem[]> {
   const today = localDayBounds(input.now, input.timeZone);
 
@@ -50,7 +50,13 @@ export async function listTodayItems(
     })
     .from(followUps)
     .innerJoin(clients, eq(clients.id, followUps.clientId))
-    .where(and(eq(followUps.status, 'open'), lte(followUps.dueOn, today.date)));
+    .where(
+      and(
+        eq(followUps.organizationId, input.organizationId),
+        eq(followUps.status, 'open'),
+        lte(followUps.dueOn, today.date),
+      ),
+    );
 
   const pendingQueue = await tx
     .select({
@@ -61,7 +67,13 @@ export async function listTodayItems(
     })
     .from(applications)
     .innerJoin(clients, eq(clients.id, applications.clientId))
-    .where(and(eq(applications.path, 'b'), isNull(applications.reviewDecision)));
+    .where(
+      and(
+        eq(applications.organizationId, input.organizationId),
+        eq(applications.path, 'b'),
+        isNull(applications.reviewDecision),
+      ),
+    );
 
   const todaysCalls = await tx
     .select({
@@ -74,6 +86,7 @@ export async function listTodayItems(
     .innerJoin(clients, eq(clients.id, calls.clientId))
     .where(
       and(
+        eq(calls.organizationId, input.organizationId),
         eq(calls.status, 'scheduled'),
         gte(calls.startsAt, today.start),
         lt(calls.startsAt, today.end),

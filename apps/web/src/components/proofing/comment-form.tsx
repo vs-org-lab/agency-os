@@ -7,6 +7,8 @@ import { Checkbox } from '@agency-os/ui/components/checkbox';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { VoiceNoteRecorder } from '@/components/media/voice-note-recorder';
+import type { Recording } from '@/components/media/use-recorder';
 import type { AnchorLabel } from './anchor-format';
 import { proofError, type ProofActionResult, type ProofError } from './proof-errors';
 
@@ -16,11 +18,14 @@ export function CommentForm({
   audience,
   onClearAnchor,
   onSubmit,
+  onVoiceNote,
 }: {
   anchor: AnchorLabel;
   audience: 'team' | 'client';
   onClearAnchor: () => void;
   onSubmit: (body: string, internal: boolean) => Promise<ProofActionResult>;
+  /** Sends a recorded voice note as the comment; resolves to false when it could not be sent. */
+  onVoiceNote?: (recording: Recording, internal: boolean) => Promise<boolean>;
 }) {
   const t = useTranslations('proofing');
   const id = useId();
@@ -89,6 +94,9 @@ export function CommentForm({
             {t('comments.internal')}
           </Label>
         </div>
+      ) : null}
+      {onVoiceNote ? (
+        <VoiceNoteRecorder submit={(recording) => onVoiceNote(recording, internal)} />
       ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={pending || body.trim() === ''}>

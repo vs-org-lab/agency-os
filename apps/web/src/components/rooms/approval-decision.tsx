@@ -6,6 +6,8 @@ import { Button } from '@agency-os/ui/components/button';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { sendVoiceNote, type VoiceNoteActions } from '@/components/media/send-voice-note';
+import { VoiceNoteRecorder } from '@/components/media/voice-note-recorder';
 
 export type DecideApproval = (input: {
   approvalId: string;
@@ -27,11 +29,15 @@ function decisionError(code: string): DecisionError {
 export function ApprovalDecision({
   approvalId,
   decide,
+  voiceActions,
 }: {
   approvalId: string;
   decide: DecideApproval;
+  /** Lets the decision maker explain the requested changes with a voice note. */
+  voiceActions?: VoiceNoteActions;
 }) {
   const t = useTranslations('portal.room');
+  const tVoice = useTranslations('media.voiceNote');
   const [comment, setComment] = useState('');
   const [result, setResult] = useState<{ ok: true } | { ok: false; error: DecisionError } | null>(
     null,
@@ -52,6 +58,23 @@ export function ApprovalDecision({
       );
       setResult(outcome.ok ? { ok: true } : { ok: false, error: decisionError(outcome.code) });
     });
+
+  const submitVoice = async (recording: Parameters<typeof sendVoiceNote>[2]) => {
+    if (!voiceActions) return false;
+    const stored = await sendVoiceNote(
+      voiceActions,
+      { targetKind: 'approval_change_request', targetId: approvalId },
+      recording,
+    );
+    if (!stored) return false;
+    const outcome = await decide({
+      approvalId,
+      decision: 'changes_requested',
+      comment: comment.trim() || tVoice('body'),
+    }).catch(() => ({ ok: false, code: 'not_found' }) as const);
+    setResult(outcome.ok ? { ok: true } : { ok: false, error: decisionError(outcome.code) });
+    return outcome.ok;
+  };
 
   if (result?.ok)
     return (
@@ -84,6 +107,7 @@ export function ApprovalDecision({
           {t(`errors.${result.error}`)}
         </FormMessage>
       ) : null}
+      {voiceActions ? <VoiceNoteRecorder submit={submitVoice} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button type="button" disabled={pending} onClick={() => submit('approved')}>
           {t('approve')}

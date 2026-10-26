@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { ImageCompare } from '@agency-os/ui/components/image-compare';
 import type { ProofKind } from '@agency-os/db';
+import { sendVoiceNote, type VoiceNoteActions } from '@/components/media/send-voice-note';
 import type { ProofAnchor, ProofCommentView } from '@/modules/proofing';
+import type { VoiceNoteView } from '@/modules/voice-notes';
 import { anchorLabel } from './anchor-format';
 import { CommentForm } from './comment-form';
 import { CommentList } from './comment-list';
@@ -38,6 +40,8 @@ export function ProofViewer({
   canComment,
   addComment,
   resolveComment,
+  voiceNotes = [],
+  voiceActions,
 }: {
   kind: ProofKind;
   src: string;
@@ -51,8 +55,12 @@ export function ProofViewer({
   canComment: boolean;
   addComment: (input: NewProofComment) => Promise<ProofActionResult>;
   resolveComment?: (commentId: string, resolved: boolean) => Promise<ProofActionResult>;
+  voiceNotes?: VoiceNoteView[];
+  /** Server actions that store a recorded note; their presence turns the voice recorder on. */
+  voiceActions?: VoiceNoteActions;
 }) {
   const t = useTranslations('proofing');
+  const tVoice = useTranslations('media.voiceNote');
   const video = useRef<HTMLVideoElement>(null);
   const [pending, setPending] = useState<ProofAnchor | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -169,6 +177,24 @@ export function ProofViewer({
             anchor={anchorLabel(pending, nextNumber)}
             audience={audience}
             onClearAnchor={() => setPending(null)}
+            onVoiceNote={
+              voiceActions
+                ? async (recording, internal) => {
+                    const result = await addComment({
+                      body: tVoice('body'),
+                      anchor: pending,
+                      internal,
+                    });
+                    if (!result.ok || !result.commentId) return false;
+                    setPending(null);
+                    return sendVoiceNote(
+                      voiceActions,
+                      { targetKind: 'proof_comment', targetId: result.commentId },
+                      recording,
+                    );
+                  }
+                : undefined
+            }
             onSubmit={async (body, internal) => {
               const result = await addComment({ body, anchor: pending, internal });
               if (result.ok) setPending(null);
@@ -178,6 +204,7 @@ export function ProofViewer({
         ) : null}
         <CommentList
           comments={comments}
+          voiceNotes={voiceNotes}
           audience={audience}
           activeId={activeId}
           onSelect={select}

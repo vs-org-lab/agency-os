@@ -6,7 +6,9 @@ import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { cn } from '@agency-os/ui/lib/utils';
+import { VoiceNotePlayer } from '@/components/media/voice-note-player';
 import type { ProofCommentView } from '@/modules/proofing';
+import type { VoiceNoteView } from '@/modules/voice-notes';
 import { anchorLabel } from './anchor-format';
 import type { ProofActionResult } from './proof-errors';
 
@@ -69,8 +71,10 @@ export function CommentList({
   onSelect,
   onReply,
   onResolve,
+  voiceNotes = [],
 }: {
   comments: ProofCommentView[];
+  voiceNotes?: VoiceNoteView[];
   audience: 'team' | 'client';
   activeId: string | null;
   onSelect: (id: string) => void;
@@ -115,6 +119,11 @@ export function CommentList({
               {comment.resolved ? <Badge variant="secondary">{t('resolved')}</Badge> : null}
             </button>
             <p className="text-body-sm whitespace-pre-line text-text">{comment.body}</p>
+            {voiceNotes
+              .filter((note) => note.targetId === comment.id)
+              .map((note) => (
+                <VoiceNotePlayer key={note.id} note={note} />
+              ))}
             <p className="text-caption text-text-secondary">
               {t('byLine', {
                 author: comment.authorName,
@@ -132,6 +141,11 @@ export function CommentList({
                 {comment.replies.map((reply) => (
                   <li key={reply.id} className="flex flex-col gap-1">
                     <p className="text-body-sm whitespace-pre-line text-text">{reply.body}</p>
+                    {voiceNotes
+                      .filter((note) => note.targetId === reply.id)
+                      .map((note) => (
+                        <VoiceNotePlayer key={note.id} note={note} />
+                      ))}
                     <p className="text-caption text-text-secondary">{reply.authorName}</p>
                   </li>
                 ))}

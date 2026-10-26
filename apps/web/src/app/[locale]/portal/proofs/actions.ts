@@ -15,7 +15,7 @@ export async function commentOnClientProofAction(
   const result = await commentOnProof(claims, { ...input, internal: false, versionId });
   if (!result.ok) return { ok: false, code: result.rule };
   revalidatePath(`/portal/proofs/${versionId}`);
-  return { ok: true };
+  return { ok: true, commentId: result.commentId };
 }
 
 export async function decideProofAction(input: {

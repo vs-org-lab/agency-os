@@ -16,7 +16,9 @@ const FRAME_MS = 30;
 
 function scrambled(text: string, revealed: number): string {
   return Array.from(text, (char, index) =>
-    char === ' ' || index < revealed ? char : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]!,
+    char === ' ' || index < revealed
+      ? char
+      : GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length)),
   ).join('');
 }
 

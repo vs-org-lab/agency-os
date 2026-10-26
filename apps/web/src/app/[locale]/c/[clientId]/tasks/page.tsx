@@ -61,6 +61,7 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
         clients={null}
         people={options.people}
         counts={counts}
+        currentUserId={session.claims.sub}
         current={{
           clientId,
           assigneeId: filter.assigneeId ?? null,

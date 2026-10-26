@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type TaskStatus } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
@@ -44,6 +44,9 @@ export type TaskView = {
   itemsTotal: number;
   commentCount: number;
   fileCount: number;
+  /** The process step the task came from, when it did and the reader may see it. */
+  phaseName: string | null;
+  createdAt: string;
   /** Whether the reader may edit or delete the task, beyond completing it. */
   canEdit: boolean;
 };
@@ -331,6 +334,44 @@ export async function setTaskItem(
   return { ok: true };
 }
 
+const MAX_TASK_ITEMS = 30;
+
+/** A subtask at the end of the checklist, by whoever may complete the task. */
+export async function addTaskItem(
+  claims: VerifiedClaims,
+  input: { taskId: string; title: string },
+  deps: TasksDeps,
+): Promise<{ ok: true; itemId: string } | NotFound | { ok: false; rule: 'invalid_input' }> {
+  const task = await canWork(deps, claims, input.taskId);
+  if (!task) return NOT_FOUND;
+  const parsed = title.safeParse(input.title);
+  if (!parsed.success) return { ok: false, rule: 'invalid_input' };
+
+  return deps.contexts.withSystemContext(async (tx) => {
+    const [last] = await tx
+      .select({ position: taskItems.position, organizationId: tasks.organizationId })
+      .from(tasks)
+      .leftJoin(taskItems, eq(taskItems.taskId, tasks.id))
+      .where(eq(tasks.id, task.id))
+      .orderBy(desc(taskItems.position))
+      .limit(1);
+    const count = await tx.$count(taskItems, eq(taskItems.taskId, task.id));
+    if (!last || count >= MAX_TASK_ITEMS)
+      return { ok: false as const, rule: 'invalid_input' as const };
+    const [item] = await tx
+      .insert(taskItems)
+      .values({
+        organizationId: last.organizationId,
+        taskId: task.id,
+        position: (last.position ?? 0) + 1,
+        title: parsed.data,
+      })
+      .returning({ id: taskItems.id });
+    if (!item) throw new Error('Task item was not created');
+    return { ok: true as const, itemId: item.id };
+  });
+}
+
 /** S-03 and C-03: the tasks the caller can read, with their items, client and assignee. */
 export async function listTasks(
   tx: DbTransaction,
@@ -352,6 +393,8 @@ export async function listTasks(
     items_total: number;
     comment_count: number;
     file_count: number;
+    phase_name: string | null;
+    created_at: string;
   }>(sql`
     select t.id, t.title, t.notes, t.client_id, c.name as client_name, t.project_id, t.assignee_id,
            p.full_name as assignee_name, t.due_on::text as due_on, t.status::text as status,
@@ -364,8 +407,11 @@ export async function listTasks(
            (select count(*) filter (where i.done) from public.task_items i where i.task_id = t.id)::int as items_done,
            (select count(*) from public.task_items i where i.task_id = t.id)::int as items_total,
            (select count(*) from public.task_comments k where k.task_id = t.id)::int as comment_count,
-           (select count(*) from public.task_files f where f.task_id = t.id)::int as file_count
+           (select count(*) from public.task_files f where f.task_id = t.id)::int as file_count,
+           s.name as phase_name,
+           to_char(t.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
     from public.tasks t
+    left join public.project_steps s on s.id = t.step_id
     left join public.clients c on c.id = t.client_id
     left join public.profiles p on p.id = t.assignee_id
     where (${filter.taskId ?? null}::uuid is null or t.id = ${filter.taskId ?? null}::uuid)
@@ -398,6 +444,8 @@ export async function listTasks(
     itemsTotal: row.items_total,
     commentCount: row.comment_count,
     fileCount: row.file_count,
+    phaseName: row.phase_name,
+    createdAt: row.created_at,
     items: items
       .filter((item) => item.taskId === row.id)
       .map((item) => ({

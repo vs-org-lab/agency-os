@@ -1,6 +1,6 @@
 export type TaskActionResult = { ok: true } | { ok: false; code: string };
 
-export const TASK_ERRORS = ['not_found', 'invalid_input'] as const;
+export const TASK_ERRORS = ['not_found', 'invalid_input', 'forbidden'] as const;
 
 export type TaskError = (typeof TASK_ERRORS)[number];
 

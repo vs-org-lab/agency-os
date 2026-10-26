@@ -2040,7 +2040,8 @@
       "all": "Todos",
       "open": "Por fazer",
       "done": "Concluídas",
-      "allTasks": "Todas"
+      "allTasks": "Todas",
+      "mine": "Minhas"
     },
     "form": {
       "heading": "Nova tarefa",
@@ -2058,9 +2059,34 @@
       "created": "Tarefa criada.",
       "saved": "Alterações guardadas."
     },
+    "table": {
+      "label": "Tarefas",
+      "noPhase": "—",
+      "noValue": "—",
+      "subtaskRatio": "{done}/{total}",
+      "expand": "Mostrar subtarefas de {title}",
+      "collapse": "Ocultar subtarefas de {title}",
+      "subtasksOf": "Subtarefas de {title}",
+      "addSubtask": "Adicionar subtarefa",
+      "subtaskTitle": "Título da subtarefa",
+      "subtaskPlaceholder": "Nova subtarefa — Enter grava, Esc cancela",
+      "columns": {
+        "done": "Concluída",
+        "title": "Tarefa",
+        "client": "Cliente",
+        "phase": "Fase",
+        "assignee": "Responsável",
+        "due": "Prazo",
+        "subtasks": "Subtarefas",
+        "comments": "Comentários",
+        "created": "Criada"
+      },
+      "commentCount": "{count, plural, one {# comentário} other {# comentários}}"
+    },
     "errors": {
       "not_found": "Não tem permissão para esta ação.",
-      "invalid_input": "Verifique os campos e tente de novo."
+      "invalid_input": "Verifique os campos e tente de novo.",
+      "forbidden": "Não tem acesso a esta tarefa."
     },
     "delete": "Apagar",
     "deleteLabel": "Apagar tarefa {title}",

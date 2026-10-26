@@ -86,6 +86,7 @@ export {
   type IntegrationsView,
   type StartConnectionResult,
 } from './calendar/integration';
+export type { ConnectionStatus } from './calendar/connections';
 
 export {
   publicBook,

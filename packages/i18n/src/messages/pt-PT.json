@@ -1163,7 +1163,7 @@
   "settings": {
     "integrations": {
       "title": "Integrações",
-      "description": "Serviços externos ligados ao estúdio.",
+      "description": "O que o OS liga hoje e o que pode vir a ligar.",
       "google": {
         "title": "Google Calendar",
         "description": "Lê a sua disponibilidade e cria as chamadas de descoberta com Google Meet."
@@ -1182,6 +1182,79 @@
         "connected": "Google Calendar ligado.",
         "disconnected": "Google Calendar desligado.",
         "error": "Não foi possível concluir a ligação ao Google Calendar. Tente de novo."
+      },
+      "groups": {
+        "account": {
+          "title": "A sua conta",
+          "description": "Só seu. Cada pessoa da equipa liga a sua."
+        },
+        "studio": {
+          "title": "Estúdio",
+          "description": "Serviços configurados no servidor, para toda a equipa. Só leitura."
+        },
+        "ideas": {
+          "title": "Ideias para ligar",
+          "description": "Ainda não existem. Dizem o que podíamos ligar a seguir."
+        }
+      },
+      "state": {
+        "active": "Ativo",
+        "test": "Modo de teste",
+        "missing": "Por configurar"
+      },
+      "services": {
+        "payments": {
+          "title": "Pagamentos",
+          "description": "Cobranças por cartão com Stripe."
+        },
+        "email": {
+          "title": "Email",
+          "description": "Envio dos emails do OS por SMTP."
+        },
+        "transcription": {
+          "title": "Transcrição",
+          "description": "Transcreve as chamadas e os áudios com Groq."
+        },
+        "receipts": {
+          "title": "Leitura de recibos",
+          "description": "Propõe os campos da despesa a partir da fotografia do recibo."
+        },
+        "domains": {
+          "title": "Domínios do Brand Hub",
+          "description": "Verifica e liga o domínio do cliente ao site da marca."
+        },
+        "events": {
+          "title": "Eventos",
+          "description": "Corre as automações e os lembretes em segundo plano com Inngest."
+        }
+      },
+      "soon": "Em breve",
+      "ideas": {
+        "mcp": {
+          "title": "IA por MCP",
+          "description": "O Claude e o ChatGPT leem clientes, fases, tarefas e agenda com as permissões de quem liga."
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Avisos da equipa no canal certo."
+        },
+        "drive": {
+          "title": "Google Drive",
+          "description": "Importar ficheiros para a Biblioteca."
+        },
+        "dropbox": {
+          "title": "Dropbox",
+          "description": "Importar ficheiros para a Biblioteca."
+        },
+        "figma": {
+          "title": "Figma",
+          "description": "Provas a partir de frames."
+        }
+      },
+      "connected": {
+        "title": "Ligações ativas",
+        "empty": "Ainda não há ligações ativas.",
+        "since": "desde {date}"
       }
     },
     "nav": {

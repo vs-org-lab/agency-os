@@ -5,6 +5,7 @@ import { CalendarIcon } from 'lucide-react';
 import { enUS, pt } from 'react-day-picker/locale';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Calendar } from '@agency-os/ui/components/calendar';
+import { formatDisplay, parseIso, toIso } from '@agency-os/ui/lib/iso-date';
 import { Popover, PopoverContent, PopoverTrigger } from '@agency-os/ui/components/popover';
 
 type DatePickerProps = {
@@ -24,28 +25,6 @@ type DatePickerProps = {
   onChange?: (value: string | null) => void;
   className?: string;
 };
-
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-function parseIso(value: string | null | undefined): Date | undefined {
-  const match = value ? ISO_DATE.exec(value) : null;
-  if (!match) return undefined;
-  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-}
-
-function toIso(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-function formatDisplay(date: Date, locale: string): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return locale.toLowerCase().startsWith('pt')
-    ? `${day}/${month}/${date.getFullYear()}`
-    : `${month}/${day}/${date.getFullYear()}`;
-}
 
 /** Date field that submits `yyyy-MM-dd` (or an empty string) through a hidden input named `name`. */
 function DatePicker({

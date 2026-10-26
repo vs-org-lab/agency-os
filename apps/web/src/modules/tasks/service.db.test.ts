@@ -1,3 +1,4 @@
+import { schema } from '@agency-os/db';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
@@ -439,6 +440,70 @@ describe('tasks', () => {
         [2, 'Dois', false],
         [3, 'Três', false],
       ]);
+    });
+  });
+
+  it('retries once when a concurrent add took the same subtask position', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const created = await createTask(founder, { title: 'Entrega', items: ['Um'] }, deps);
+      if (!created.ok) throw new Error('Task was not created');
+
+      // The first attempt loses the race: its position is taken as it inserts, which the database
+      // reports as a unique violation; the transaction of that attempt is rolled back.
+      let raced = false;
+      let conflicts = 0;
+      const racing = {
+        ...deps,
+        contexts: {
+          ...deps.contexts,
+          withSystemContext: ((run) =>
+            deps.contexts.withSystemContext((tx) =>
+              run(
+                new Proxy(tx, {
+                  get(target, key) {
+                    const value = Reflect.get(target, key) as unknown;
+                    if (key !== 'insert') {
+                      return typeof value === 'function' ? value.bind(target) : value;
+                    }
+                    return (table: unknown) => {
+                      const builder = target.insert(table as typeof schema.taskItems);
+                      if (table !== schema.taskItems || raced) return builder;
+                      raced = true;
+                      conflicts += 1;
+                      return {
+                        values: (row: typeof schema.taskItems.$inferInsert) => ({
+                          returning: async (fields: { id: typeof schema.taskItems.id }) => {
+                            await builder.values(row).returning(fields);
+                            return target.insert(schema.taskItems).values(row).returning(fields);
+                          },
+                        }),
+                      };
+                    };
+                  },
+                }),
+              ),
+            )) as typeof deps.contexts.withSystemContext,
+        },
+      };
+
+      expect(
+        await addTaskItem(founder, { taskId: created.taskId, title: 'Três' }, racing),
+      ).toMatchObject({
+        ok: true,
+      });
+      await sql`reset role`;
+      const rows = await sql<{ position: number; title: string }[]>`
+        select position, title from public.task_items where task_id = ${created.taskId}
+        order by position
+      `;
+      expect(rows.map((row) => [row.position, row.title])).toEqual([
+        [1, 'Um'],
+        [2, 'Três'],
+      ]);
+      expect(conflicts).toBe(1);
     });
   });
 });

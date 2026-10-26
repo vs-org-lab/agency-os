@@ -348,24 +348,50 @@ export async function addTaskItem(
   const parsed = title.safeParse(input.title);
   if (!parsed.success) return { ok: false, rule: 'invalid_input' };
 
+  const append = () => appendTaskItem(deps, task.id, parsed.data);
+  try {
+    return await append();
+  } catch (error) {
+    // A concurrent add took the same position; the next attempt reads the new last one.
+    if (!isPositionConflict(error)) throw error;
+    return append();
+  }
+}
+
+function isPositionConflict(error: unknown): boolean {
+  for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
+    const { code, constraint_name: constraint } = current as {
+      code?: unknown;
+      constraint_name?: unknown;
+    };
+    if (code === '23505' && constraint === 'task_items_position_key') return true;
+  }
+  return false;
+}
+
+async function appendTaskItem(
+  deps: TasksDeps,
+  taskId: string,
+  itemTitle: string,
+): Promise<{ ok: true; itemId: string } | { ok: false; rule: 'invalid_input' }> {
   return deps.contexts.withSystemContext(async (tx) => {
     const [last] = await tx
       .select({ position: taskItems.position, organizationId: tasks.organizationId })
       .from(tasks)
       .leftJoin(taskItems, eq(taskItems.taskId, tasks.id))
-      .where(eq(tasks.id, task.id))
+      .where(eq(tasks.id, taskId))
       .orderBy(desc(taskItems.position))
       .limit(1);
-    const count = await tx.$count(taskItems, eq(taskItems.taskId, task.id));
+    const count = await tx.$count(taskItems, eq(taskItems.taskId, taskId));
     if (!last || count >= MAX_TASK_ITEMS)
       return { ok: false as const, rule: 'invalid_input' as const };
     const [item] = await tx
       .insert(taskItems)
       .values({
         organizationId: last.organizationId,
-        taskId: task.id,
+        taskId,
         position: (last.position ?? 0) + 1,
-        title: parsed.data,
+        title: itemTitle,
       })
       .returning({ id: taskItems.id });
     if (!item) throw new Error('Task item was not created');
@@ -409,7 +435,9 @@ export async function listTasks(
            (select count(*) filter (where i.done) from public.task_items i where i.task_id = t.id)::int as items_done,
            (select count(*) from public.task_items i where i.task_id = t.id)::int as items_total,
            (select count(*) from public.task_comments k where k.task_id = t.id)::int as comment_count,
-           (select count(*) from public.task_files f where f.task_id = t.id)::int as file_count,
+           (select count(*) from public.task_files f
+             join public.library_files lf on lf.id = f.library_file_id and lf.status = 'ready'
+             where f.task_id = t.id)::int as file_count,
            s.name as phase_name, pr.name as project_name,
            to_char(t.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
     from public.tasks t

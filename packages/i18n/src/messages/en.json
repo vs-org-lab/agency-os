@@ -353,7 +353,14 @@
         "unavailable": "Card payment is not available for this request.",
         "not_found": "This request is no longer available. Refresh the page."
       },
-      "receipts": "Receipts"
+      "receipts": "Receipts",
+      "receipt": {
+        "title": "Payment received",
+        "thanks": "Thank you. We received your payment.",
+        "request": "Request",
+        "amount": "Amount",
+        "date": "Date"
+      }
     },
     "room": {
       "title": "Your project: {name}",

@@ -54,7 +54,6 @@ export function AspectPreview({ images }: { images: PreviewImage[] }) {
               className="flex items-center justify-center overflow-hidden rounded-md border border-border bg-surface-muted"
               style={{ aspectRatio: ratioOf(aspect) }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- local object URL preview */}
               <img
                 src={image.url}
                 alt={image.name}

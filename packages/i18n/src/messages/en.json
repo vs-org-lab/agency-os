@@ -1945,7 +1945,8 @@
     "createProject": "Create project",
     "tabs": {
       "steps": "Steps",
-      "plan": "Plan"
+      "plan": "Plan",
+      "timeline": "Timeline"
     },
     "projectStatus": {
       "active": "In progress",
@@ -2012,6 +2013,16 @@
       "title": "Plan",
       "week": "Week {start}",
       "weeks": "Weeks {start} to {end}"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "today": "Today",
+      "zoom": "Scale",
+      "week": "Week",
+      "month": "Month",
+      "row": "{name}, from {start} to {end}",
+      "empty": "No phase has dates yet, so there is nothing to draw.",
+      "undated": "No dates, left out of the timeline: {names}."
     },
     "updates": {
       "title": "Updates",

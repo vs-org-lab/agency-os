@@ -4,6 +4,7 @@ import { magicLinkPath } from './support/admin';
 import { signInWithPassword } from './support/auth';
 import { readCredentials } from './support/credentials';
 import { seedRoomProject } from './support/rooms';
+import { pickDate } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -32,11 +33,11 @@ test.describe('Retainers', () => {
     await page.goto(`/c/${seeded.clientId}/retainer`);
     await page.getByLabel('Nível').fill('Essencial');
     await page.getByLabel('Valor mensal').fill('1500');
-    await page.getByLabel('Início').fill(isoDate(today));
-    await page.getByLabel('Revisão anual').fill(isoDate(nextYear));
+    await pickDate(page, page.getByRole('button', { name: /^Início/ }), isoDate(today));
+    await pickDate(page, page.getByRole('button', { name: /^Revisão anual/ }), isoDate(nextYear));
     await page.getByLabel('Peças de conteúdo').fill('2');
     await page.getByRole('button', { name: 'Guardar retainer' }).click();
-    await expect(page.getByRole('region', { name: 'Peças de conteúdo' })).toContainText('0 de 2', {
+    await expect(page.getByRole('group', { name: 'Peças de conteúdo' })).toContainText('0 de 2', {
       timeout: 30_000,
     });
     await expectAccessible(page);
@@ -77,7 +78,7 @@ test.describe('Retainers', () => {
     await clientContext.close();
 
     await page.reload();
-    await expect(page.getByRole('region', { name: 'Peças de conteúdo' })).toContainText('1 de 2');
+    await expect(page.getByRole('group', { name: 'Peças de conteúdo' })).toContainText('1 de 2');
     const usage = page.getByRole('region', { name: 'Registos do mês' });
     await expect(
       usage.getByRole('listitem').filter({ hasText: 'Série de verão' }).getByText('Pedido extra'),

@@ -5,6 +5,7 @@ import { signInWithPassword } from './support/auth';
 import { readCredentials } from './support/credentials';
 import { seedRoomProject } from './support/rooms';
 import { seedReceivedPayment } from './support/tasks';
+import { chooseOption, pickDate } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -36,11 +37,16 @@ test.describe('Tasks, home and updates', () => {
     await expect(page.getByRole('heading', { name: 'Início', level: 1 })).toBeVisible();
     await expectAccessible(page);
 
-    await page.getByRole('link', { name: 'Nova tarefa' }).click();
+    await page.getByRole('button', { name: 'Novo', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Nova tarefa' }).click();
     const form = page.getByRole('form', { name: 'Nova tarefa' });
     await form.getByLabel('Título').fill(title);
-    await form.getByLabel('Cliente').selectOption({ label: room.company });
-    await form.getByLabel('Data').fill(lisbonDate(-1));
+    await chooseOption(
+      page,
+      form.getByRole('combobox', { name: 'Cliente', exact: true }),
+      room.company,
+    );
+    await pickDate(page, form.getByRole('button', { name: /^Data/ }), lisbonDate(-1));
     await form.getByLabel('Subtarefas').fill('Exportar ficheiros');
     await form.getByRole('button', { name: 'Criar tarefa' }).click();
     await expect(page.getByText('Tarefa criada.')).toBeVisible({ timeout: 30_000 });
@@ -65,8 +71,7 @@ test.describe('Tasks, home and updates', () => {
     await expect(page.getByText(title)).toHaveCount(0, { timeout: 30_000 });
 
     await page.goto('/tasks');
-    await page.getByLabel('Estado').selectOption('done');
-    await page.getByRole('button', { name: 'Filtrar' }).click();
+    await page.getByRole('tab', { name: /^Concluídas/ }).click();
     await expect(page).toHaveURL(/\/tasks\?.*status=done/);
     await expect(page.getByRole('region', { name: 'Concluídas' }).getByText(title)).toBeVisible();
 

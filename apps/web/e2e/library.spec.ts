@@ -61,8 +61,9 @@ test.describe('Library', () => {
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/library`);
     await page.getByRole('button', { name: 'Nova pasta' }).click();
-    await page.getByLabel('Nome da pasta').fill(folderName);
-    await page.getByRole('button', { name: 'Criar' }).click();
+    const newFolder = page.getByRole('dialog', { name: 'Nova pasta' });
+    await newFolder.getByLabel('Nome da pasta').fill(folderName);
+    await newFolder.getByRole('button', { name: 'Criar', exact: true }).click();
     await page.getByRole('link', { name: new RegExp(`^${folderName}`) }).click();
     await expect(page.getByRole('navigation', { name: 'Caminho da pasta' })).toContainText(
       folderName,

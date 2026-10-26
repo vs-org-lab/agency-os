@@ -9,6 +9,7 @@ import {
   listVisibleClients,
 } from '@/modules/organizations';
 import { withUserContext } from '@/platform/db';
+import { CommandPalette, type CreateAction } from '../command/command-palette';
 import { SkipLink } from './skip-link';
 import { AppSidebar, type CounterSource } from './app-sidebar';
 import { buildNavigation, type NavigationCounter, type NavigationLevel } from './navigation';
@@ -19,11 +20,14 @@ export async function AppShell({
   session,
   level,
   counters,
+  commandPalette,
   children,
 }: {
   session: AreaSession;
   level: NavigationLevel;
   counters?: Partial<Record<NavigationCounter, CounterSource>>;
+  /** Mounts the command palette; only the internal workspace and rooms pass it. */
+  commandPalette?: { createActions: CreateAction[] };
   children: ReactNode;
 }) {
   const t = await getTranslations();
@@ -65,6 +69,7 @@ export async function AppShell({
         footer={resolve(navigation.footer)}
         clients={level.level === 'studio' ? data.clients : undefined}
         counters={counters}
+        search={commandPalette ? { label: t('command.open') } : undefined}
         user={{
           name: data.userName ?? session.claims.email ?? '',
           email: session.claims.email ?? null,
@@ -96,6 +101,12 @@ export async function AppShell({
           {children}
         </main>
       </SidebarInset>
+      {commandPalette ? (
+        <CommandPalette
+          navigation={[...navigation.items, ...navigation.footer]}
+          createActions={commandPalette.createActions}
+        />
+      ) : null}
     </SidebarProvider>
   );
 }

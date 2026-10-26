@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { Toaster } from '@agency-os/ui/components/sonner';
 import { AppShell } from '@/components/shell/app-shell';
+import { commandCreateActions } from '@/components/command/create-actions';
 import { roomAccess } from '@/components/shell/routing';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -37,7 +38,11 @@ export default async function RoomLayout({ children, params }: LayoutProps) {
       ]);
 
   return (
-    <AppShell session={session} level={{ level: 'room', clientId, retainer, outcome }}>
+    <AppShell
+      session={session}
+      level={{ level: 'room', clientId, retainer, outcome }}
+      commandPalette={{ createActions: commandCreateActions(session.actor) }}
+    >
       {children}
       <Toaster />
     </AppShell>

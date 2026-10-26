@@ -2239,6 +2239,18 @@
       }
     }
   },
+  "command": {
+    "open": "Procurar",
+    "title": "Paleta de comandos",
+    "description": "Vá a uma página, crie algo ou procure clientes, negócios e tarefas.",
+    "placeholder": "Escreva um comando ou procure…",
+    "groups": { "goTo": "Ir para", "create": "Criar", "search": "Procurar" },
+    "create": { "newTask": "Nova tarefa" },
+    "kind": { "client": "Cliente", "deal": "Negócio", "task": "Tarefa" },
+    "empty": "Sem resultados.",
+    "searching": "A procurar…",
+    "error": "A procura não está disponível."
+  },
   "interaction": {
     "holdToConfirm": "{label}, mantenha premido para confirmar",
     "holding": "Continue a premir…",

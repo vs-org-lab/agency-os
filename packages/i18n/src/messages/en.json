@@ -2239,6 +2239,18 @@
       }
     }
   },
+  "command": {
+    "open": "Search",
+    "title": "Command palette",
+    "description": "Go to a page, create something or search clients, deals and tasks.",
+    "placeholder": "Type a command or search…",
+    "groups": { "goTo": "Go to", "create": "Create", "search": "Search" },
+    "create": { "newTask": "New task" },
+    "kind": { "client": "Client", "deal": "Deal", "task": "Task" },
+    "empty": "No results.",
+    "searching": "Searching…",
+    "error": "The search is unavailable."
+  },
   "interaction": {
     "holdToConfirm": "{label}, hold to confirm",
     "holding": "Keep holding…",

@@ -20,6 +20,7 @@ import {
   Newspaper,
   Palette,
   ReceiptText,
+  Search,
   Settings,
   Target,
 } from 'lucide-react';
@@ -43,6 +44,7 @@ import {
 import { ThemeToggle } from '@agency-os/ui/theme-toggle';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
+import { OPEN_COMMAND_PALETTE_EVENT } from '../command/command-palette';
 import { LocaleSwitcher } from './locale-switcher';
 import type { NavigationCounter, NavigationIcon } from './navigation';
 import { CounterValue, formatCounter, useLiveCounter } from './navigation-counter';
@@ -66,6 +68,8 @@ export type AppSidebarProps = {
   clients?: { id: string; name: string }[];
   user: { name: string; email: string | null };
   counters?: Partial<Record<NavigationCounter, CounterSource>>;
+  /** Present only where the command palette is mounted. */
+  search?: { label: string };
   labels: {
     mobileTitle: string;
     mobileDescription: string;
@@ -207,6 +211,24 @@ export function AppSidebar(props: AppSidebarProps) {
         </SidebarHeader>
 
         <SidebarContent>
+          {props.search ? (
+            <SidebarGroup className="pb-0">
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    type="button"
+                    tooltip={props.search.label}
+                    aria-keyshortcuts="Control+K Meta+K"
+                    onClick={() => window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT))}
+                  >
+                    <Search aria-hidden />
+                    <span>{props.search.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          ) : null}
+
           {props.back ? (
             <SidebarGroup className="pb-0">
               <SidebarMenu>

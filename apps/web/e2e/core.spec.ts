@@ -4,6 +4,7 @@ import { signInWithPassword } from './support/auth';
 import { seedDeal, uniqueCompany } from './support/commercial';
 import { EVIDENCE_PNG, seedCore, seedSharedCore } from './support/core';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -187,6 +188,7 @@ test.describe('Aurion Core', () => {
 
     await page.goto(await magicLinkPath(credentials.client.email));
     await page.goto('/portal');
+    await dismissPortalWelcome(page);
 
     await expect(page.getByText(shared.note)).toBeVisible();
     await expect(page.getByText(shared.presentation)).toBeVisible();

@@ -10,6 +10,7 @@ import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
 import { phaseTimeline } from '@/modules/rooms';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
+import { loadProjectTestimonial } from '@/modules/testimonials/server';
 import {
   completePhaseAction,
   createProjectAction,
@@ -37,6 +38,7 @@ import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
 import { TimelineView } from './room/timeline-view';
+import { TestimonialSection } from './room/testimonial-section';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
@@ -65,12 +67,14 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   const t = await getTranslations('rooms');
   const timeline = room.project ? phaseTimeline(room.project.phases, room.project.startsOn) : null;
   const tp = await getTranslations('proofing.section');
-  const [proofs, rounds] = room.project
+  const tt = await getTranslations('testimonials.team');
+  const [proofs, rounds, testimonial] = room.project
     ? await Promise.all([
         loadProjectProofs(session.claims, clientId, room.project.id),
         loadProjectRounds(session.claims, room.project.id),
+        loadProjectTestimonial(session.claims, room.project.id),
       ])
-    : [null, null];
+    : [null, null, null];
 
   return (
     <div className="flex flex-col gap-6">
@@ -100,6 +104,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
               <TabsTrigger value="plan">{t('tabs.plan')}</TabsTrigger>
               <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
               <TabsTrigger value="proofs">{tp('title')}</TabsTrigger>
+              <TabsTrigger value="testimonial">{tt('title')}</TabsTrigger>
             </TabsList>
             <TabsContent value="steps" className="pt-4">
               <ProcessBoard
@@ -155,6 +160,9 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
                   saveLimit: saveRevisionLimitAction,
                 }}
               />
+            </TabsContent>
+            <TabsContent value="testimonial" className="pt-4">
+              <TestimonialSection testimonial={testimonial} />
             </TabsContent>
           </Tabs>
           <ProjectCard project={room.project} team={room.team} health={health} />

@@ -5,7 +5,10 @@ import { ProofViewer } from '@/components/proofing/proof-viewer';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
+import { VoiceNotePlayer } from '@/components/media/voice-note-player';
 import { loadStaffProofVersion } from '@/modules/proofing/server';
+import { loadVoiceNotes } from '@/modules/voice-notes/server';
+import { finishVoiceNoteAction, startVoiceNoteAction } from '../../../../voice-note-actions';
 import { commentOnProofAction, resolveProofCommentAction } from '../../proof-actions';
 import { pageMetadata } from '@/i18n/page-title';
 
@@ -22,6 +25,17 @@ export default async function StaffProofPage({ params }: PageProps) {
   const version = await loadStaffProofVersion(session.claims, versionId);
   if (!version || version.clientId !== clientId) notFound();
   const t = await getTranslations('proofing');
+  const tMedia = await getTranslations('media.voiceNote');
+  const [commentNotes, approvalNotes] = await Promise.all([
+    loadVoiceNotes(
+      session.claims,
+      'proof_comment',
+      version.comments.flatMap((comment) => [comment.id, ...comment.replies.map((r) => r.id)]),
+    ),
+    version.approval
+      ? loadVoiceNotes(session.claims, 'approval_change_request', [version.approval.id])
+      : Promise.resolve([]),
+  ]);
   const commentOnVersion = commentOnProofAction.bind(null, versionId);
 
   return (
@@ -41,6 +55,13 @@ export default async function StaffProofPage({ params }: PageProps) {
           </span>
         </p>
       </header>
+      {approvalNotes.length > 0 ? (
+        <section aria-label={tMedia('list')} className="flex flex-col gap-3">
+          {approvalNotes.map((note) => (
+            <VoiceNotePlayer key={note.id} note={note} />
+          ))}
+        </section>
+      ) : null}
       <ProofViewer
         kind={version.kind}
         src={`/api/proofs/${versionId}/file`}
@@ -52,6 +73,8 @@ export default async function StaffProofPage({ params }: PageProps) {
         audience="team"
         canComment
         addComment={commentOnVersion}
+        voiceNotes={commentNotes}
+        voiceActions={{ start: startVoiceNoteAction, finish: finishVoiceNoteAction }}
         resolveComment={resolveProofCommentAction}
       />
     </div>

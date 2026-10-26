@@ -72,7 +72,8 @@ export async function commentOnProofAction(
   const claims = await getVerifiedClaims();
   if (!claims) return { ok: false, code: 'not_found' };
   const result = await commentOnProof(claims, { versionId, ...input });
-  return done(result.ok ? { ok: true } : result);
+  const outcome = done(result.ok ? { ok: true } : result);
+  return outcome.ok && result.ok ? { ok: true, commentId: result.commentId } : outcome;
 }
 
 export async function resolveProofCommentAction(

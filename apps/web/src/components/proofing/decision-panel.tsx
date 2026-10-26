@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { VoiceNoteActions } from '@/components/media/send-voice-note';
 import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approval-decision';
 import type { RoundsStatus } from '@/modules/proofing';
 
@@ -12,10 +13,12 @@ export function DecisionPanel({
   approvalId,
   rounds,
   decide,
+  voiceActions,
 }: {
   approvalId: string;
   rounds: RoundsStatus;
   decide: DecideApproval;
+  voiceActions?: VoiceNoteActions;
 }) {
   const t = useTranslations('proofing.decision');
   const nextIsExtra = rounds.used + 1 > rounds.limit;
@@ -29,7 +32,7 @@ export function DecisionPanel({
           {t('extraWarning', { limit: rounds.limit })}
         </p>
       ) : null}
-      <ApprovalDecision approvalId={approvalId} decide={decide} />
+      <ApprovalDecision approvalId={approvalId} decide={decide} voiceActions={voiceActions} />
     </div>
   );
 }

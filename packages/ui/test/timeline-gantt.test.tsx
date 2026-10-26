@@ -15,10 +15,10 @@ describe('ganttLayout', () => {
   it('places bars proportionally over the span of the rows', () => {
     const layout = ganttLayout(ROWS, '2026-10-15', 'week');
     expect(layout.totalDays).toBe(21);
-    expect(layout.bars[0]!.leftPct).toBeCloseTo(0);
-    expect(layout.bars[0]!.widthPct).toBeCloseTo((7 / 21) * 100);
-    expect(layout.bars[1]!.leftPct).toBeCloseTo((7 / 21) * 100);
-    expect(layout.bars[1]!.widthPct).toBeCloseTo((14 / 21) * 100);
+    expect(layout.bars[0].leftPct).toBeCloseTo(0);
+    expect(layout.bars[0].widthPct).toBeCloseTo((7 / 21) * 100);
+    expect(layout.bars[1].leftPct).toBeCloseTo((7 / 21) * 100);
+    expect(layout.bars[1].widthPct).toBeCloseTo((14 / 21) * 100);
     expect(layout.todayPct).toBeCloseTo((10 / 21) * 100);
   });
 
@@ -26,7 +26,7 @@ describe('ganttLayout', () => {
     const layout = ganttLayout(ROWS, '2026-10-01', 'week');
     expect(layout.totalDays).toBe(25);
     expect(layout.todayPct).toBeCloseTo(0);
-    expect(layout.bars[0]!.leftPct).toBeCloseTo((4 / 25) * 100);
+    expect(layout.bars[0].leftPct).toBeCloseTo((4 / 25) * 100);
   });
 
   it('is wider in the month zoom than in the week zoom', () => {
@@ -75,7 +75,7 @@ describe('TimelineGantt', () => {
     const user = userEvent.setup();
     renderGantt();
     const [first, second] = screen.getAllByRole('row');
-    first!.focus();
+    first?.focus();
     await user.keyboard('{ArrowDown}');
     expect(document.activeElement).toBe(second);
     await user.keyboard('{ArrowUp}');

@@ -39,7 +39,7 @@ export function phaseTimeline(
   let previousEnd = projectStart;
   for (const phase of phases) {
     const stepDates = phase.steps.flatMap((step) => (step.dueOn ? [step.dueOn] : []));
-    const latestStep = stepDates.length > 0 ? [...stepDates].sort().at(-1)! : null;
+    const latestStep = stepDates.sort().at(-1) ?? null;
     const startedOn = phase.startedAt ? phase.startedAt.slice(0, 10) : null;
     const rawEnd = phase.completedAt?.slice(0, 10) ?? phase.dueOn ?? latestStep;
     if (!rawEnd) {

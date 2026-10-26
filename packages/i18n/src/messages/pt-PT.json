@@ -2571,7 +2571,8 @@
     "datePicker": {
       "placeholder": "Escolher data",
       "clear": "Limpar"
-    }
+    },
+    "searchMember": "Procurar por nome"
   },
   "testimonials": {
     "title": "Testemunho",

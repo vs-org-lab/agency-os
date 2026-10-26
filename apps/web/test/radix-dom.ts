@@ -8,6 +8,11 @@ export function installRadixDomPolyfills(): void {
   Element.prototype.setPointerCapture = () => undefined;
   Element.prototype.releasePointerCapture = () => undefined;
   Element.prototype.scrollIntoView = () => undefined;
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 }
 
 /** Opens a Radix Select by its accessible name and picks an option by its text. */

@@ -171,9 +171,14 @@
     "home": {
       "title": "Início",
       "date": "{date}",
+      "create": {
+        "label": "Novo",
+        "task": "Nova tarefa",
+        "target": "Novo alvo de angariação",
+        "event": "Novo evento"
+      },
       "actions": {
         "label": "Ações rápidas",
-        "newTask": "Nova tarefa",
         "pipeline": "Abrir o pipeline",
         "updates": "Ver atualizações"
       },

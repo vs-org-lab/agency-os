@@ -7,6 +7,7 @@ import { loadUpcomingEvents } from '@/modules/agenda/server';
 import { loadStudioHome } from '@/modules/studio/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { ClientProgress } from './home/client-progress';
+import { HomeCreateMenu } from './home/create-menu';
 import { HomeIndicators } from './home/indicators';
 import { TodayList } from './home/today-list';
 import { UpcomingEvents } from './home/upcoming-events';
@@ -36,9 +37,7 @@ export default async function StudioHomePage({ params }: PageProps) {
           </p>
         </div>
         <nav aria-label={t('actions.label')} className="flex flex-wrap gap-2">
-          <Button asChild size="sm">
-            <Link href="/tasks?new=1">{t('actions.newTask')}</Link>
-          </Button>
+          <HomeCreateMenu create={home.create} />
           {home.pipeline ? (
             <Button asChild size="sm" variant="outline">
               <Link href="/pipeline">{t('actions.pipeline')}</Link>
@@ -63,22 +62,20 @@ export default async function StudioHomePage({ params }: PageProps) {
           <TodayList items={home.today} />
         </section>
 
-        <div className="flex flex-col gap-8">
-          <section aria-labelledby="home-upcoming" className="flex flex-col gap-3">
-            <h2 id="home-upcoming" className="text-heading text-text">
-              {t('upcoming.title')}
-            </h2>
-            <UpcomingEvents items={upcoming} />
-          </section>
-
-          <section aria-labelledby="home-clients" className="flex flex-col gap-3">
-            <h2 id="home-clients" className="text-heading text-text">
-              {t('clients.title')}
-            </h2>
-            <ClientProgress clients={home.clients} />
-          </section>
-        </div>
+        <section aria-labelledby="home-upcoming" className="flex flex-col gap-3">
+          <h2 id="home-upcoming" className="text-heading text-text">
+            {t('upcoming.title')}
+          </h2>
+          <UpcomingEvents items={upcoming} />
+        </section>
       </div>
+
+      <section aria-labelledby="home-clients" className="flex flex-col gap-3">
+        <h2 id="home-clients" className="text-heading text-text">
+          {t('clients.title')}
+        </h2>
+        <ClientProgress clients={home.clients} />
+      </section>
     </div>
   );
 }

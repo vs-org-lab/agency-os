@@ -13,7 +13,10 @@ import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
-type PageProps = { params: Promise<{ locale: string }> };
+type PageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ new?: string }>;
+};
 
 function bySector(targets: AcquisitionTarget[]): Array<[string, AcquisitionTarget[]]> {
   const groups = new Map<string, AcquisitionTarget[]>();
@@ -22,8 +25,9 @@ function bySector(targets: AcquisitionTarget[]): Array<[string, AcquisitionTarge
   return [...groups.entries()];
 }
 
-export default async function AcquisitionPage({ params }: PageProps) {
+export default async function AcquisitionPage({ params, searchParams }: PageProps) {
   setRequestLocale(requireLocale((await params).locale));
+  const query = await searchParams;
   const session = await commercialSession(await getVerifiedClaims());
   if (!session || !session.actor.roles.some((role) => role === 'founder' || role === 'finance')) {
     notFound();
@@ -45,6 +49,7 @@ export default async function AcquisitionPage({ params }: PageProps) {
                 action={saveTargetAction.bind(null, null)}
                 defaults={null}
                 idPrefix="new-target"
+                openRequested={query.new === '1'}
               />
             ) : null
           }

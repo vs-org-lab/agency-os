@@ -25,6 +25,7 @@ import {
   Target,
 } from 'lucide-react';
 import { BrandSymbol } from '@agency-os/ui/brand';
+import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { LayoutGroup, m, transitions } from '@agency-os/ui/motion';
 import {
   Sidebar,
@@ -273,12 +274,7 @@ export function AppSidebar(props: AppSidebarProps) {
                           tooltip={client.name}
                         >
                           <Link href={`/c/${client.id}`}>
-                            <span
-                              aria-hidden
-                              className="flex size-5 shrink-0 items-center justify-center rounded-sm bg-surface-muted text-caption font-semibold text-text-secondary"
-                            >
-                              {initials(client.name)}
-                            </span>
+                            <ClientAvatar id={client.id} name={client.name} size="sm" />
                             <span>{client.name}</span>
                           </Link>
                         </SidebarMenuButton>

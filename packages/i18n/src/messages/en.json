@@ -1663,6 +1663,7 @@
       "confirmOverwrite": "There are notes in: {blocks}. Replace them?",
       "overwrite": "Replace",
       "applied": "Saved.",
+      "thinking": "Thinking…",
       "narrative": "Saved narrative",
       "needsTranscript": "Save the transcript before asking for the briefing.",
       "errors": {

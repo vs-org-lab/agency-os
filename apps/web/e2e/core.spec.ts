@@ -83,7 +83,11 @@ test.describe('Aurion Core', () => {
       owner: 'Interno',
     });
 
-    for (const points of await page.getByLabel('Pontos (0 a 5)').all()) await points.fill('3');
+    for (const points of await page.getByRole('slider', { name: 'Pontos (0 a 5)' }).all()) {
+      await points.focus();
+      await page.keyboard.press('Home');
+      for (let step = 0; step < 3; step += 1) await page.keyboard.press('ArrowRight');
+    }
     for (const justification of await page.getByLabel('Justificação').all()) {
       await justification.fill('Prova na auditoria');
     }

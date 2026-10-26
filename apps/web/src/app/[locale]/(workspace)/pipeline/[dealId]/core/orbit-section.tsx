@@ -6,6 +6,7 @@ import type { OrbitFront } from '@agency-os/db';
 import type { Locale } from '@agency-os/i18n';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { ScoreSlider } from '@agency-os/ui/components/score-slider';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { ORBIT_FRONT_MAX_POINTS, type OrbitGrid, type OrbitIndexRow } from '@/modules/diagnosis';
@@ -53,7 +54,7 @@ function FrontScores({
           return (
             <li
               key={criterion.id}
-              className="grid gap-2 md:grid-cols-[minmax(0,1fr)_120px_minmax(0,1.4fr)]"
+              className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.4fr)]"
             >
               <div className="flex flex-col">
                 <span className="text-body-sm font-medium text-text">{criterion.name[locale]}</span>
@@ -61,23 +62,18 @@ function FrontScores({
                   {criterion.observes[locale]}
                 </span>
               </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor={`points-${criterion.id}`} className="sr-only">
-                  {t('orbit.points', { max: criterion.maxPoints })}
-                </Label>
-                <Input
-                  id={`points-${criterion.id}`}
-                  name={`points-${criterion.id}`}
-                  type="number"
-                  min={0}
-                  max={criterion.maxPoints}
-                  step={1}
-                  required
-                  disabled={!writable}
-                  defaultValue={current?.points ?? ''}
-                  placeholder={t('orbit.points', { max: criterion.maxPoints })}
-                />
-              </div>
+              <ScoreSlider
+                id={`points-${criterion.id}`}
+                name={`points-${criterion.id}`}
+                label={t('orbit.points', { max: criterion.maxPoints })}
+                max={criterion.maxPoints}
+                disabled={!writable}
+                defaultValue={current?.points ?? null}
+                clearLabel={t('orbit.clear')}
+                valueText={(value, max) =>
+                  value === null ? t('orbit.noScore') : t('orbit.score', { value, max })
+                }
+              />
               <div className="flex flex-col gap-1">
                 <Label htmlFor={`justification-${criterion.id}`} className="sr-only">
                   {t('orbit.justification')}

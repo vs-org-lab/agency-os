@@ -2749,10 +2749,16 @@
         "compact": "Compact"
       },
       "contrast": "Text on the surface falls below AA contrast. The brand is the client’s, so you can still save.",
+      "contrastRatio": "{ratio}:1 · {level}",
+      "contrastFail": "below AA",
       "save": "Save design",
       "saved": "Design saved."
     },
     "assets": {
+      "aspect": {
+        "label": "Preview aspect ratio",
+        "original": "Original"
+      },
       "title": "Files",
       "upload": "Upload files",
       "uploading": "Uploading {done} of {total}…",

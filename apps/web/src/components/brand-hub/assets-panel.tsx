@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Trash2, Upload } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
@@ -8,6 +8,7 @@ import { FormMessage } from '@/components/forms/form-message';
 import { uploadToSignedUrl } from '@/components/proofing/upload';
 import { MAX_LIBRARY_BYTES } from '@/modules/library';
 import type { HubEditorAsset } from '@/modules/brand-hub';
+import { AspectPreview, type PreviewImage } from './aspect-preview';
 import { hubError, type ActionResult, type HubError } from './hub-errors';
 
 export const ACCEPTED_HUB_TYPES =
@@ -40,8 +41,19 @@ export function AssetsPanel({
   const [uploaded, setUploaded] = useState<number | null>(null);
   const [error, setError] = useState<HubError | null>(null);
   const [pending, startTransition] = useTransition();
+  const [previews, setPreviews] = useState<PreviewImage[]>([]);
+
+  useEffect(
+    () => () => previews.forEach((preview) => URL.revokeObjectURL(preview.url)),
+    [previews],
+  );
 
   const upload = async (files: File[]) => {
+    setPreviews(
+      files
+        .filter((file) => file.type.startsWith('image/') && file.type !== 'image/svg+xml')
+        .map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
+    );
     setError(null);
     setUploaded(null);
     let done = 0;
@@ -112,6 +124,7 @@ export function AssetsPanel({
         <FormMessage tone="success">{t('assets.uploaded', { count: uploaded })}</FormMessage>
       ) : null}
       {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
+      {previews.length > 0 ? <AspectPreview images={previews} /> : null}
       {assets.length === 0 ? (
         <p className="text-body-sm text-text-secondary">{t('assets.empty')}</p>
       ) : (

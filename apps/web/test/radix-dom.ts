@@ -21,7 +21,14 @@ export async function chooseOption(user: UserEvent, select: string | RegExp, opt
 /** Opens a DatePicker by its accessible name and picks a day of the month it shows. */
 export async function chooseDay(user: UserEvent, picker: string | RegExp, day: number) {
   await user.click(screen.getByRole('button', { name: picker }));
-  const dialog = await screen.findByRole('dialog');
+  // A picker opened inside a side panel or dialog leaves more than one dialog on screen.
+  const dialog = await waitFor(() => {
+    const found = screen
+      .getAllByRole('dialog')
+      .find((node) => node.querySelector('[role="gridcell"]'));
+    if (!found) throw new Error('calendar not shown');
+    return found;
+  });
   const cells = dialog.querySelectorAll<HTMLElement>('[role="gridcell"]:not([data-outside])');
   const cell = Array.from(cells).find((node) => node.textContent?.trim() === String(day));
   if (!cell) throw new Error(`day ${day} not shown`);

@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
+import { MotionProvider } from '@agency-os/ui/motion';
 import type { ProjectView } from '@/modules/rooms';
 import {
   chooseDay,
@@ -94,7 +95,7 @@ function actionsMock(overrides: Partial<ProcessActions> = {}): ProcessActions {
 function withIntl(node: React.ReactNode) {
   return render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      {node}
+      <MotionProvider>{node}</MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -163,6 +164,7 @@ describe('ProcessBoard', () => {
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Questionário de descoberta' }));
     expect(screen.getByLabelText('Responsável por Questionário de descoberta')).toBeTruthy();
   });
 
@@ -271,6 +273,7 @@ describe('ProcessBoard controls submit the same data as before', () => {
     const user = userEvent.setup();
     const updateStep = vi.fn(async () => ({ ok: true }) as const);
     renderBoard({ updateStep });
+    await user.click(screen.getByRole('button', { name: 'Questionário de descoberta' }));
     const select = 'Responsável por Questionário de descoberta';
 
     await chooseOption(user, select, 'Ana Dias');
@@ -285,6 +288,7 @@ describe('ProcessBoard controls submit the same data as before', () => {
     const updateStep = vi.fn(async () => ({ ok: true }) as const);
     renderBoard({ updateStep });
 
+    await user.click(screen.getByRole('button', { name: 'Questionário de descoberta' }));
     await chooseDay(user, /^Data de Questionário de descoberta/, 12);
 
     const now = new Date();

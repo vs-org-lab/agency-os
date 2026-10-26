@@ -1886,7 +1886,8 @@
       "endsOn": "Expected end",
       "noEnd": "To be set",
       "people": "People",
-      "nobody": "Nobody assigned"
+      "nobody": "Nobody assigned",
+      "healthLine": "Health: {score} of 100, {level}"
     },
     "phases": "Phases",
     "phaseDue": "Phase due date",
@@ -1915,7 +1916,14 @@
         "todo": "Start",
         "in_progress": "Mark as done",
         "done": "Reopen"
-      }
+      },
+      "noDate": "No date",
+      "panelClose": "Close step panel",
+      "status": "Status",
+      "reopenTitle": "Reopen this step?",
+      "reopenBody": "The client has already seen this step. Reopening it shows it as in progress again.",
+      "reopenConfirm": "Reopen step",
+      "reopenCancel": "Cancel"
     },
     "plan": {
       "title": "Plan",

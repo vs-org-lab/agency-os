@@ -1,8 +1,7 @@
 'use client';
 
-import { Download, File, FileImage, FileText, FileVideo, Folder, Trash2 } from 'lucide-react';
+import { Download, File, FileImage, FileText, FileVideo, Trash2 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
 import {
   Table,
@@ -12,8 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@agency-os/ui/components/table';
-import { Link } from '@/i18n/navigation';
-import type { FileView, FolderView } from '@/modules/library';
+import type { FileView } from '@/modules/library';
 
 /** Images up to this size show as thumbnails in the grid; larger ones keep the icon. */
 const THUMBNAIL_MAX_BYTES = 5_000_000;
@@ -37,21 +35,9 @@ export function useFileSize() {
 }
 
 type ItemsProps = {
-  folders: FolderView[];
   files: FileView[];
-  folderLink: (folderId: string) => string;
-  showVisibility: boolean;
   onDeleteFile: (file: FileView) => void;
 };
-
-function VisibilityBadge({ folder }: { folder: FolderView }) {
-  const t = useTranslations('library.visibility');
-  return (
-    <Badge variant={folder.visibility === 'client' ? 'secondary' : 'outline'}>
-      {t(folder.visibility)}
-    </Badge>
-  );
-}
 
 function FileActions({ file, onDelete }: { file: FileView; onDelete: (file: FileView) => void }) {
   const t = useTranslations('library');
@@ -77,32 +63,11 @@ function FileActions({ file, onDelete }: { file: FileView; onDelete: (file: File
   );
 }
 
-export function LibraryGrid({
-  folders,
-  files,
-  folderLink,
-  showVisibility,
-  onDeleteFile,
-}: ItemsProps) {
+export function LibraryGrid({ files, onDeleteFile }: ItemsProps) {
   const t = useTranslations('library');
   const size = useFileSize();
   return (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {folders.map((folder) => (
-        <li key={folder.id}>
-          <Link
-            href={folderLink(folder.id)}
-            className="flex h-full flex-col gap-2 rounded-lg border border-border bg-surface p-3 hover:border-text focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            <Folder aria-hidden="true" className="size-8 text-text-secondary" />
-            <span className="truncate text-label text-text">{folder.name}</span>
-            <span className="text-caption text-text-secondary">
-              {t('fileCount', { count: folder.fileCount })}
-            </span>
-            {showVisibility ? <VisibilityBadge folder={folder} /> : null}
-          </Link>
-        </li>
-      ))}
       {files.map((file) => {
         const Icon = KIND_ICONS[file.kind];
         return (
@@ -137,13 +102,7 @@ export function LibraryGrid({
   );
 }
 
-export function LibraryList({
-  folders,
-  files,
-  folderLink,
-  showVisibility,
-  onDeleteFile,
-}: ItemsProps) {
+export function LibraryList({ files, onDeleteFile }: ItemsProps) {
   const t = useTranslations('library');
   const format = useFormatter();
   const size = useFileSize();
@@ -162,30 +121,6 @@ export function LibraryList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {folders.map((folder) => (
-            <TableRow key={folder.id}>
-              <TableCell>
-                <Link
-                  href={folderLink(folder.id)}
-                  className="inline-flex items-center gap-2 text-text hover:underline"
-                >
-                  <Folder aria-hidden="true" className="size-4 text-text-secondary" />
-                  {folder.name}
-                </Link>
-                {showVisibility ? (
-                  <span className="ml-2">
-                    <VisibilityBadge folder={folder} />
-                  </span>
-                ) : null}
-              </TableCell>
-              <TableCell className="text-text-secondary">
-                {t('fileCount', { count: folder.fileCount })}
-              </TableCell>
-              <TableCell className="hidden md:table-cell" />
-              <TableCell className="hidden md:table-cell" />
-              <TableCell />
-            </TableRow>
-          ))}
           {files.map((file) => {
             const Icon = KIND_ICONS[file.kind];
             return (

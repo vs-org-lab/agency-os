@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import { FormMessage } from '@/components/forms/form-message';
 import { libraryError, type LibraryError } from './library-errors';
 import type { ActionResult } from './upload-files';
@@ -92,27 +93,27 @@ export function NewFolderButton({
   onCreated: () => void;
 }) {
   const t = useTranslations('library');
-  const [open, setOpen] = useState(false);
-  if (open) {
-    return (
-      <NameForm
-        label={t('folderName')}
-        submitLabel={t('create')}
-        initial=""
-        onSubmit={async (name) => {
-          const result = await create(name);
-          if (result.ok) onCreated();
-          return result;
-        }}
-        onCancel={() => setOpen(false)}
-      />
-    );
-  }
   return (
-    <Button type="button" size="sm" onClick={() => setOpen(true)}>
-      <FolderPlus aria-hidden="true" />
-      {t('newFolder')}
-    </Button>
+    <CreateDialog
+      label={t('newFolder')}
+      title={t('newFolder')}
+      variant="outline"
+      icon={<FolderPlus aria-hidden="true" />}
+    >
+      {(close) => (
+        <NameForm
+          label={t('folderName')}
+          submitLabel={t('create')}
+          initial=""
+          onSubmit={async (name) => {
+            const result = await create(name);
+            if (result.ok) onCreated();
+            return result;
+          }}
+          onCancel={() => close()}
+        />
+      )}
+    </CreateDialog>
   );
 }
 

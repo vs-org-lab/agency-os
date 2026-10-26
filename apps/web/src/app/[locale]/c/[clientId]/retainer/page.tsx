@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RetainerBilling } from '@/components/retainers/retainer-billing';
 import { RetainerScreen } from '@/components/retainers/retainer-screen';
 import { requireArea } from '@/components/shell/session-guard';
@@ -42,13 +42,16 @@ export default async function RoomRetainerPage({ params }: PageProps) {
   ]);
   if (!view || (!view.retainer && !view.canWrite)) notFound();
 
+  const t = await getTranslations('retainers');
+
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={`/c/${clientId}/retainer`}
       />
       <RetainerScreen

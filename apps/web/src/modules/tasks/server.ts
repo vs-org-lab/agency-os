@@ -3,6 +3,7 @@ import type { TaskStatus } from '@agency-os/db';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { listTaskOptions } from './options';
 import {
+  countTasksByStatus,
   createTask,
   deleteTask,
   listTasks,
@@ -25,6 +26,13 @@ export function loadTasks(
   filter: { clientId?: string; assigneeId?: string; status?: TaskStatus },
 ) {
   return withUserContext(session.claims, (tx) => listTasks(tx, filter));
+}
+
+export function loadTaskCounts(
+  session: TaskSession,
+  filter: { clientId?: string; assigneeId?: string },
+) {
+  return withUserContext(session.claims, (tx) => countTasksByStatus(tx, filter));
 }
 
 export function createStudioTask(session: TaskSession, input: TaskInput) {

@@ -5,10 +5,9 @@ import { TaskFilters } from '@/components/tasks/task-filters';
 import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
-import { getPathname } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { parseTaskFilter, taskToday } from '@/modules/tasks';
-import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
+import { loadTaskCounts, loadTaskOptions, loadTasks } from '@/modules/tasks/server';
 import {
   createTaskAction,
   deleteTaskAction,
@@ -33,7 +32,10 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
   const options = await loadTaskOptions(session, null);
   if (!options) notFound();
   const filter = parseTaskFilter(query);
-  const tasks = await loadTasks(session, filter);
+  const [tasks, counts] = await Promise.all([
+    loadTasks(session, filter),
+    loadTaskCounts(session, { clientId: filter.clientId, assigneeId: filter.assigneeId }),
+  ]);
   const t = await getTranslations('tasks');
 
   return (
@@ -53,9 +55,9 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
         }
       />
       <TaskFilters
-        action={getPathname({ href: '/tasks', locale })}
         clients={options.clients}
         people={options.people}
+        counts={counts}
         current={{
           clientId: filter.clientId ?? null,
           assigneeId: filter.assigneeId ?? null,

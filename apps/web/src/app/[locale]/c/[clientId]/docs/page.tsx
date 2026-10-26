@@ -35,16 +35,14 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={view?.projects ?? []}
         selectedId={view?.projectId ?? null}
+        showPreviewLink={Boolean(view?.projectId)}
         basePath={basePath}
-      />
-      <h2 className="text-title-sm text-text">{t('title')}</h2>
-      {view?.projectId ? (
-        <>
-          {view.canWrite ? (
+        actions={
+          view?.projectId && view.canWrite ? (
             <NewRoomDocument
               projectId={view.projectId}
               basePath={basePath}
@@ -53,9 +51,11 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
                 finishUpload: finishDocumentUploadAction,
               }}
             />
-          ) : null}
-          <RoomDocumentCards clientId={clientId} view={view} />
-        </>
+          ) : null
+        }
+      />
+      {view?.projectId ? (
+        <RoomDocumentCards clientId={clientId} view={view} />
       ) : (
         <EmptyState title={t('noProject')} description="" />
       )}

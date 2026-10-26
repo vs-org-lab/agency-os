@@ -392,6 +392,27 @@ export async function listTasks(
   }));
 }
 
+export type TaskCounts = { open: number; done: number; all: number };
+
+/** Tasks per status under the client and assignee filters of the list, in the caller's context. */
+export async function countTasksByStatus(
+  tx: DbTransaction,
+  filter: { clientId?: string; assigneeId?: string },
+): Promise<TaskCounts> {
+  const rows = await tx.execute<{ status: TaskStatus; count: string }>(sql`
+    select t.status::text as status, count(*)::text as count
+    from public.tasks t
+    where (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
+      and (${filter.assigneeId ?? null}::uuid is null or t.assignee_id = ${filter.assigneeId ?? null}::uuid)
+    group by t.status
+  `);
+  const countOf = (status: TaskStatus) =>
+    Number(rows.find((row) => row.status === status)?.count ?? 0);
+  const open = countOf('open');
+  const done = countOf('done');
+  return { open, done, all: open + done };
+}
+
 /**
  * AUT-13: "Agendar kickoff" and "Enviar kit de boas-vindas" for a project started from 2.2, once
  * each, assigned to the client's project manager when there is exactly one.

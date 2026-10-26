@@ -1,42 +1,64 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button } from '@agency-os/ui/components/button';
+import { PageHeader } from '@agency-os/ui/components/page-header';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 import type { ProjectSummary } from '@/modules/rooms';
 
-const LINK = 'text-body-sm text-link hover:underline';
-
-/** Client name, the project selector when there is more than one project (RF-052) and the preview link. */
+/**
+ * The single heading of a room screen: the section title with the client as context, the preview
+ * link, the page's primary action and the project selector when there is more than one (RF-052).
+ */
 export function RoomHeader({
-  clientId,
-  clientName,
+  title,
+  description,
+  client,
   projects,
   selectedId,
   basePath,
+  showPreviewLink,
   actions,
 }: {
-  clientId: string;
-  clientName: string;
+  title: string;
+  description?: string;
+  client: { id: string; name: string };
   projects: readonly ProjectSummary[];
   selectedId: string | null;
   basePath: string;
+  showPreviewLink: boolean;
   /** Primary actions of the page, shown beside the preview link. */
   actions?: ReactNode;
 }) {
   const t = useTranslations('rooms');
+  const previewHref = selectedId
+    ? `/c/${client.id}/preview?project=${selectedId}`
+    : `/c/${client.id}/preview`;
+  const hasActions = showPreviewLink || Boolean(actions);
+
   return (
-    <header className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-title text-text">{clientName}</h1>
-        <div className="flex flex-wrap items-center gap-3">
-          {selectedId ? (
-            <Link href={`/c/${clientId}/preview?project=${selectedId}`} className={LINK}>
-              {t('previewAsClient')}
-            </Link>
-          ) : null}
-          {actions}
-        </div>
-      </div>
+    <div className="flex flex-col gap-3">
+      <PageHeader
+        title={title}
+        description={description}
+        context={
+          title === client.name ? undefined : (
+            <span className="text-caption text-text-secondary">{client.name}</span>
+          )
+        }
+        actions={
+          hasActions ? (
+            <>
+              {showPreviewLink ? (
+                <Button asChild variant="outline">
+                  <Link href={previewHref}>{t('previewAsClient')}</Link>
+                </Button>
+              ) : null}
+              {actions}
+            </>
+          ) : null
+        }
+      />
       {projects.length > 1 ? (
         <nav aria-label={t('projectSelector')}>
           <ul className="flex flex-wrap gap-2">
@@ -57,6 +79,6 @@ export function RoomHeader({
           </ul>
         </nav>
       ) : null}
-    </header>
+    </div>
   );
 }

@@ -71,10 +71,11 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   return (
     <div className="flex flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={room.clientName}
+        title={room.clientName}
+        client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
+        showPreviewLink={room.project !== null}
         basePath={`/c/${clientId}`}
         actions={
           writable && templates.length > 0 ? (

@@ -44,13 +44,13 @@ export default async function RoomLibraryPage({ params, searchParams }: PageProp
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={view?.projects ?? []}
         selectedId={view?.projectId ?? null}
+        showPreviewLink={Boolean(view?.projectId)}
         basePath={basePath}
       />
-      <h2 className="text-title-sm text-text">{t('title')}</h2>
       {view?.projectId ? (
         <LibraryBrowser
           view={view}

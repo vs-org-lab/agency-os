@@ -119,7 +119,7 @@
       "library": "Library",
       "documents": "Documents",
       "brandHub": "Brand Hub",
-      "progress": "Progress",
+      "progress": "Plan and results",
       "academy": "Academy"
     }
   },
@@ -400,6 +400,7 @@
       },
       "plan": {
         "title": "Your plan",
+        "details": "What it includes and rules",
         "tier": "{tier} tier",
         "includes": "What it includes",
         "perMonth": "{count} per month",
@@ -435,7 +436,7 @@
         }
       },
       "project": {
-        "title": "Your project",
+        "title": "Your project: {name}",
         "phases": "Project phases",
         "current": "Current phase",
         "nextStep": "Next step: {name}",
@@ -3323,7 +3324,7 @@
       "sent": "Quote sent to the client."
     },
     "portal": {
-      "title": "Progress",
+      "title": "Plan and results",
       "description": "This month's retainer usage and your requests.",
       "none": "There is no active retainer.",
       "request": {

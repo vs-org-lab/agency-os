@@ -29,12 +29,15 @@ export type PortalRetainerActions = {
   decide: (extraRequestId: string, decision: 'approved' | 'declined') => Promise<RetainerResult>;
 };
 
-function RequestForm({
+export function RequestForm({
   view,
   request,
+  onDone,
 }: {
   view: PortalRetainerView;
   request: PortalRetainerActions['request'];
+  /** Called after the request was accepted, with how it was handled. */
+  onDone?: (outcome: 'task' | 'extra') => void;
 }) {
   const t = useTranslations('retainers');
   const id = useId();
@@ -71,6 +74,7 @@ function RequestForm({
           if (result.ok) {
             setDescription('');
             setMessage(result.outcome);
+            onDone?.(result.outcome);
           } else setMessage(retainerError(result.code));
         });
       }}

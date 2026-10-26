@@ -119,7 +119,7 @@
       "library": "Biblioteca",
       "documents": "Documentos",
       "brandHub": "Brand Hub",
-      "progress": "Progresso",
+      "progress": "Plano e resultado",
       "academy": "Academia"
     }
   },
@@ -400,6 +400,7 @@
       },
       "plan": {
         "title": "O seu plano",
+        "details": "O que inclui e regras",
         "tier": "Nível {tier}",
         "includes": "O que inclui",
         "perMonth": "{count} por mês",
@@ -435,7 +436,7 @@
         }
       },
       "project": {
-        "title": "O seu projeto",
+        "title": "O seu projeto: {name}",
         "phases": "Fases do projeto",
         "current": "Fase atual",
         "nextStep": "Próximo passo: {name}",
@@ -3323,7 +3324,7 @@
       "sent": "Orçamento enviado ao cliente."
     },
     "portal": {
-      "title": "Progresso",
+      "title": "Plano e resultado",
       "description": "O consumo do retainer este mês e os seus pedidos.",
       "none": "Não há um retainer ativo.",
       "request": {

@@ -9,6 +9,7 @@ import { AttachmentPicker } from './attachment-picker';
 import { LibraryBrowser, type LibraryActions, type LibraryParams } from './library-browser';
 
 const push = vi.fn();
+const replace = vi.fn();
 
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -16,7 +17,7 @@ vi.mock('@/i18n/navigation', () => ({
       {children}
     </a>
   ),
-  useRouter: () => ({ push, refresh: vi.fn() }),
+  useRouter: () => ({ push, replace, refresh: vi.fn() }),
 }));
 
 beforeAll(() => {
@@ -38,6 +39,7 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   push.mockReset();
+  replace.mockReset();
   vi.unstubAllGlobals();
 });
 
@@ -140,9 +142,33 @@ describe('LibraryBrowser', () => {
       target: { value: ' logo ' },
     });
     act(() => vi.advanceTimersByTime(249));
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(1));
-    expect(push).toHaveBeenCalledWith('/c/client-1/library?project=project-1&q=logo&sort=size');
+    expect(replace).toHaveBeenCalledWith('/c/client-1/library?project=project-1&q=logo&sort=size');
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('follows the search term when the url changes from outside', () => {
+    const element = (params: LibraryParams) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
+        <MotionProvider>
+          <LibraryBrowser
+            view={FOLDER_VIEW}
+            basePath="/c/client-1/library"
+            params={params}
+            actions={actions()}
+            audience="staff"
+          />
+        </MotionProvider>
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(element({ folder: 'folder-1', q: 'logo' }));
+    const box = screen.getByRole('searchbox', { name: 'Pesquisar ficheiros' }) as HTMLInputElement;
+    expect(box.value).toBe('logo');
+
+    rerender(element({ folder: 'folder-1' }));
+
+    expect(box.value).toBe('');
   });
 
   it('shows the drop layer on dragenter and hides on drop', async () => {

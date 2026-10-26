@@ -6,10 +6,9 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import { CreateSheet } from '@/components/ui/create-sheet';
 import { roomError, type ActionResult, type RoomError } from './room-errors';
-
-const FIELD = 'h-11 rounded-md border border-border bg-surface px-3 text-body text-text md:h-9';
 
 /** "Novo projeto": the founder or the client's manager starts a project from a process template. */
 export function NewProjectForm({
@@ -62,18 +61,13 @@ export function NewProjectForm({
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="new-project-template">{t('template')}</Label>
-        <select
+        <SelectField
           id="new-project-template"
-          className={FIELD}
+          name="templateKey"
           value={templateKey}
-          onChange={(event) => setTemplateKey(event.target.value)}
-        >
-          {templates.map((template) => (
-            <option key={template.key} value={template.key}>
-              {template.name}
-            </option>
-          ))}
-        </select>
+          onValueChange={setTemplateKey}
+          options={templates.map((template) => ({ value: template.key, label: template.name }))}
+        />
       </div>
       <Button type="submit" disabled={pending}>
         {t('createProject')}

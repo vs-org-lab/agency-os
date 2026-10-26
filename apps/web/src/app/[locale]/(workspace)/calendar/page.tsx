@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ view?: string; date?: string }>;
+  searchParams: Promise<{ view?: string; date?: string; new?: string }>;
 };
 
 /** S-04: everything dated across the clients the reader sees, one colour per client. */
@@ -26,7 +26,8 @@ export default async function StudioCalendarPage({ params, searchParams }: PageP
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
   const today = lisbonDay(new Date());
-  const period = agendaPeriod(await searchParams, today);
+  const query = await searchParams;
+  const period = agendaPeriod(query, today);
   const [agenda, busy] = await Promise.all([
     loadAgendaRange(session.claims, { from: period.from, to: period.to }),
     period.view === 'week' ? loadHostBusy(session.claims, period.from, period.to) : [],
@@ -45,6 +46,7 @@ export default async function StudioCalendarPage({ params, searchParams }: PageP
         items={agenda.items}
         busy={busy}
         canSchedule={agenda.canSchedule || agenda.clients.length > 0}
+        openNewRequested={query.new === '1'}
         clients={agenda.clients}
         projects={agenda.projects}
         fixedClientId={null}

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { withActor, type Actor } from '@/modules/access';
 import type { CalendarPort } from '@/modules/commercial';
+import { canScheduleInStudio } from './schedulers';
 import { roomActor } from '@/modules/rooms/server';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
@@ -23,8 +24,6 @@ export const OK = { ok: true } as const;
 
 export const uuid = z.uuid();
 
-const STUDIO_SCHEDULERS = new Set(['founder', 'project_manager']);
-
 /**
  * Who schedules meetings: the room writers for a client's meetings, and the founder or a project
  * manager for internal ones. Freelancers and finance only read the agenda.
@@ -40,9 +39,7 @@ export async function agendaWriter(
     deps.contexts,
     claims,
     async (_tx, actor) =>
-      actor.mfaVerifiedAt !== null && actor.roles.some((role) => STUDIO_SCHEDULERS.has(role))
-        ? actor
-        : null,
+      actor.mfaVerifiedAt !== null && canScheduleInStudio(actor.roles) ? actor : null,
     null,
   );
 }

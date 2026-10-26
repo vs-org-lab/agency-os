@@ -1,6 +1,5 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
-import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Link } from '@/i18n/navigation';
 import type { HomeItem } from '@/modules/studio';
 
@@ -10,7 +9,12 @@ export function TodayList({ items }: { items: HomeItem[] }) {
   const format = useFormatter();
 
   if (items.length === 0) {
-    return <EmptyState title={t('empty.title')} description={t('empty.description')} />;
+    return (
+      <div className="flex flex-col gap-0.5 rounded-lg border border-dashed border-border px-4 py-3">
+        <p className="text-body-sm font-medium text-text">{t('empty.title')}</p>
+        <p className="text-caption text-text-secondary">{t('empty.description')}</p>
+      </div>
+    );
   }
 
   return (

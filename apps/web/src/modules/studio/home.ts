@@ -3,10 +3,11 @@ import { schema, type DbTransaction } from '@agency-os/db';
 import type { Currency } from '@agency-os/i18n';
 import { withActor, type Actor } from '@/modules/access';
 import { canReadBilling } from '@/modules/billing';
-import { canSeePipeline } from '@/modules/commercial';
+import { canScheduleInStudio } from '@/modules/agenda';
+import { canSeePipeline, isFounderActor } from '@/modules/commercial';
 import { toMinorUnits } from '@/modules/contracts';
 import { listTodayItems } from '@/modules/commercial/server';
-import { sortByUrgency } from '@/modules/tasks';
+import { canCreateTasks, sortByUrgency } from '@/modules/tasks';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { isStudioStaff } from './access';
 
@@ -43,6 +44,8 @@ export type HomeClient = {
   id: string;
   name: string;
   progress: { done: number; total: number } | null;
+  /** The phase in progress, else the first one not done; null without phases or when all are done. */
+  currentPhase: string | null;
   lastActivityAt: Date | null;
   /** The client has an active retainer (S-01 label). */
   retainer: boolean;
@@ -62,6 +65,8 @@ export type HomeView = {
   clients: HomeClient[];
   /** Whether the reader may open the commercial pipeline. */
   pipeline: boolean;
+  /** The creation flows the reader may start from the home menu. */
+  create: { task: boolean; target: boolean; event: boolean };
 };
 
 /** How long a change request stays in "Hoje" after the client sends it. */
@@ -238,6 +243,18 @@ async function billingFigures(
   };
 }
 
+function currentPhaseName(
+  phases: Array<{ status: string; name: string; position: number }>,
+): string | null {
+  const ordered = [...phases].sort((a, b) => a.position - b.position);
+  return (
+    (
+      ordered.find((phase) => phase.status === 'in_progress') ??
+      ordered.find((phase) => phase.status !== 'done')
+    )?.name ?? null
+  );
+}
+
 async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
   const active = await tx
     .select({
@@ -252,7 +269,12 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
   if (active.length === 0) return [];
   const projectIds = active.map((row) => row.projectId);
   const phases = await tx
-    .select({ projectId: projectPhases.projectId, status: projectPhases.status })
+    .select({
+      projectId: projectPhases.projectId,
+      status: projectPhases.status,
+      name: projectPhases.name,
+      position: projectPhases.position,
+    })
     .from(projectPhases)
     .where(inArray(projectPhases.projectId, projectIds));
   const activity = await tx
@@ -272,6 +294,7 @@ async function clientProgress(tx: DbTransaction): Promise<HomeClient[]> {
       progress: own.length
         ? { done: own.filter((phase) => phase.status === 'done').length, total: own.length }
         : null,
+      currentPhase: currentPhaseName(own),
       lastActivityAt: last ? new Date(last) : null,
       retainer: false,
       healthLevel: null,
@@ -347,6 +370,11 @@ export async function loadHome(
         today: todayItems,
         clients: clientsView,
         pipeline: canSeePipeline(actor),
+        create: {
+          task: canCreateTasks(actor.roles),
+          target: isFounderActor(actor),
+          event: actor.mfaVerifiedAt !== null && canScheduleInStudio(actor.roles),
+        },
       };
     },
     null,

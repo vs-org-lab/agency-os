@@ -15,3 +15,4 @@ export {
   type MeetingKind,
 } from './domain/meeting';
 export type { AgendaItem, AgendaItemKind, AgendaMeeting, AgendaView } from './views';
+export { canScheduleInStudio } from './schedulers';

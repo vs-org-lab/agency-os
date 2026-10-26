@@ -171,9 +171,14 @@
     "home": {
       "title": "Home",
       "date": "{date}",
+      "create": {
+        "label": "New",
+        "task": "New task",
+        "target": "New acquisition target",
+        "event": "New event"
+      },
       "actions": {
         "label": "Quick actions",
-        "newTask": "New task",
         "pipeline": "Open the pipeline",
         "updates": "See updates"
       },

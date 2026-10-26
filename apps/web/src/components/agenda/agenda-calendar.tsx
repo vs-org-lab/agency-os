@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@agency-os/ui/lib/utils';
 import { FormMessage } from '@/components/forms/form-message';
+import { useStripNewParam } from '@/components/ui/use-strip-new-param';
 import { Link, useRouter } from '@/i18n/navigation';
 import { addDays, weekDays, type AgendaItem } from '@/modules/agenda';
 import { ListView } from './list-view';
@@ -46,6 +47,7 @@ export function AgendaCalendar({
   items,
   busy,
   canSchedule,
+  openNewRequested = false,
   clients,
   projects,
   fixedClientId,
@@ -58,6 +60,8 @@ export function AgendaCalendar({
   items: AgendaItem[];
   busy: { start: string; end: string }[];
   canSchedule: boolean;
+  /** `?new=1`: opens the new meeting dialog on arrival, only for readers who may schedule. */
+  openNewRequested?: boolean;
   clients: { id: string; name: string }[];
   projects: { id: string; name: string; clientId: string }[];
   fixedClientId: string | null;
@@ -66,9 +70,18 @@ export function AgendaCalendar({
   const t = useTranslations('agenda');
   const format = useFormatter();
   const router = useRouter();
+  const stripNewParam = useStripNewParam();
   const [hidden, setHidden] = useState<Set<Filter>>(new Set());
   const [target, setTarget] = useState<DialogTarget | null>(null);
   const [notice, setNotice] = useState<'scheduled' | 'updated' | 'cancelled' | null>(null);
+  useEffect(() => {
+    if (openNewRequested && canSchedule) setTarget({ mode: 'new', day: today });
+  }, [openNewRequested, canSchedule, today]);
+
+  const closeDialog = () => {
+    setTarget(null);
+    if (openNewRequested) stripNewParam();
+  };
   const shown = items.filter((item) => !hidden.has(filterOf(item)));
   const href = (nextView: AgendaViewName, nextDate: string) =>
     `${basePath}?view=${nextView}&date=${nextDate}`;
@@ -180,9 +193,9 @@ export function AgendaCalendar({
         <MeetingDialog
           key={target.mode === 'edit' ? target.item.id : target.day}
           target={target}
-          onClose={() => setTarget(null)}
+          onClose={closeDialog}
           onDone={(done) => {
-            setTarget(null);
+            closeDialog();
             setNotice(done);
             router.refresh();
           }}

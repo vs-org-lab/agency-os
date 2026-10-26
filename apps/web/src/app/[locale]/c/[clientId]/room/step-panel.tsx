@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
+import { MemberSelector } from '@agency-os/ui/components/member-selector';
 import { SidePanel } from '@agency-os/ui/components/side-panel';
 import { DateField } from '@/components/forms/date-field';
-import { SelectField } from '@/components/forms/select-field';
 import { FormMessage } from '@/components/forms/form-message';
 import type { Person, StepView } from '@/modules/rooms';
 import type { RoomError } from './room-errors';
@@ -37,6 +37,7 @@ export function StepPanel({
   onChange: (stepId: string, changes: StepChanges) => void;
 }) {
   const t = useTranslations('rooms');
+  const tInteraction = useTranslations('interaction');
 
   return (
     <SidePanel
@@ -62,16 +63,15 @@ export function StepPanel({
           ) : null}
           {editable ? (
             <>
-              <SelectField
+              <MemberSelector
                 name="assignee"
                 label={t('step.assignee', { name: step.name })}
-                value={step.assigneeId ?? ''}
+                value={step.assigneeId ?? null}
                 disabled={pending}
-                onValueChange={(assigneeId) =>
-                  onChange(step.id, { assigneeId: assigneeId || null })
-                }
-                options={people.map((person) => ({ value: person.id, label: person.name }))}
-                emptyLabel={t('step.unassigned')}
+                onChange={(assigneeId) => onChange(step.id, { assigneeId })}
+                members={people.map((person) => ({ id: person.id, name: person.name }))}
+                unassignedLabel={t('step.unassigned')}
+                searchPlaceholder={tInteraction('searchMember')}
               />
               <DateField
                 name="dueOn"

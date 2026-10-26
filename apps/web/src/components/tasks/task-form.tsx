@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { MemberSelector } from '@agency-os/ui/components/member-selector';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
@@ -45,21 +46,30 @@ function PersonSelect({
   people,
   value,
   onChange,
+  roomClientId,
 }: {
   id: string;
   people: TaskPerson[];
   value: string;
   onChange: (value: string) => void;
+  roomClientId: string | null;
 }) {
   const t = useTranslations('tasks.form');
+  const tInteraction = useTranslations('interaction');
   return (
-    <SelectField
+    <MemberSelector
       id={id}
       name="assignee"
-      value={value}
-      onValueChange={onChange}
-      options={people.map((person) => ({ value: person.id, label: person.name }))}
-      emptyLabel={t('none')}
+      label={t('assignee')}
+      members={people.map((person) => ({
+        id: person.id,
+        name: person.name,
+        priority: roomClientId !== null && person.clientIds?.includes(roomClientId) === true,
+      }))}
+      value={value || null}
+      onChange={(next) => onChange(next ?? '')}
+      unassignedLabel={t('none')}
+      searchPlaceholder={tInteraction('searchMember')}
     />
   );
 }
@@ -157,6 +167,7 @@ export function TaskForm({
           people={eligible}
           value={assigneeId}
           onChange={setAssigneeId}
+          roomClientId={targetClientId}
         />
       </div>
       <div className="flex flex-col gap-1">

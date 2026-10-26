@@ -38,7 +38,7 @@ describe('cancel booking', () => {
     const message = await screen.findByText(
       'Não foi possível cancelar. Tente de novo dentro de momentos.',
     );
-    expect(document.activeElement).toBe(message);
+    await waitFor(() => expect(document.activeElement).toBe(message));
   });
 
   it('a cancel inside the cutoff says it can no longer be changed online', async () => {
@@ -50,7 +50,7 @@ describe('cancel booking', () => {
     const message = await screen.findByText(
       'Já não é possível alterar esta marcação online. Responda ao email de confirmação.',
     );
-    expect(document.activeElement).toBe(message);
+    await waitFor(() => expect(document.activeElement).toBe(message));
   });
 
   it('a cancel on an inactive link says the link is no longer active', async () => {

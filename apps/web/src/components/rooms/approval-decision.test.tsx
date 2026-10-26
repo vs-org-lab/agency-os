@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -22,7 +22,7 @@ describe('approval decision', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Aprovar' }));
 
     const confirmation = await screen.findByText('Decisão registada. Obrigado.');
-    expect(document.activeElement).toBe(confirmation);
+    await waitFor(() => expect(document.activeElement).toBe(confirmation));
   });
 
   it('moves focus to the error when the decision fails', async () => {
@@ -31,6 +31,6 @@ describe('approval decision', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Aprovar' }));
 
     const error = await screen.findByRole('alert');
-    expect(document.activeElement).toBe(error);
+    await waitFor(() => expect(document.activeElement).toBe(error));
   });
 });

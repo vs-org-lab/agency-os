@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -149,7 +149,7 @@ describe('C-11 outcome', () => {
     const noteField = within(approvals).getByLabelText('Nota');
     expect(noteField.getAttribute('aria-invalid')).toBe('true');
     expect(noteField.getAttribute('aria-describedby')).toContain(alert.id);
-    expect(document.activeElement).toBe(noteField);
+    await waitFor(() => expect(document.activeElement).toBe(noteField));
     fireEvent.change(within(approvals).getByLabelText('Nota'), {
       target: { value: 'Duas aprovações com uma semana de atraso' },
     });

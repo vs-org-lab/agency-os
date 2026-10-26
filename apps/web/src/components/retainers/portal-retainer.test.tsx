@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -110,7 +110,7 @@ describe('P-10 retainer', () => {
     expect(quantity.getAttribute('aria-invalid')).toBe('true');
     expect(quantity.getAttribute('aria-describedby')).toContain(alert.id);
     expect(screen.getByLabelText('O que precisa').getAttribute('aria-invalid')).toBeNull();
-    expect(document.activeElement).toBe(quantity);
+    await waitFor(() => expect(document.activeElement).toBe(quantity));
   });
 
   it('a suspended client sees the notice instead of the form', () => {

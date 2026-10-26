@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -138,7 +138,7 @@ describe('ProposalAcceptance', () => {
     const alert = screen.getByRole('alert');
     expect(radios[0]?.getAttribute('aria-invalid')).toBe('true');
     expect(radios[0]?.getAttribute('aria-describedby')).toContain(alert.id);
-    expect(document.activeElement).toBe(radios[0]);
+    await waitFor(() => expect(document.activeElement).toBe(radios[0]));
   });
 
   it('sends a change request', async () => {

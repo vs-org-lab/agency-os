@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -71,7 +71,7 @@ describe('BookingPanel', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar marcação' }));
 
     const heading = await screen.findByText('A chamada está marcada');
-    expect(document.activeElement).toBe(heading);
+    await waitFor(() => expect(document.activeElement).toBe(heading));
     const formData = action.mock.calls[0]?.[1] as FormData | undefined;
     expect(formData?.get('start')).toBe('2026-10-13T09:00:00.000Z');
     expect(formData?.get('timeZone')).toBe('Africa/Luanda');

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -53,7 +53,7 @@ describe('SignatureForm', () => {
     const alert = screen.getByRole('alert');
     expect(name.getAttribute('aria-invalid')).toBe('true');
     expect(name.getAttribute('aria-describedby')).toContain(alert.id);
-    expect(document.activeElement).toBe(name);
+    await waitFor(() => expect(document.activeElement).toBe(name));
   });
 
   it('signs with the typed name once the confirmation is ticked', async () => {

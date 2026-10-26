@@ -62,6 +62,26 @@ describe('CommandPalette', () => {
     expect(screen.getByRole('combobox')).toBeTruthy();
   });
 
+  it('gives the combobox an accessible name', async () => {
+    renderPalette();
+    window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT));
+    expect(await screen.findByRole('combobox', { name: 'Paleta de comandos' })).toBeTruthy();
+  });
+
+  it('does not open with Ctrl+K while another dialog is open', async () => {
+    const user = userEvent.setup();
+    renderPalette();
+    const other = document.createElement('div');
+    other.setAttribute('role', 'dialog');
+    other.setAttribute('data-state', 'open');
+    document.body.appendChild(other);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    expect(screen.queryByRole('combobox')).toBeNull();
+    other.remove();
+  });
+
   it('opens from the open event dispatched by the sidebar field', async () => {
     renderPalette();
     window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE_EVENT));

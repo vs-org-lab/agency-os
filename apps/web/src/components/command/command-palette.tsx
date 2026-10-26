@@ -60,6 +60,8 @@ export function CommandPalette({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        if (!openRef.current && document.querySelector('[role="dialog"][data-state="open"]'))
+          return;
         event.preventDefault();
         onOpenChange(!openRef.current);
       }
@@ -123,7 +125,7 @@ export function CommandPalette({
       title={t('command.title')}
       description={t('command.description')}
       closeLabel={t('interaction.close')}
-      commandProps={{ shouldFilter: false, loop: true }}
+      commandProps={{ shouldFilter: false, loop: true, label: t('command.title') }}
     >
       <CommandInput value={query} onValueChange={setQuery} placeholder={t('command.placeholder')} />
       <CommandList>

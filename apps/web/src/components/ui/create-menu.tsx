@@ -63,7 +63,10 @@ export function CreateMenu({ label, items }: { label: string; items: CreateMenuI
     else if (event.key === 'ArrowUp') focusAt(current - 1);
     else if (event.key === 'Home') focusAt(0);
     else if (event.key === 'End') focusAt(nodes.length - 1);
-    else if (event.key === 'Escape') {
+    else if (event.key === ' ' && current >= 0) {
+      event.preventDefault();
+      nodes[current]?.click();
+    } else if (event.key === 'Escape') {
       event.preventDefault();
       close(true);
     } else if (event.key === 'Tab') close(false);
@@ -109,7 +112,6 @@ export function CreateMenu({ label, items }: { label: string; items: CreateMenuI
             type="button"
             aria-haspopup="menu"
             aria-expanded={false}
-            aria-controls={menuId}
             transition={transitions.morph}
             style={{ borderRadius: 8 }}
             className="inline-flex h-9 items-center justify-center gap-1.5 bg-primary px-4 text-body-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2"

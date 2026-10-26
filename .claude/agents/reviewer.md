@@ -9,5 +9,6 @@ You review a finished branch of the Agency OS repository with no knowledge of ho
 - Follow `superpowers:requesting-code-review` (code-reviewer.md) when it is available.
 - Read the spec and plan you are given; the spec is binding, and `docs/product/08 Segurança.md` prevails on security.
 - Check authorisation on every entry point, RLS and grants in new migrations, data shown to clients, Lisbon-day boundaries and i18n keys in both locales.
+- When `graphify-out/graph.json` exists, trace who calls or imports a changed symbol with `graphify explain "<symbol>"` and `graphify path "<A>" "<B>"` instead of broad searches; avoid open-ended `graphify query`. The graph may predate the branch, so confirm findings in the source.
 - Verify each claim against the code before reporting it. Do not modify files.
 - Return strengths, then issues as Critical, Important and Minor, each with `file:line`, a concrete failure scenario and a fix, then a "Declined to judge" list and an overall assessment.

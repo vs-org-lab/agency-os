@@ -42,6 +42,22 @@ describe('RoomHeader', () => {
     expect(screen.getByText('Atlas Lda')).toBeTruthy();
   });
 
+  it('shows the client avatar in the heading when the title is the client', () => {
+    renderHeader({ title: CLIENT.name });
+
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading.querySelector('[data-slot="client-avatar"]')?.textContent).toBe('AL');
+    expect(heading.textContent).toBe('ALAtlas Lda');
+  });
+
+  it('puts an eye icon on the preview link', () => {
+    renderHeader();
+
+    expect(
+      screen.getByRole('link', { name: 'Ver como cliente' }).querySelector('svg'),
+    ).toBeTruthy();
+  });
+
   it('renders the preview link as an outline button', () => {
     renderHeader({ selectedId: 'project-1' });
 

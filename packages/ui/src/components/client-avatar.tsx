@@ -36,12 +36,20 @@ type ClientAvatarProps = {
   id: string;
   name: string;
   size?: keyof typeof SIZES;
+  /** Neutral colouring for people, so a person never reads as a client status. */
+  tone?: 'hash' | 'neutral';
   className?: string;
 };
 
 /** Initials on a status-background tone picked from a stable hash of the id; never uses the gold token. */
-function ClientAvatar({ id, name, size = 'md', className }: ClientAvatarProps) {
-  const tone = toneIndex(id);
+function ClientAvatar({
+  id,
+  name,
+  size = 'md',
+  tone: mode = 'hash',
+  className,
+}: ClientAvatarProps) {
+  const tone = mode === 'neutral' ? 5 : toneIndex(id);
 
   return (
     <span

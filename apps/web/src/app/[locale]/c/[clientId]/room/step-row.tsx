@@ -100,7 +100,7 @@ export function StepRow({
       {step.reopened ? <Badge variant="outline">{t('step.reopened')}</Badge> : null}
       {assignee ? (
         <span className="flex items-center gap-1.5">
-          <ClientAvatar id={assignee.id} name={assignee.name} size="sm" />
+          <ClientAvatar id={assignee.id} name={assignee.name} size="sm" tone="neutral" />
           <span className="sr-only">{assignee.name}</span>
         </span>
       ) : null}

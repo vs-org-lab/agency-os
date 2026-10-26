@@ -6,10 +6,12 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateSheet } from '@/components/ui/create-sheet';
 import { PIPELINE_STAGES, pipelineCodeMessageKey, type PipelineCode } from '@/modules/commercial';
 import {
   MAX_PHASES,
   MAX_STEPS_PER_PHASE,
+  ORBIT_PROCESS,
   validateProcessDefinition,
   type ProcessDefinition,
   type ProcessPhaseDefinition,
@@ -51,9 +53,12 @@ const EMPTY_PHASE: ProcessPhaseDefinition = {
 export function ProcessTemplateEditor({
   template,
   publish,
+  onDone,
 }: {
   template: EditableProcessTemplate;
   publish: PublishProcess;
+  /** Called once with the success message when a version has been published. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations();
   const tp = useTranslations('settings.processTemplates');
@@ -100,6 +105,7 @@ export function ProcessTemplateEditor({
             definition,
             makeDefault,
           }).catch(() => ({ ok: false, rule: 'not_found' }) as const);
+          if (result.ok) onDone?.(tp('published', { version: result.version }));
           setMessage(
             result.ok
               ? { tone: 'success', text: tp('published', { version: result.version }) }
@@ -339,5 +345,27 @@ export function ProcessTemplateEditor({
         </div>
       </div>
     </form>
+  );
+}
+
+/** The "new process template" button and its side panel. */
+export function ProcessTemplateSheet({ publish }: { publish: PublishProcess }) {
+  const tp = useTranslations('settings.processTemplates');
+  return (
+    <CreateSheet label={tp('newTemplate')} title={tp('newTemplate')}>
+      {(close) => (
+        <ProcessTemplateEditor
+          template={{
+            key: null,
+            name: '',
+            version: 0,
+            isDefault: false,
+            definition: ORBIT_PROCESS,
+          }}
+          publish={publish}
+          onDone={(message) => close({ message })}
+        />
+      )}
+    </CreateSheet>
   );
 }

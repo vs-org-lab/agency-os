@@ -1,22 +1,27 @@
+import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Badge } from '@agency-os/ui/components/badge';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@agency-os/ui/components/collapsible';
 import { requireLocale } from '@/i18n/require-locale';
 import { isFounderActor } from '@/modules/commercial';
 import { commercialSession, loadSettingsData } from '@/modules/commercial/server';
 import { loadContractTemplates } from '@/modules/contracts/server';
 import { loadCoreTemplates } from '@/modules/diagnosis/server';
-import { ORBIT_PROCESS } from '@/modules/rooms';
 import { loadProcessTemplates } from '@/modules/rooms/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { saveTemplateAction } from '../commercial-actions';
-import { TemplateForm } from '../settings-forms';
+import { TemplateSheet } from '../settings-forms';
 import {
   publishContractTemplateAction,
   publishCoreTemplateAction,
   publishProcessTemplateAction,
 } from './actions';
-import { ProcessTemplateEditor } from './process-template-editor';
+import { ProcessTemplateEditor, ProcessTemplateSheet } from './process-template-editor';
 import { ContractTemplateEditor } from './contract-template-editor';
 import { BriefingGuideEditor } from './briefing-guide-editor';
 import { OrbitGridEditor } from './orbit-grid-editor';
@@ -25,6 +30,18 @@ import { pageMetadata } from '@/i18n/page-title';
 export const dynamic = 'force-dynamic';
 
 const LOCALES = ['pt-PT', 'en'] as const;
+
+/** A bordered section that opens and closes with an animated height. */
+function Disclosure({ title, children }: { title: ReactNode; children: ReactNode }) {
+  return (
+    <Collapsible className="rounded-lg border border-border bg-surface p-4">
+      <CollapsibleTrigger className="text-label">{title}</CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="pt-4">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -62,26 +79,20 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
           </h2>
           <p className="text-body-sm text-text-secondary">{tc('description')}</p>
         </div>
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{tc('guide.title')}</summary>
-          <div className="pt-4">
-            <BriefingGuideEditor
-              guide={core.briefing.definition}
-              version={core.briefing.version}
-              publish={publishCoreTemplateAction.bind(null, 'briefing')}
-            />
-          </div>
-        </details>
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{tc('grid.title')}</summary>
-          <div className="pt-4">
-            <OrbitGridEditor
-              grid={core.grid.definition}
-              version={core.grid.version}
-              publish={publishCoreTemplateAction.bind(null, 'orbit_grid')}
-            />
-          </div>
-        </details>
+        <Disclosure title={tc('guide.title')}>
+          <BriefingGuideEditor
+            guide={core.briefing.definition}
+            version={core.briefing.version}
+            publish={publishCoreTemplateAction.bind(null, 'briefing')}
+          />
+        </Disclosure>
+        <Disclosure title={tc('grid.title')}>
+          <OrbitGridEditor
+            grid={core.grid.definition}
+            version={core.grid.version}
+            publish={publishCoreTemplateAction.bind(null, 'orbit_grid')}
+          />
+        </Disclosure>
       </section>
 
       <section aria-labelledby="contract-templates-title" className="flex flex-col gap-3">
@@ -93,19 +104,14 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
           <p className="text-body-sm text-warning">{tk('legalReview')}</p>
         </div>
         {LOCALES.map((locale) => (
-          <details key={locale} className="rounded-lg border border-border bg-surface p-4">
-            <summary className="cursor-pointer text-label text-text">
-              {tk(`languages.${locale}`)}
-            </summary>
-            <div className="pt-4">
-              <ContractTemplateEditor
-                locale={locale}
-                version={contracts[locale].version}
-                body={contracts[locale].body}
-                publish={publishContractTemplateAction.bind(null, locale)}
-              />
-            </div>
-          </details>
+          <Disclosure key={locale} title={tk(`languages.${locale}`)}>
+            <ContractTemplateEditor
+              locale={locale}
+              version={contracts[locale].version}
+              body={contracts[locale].body}
+              publish={publishContractTemplateAction.bind(null, locale)}
+            />
+          </Disclosure>
         ))}
       </section>
 
@@ -117,47 +123,34 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
           <p className="text-body-sm text-text-secondary">{tp('description')}</p>
         </div>
         {processes.map((process) => (
-          <details key={process.key} className="rounded-lg border border-border bg-surface p-4">
-            <summary className="cursor-pointer text-label text-text">
-              {process.name}
-              {process.isDefault ? (
-                <Badge variant="secondary" className="ml-2">
-                  {tp('isDefault')}
-                </Badge>
-              ) : null}
-            </summary>
-            <div className="pt-4">
-              <ProcessTemplateEditor template={process} publish={publishProcessTemplateAction} />
-            </div>
-          </details>
+          <Disclosure
+            key={process.key}
+            title={
+              <>
+                {process.name}
+                {process.isDefault ? (
+                  <Badge variant="secondary" className="ml-2">
+                    {tp('isDefault')}
+                  </Badge>
+                ) : null}
+              </>
+            }
+          >
+            <ProcessTemplateEditor template={process} publish={publishProcessTemplateAction} />
+          </Disclosure>
         ))}
-        <details className="rounded-lg border border-border bg-surface p-4">
-          <summary className="cursor-pointer text-label text-text">{tp('newTemplate')}</summary>
-          <div className="pt-4">
-            <ProcessTemplateEditor
-              template={{
-                key: null,
-                name: '',
-                version: 0,
-                isDefault: false,
-                definition: ORBIT_PROCESS,
-              }}
-              publish={publishProcessTemplateAction}
-            />
-          </div>
-        </details>
+        <div>
+          <ProcessTemplateSheet publish={publishProcessTemplateAction} />
+        </div>
       </section>
 
-      <details className="rounded-lg border border-border bg-surface p-4">
-        <summary className="cursor-pointer text-label text-text">{t('new')}</summary>
-        <div className="pt-4">
-          <TemplateForm
-            action={saveTemplateAction.bind(null, null)}
-            defaults={null}
-            idPrefix="new-template"
-          />
-        </div>
-      </details>
+      <div>
+        <TemplateSheet
+          action={saveTemplateAction.bind(null, null)}
+          defaults={null}
+          idPrefix="new-template"
+        />
+      </div>
 
       {templates.length === 0 ? (
         <p className="text-body-sm text-text-secondary">{t('empty')}</p>
@@ -176,16 +169,13 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
               <p className="whitespace-pre-line text-body-sm text-text-secondary">
                 {template.body}
               </p>
-              <details>
-                <summary className="cursor-pointer text-body-sm text-link">{t('edit')}</summary>
-                <div className="pt-3">
-                  <TemplateForm
-                    action={saveTemplateAction.bind(null, template.templateId)}
-                    defaults={template}
-                    idPrefix={`template-${template.templateId}`}
-                  />
-                </div>
-              </details>
+              <div>
+                <TemplateSheet
+                  action={saveTemplateAction.bind(null, template.templateId)}
+                  defaults={template}
+                  idPrefix={`template-${template.templateId}`}
+                />
+              </div>
             </li>
           ))}
         </ul>

@@ -98,5 +98,10 @@ export default tseslint.config(
       'no-restricted-imports': ['error', systemContextRestriction],
     },
   },
+  {
+    // The demo seed injects its own dependencies into the services, which the public entry points do not allow.
+    files: ['apps/web/scripts/seed-demo.ts'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
   prettier,
 );

@@ -8,6 +8,7 @@ import {
   deleteStudioTaskComment,
   detachStudioTaskFile,
   loadStudioTaskDetail,
+  loadStudioTaskFilePreviews,
   loadStudioTaskUploadFolder,
   removeStudioTaskLink,
   type TaskSession,
@@ -64,4 +65,8 @@ export async function detachTaskFileAction(taskId: string, libraryFileId: string
 
 export async function taskUploadFolderAction(taskId: string) {
   return run((session) => loadStudioTaskUploadFolder(session, taskId), { revalidate: false });
+}
+
+export async function taskFilePreviewAction(taskId: string) {
+  return run((session) => loadStudioTaskFilePreviews(session, taskId), { revalidate: false });
 }

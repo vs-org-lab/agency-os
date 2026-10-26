@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
@@ -11,6 +11,16 @@ import type { TasksDeps } from './service';
 const { libraryFiles, taskComments, taskFiles, taskLinks, tasks } = schema;
 
 export const TASK_UPLOAD_FOLDER = 'Tarefas';
+
+const PREVIEW_FILES = 3;
+
+/** A linked file as the hover preview shows it; `url` is a signed link, set only for images. */
+export type TaskFilePreview = {
+  id: string;
+  name: string;
+  mimeType: string | null;
+  url: string | null;
+};
 
 export type CollaborationFailure = {
   ok: false;
@@ -366,4 +376,31 @@ export async function taskUploadFolder(
   );
   if (!folder.ok) return folder.rule === 'not_found' ? FORBIDDEN : INVALID;
   return { ok: true, folderId: folder.folderId };
+}
+
+/** The first files linked to a task that the caller reads in the library, for the hover preview. */
+export async function taskFilePreviews(
+  claims: VerifiedClaims,
+  input: { taskId: string },
+  deps: TasksDeps,
+): Promise<
+  CollaborationResult<{ files: { id: string; name: string; mimeType: string | null }[] }>
+> {
+  const access = await collaborator(deps, claims, input.taskId);
+  if (!access) return FORBIDDEN;
+  const linked = await deps.contexts.withUserContext(claims, (tx) =>
+    tx
+      .select({ id: libraryFiles.id, name: libraryFiles.name, mimeType: libraryFiles.mimeType })
+      .from(taskFiles)
+      .innerJoin(libraryFiles, eq(libraryFiles.id, taskFiles.libraryFileId))
+      .where(eq(taskFiles.taskId, access.task.id))
+      .orderBy(asc(taskFiles.createdAt), asc(libraryFiles.id))
+      .limit(PREVIEW_FILES),
+  );
+  const readable = await readableFileIds(
+    claims,
+    linked.map((file) => file.id),
+    deps,
+  );
+  return { ok: true, files: linked.filter((file) => readable.has(file.id)) };
 }

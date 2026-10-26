@@ -13,6 +13,7 @@ import {
   deleteTaskComment,
   detachTaskFile,
   removeTaskLink,
+  taskFilePreviews,
   taskUploadFolder,
 } from './collaboration';
 import { createTask } from './service';
@@ -349,6 +350,31 @@ describe('task collaboration', () => {
       expect(events).toHaveLength(1);
       expect(events[0]?.payload).toMatchObject({ taskId, assigneeId: world.users.manager });
       expect(JSON.stringify(events[0]?.payload)).not.toContain('Segredo');
+    });
+  });
+
+  it('file previews list the linked files for those who read the task', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, library, deps, taskId } = await seed(sql);
+      const manager = taskClaims(world.users.manager);
+      for (const libraryFileId of [library.a.rootFileId, library.a.subfolderFileId]) {
+        await attachTaskFile(manager, { taskId, libraryFileId }, deps);
+      }
+
+      const result = await taskFilePreviews(manager, { taskId }, deps);
+      if (!result.ok) throw new Error('Previews were not listed');
+
+      expect(result.files.map((file) => file.id).sort()).toEqual(
+        [library.a.rootFileId, library.a.subfolderFileId].sort(),
+      );
+      expect(result.files.every((file) => file.name.length > 0)).toBe(true);
+      expect(
+        await taskFilePreviews(
+          { ...taskClaims(world.users.decisionMakerA), user_kind: 'client' },
+          { taskId },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'forbidden' });
     });
   });
 });

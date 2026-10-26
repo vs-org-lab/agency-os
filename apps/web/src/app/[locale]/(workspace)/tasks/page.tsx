@@ -15,6 +15,7 @@ import {
   setTaskItemAction,
   setTaskStatusAction,
 } from './actions';
+import { taskFilePreviewAction } from './collaboration-actions';
 import { loadPanelData } from './panel-data';
 import { taskPanelActions } from './panel-actions';
 import { pageMetadata } from '@/i18n/page-title';
@@ -85,6 +86,7 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
           setStatus={setTaskStatusAction}
           setItem={setTaskItemAction}
           addItem={addTaskItemAction}
+          loadPreview={taskFilePreviewAction}
         />
       </div>
       <TaskPanel

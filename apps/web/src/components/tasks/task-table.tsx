@@ -6,7 +6,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@agency-os/ui/components/table';
 import { useIsMobile } from '@agency-os/ui/hooks/use-mobile';
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import type { TaskSort, TaskView } from '@/modules/tasks';
+import type { TaskFilePreview, TaskSort, TaskView } from '@/modules/tasks';
 import type { TaskActionResult } from './task-errors';
 import { TaskCard, TaskRow } from './task-row';
 import { useTaskAction } from './use-task-action';
@@ -22,6 +22,9 @@ type TaskTableProps = {
   setStatus: (taskId: string, status: 'open' | 'done') => Promise<TaskActionResult>;
   setItem: (itemId: string, done: boolean) => Promise<TaskActionResult>;
   addItem: (taskId: string, title: string) => Promise<TaskActionResult>;
+  loadPreview?: (
+    taskId: string,
+  ) => Promise<{ ok: true; files: TaskFilePreview[] } | { ok: false; code: string }>;
 };
 
 const SORT_DIRECTION: Record<TaskSort, 'ascending' | 'descending'> = {
@@ -74,6 +77,7 @@ export function TaskTable({ tasks, sort, ...rest }: TaskTableProps) {
     setStatus: rest.setStatus,
     setItem: rest.setItem,
     addItem: rest.addItem,
+    loadPreview: rest.loadPreview,
     run,
     pending,
     onOpen: (taskId: string) => setParams({ task: taskId }),

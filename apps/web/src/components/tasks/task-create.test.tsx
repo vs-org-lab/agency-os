@@ -10,6 +10,18 @@ import { TaskCreate } from './task-create';
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn(), info: vi.fn() }));
 vi.mock('sonner', () => ({ toast }));
 
+const navigation = vi.hoisted(() => ({
+  replace: vi.fn(),
+  search: 'new=1&status=done',
+}));
+vi.mock('@/i18n/navigation', () => ({
+  usePathname: () => '/tasks',
+  useRouter: () => ({ replace: navigation.replace }),
+}));
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(navigation.search),
+}));
+
 beforeAll(() => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -32,8 +44,8 @@ afterEach(() => {
 
 const OK = async () => ({ ok: true as const });
 
-function renderCreate(overrides: Partial<React.ComponentProps<typeof TaskCreate>> = {}) {
-  return render(
+function tree(overrides: Partial<React.ComponentProps<typeof TaskCreate>> = {}) {
+  return (
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
       <MotionProvider>
         <TaskCreate
@@ -46,8 +58,12 @@ function renderCreate(overrides: Partial<React.ComponentProps<typeof TaskCreate>
           {...overrides}
         />
       </MotionProvider>
-    </NextIntlClientProvider>,
+    </NextIntlClientProvider>
   );
+}
+
+function renderCreate(overrides: Partial<React.ComponentProps<typeof TaskCreate>> = {}) {
+  return render(tree(overrides));
 }
 
 describe('TaskCreate', () => {
@@ -62,6 +78,19 @@ describe('TaskCreate', () => {
   it('opens automatically with new=1 when the user can create', () => {
     renderCreate({ openRequested: true });
     expect(screen.getByRole('dialog', { name: 'Nova tarefa' })).toBeTruthy();
+  });
+
+  it('opens when openRequested turns true after mount', () => {
+    const view = renderCreate({ openRequested: false });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    view.rerender(tree({ openRequested: true }));
+    expect(screen.getByRole('dialog', { name: 'Nova tarefa' })).toBeTruthy();
+  });
+
+  it('strips new from the URL on close, keeping other params', async () => {
+    renderCreate({ openRequested: true });
+    await userEvent.keyboard('{Escape}');
+    expect(navigation.replace).toHaveBeenCalledWith('/tasks?status=done');
   });
 
   it('does not render the button or open when the user cannot create', () => {

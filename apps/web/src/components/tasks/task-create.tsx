@@ -1,6 +1,8 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { CreateSheet } from '@/components/ui/create-sheet';
 import type { TaskPerson } from '@/modules/tasks';
 import type { TaskActionResult, TaskOptionView } from './task-errors';
@@ -24,10 +26,26 @@ export function TaskCreate({
   create: (input: NewTaskInput) => Promise<TaskActionResult>;
 }) {
   const t = useTranslations('tasks');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   if (!canCreate) return null;
 
+  const stripNewParam = () => {
+    if (!searchParams.has('new')) return;
+    const rest = new URLSearchParams(searchParams);
+    rest.delete('new');
+    const query = rest.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
+
   return (
-    <CreateSheet label={t('form.heading')} title={t('form.heading')} defaultOpen={openRequested}>
+    <CreateSheet
+      label={t('form.heading')}
+      title={t('form.heading')}
+      openRequested={openRequested}
+      onClose={stripNewParam}
+    >
       {(close) => (
         <TaskForm
           clients={clients}

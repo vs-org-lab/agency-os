@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ locale: string; clientId: string }>;
-  searchParams: Promise<{ assignee?: string; status?: string }>;
+  searchParams: Promise<{ assignee?: string; status?: string; new?: string }>;
 };
 
 export default async function RoomTasksPage({ params, searchParams }: PageProps) {
@@ -32,7 +32,8 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
   const session = await requireArea('/', locale);
   const options = await loadTaskOptions(session, clientId);
   if (!options) notFound();
-  const filter = parseTaskFilter(await searchParams);
+  const query = await searchParams;
+  const filter = parseTaskFilter(query);
   const tasks = await loadTasks(session, { ...filter, clientId });
   const clientName = options.clients.find((client) => client.id === clientId)?.name ?? '';
   const t = await getTranslations('tasks');
@@ -46,7 +47,7 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
         actions={
           <TaskCreate
             canCreate={options.canCreate}
-            openRequested={false}
+            openRequested={query.new === '1'}
             clients={[]}
             people={options.people}
             fixedClientId={clientId}

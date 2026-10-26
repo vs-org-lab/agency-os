@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MotionProvider, useReducedMotion } from '../src/motion';
-import { loadMotionFeatures } from '../src/motion/motion-provider';
+import { motionFeatures } from '../src/motion/features';
 import { installMatchMedia } from './match-media';
 
 function ReducedProbe() {
@@ -35,9 +35,9 @@ describe('MotionProvider', () => {
   });
 });
 
-describe('loadMotionFeatures', () => {
-  it('loads the feature bundle that includes layout animations', async () => {
+describe('motionFeatures', () => {
+  it('is the feature bundle that includes layout animations', async () => {
     const { domMax } = await import('motion/react');
-    expect(await loadMotionFeatures()).toBe(domMax);
+    expect(motionFeatures).toBe(domMax);
   });
 });

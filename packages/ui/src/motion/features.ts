@@ -1,3 +1,4 @@
 import { domMax } from 'motion/react';
 
-export default domMax;
+/** Layout and shared-element animations need the full feature set. */
+export const motionFeatures = domMax;

@@ -48,6 +48,7 @@ test.describe('Delivery', () => {
     await client.goto(`/portal/testimonial/${seeded.projectId}`);
     await client.getByLabel('Nome', { exact: true }).fill('Rita Moura');
     await client.getByRole('checkbox', { name: /Autorizo a gravação/ }).click();
+    await client.getByRole('button', { name: 'Ativar câmara e microfone' }).click();
     await client.getByRole('button', { name: 'Começar a gravar' }).click();
     await expect(client.getByText('1 de 5 · Antes')).toBeVisible();
     await client.waitForTimeout(2_000);

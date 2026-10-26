@@ -24,6 +24,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+async function enableCamera() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Ativar câmara e microfone' }));
+  });
+}
+
 function renderExperience() {
   const videoActions = {
     begin: vi.fn(async () => ({ ok: true as const, uploadUrl: 'https://storage.example/up' })),
@@ -50,6 +56,7 @@ describe('TestimonialExperience', () => {
     renderExperience();
     await act(async () => {});
 
+    await enableCamera();
     expect(screen.getByRole('button', { name: 'Começar a gravar' })).toBeTruthy();
     await act(async () => {
       fireEvent.mouseDown(screen.getByRole('tab', { name: 'Escrever' }), { button: 0 });
@@ -61,7 +68,7 @@ describe('TestimonialExperience', () => {
   it('needs the recording consent and a name before recording', async () => {
     installFakeMedia({ kinds: ['audio', 'video'] });
     renderExperience();
-    await act(async () => {});
+    await enableCamera();
 
     const start = screen.getByRole('button', { name: 'Começar a gravar' }) as HTMLButtonElement;
     expect(start.disabled).toBe(true);
@@ -75,7 +82,7 @@ describe('TestimonialExperience', () => {
     const fetchMock = vi.fn(async () => new Response(null, { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
     const actions = renderExperience();
-    await act(async () => {});
+    await enableCamera();
 
     fireEvent.change(screen.getByLabelText('Nome'), { target: { value: 'Marta Lopes' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /Autorizo a gravação/ }));

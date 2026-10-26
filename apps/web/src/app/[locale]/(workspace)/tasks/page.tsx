@@ -1,7 +1,7 @@
 import { PageHeader } from '@agency-os/ui/components/page-header';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { TaskFilters } from '@/components/tasks/task-filters';
+import { TASK_LIST_ID, TaskFilters } from '@/components/tasks/task-filters';
 import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
@@ -64,14 +64,16 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
           status: filter.status,
         }}
       />
-      <TaskList
-        tasks={tasks}
-        today={taskToday(new Date())}
-        showClient
-        setStatus={setTaskStatusAction}
-        setItem={setTaskItemAction}
-        edit={{ people: options.people, update: updateTaskAction, remove: deleteTaskAction }}
-      />
+      <div id={TASK_LIST_ID}>
+        <TaskList
+          tasks={tasks}
+          today={taskToday(new Date())}
+          showClient
+          setStatus={setTaskStatusAction}
+          setItem={setTaskItemAction}
+          edit={{ people: options.people, update: updateTaskAction, remove: deleteTaskAction }}
+        />
+      </div>
     </div>
   );
 }

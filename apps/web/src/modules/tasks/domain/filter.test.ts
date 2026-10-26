@@ -19,6 +19,7 @@ describe('task filter', () => {
       status: 'open',
     });
     expect(parseTaskFilter({ status: 'done' }).status).toBe('done');
+    expect(parseTaskFilter({ status: 'all' }).status).toBe('all');
   });
 
   it('measures today in Lisbon', () => {

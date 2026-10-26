@@ -2038,7 +2038,8 @@
       "status": "Estado",
       "all": "Todos",
       "open": "Por fazer",
-      "done": "Concluídas"
+      "done": "Concluídas",
+      "allTasks": "Todas"
     },
     "form": {
       "heading": "Nova tarefa",

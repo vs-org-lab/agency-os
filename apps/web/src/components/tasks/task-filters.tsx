@@ -3,10 +3,12 @@ import { FilterBar, type FilterSelect } from '@/components/filters/filter-bar';
 import type { TaskCounts } from '@/modules/tasks';
 import type { TaskOptionView } from './task-errors';
 
+export const TASK_LIST_ID = 'task-list';
+
 export type TaskFilterValues = {
   clientId: string | null;
   assigneeId: string | null;
-  status: 'open' | 'done';
+  status: 'open' | 'done' | 'all';
 };
 
 /** Filters applied through the URL as they change, so filtered lists stay linkable. */
@@ -54,9 +56,11 @@ export function TaskFilters({
         options: [
           { value: 'open', label: t('open'), count: counts.open },
           { value: 'done', label: t('done'), count: counts.done },
+          { value: 'all', label: t('allTasks'), count: counts.all },
         ],
       }}
       selects={selects}
+      controls={TASK_LIST_ID}
     />
   );
 }

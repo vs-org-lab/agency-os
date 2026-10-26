@@ -2038,7 +2038,8 @@
       "status": "Status",
       "all": "All",
       "open": "To do",
-      "done": "Done"
+      "done": "Done",
+      "allTasks": "All"
     },
     "form": {
       "heading": "New task",

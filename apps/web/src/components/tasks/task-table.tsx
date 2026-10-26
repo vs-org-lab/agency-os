@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@agency-os/ui/components/table';
-import { useIsMobile } from '@agency-os/ui/hooks/use-mobile';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import type { TaskFilePreview, TaskSort, TaskView } from '@/modules/tasks';
 import type { TaskActionResult } from './task-errors';
@@ -64,7 +63,6 @@ function SortHeader({
 /** S-03 and C-03: tasks as a sortable table with inline subtasks; cards below 768 px. */
 export function TaskTable({ tasks, sort, ...rest }: TaskTableProps) {
   const t = useTranslations('tasks');
-  const isMobile = useIsMobile();
   const setParams = useTaskParams();
   const { run, pending } = useTaskAction();
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
@@ -89,9 +87,14 @@ export function TaskTable({ tasks, sort, ...rest }: TaskTableProps) {
       return next;
     });
 
-  if (isMobile) {
-    return (
-      <ul aria-label={t('table.label')} className="flex flex-col gap-2">
+  const columns = rest.showClient ? 9 : 8;
+  const onSort = (column: TaskSort) => setParams({ sort: column === 'due' ? null : column });
+
+  // Both layouts are rendered and switched by CSS, so the server markup matches every viewport;
+  // the hidden one is display: none and leaves the accessibility tree.
+  return (
+    <>
+      <ul aria-label={t('table.label')} className="flex flex-col gap-2 md:hidden">
         {tasks.map((task) => (
           <TaskCard
             key={task.id}
@@ -102,55 +105,49 @@ export function TaskTable({ tasks, sort, ...rest }: TaskTableProps) {
           />
         ))}
       </ul>
-    );
-  }
-
-  const columns = rest.showClient ? 9 : 8;
-  const onSort = (column: TaskSort) => setParams({ sort: column === 'due' ? null : column });
-
-  return (
-    <div className="rounded-lg border border-border bg-surface">
-      <Table aria-label={t('table.label')}>
-        <TableHeader>
-          <TableRow className="text-caption text-text-secondary">
-            <TableHead className="w-10">
-              <span className="sr-only">{t('table.columns.done')}</span>
-            </TableHead>
-            <SortHeader
-              column="title"
-              label={t('table.columns.title')}
-              sort={sort}
-              onSort={onSort}
-            />
-            {rest.showClient ? <TableHead>{t('table.columns.client')}</TableHead> : null}
-            <TableHead>{t('table.columns.phase')}</TableHead>
-            <TableHead>{t('table.columns.assignee')}</TableHead>
-            <SortHeader column="due" label={t('table.columns.due')} sort={sort} onSort={onSort} />
-            <TableHead>{t('table.columns.subtasks')}</TableHead>
-            <TableHead>{t('table.columns.comments')}</TableHead>
-            <SortHeader
-              column="created"
-              label={t('table.columns.created')}
-              sort={sort}
-              onSort={onSort}
-            />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tasks.map((task) => (
-            <TaskRow
-              key={task.id}
-              task={task}
-              today={rest.today}
-              showClient={rest.showClient}
-              columns={columns}
-              expanded={expanded.has(task.id)}
-              onToggle={() => toggle(task.id)}
-              {...actions}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+      <div className="hidden rounded-lg border border-border bg-surface md:block">
+        <Table aria-label={t('table.label')}>
+          <TableHeader>
+            <TableRow className="text-caption text-text-secondary">
+              <TableHead className="w-10">
+                <span className="sr-only">{t('table.columns.done')}</span>
+              </TableHead>
+              <SortHeader
+                column="title"
+                label={t('table.columns.title')}
+                sort={sort}
+                onSort={onSort}
+              />
+              {rest.showClient ? <TableHead>{t('table.columns.client')}</TableHead> : null}
+              <TableHead>{t('table.columns.phase')}</TableHead>
+              <TableHead>{t('table.columns.assignee')}</TableHead>
+              <SortHeader column="due" label={t('table.columns.due')} sort={sort} onSort={onSort} />
+              <TableHead>{t('table.columns.subtasks')}</TableHead>
+              <TableHead>{t('table.columns.comments')}</TableHead>
+              <SortHeader
+                column="created"
+                label={t('table.columns.created')}
+                sort={sort}
+                onSort={onSort}
+              />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tasks.map((task) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                today={rest.today}
+                showClient={rest.showClient}
+                columns={columns}
+                expanded={expanded.has(task.id)}
+                onToggle={() => toggle(task.id)}
+                {...actions}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 }

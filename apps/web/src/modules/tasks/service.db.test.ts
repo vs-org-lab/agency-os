@@ -393,6 +393,7 @@ describe('tasks', () => {
       );
 
       expect(task?.phaseName).toBe('Passo visível');
+      expect(task?.projectName).toBe('Website');
       expect(Number.isNaN(Date.parse(task?.createdAt ?? ''))).toBe(false);
     });
   });

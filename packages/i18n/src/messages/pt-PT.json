@@ -2016,18 +2016,9 @@
     "title": "Tarefas",
     "description": "O que há para fazer, no estúdio e nos clientes.",
     "roomDescription": "As tarefas internas deste cliente. O cliente não as vê.",
-    "groups": {
-      "today": "Hoje",
-      "this_week": "Esta semana",
-      "later": "Mais tarde",
-      "done": "Concluídas"
-    },
-    "overdue": "Atrasado",
     "noDate": "Sem data",
     "studio": "Estúdio",
     "unassigned": "Sem responsável",
-    "edit": "Editar",
-    "itemsLabel": "Subtarefas de {title}",
     "empty": {
       "title": "Sem tarefas",
       "description": "As tarefas criadas aqui ou pelo processo aparecem nesta lista."
@@ -2083,14 +2074,76 @@
       },
       "commentCount": "{count, plural, one {# comentário} other {# comentários}}"
     },
+    "panel": {
+      "close": "Fechar",
+      "copyLink": "Copiar link",
+      "linkCopied": "Link copiado.",
+      "copyFailed": "Não foi possível copiar o link.",
+      "delete": "Apagar",
+      "deleteConfirm": "Apagar esta tarefa?",
+      "deleteHint": "Os comentários, ficheiros ligados e links desta tarefa deixam de existir.",
+      "confirmDelete": "Apagar tarefa",
+      "cancel": "Cancelar",
+      "deleted": "Tarefa apagada.",
+      "tabs": {
+        "details": "Detalhes",
+        "collaboration": "Comentários e ficheiros ({count})"
+      },
+      "details": {
+        "title": "Título",
+        "notes": "Notas",
+        "assignee": "Responsável",
+        "dueOn": "Prazo",
+        "client": "Cliente",
+        "project": "Projeto",
+        "checklist": "Checklist",
+        "addItem": "Adicionar item",
+        "itemTitle": "Novo item da checklist",
+        "none": "—"
+      },
+      "comments": {
+        "heading": "Comentários",
+        "placeholder": "Escrever um comentário…",
+        "send": "Comentar",
+        "hint": "Ctrl+Enter para enviar",
+        "empty": "Ainda não há comentários.",
+        "delete": "Apagar comentário de {author}",
+        "unknownAuthor": "Ex-membro"
+      },
+      "files": {
+        "heading": "Ficheiros",
+        "add": "Adicionar ficheiro",
+        "chooseTitle": "Ficheiros da biblioteca",
+        "upload": "Carregar ficheiros",
+        "none": "Sem ficheiros ligados.",
+        "noneAvailable": "A biblioteca do projeto não tem outros ficheiros para ligar.",
+        "attach": "Ligar {name}",
+        "detach": "Remover {name}",
+        "noProject": "Os ficheiros vivem na biblioteca de um projeto.",
+        "dropHere": "Largue os ficheiros para os ligar à tarefa",
+        "dropFolders": "As pastas não podem ser carregadas e foram ignoradas.",
+        "uploading": "A carregar {done} de {total}…",
+        "uploadFailed": "Não foi possível carregar alguns ficheiros.",
+        "filter": "Procurar na biblioteca",
+        "attachShort": "Ligar",
+        "attached": "Ficheiro ligado à tarefa."
+      },
+      "links": {
+        "heading": "Links",
+        "add": "Adicionar link",
+        "url": "Endereço",
+        "linkTitle": "Título (opcional)",
+        "submit": "Adicionar",
+        "none": "Sem links.",
+        "remove": "Remover link {name}",
+        "invalid": "Use um endereço que comece por https://."
+      }
+    },
     "errors": {
       "not_found": "Não tem permissão para esta ação.",
       "invalid_input": "Verifique os campos e tente de novo.",
       "forbidden": "Não tem acesso a esta tarefa."
-    },
-    "delete": "Apagar",
-    "deleteLabel": "Apagar tarefa {title}",
-    "editLabel": "Editar tarefa {title}"
+    }
   },
   "team": {
     "title": "Equipa",

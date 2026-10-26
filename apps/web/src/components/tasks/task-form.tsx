@@ -9,7 +9,7 @@ import { Textarea } from '@agency-os/ui/components/textarea';
 import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
 import { SelectField } from '@/components/forms/select-field';
-import { canTakeTask, type TaskPerson, type TaskView } from '@/modules/tasks';
+import { canTakeTask, type TaskPerson } from '@/modules/tasks';
 import {
   taskError,
   type TaskActionResult,
@@ -24,14 +24,6 @@ export type NewTaskInput = {
   assigneeId: string | null;
   dueOn: string | null;
   items: string[];
-};
-
-export type TaskChanges = {
-  taskId: string;
-  title: string;
-  notes: string;
-  assigneeId: string | null;
-  dueOn: string | null;
 };
 
 type Outcome = { ok: true } | { ok: false; error: TaskError } | null;
@@ -209,100 +201,6 @@ export function TaskForm({
         ) : null}
         {outcome?.ok && !onDone ? (
           <FormMessage tone="success">{t('form.created')}</FormMessage>
-        ) : null}
-      </div>
-    </form>
-  );
-}
-
-/** Title, notes, assignee and date of an existing task; client and subtasks stay as created. */
-export function TaskEditForm({
-  task,
-  people,
-  update,
-  onDone,
-}: {
-  task: TaskView;
-  people: TaskPerson[];
-  update: (input: TaskChanges) => Promise<TaskActionResult>;
-  /** Called once with the success message when the changes have been saved. */
-  onDone?: (message: string) => void;
-}) {
-  const t = useTranslations('tasks');
-  const [title, setTitle] = useState(task.title);
-  const [notes, setNotes] = useState(task.notes);
-  const [assigneeId, setAssigneeId] = useState(task.assigneeId ?? '');
-  const [dueOn, setDueOn] = useState(task.dueOn ?? '');
-  const { outcome, setOutcome, pending, run } = useOutcome();
-  const prefix = `task-${task.id}`;
-
-  return (
-    <form
-      className="grid gap-3 md:grid-cols-2"
-      onChange={() => setOutcome(null)}
-      onSubmit={(event) => {
-        event.preventDefault();
-        run(
-          () =>
-            update({
-              taskId: task.id,
-              title,
-              notes,
-              assigneeId: assigneeId || null,
-              dueOn: dueOn || null,
-            }),
-          () => onDone?.(t('form.saved')),
-        );
-      }}
-    >
-      <div className="flex flex-col gap-1 md:col-span-2">
-        <Label htmlFor={`${prefix}-title`}>{t('form.title')}</Label>
-        <Input
-          id={`${prefix}-title`}
-          required
-          maxLength={200}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor={`${prefix}-assignee`}>{t('form.assignee')}</Label>
-        <PersonSelect
-          id={`${prefix}-assignee`}
-          people={people.filter((person) => canTakeTask(person, task.clientId))}
-          value={assigneeId}
-          onChange={setAssigneeId}
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor={`${prefix}-due`}>{t('form.dueOn')}</Label>
-        <DateField
-          id={`${prefix}-due`}
-          name="dueOn"
-          label={t('form.dueOn')}
-          value={dueOn}
-          onValueChange={setDueOn}
-        />
-      </div>
-      <div className="flex flex-col gap-1 md:col-span-2">
-        <Label htmlFor={`${prefix}-notes`}>{t('form.notes')}</Label>
-        <Textarea
-          id={`${prefix}-notes`}
-          rows={2}
-          maxLength={5000}
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-        />
-      </div>
-      <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-        <Button type="submit" size="sm" disabled={pending}>
-          {t('form.save')}
-        </Button>
-        {outcome?.ok === false ? (
-          <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
-        ) : null}
-        {outcome?.ok && !onDone ? (
-          <FormMessage tone="success">{t('form.saved')}</FormMessage>
         ) : null}
       </div>
     </form>

@@ -51,6 +51,7 @@ function task(overrides: Partial<TaskView>): TaskView {
     clientId: 'c1',
     clientName: 'Atlas Lda',
     projectId: null,
+    projectName: null,
     assigneeId: null,
     assigneeName: null,
     dueOn: null,

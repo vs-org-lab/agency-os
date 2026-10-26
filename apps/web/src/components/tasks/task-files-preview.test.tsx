@@ -73,4 +73,26 @@ describe('task files preview', () => {
     await waitFor(() => expect(screen.queryByRole('list')).toBeNull());
     expect(loadPreview).not.toHaveBeenCalled();
   });
+
+  it('fetches the preview again when it is older than the signed links allow', async () => {
+    const user = userEvent.setup();
+    const loadPreview = renderPreview();
+    const trigger = screen.getByRole('button', { name: 'Entrega' });
+
+    await user.hover(trigger);
+    await screen.findByRole('list', { name: 'Ficheiros de Entrega' }, { timeout: 2000 });
+    await user.unhover(trigger);
+    await waitFor(() => expect(screen.queryByRole('list')).toBeNull());
+    await user.hover(trigger);
+    await screen.findByRole('list', { name: 'Ficheiros de Entrega' }, { timeout: 2000 });
+    expect(loadPreview).toHaveBeenCalledTimes(1);
+
+    await user.unhover(trigger);
+    await waitFor(() => expect(screen.queryByRole('list')).toBeNull());
+    const now = Date.now();
+    vi.spyOn(Date, 'now').mockReturnValue(now + 11 * 60 * 1000);
+    await user.hover(trigger);
+    await waitFor(() => expect(loadPreview).toHaveBeenCalledTimes(2), { timeout: 2000 });
+    vi.restoreAllMocks();
+  });
 });

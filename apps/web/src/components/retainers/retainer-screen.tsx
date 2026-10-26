@@ -167,7 +167,7 @@ export function RetainerScreen({
         <>
           <section className="flex flex-col gap-3" aria-label={t('month', { month: monthLabel })}>
             <h3 className="text-body font-medium text-text">{t('month', { month: monthLabel })}</h3>
-            <LimitRings limits={view.limits} />
+            <LimitRings limits={view.limits} period={view.period} />
           </section>
           <section className="flex flex-col gap-3" aria-label={t('usage.list')}>
             <h3 className="text-body font-medium text-text">{t('usage.list')}</h3>

@@ -25,7 +25,9 @@ export function lisbonMonth(now: Date): string {
 }
 
 /** The day of the Lisbon month, its length and the days left until it closes. */
-export function monthProgress(now: Date): { day: number; total: number; left: number } {
+export type MonthProgress = { day: number; total: number; left: number };
+
+export function monthProgress(now: Date): MonthProgress {
   const [year, month, day] = lisbonDay(now).split('-').map(Number) as [number, number, number];
   const total = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return { day, total, left: total - day };

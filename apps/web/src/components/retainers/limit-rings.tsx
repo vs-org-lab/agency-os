@@ -1,19 +1,18 @@
 'use client';
 
-import { useLocale, useNow, useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AllowanceRing } from '@agency-os/ui/components/allowance-ring';
-import { monthProgress, type LimitMonth } from '@/modules/retainers';
+import type { LimitMonth, MonthProgress } from '@/modules/retainers';
 import { useQuantity } from './shared';
 
 /**
  * RF-111: one ring per limit of the month with what is used, left and carried over, plus a ring for
- * the period itself that counts the days until the month closes in Lisbon.
+ * the period itself that counts the days until the month closes in Lisbon, as the server saw them.
  */
-export function LimitRings({ limits }: { limits: LimitMonth[] }) {
+export function LimitRings({ limits, period }: { limits: LimitMonth[]; period: MonthProgress }) {
   const t = useTranslations('retainers');
   const locale = useLocale();
   const quantity = useQuantity();
-  const period = monthProgress(useNow());
 
   return (
     <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -37,6 +36,7 @@ export function LimitRings({ limits }: { limits: LimitMonth[] }) {
       <AllowanceRing
         used={period.day}
         limit={period.total}
+        neutral
         locale={locale}
         label={t('period.label')}
         remainingLabel={() => t('period.remaining', { count: period.left })}

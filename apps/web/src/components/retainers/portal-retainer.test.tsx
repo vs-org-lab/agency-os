@@ -43,6 +43,7 @@ function view(decides: boolean, suspended = false): PortalRetainerView {
     decides,
     suspended,
     month: '2026-10-01',
+    period: { day: 26, total: 31, left: 5 },
     retainer: { id: 'retainer-1', tier: 'Essencial', status: 'active' },
     limits: [
       {

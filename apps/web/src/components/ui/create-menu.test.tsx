@@ -50,6 +50,7 @@ describe('CreateMenu', () => {
     const trigger = setup();
     expect(screen.queryByRole('menu')).toBeNull();
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger.hasAttribute('aria-controls')).toBe(false);
 
     trigger.focus();
     await user.keyboard('{Enter}');
@@ -73,6 +74,21 @@ describe('CreateMenu', () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Novo' })),
     );
+  });
+
+  it('activates the focused item with Space', async () => {
+    const user = userEvent.setup();
+    const clicked = vi.fn((event: Event) => event.preventDefault());
+    const trigger = setup();
+    trigger.focus();
+    await user.keyboard('{Enter}');
+    const [first] = await screen.findAllByRole('menuitem');
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    first?.addEventListener('click', clicked);
+
+    await user.keyboard(' ');
+
+    expect(clicked).toHaveBeenCalledTimes(1);
   });
 
   it('closes when the pointer goes down outside', async () => {

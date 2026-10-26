@@ -91,9 +91,9 @@ describe('ContractSection', () => {
 
   it('reveals the contract text from the read disclosure', () => {
     renderSection({ sign: vi.fn(), void: vi.fn() });
-    expect(screen.queryByText(/Texto./)).toBeNull();
+    expect(screen.getByText(/Texto./).closest('[hidden]')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Ler o contrato' }));
-    expect(screen.getByText(/Texto./)).toBeTruthy();
+    expect(screen.getByText(/Texto./).closest('[hidden]')).toBeNull();
   });
 
   it('shows who signed and offers the studio signature', () => {

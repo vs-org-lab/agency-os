@@ -28,10 +28,10 @@ describe('Collapsible', () => {
     render(<Example />);
     const trigger = screen.getByRole('button', { name: 'Details' });
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByText('Hidden body')).toBeNull();
+    expect(screen.getByText('Hidden body').closest('[hidden]')).not.toBeNull();
     await userEvent.click(trigger);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('Hidden body')).toBeTruthy();
+    expect(screen.getByText('Hidden body').closest('[hidden]')).toBeNull();
   });
 
   it('opens with Enter and Space', async () => {
@@ -50,6 +50,6 @@ describe('Collapsible', () => {
     expect(screen.getByRole('button', { name: 'Details' }).getAttribute('aria-expanded')).toBe(
       'true',
     );
-    expect(screen.getByText('Hidden body')).toBeTruthy();
+    expect(screen.getByText('Hidden body').closest('[hidden]')).toBeNull();
   });
 });

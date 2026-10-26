@@ -2589,6 +2589,106 @@
       "sent": "Obrigado pelo seu testemunho.",
       "required": "Escreva o testemunho e o seu nome.",
       "failed": "Não foi possível guardar. Tente de novo."
+    },
+    "mode": {
+      "label": "Como prefere responder",
+      "video": "Vídeo",
+      "write": "Escrever"
+    },
+    "video": {
+      "intro": "Responda a cinco perguntas curtas diante da câmara, com a duração que quiser até {max} minutos. As perguntas aparecem uma a uma.",
+      "name": "Nome",
+      "role": "Função",
+      "recordConsent": "Autorizo a gravação e o uso interno deste testemunho.",
+      "publishConsent": "Autorizo a publicação deste testemunho, com o meu nome e função, no site e em apresentações da agência.",
+      "consentRequired": "Confirme a autorização de gravação e indique o seu nome.",
+      "sent": "Obrigado pelo seu testemunho em vídeo.",
+      "failed": "Não foi possível enviar o vídeo. Tente de novo.",
+      "hasVideo": "O seu vídeo já foi enviado. Pode gravar outro para o substituir.",
+      "questions": {
+        "q1": {
+          "topic": "Antes",
+          "text": "Como era a sua situação antes de trabalharmos juntos?"
+        },
+        "q2": {
+          "topic": "A mudança",
+          "text": "O que mudou depois do projeto?"
+        },
+        "q3": {
+          "topic": "A colaboração",
+          "text": "Como foi trabalhar com o estúdio?"
+        },
+        "q4": {
+          "topic": "O resultado",
+          "text": "Que resultado concreto viu até agora?"
+        },
+        "q5": {
+          "topic": "A recomendação",
+          "text": "A quem recomendaria o estúdio, e porquê?"
+        }
+      }
+    },
+    "team": {
+      "title": "Testemunho do cliente",
+      "empty": "O cliente ainda não deixou o testemunho deste projeto.",
+      "video": "Vídeo do testemunho",
+      "chapters": "Perguntas",
+      "publish": "Autoriza a publicação",
+      "internal": "Apenas uso interno",
+      "author": "{name}, {role}",
+      "written": "Testemunho escrito"
+    }
+  },
+  "media": {
+    "voiceNote": {
+      "record": "Gravar nota de voz",
+      "recording": "A gravar nota de voz",
+      "ready": "Nota de voz pronta",
+      "stop": "Parar",
+      "delete": "Apagar",
+      "send": "Enviar nota de voz",
+      "sending": "A enviar…",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "position": "Posição da nota de voz",
+      "denied": "Não foi possível aceder ao microfone. Verifique a permissão do navegador ou escreva a mensagem.",
+      "unsupported": "Este navegador não permite gravar áudio. Escreva a mensagem.",
+      "failed": "Não foi possível enviar a nota de voz. Tente de novo.",
+      "limit": "Limite de {max} atingido.",
+      "body": "Nota de voz",
+      "transcribing": "A transcrever…",
+      "transcriptFailed": "Não foi possível transcrever esta nota.",
+      "noSpeech": "Sem fala reconhecida.",
+      "transcript": "Transcrição",
+      "list": "Notas de voz"
+    },
+    "recorder": {
+      "camera": "Câmara",
+      "microphone": "Microfone",
+      "level": "Nível do microfone",
+      "preview": "Pré-visualização da câmara",
+      "start": "Começar a gravar",
+      "pause": "Pausar",
+      "resume": "Continuar",
+      "stop": "Parar",
+      "next": "Seguinte",
+      "question": "{current} de {total} · {topic}",
+      "idle": "Pronto para gravar",
+      "recording": "A gravar",
+      "paused": "Em pausa",
+      "stopped": "Gravação concluída",
+      "sent": "Vídeo enviado",
+      "limit": "Limite de {max} atingido. A gravação parou.",
+      "review": "Rever a gravação",
+      "position": "Posição do vídeo",
+      "chapter": "Pergunta {index}",
+      "again": "Gravar de novo",
+      "send": "Enviar vídeo",
+      "sending": "A enviar…",
+      "denied": "Não foi possível aceder à câmara e ao microfone. Pode escrever o testemunho em vez disso.",
+      "unsupported": "Este navegador não permite gravar vídeo. Pode escrever o testemunho.",
+      "failed": "Não foi possível enviar o vídeo. Tente de novo.",
+      "writeInstead": "Escrever em vez disso"
     }
   },
   "library": {

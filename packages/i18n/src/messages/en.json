@@ -2589,6 +2589,106 @@
       "sent": "Thank you for your testimonial.",
       "required": "Write the testimonial and your name.",
       "failed": "It could not be saved. Try again."
+    },
+    "mode": {
+      "label": "How would you like to answer",
+      "video": "Video",
+      "write": "Write"
+    },
+    "video": {
+      "intro": "Answer five short questions on camera, for as long as you like up to {max} minutes. The questions appear one at a time.",
+      "name": "Name",
+      "role": "Role",
+      "recordConsent": "I authorise the recording and its internal use.",
+      "publishConsent": "I authorise publishing this testimonial, with my name and role, on the website and in agency presentations.",
+      "consentRequired": "Confirm the recording authorisation and enter your name.",
+      "sent": "Thank you for your video testimonial.",
+      "failed": "The video could not be sent. Try again.",
+      "hasVideo": "Your video was already sent. You can record another to replace it.",
+      "questions": {
+        "q1": {
+          "topic": "Before",
+          "text": "What was your situation before we worked together?"
+        },
+        "q2": {
+          "topic": "The change",
+          "text": "What changed after the project?"
+        },
+        "q3": {
+          "topic": "Working together",
+          "text": "What was it like working with the studio?"
+        },
+        "q4": {
+          "topic": "The result",
+          "text": "What concrete result have you seen so far?"
+        },
+        "q5": {
+          "topic": "The recommendation",
+          "text": "Who would you recommend the studio to, and why?"
+        }
+      }
+    },
+    "team": {
+      "title": "Client testimonial",
+      "empty": "The client has not left a testimonial for this project yet.",
+      "video": "Testimonial video",
+      "chapters": "Questions",
+      "publish": "Authorises publishing",
+      "internal": "Internal use only",
+      "author": "{name}, {role}",
+      "written": "Written testimonial"
+    }
+  },
+  "media": {
+    "voiceNote": {
+      "record": "Record a voice note",
+      "recording": "Recording a voice note",
+      "ready": "Voice note ready",
+      "stop": "Stop",
+      "delete": "Delete",
+      "send": "Send voice note",
+      "sending": "Sending…",
+      "play": "Play",
+      "pause": "Pause",
+      "position": "Voice note position",
+      "denied": "The microphone could not be accessed. Check the browser permission or write the message.",
+      "unsupported": "This browser cannot record audio. Write the message.",
+      "failed": "The voice note could not be sent. Try again.",
+      "limit": "Limit of {max} reached.",
+      "body": "Voice note",
+      "transcribing": "Transcribing…",
+      "transcriptFailed": "This note could not be transcribed.",
+      "noSpeech": "No speech recognised.",
+      "transcript": "Transcript",
+      "list": "Voice notes"
+    },
+    "recorder": {
+      "camera": "Camera",
+      "microphone": "Microphone",
+      "level": "Microphone level",
+      "preview": "Camera preview",
+      "start": "Start recording",
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "next": "Next",
+      "question": "{current} of {total} · {topic}",
+      "idle": "Ready to record",
+      "recording": "Recording",
+      "paused": "Paused",
+      "stopped": "Recording finished",
+      "sent": "Video sent",
+      "limit": "Limit of {max} reached. The recording stopped.",
+      "review": "Review the recording",
+      "position": "Video position",
+      "chapter": "Question {index}",
+      "again": "Record again",
+      "send": "Send video",
+      "sending": "Sending…",
+      "denied": "The camera and microphone could not be accessed. You can write the testimonial instead.",
+      "unsupported": "This browser cannot record video. You can write the testimonial.",
+      "failed": "The video could not be sent. Try again.",
+      "writeInstead": "Write instead"
     }
   },
   "library": {

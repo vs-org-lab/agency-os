@@ -5,6 +5,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadClientPortalDocuments } from '@/modules/project-documents/server';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,4 +32,8 @@ export default async function PortalDocumentsPage({ params }: PageProps) {
       <PortalDocumentCards documents={documents} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'projectDocuments.portal.title');
 }

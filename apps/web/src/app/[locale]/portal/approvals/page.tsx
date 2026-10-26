@@ -6,6 +6,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalApprovals } from '@/modules/rooms/server';
 import { portalRoomAccess } from '../room-session';
 import { decideApprovalAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,4 +34,8 @@ export default async function PortalApprovalsPage({ params }: PageProps) {
       <ApprovalsList approvals={pending} decides={access.decides} decide={decideApprovalAction} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.room.approvalsTitle');
 }

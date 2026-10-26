@@ -19,6 +19,7 @@ import {
   zipAction,
 } from '../../../library-actions';
 import { RoomHeader } from '../room/room-header';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,4 +73,8 @@ export default async function RoomLibraryPage({ params, searchParams }: PageProp
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'library.title');
 }

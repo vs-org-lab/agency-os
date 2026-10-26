@@ -5,6 +5,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { restrictedHubAccess } from '@/modules/brand-hub/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { AuthCard } from '../../auth-card';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,4 +50,8 @@ export default async function HubAccessPage({ params, searchParams }: PageProps)
       </Link>
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'brandHub.access.signInTitle');
 }

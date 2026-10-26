@@ -3,12 +3,14 @@ import { getTranslations } from 'next-intl/server';
 import { BrandSymbol } from '@agency-os/ui/brand';
 import { ThemeToggle } from '@agency-os/ui/theme-toggle';
 import { LocaleSwitcher } from '@/components/shell/locale-switcher';
+import { SkipLink } from '@/components/shell/skip-link';
 
 export async function PublicFrame({ embed, children }: { embed: boolean; children: ReactNode }) {
   const t = await getTranslations();
 
   return (
-    <main className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-canvas">
+      {embed ? null : <SkipLink label={t('shell.skipToContent')} />}
       {embed ? null : (
         <header className="flex items-center justify-between gap-4 px-4 py-4 md:px-8">
           <BrandSymbol className="size-8 text-text" title={t('app.name')} />
@@ -28,9 +30,9 @@ export async function PublicFrame({ embed, children }: { embed: boolean; childre
           </div>
         </header>
       )}
-      <div className="flex flex-1 justify-center px-4 py-8 md:py-16">
+      <main id="main" tabIndex={-1} className="flex flex-1 justify-center px-4 py-8 md:py-16">
         <div className="flex w-full max-w-[560px] flex-col gap-8">{children}</div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

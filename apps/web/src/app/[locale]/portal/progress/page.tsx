@@ -8,6 +8,7 @@ import { loadClientOutcome } from '@/modules/outcomes/server';
 import { loadClientRetainer } from '@/modules/retainers/server';
 import { decideExtraAction, requestWorkAction } from '../../retainer-actions';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,4 +49,8 @@ export default async function PortalProgressPage({ params }: PageProps) {
       ) : null}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'retainers.portal.title');
 }

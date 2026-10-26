@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireLocale } from '@/i18n/require-locale';
 import { AuthCard } from '../auth-card';
 import { SignInForm } from './sign-in-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -18,4 +19,8 @@ export default async function SignInPage({ params, searchParams }: PageProps) {
       <SignInForm inactive={reason === 'inactive'} />
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'auth.signIn.title');
 }

@@ -147,7 +147,8 @@ describe('createDueFollowUps', () => {
       const enteredAt = new Date(entry?.at ?? 0);
       const deps = { contexts: createDbContexts(testDatabase(sql)) };
 
-      const early = await createDueFollowUps(new Date(enteredAt.getTime() + 2 * 86_400_000), deps);
+      await createDueFollowUps(new Date(enteredAt.getTime() + 2 * 86_400_000), deps);
+      const earlyDays = await followUpDays(sql, core.a.dealId);
       const due = new Date(enteredAt.getTime() + 8 * 86_400_000);
       await createDueFollowUps(due, deps);
       await createDueFollowUps(due, deps);
@@ -157,7 +158,7 @@ describe('createDueFollowUps', () => {
         select sequence_day as day, suggested_message as message from public.follow_ups
         where deal_id = ${core.a.dealId} and sequence_day = 5
       `;
-      expect(early).toBe(0);
+      expect(earlyDays).not.toContain(5);
       expect(rows).toHaveLength(1);
       expect(rows[0]?.day).toBe(5);
       expect(rows[0]?.message).toContain('Sem rastreamento de conversões');

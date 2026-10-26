@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -119,6 +119,26 @@ describe('ProposalAcceptance', () => {
 
     expect(acceptanceActions.accept).not.toHaveBeenCalled();
     expect(screen.getByRole('alert').textContent).toBe('Escolha uma opção.');
+  });
+
+  it('names each option by its title and ties the missing choice to the options', async () => {
+    renderAcceptance(PROPOSAL);
+    const radios = screen.getAllByRole('radio');
+    expect(radios.map((radio) => radio.getAttribute('aria-labelledby')).every(Boolean)).toBe(true);
+    expect(screen.getByRole('radio', { name: 'Orbit com Gravity' })).toBeTruthy();
+    expect(
+      screen.getByRole('radio', { name: 'Orbit com Gravity' }).getAttribute('aria-describedby'),
+    ).toBeTruthy();
+
+    fillDetails();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Aceitar proposta e preparar contrato' }));
+    });
+
+    const alert = screen.getByRole('alert');
+    expect(radios[0]?.getAttribute('aria-invalid')).toBe('true');
+    expect(radios[0]?.getAttribute('aria-describedby')).toContain(alert.id);
+    await waitFor(() => expect(document.activeElement).toBe(radios[0]));
   });
 
   it('sends a change request', async () => {

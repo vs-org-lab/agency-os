@@ -10,6 +10,7 @@ import { loadClientRoomDocuments } from '@/modules/project-documents/server';
 import { withUserContext } from '@/platform/db';
 import { finishDocumentUploadAction, startDocumentAction } from '../../../document-actions';
 import { RoomHeader } from '../room/room-header';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,4 +61,8 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'projectDocuments.title');
 }

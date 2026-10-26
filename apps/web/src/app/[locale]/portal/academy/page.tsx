@@ -6,6 +6,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadClientPortalAcademy } from '@/modules/academy/server';
 import { checkAcademyStepAction } from '../../academy-actions';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,4 +25,8 @@ export default async function PortalAcademyPage({ params }: PageProps) {
   if (!view) notFound();
 
   return <PortalAcademy view={view} check={checkAcademyStepAction} />;
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'academy.title');
 }

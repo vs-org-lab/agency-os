@@ -8,6 +8,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalBrandHub } from '@/modules/brand-hub/server';
 import { decideHubApprovalAction, hubManualAction, hubZipAction } from '../../brand-hub-actions';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 /** The brand manual is generated on its first download (RF-093). */
@@ -53,4 +54,8 @@ export default async function PortalBrandHubPage({ params }: PageProps) {
       <PortalHub hub={hub} requestZip={requestZip} requestManual={requestManual} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'brandHub.title');
 }

@@ -43,7 +43,8 @@
       "title": "Aceitar convite",
       "description": "Confirme para ativar o seu acesso.",
       "accept": "Aceitar convite",
-      "invalid": "O convite expirou ou já foi usado. Peça um novo convite a quem o enviou."
+      "invalid": "O convite expirou ou já foi usado. Peça um novo convite a quem o enviou.",
+      "signIn": "Ir para o início de sessão"
     },
     "setPassword": {
       "title": "Definir palavra-passe",
@@ -64,6 +65,7 @@
     "studio": "Estúdio",
     "allClients": "Todos os clientes",
     "toggleSidebar": "Mostrar ou ocultar menu",
+    "skipToContent": "Saltar para o conteúdo",
     "navigation": "Navegação",
     "navigationDescription": "Menu principal da aplicação.",
     "theme": {
@@ -127,7 +129,7 @@
       "description": "Quando houver conteúdo, aparece neste espaço."
     },
     "loading": {
-      "title": "A carregar"
+      "title": "A carregar…"
     },
     "error": {
       "title": "Algo correu mal",
@@ -421,8 +423,7 @@
         "diagnosis": "Diagnóstico",
         "documents": "Documentos e contratos",
         "billing": "Faturação",
-        "approvals": "Aprovações",
-        "retainers": "Retainers"
+        "approvals": "Aprovações"
       },
       "rules": {
         "same_code": "O negócio já está neste código.",
@@ -1137,7 +1138,10 @@
         "current": "Marcada para {when}.",
         "reschedule": "Mudar de horário",
         "cancel": "Cancelar chamada",
-        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário."
+        "cancelled": "A chamada foi cancelada. Se quiser, escolha outro horário.",
+        "confirmCancel": "Sim, cancelar",
+        "keep": "Manter a chamada",
+        "cancelFailed": "Não foi possível cancelar. Tente de novo dentro de momentos."
       }
     }
   },
@@ -2344,7 +2348,7 @@
       "invalid_file": "O ficheiro foi recusado: o tipo não é aceite ou não corresponde ao conteúdo.",
       "zip_too_large": "Há ficheiros demais para um ZIP (máximo de 500 ficheiros e 500 MB). Descarregue pasta a pasta.",
       "upload_failed": "O carregamento falhou. Verifique a ligação e tente outra vez.",
-      "download_failed": "O download falhou. Verifique a ligação e tente outra vez."
+      "download_failed": "Não foi possível descarregar. Verifique a ligação e tente outra vez."
     },
     "attachments": {
       "label": "Anexos",
@@ -2651,11 +2655,11 @@
       "nothing_to_publish": "Não há alterações por publicar.",
       "zip_too_large": "O ZIP é demasiado grande. Descarregue por secção.",
       "upload_failed": "O carregamento falhou. Tente de novo.",
-      "download_failed": "O download falhou. Tente de novo."
+      "download_failed": "Não foi possível descarregar. Tente de novo."
     },
     "access": {
       "signInTitle": "Entre para ver o Brand Hub",
-      "signInDescription": "Este Brand Hub só abre para a equipa da empresa. Entre no OS e volte ao Brand Hub.",
+      "signInDescription": "Este Brand Hub só abre para a equipa da empresa. Entre com a conta da empresa e volte ao Brand Hub.",
       "signIn": "Entrar",
       "magicLink": "Receber um link por email",
       "deniedTitle": "Sem acesso a este Brand Hub",

@@ -10,6 +10,7 @@ import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadClientPortalDocument } from '@/modules/project-documents/server';
 import { commentDocumentAction, decideDocumentAction } from '../../../document-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,4 +58,8 @@ export default async function PortalDocumentPage({ params }: PageProps) {
       </div>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'projectDocuments.title');
 }

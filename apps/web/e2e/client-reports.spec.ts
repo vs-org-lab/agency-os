@@ -36,7 +36,7 @@ function lastMonthTitle(): string {
     .split('-')
     .map(Number);
   const index = (year ?? 0) * 12 + (month ?? 1) - 2;
-  return `Relatório mensal — ${MONTHS[index % 12]} ${Math.floor(index / 12)}`;
+  return `Relatório mensal — ${MONTHS[index % 12]} de ${Math.floor(index / 12)}`;
 }
 
 test.describe('Client reports', () => {

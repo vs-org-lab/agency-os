@@ -45,7 +45,7 @@ const LABELS: Record<Locale, Labels> = {
       'Documento não fiscal. A fatura é emitida em software certificado depois do pagamento.',
     taxId: 'NIF',
     billedTo: 'Cliente',
-    milestone: 'Prestação',
+    milestone: 'Marco',
     description: 'Descrição',
     amount: 'Valor',
     issuedOn: 'Data',

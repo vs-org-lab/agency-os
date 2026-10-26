@@ -5,6 +5,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { reportYear } from '@/modules/reports';
 import { loadTeamReports } from '@/modules/reports/server';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,4 +29,8 @@ export default async function ReportsPage({ params, searchParams }: PageProps) {
   if (!view) notFound();
 
   return <ReportsScreen view={view} />;
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'reports.title');
 }

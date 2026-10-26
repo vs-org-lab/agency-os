@@ -6,6 +6,7 @@ import { getVerifiedClaims } from '@/platform/session';
 import { createSupabaseServerClient } from '@/platform/supabase-server';
 import { AuthCard } from '../../auth-card';
 import { TotpForm } from '../totp-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -41,4 +42,8 @@ export default async function EnrollTotpPage({ params }: PageProps) {
       <TotpForm factorId={enrollment.factorId} mode="enroll" />
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'auth.mfa.enrollTitle');
 }

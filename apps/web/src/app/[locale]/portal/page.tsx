@@ -15,6 +15,7 @@ import {
 } from './portal-cards';
 import { RoomHomeCard, roomCardState } from './room-cards';
 import { portalRoomAccess } from './room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 const PAYING_ROLES = ['decision_maker', 'client_finance'];
 
@@ -132,4 +133,8 @@ export default async function PortalHomePage({ params }: PageProps) {
       ) : null}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.home.title');
 }

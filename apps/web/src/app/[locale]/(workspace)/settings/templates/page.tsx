@@ -20,6 +20,7 @@ import { ProcessTemplateEditor } from './process-template-editor';
 import { ContractTemplateEditor } from './contract-template-editor';
 import { BriefingGuideEditor } from './briefing-guide-editor';
 import { OrbitGridEditor } from './orbit-grid-editor';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -191,4 +192,8 @@ export default async function TemplatesSettingsPage({ params }: PageProps) {
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'settings.templates.title');
 }

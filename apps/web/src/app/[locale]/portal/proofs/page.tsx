@@ -5,6 +5,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadClientProofs } from '@/modules/proofing/server';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,4 +33,8 @@ export default async function PortalProofsPage({ params }: PageProps) {
       <ClientProofList proofs={proofs} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'proofing.clientList.title');
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, useTransition } from 'react';
+import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
@@ -43,6 +43,18 @@ function RequestForm({
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState<'task' | 'extra' | RetainerError | null>(null);
   const [pending, startTransition] = useTransition();
+  const quantityRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLInputElement>(null);
+  const errorId = `${id}-error`;
+  const rejected = message === 'invalid_input';
+  const invalidQuantity = rejected && !(Number(decimal(quantity)) > 0);
+  const invalidDescription = rejected && !invalidQuantity && description.trim() === '';
+
+  useEffect(() => {
+    if (message !== 'invalid_input') return;
+    const target = invalidQuantity ? quantityRef : descriptionRef;
+    target.current?.focus();
+  }, [message]);
 
   return (
     <form
@@ -84,8 +96,11 @@ function RequestForm({
           <Label htmlFor={`${id}-quantity`}>{t('portal.request.quantity')}</Label>
           <Input
             id={`${id}-quantity`}
+            ref={quantityRef}
             inputMode="decimal"
             required
+            aria-invalid={invalidQuantity ? true : undefined}
+            aria-describedby={invalidQuantity ? errorId : undefined}
             value={quantity}
             onChange={(event) => setQuantity(event.target.value)}
           />
@@ -94,7 +109,10 @@ function RequestForm({
           <Label htmlFor={`${id}-description`}>{t('portal.request.description')}</Label>
           <Input
             id={`${id}-description`}
+            ref={descriptionRef}
             required
+            aria-invalid={invalidDescription ? true : undefined}
+            aria-describedby={invalidDescription ? errorId : undefined}
             maxLength={500}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -106,7 +124,9 @@ function RequestForm({
       ) : message === 'extra' ? (
         <FormMessage tone="info">{t('portal.request.extra')}</FormMessage>
       ) : message ? (
-        <FormMessage tone="danger">{t(`errors.${message}`)}</FormMessage>
+        <FormMessage tone="danger" id={errorId}>
+          {t(`errors.${message}`)}
+        </FormMessage>
       ) : null}
       <Button type="submit" size="sm" disabled={pending} className="self-start">
         {t('portal.request.send')}

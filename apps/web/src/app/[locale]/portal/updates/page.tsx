@@ -7,6 +7,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalRoom } from '@/modules/rooms/server';
 import { decideApprovalAction } from '../approvals/actions';
 import { portalRoomAccess } from '../room-session';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,4 +59,8 @@ export default async function PortalUpdatesPage({ params, searchParams }: PagePr
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.room.updatesTitle');
 }

@@ -6,7 +6,15 @@ import en from '@agency-os/i18n/messages/en';
 import ptPT from '@agency-os/i18n/messages/pt-PT';
 import '@agency-os/ui/styles/globals.css';
 
-export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+const englishRetry = ` · ${en.states.error.retry}`;
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
@@ -20,6 +28,16 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
           <p lang="en" className="text-caption text-text-tertiary">
             {en.states.error.title}
           </p>
+          <button
+            type="button"
+            onClick={reset}
+            className="mt-2 self-center rounded-md border border-border px-3 py-1.5 text-body-sm text-text"
+          >
+            {ptPT.states.error.retry}
+            <span lang="en" className="text-text-tertiary">
+              {englishRetry}
+            </span>
+          </button>
         </main>
       </body>
     </html>

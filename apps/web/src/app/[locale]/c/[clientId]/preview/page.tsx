@@ -7,6 +7,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadStaffPreview } from '@/modules/rooms/server';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,4 +45,8 @@ export default async function RoomPreviewPage({ params, searchParams }: PageProp
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'rooms.previewAsClient');
 }

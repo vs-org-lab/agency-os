@@ -9,6 +9,7 @@ import {
   listVisibleClients,
 } from '@/modules/organizations';
 import { withUserContext } from '@/platform/db';
+import { SkipLink } from './skip-link';
 import { AppSidebar, type CounterSource } from './app-sidebar';
 import { buildNavigation, type NavigationCounter, type NavigationLevel } from './navigation';
 import type { AreaSession } from './session-guard';
@@ -51,6 +52,7 @@ export async function AppShell({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <SkipLink label={t('shell.skipToContent')} />
       <AppSidebar
         workspaceName={workspaceName}
         roomName={level.level === 'room' ? data.room?.name : undefined}
@@ -90,7 +92,7 @@ export async function AppShell({
           toggleLabel={t('shell.toggleSidebar')}
           breadcrumbLabel={t('shell.breadcrumb')}
         />
-        <main id="main" className="flex-1 px-4 py-6 md:px-6 xl:px-8">
+        <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 md:px-6 xl:px-8">
           {children}
         </main>
       </SidebarInset>

@@ -34,6 +34,7 @@ import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,4 +154,8 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
       ) : null}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'shell.room.dashboard');
 }

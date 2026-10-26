@@ -15,10 +15,12 @@ async function expectAccessible(page: Page): Promise<void> {
   expect(results.violations.map((violation) => violation.id)).toEqual([]);
 }
 
+/** Calendar days from today in Lisbon, so a daylight-saving change never shifts the day. */
 function lisbonDate(offsetDays: number): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' }).format(
-    new Date(Date.now() + offsetDays * 24 * 60 * 60 * 1000),
-  );
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' }).format(new Date());
+  const day = new Date(`${today}T12:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + offsetDays);
+  return day.toISOString().slice(0, 10);
 }
 
 test.describe('Tasks, home and updates', () => {

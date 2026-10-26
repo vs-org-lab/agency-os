@@ -94,14 +94,19 @@ function issuesFrom(error: z.ZodError): SubmitIssue[] {
   });
 }
 
-async function findOrCreateProspect(
+/**
+ * An application is anonymous: a typed email proves nothing (SEC-11). It never changes or joins an
+ * existing contact, client or deal; it opens its own prospect, and an email already known is
+ * recorded as a possible duplicate for the founder to merge by hand.
+ */
+async function createProspect(
   tx: DbTransaction,
   organizationId: string,
   answers: ApplicationAnswers,
-): Promise<{ clientId: string; contactId: string }> {
+): Promise<{ clientId: string; contactId: string; possibleDuplicateOf: string | null }> {
   const email = answers.contact.email;
   const [existing] = await tx
-    .select({ id: contacts.id, clientId: contacts.clientId })
+    .select({ clientId: contacts.clientId })
     .from(contacts)
     .where(
       and(
@@ -111,13 +116,6 @@ async function findOrCreateProspect(
       ),
     )
     .limit(1);
-  if (existing) {
-    await tx
-      .update(contacts)
-      .set({ fullName: answers.contact.fullName })
-      .where(eq(contacts.id, existing.id));
-    return { clientId: existing.clientId, contactId: existing.id };
-  }
 
   const [client] = await tx
     .insert(clients)
@@ -143,7 +141,11 @@ async function findOrCreateProspect(
     })
     .returning({ id: contacts.id });
   if (!contact) throw new Error('Prospect contact was not created');
-  return { clientId: client.id, contactId: contact.id };
+  return {
+    clientId: client.id,
+    contactId: contact.id,
+    possibleDuplicateOf: existing?.clientId ?? null,
+  };
 }
 
 async function openDealFor(
@@ -219,7 +221,11 @@ export async function submitApplication(
     if (!ipAllowed || !emailAllowed) return { status: 'throttled' };
 
     const score = scoreApplication(form.definition, answers);
-    const { clientId, contactId } = await findOrCreateProspect(tx, organizationId, answers);
+    const { clientId, contactId, possibleDuplicateOf } = await createProspect(
+      tx,
+      organizationId,
+      answers,
+    );
     const { dealId, isNewDeal } = await openDealFor(tx, {
       organizationId,
       clientId,
@@ -239,7 +245,11 @@ export async function submitApplication(
         score: score.score,
         path: score.path,
         knockouts: score.knockouts,
-        source: { ...(source.success ? source.data : EMPTY_SOURCE), locale: input.locale },
+        source: {
+          ...(source.success ? source.data : EMPTY_SOURCE),
+          locale: input.locale,
+          ...(possibleDuplicateOf ? { possibleDuplicateOf } : {}),
+        },
         consentAt: now,
         consentTextVersion: input.consentTextVersion,
       })

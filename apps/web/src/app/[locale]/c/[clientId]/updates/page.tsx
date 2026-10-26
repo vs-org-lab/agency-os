@@ -9,6 +9,7 @@ import { loadStaffRoom } from '@/modules/rooms/server';
 import { publishUpdateAction } from '../actions';
 import { RoomHeader } from '../room/room-header';
 import { UpdateComposer } from '../room/update-composer';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,4 +61,8 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
       )}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'shell.room.updates');
 }

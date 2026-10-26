@@ -38,7 +38,7 @@ describe('client report pdfs', () => {
     });
 
     for (const text of [
-      'Relatório mensal · Bloom · setembro 2026',
+      'Relatório mensal · Bloom · setembro de 2026',
       'Resumo',
       'Um mês de entregas.',
       'Trabalho feito',
@@ -65,7 +65,7 @@ describe('client report pdfs', () => {
       data: EMPTY,
       texts: NO_TEXTS,
     });
-    expect(pdfContainsText(pdf, 'Relatório mensal · Bloom · setembro 2026')).toBe(true);
+    expect(pdfContainsText(pdf, 'Relatório mensal · Bloom · setembro de 2026')).toBe(true);
     expect(pdfContainsText(pdf, 'Trabalho feito')).toBe(false);
   });
 

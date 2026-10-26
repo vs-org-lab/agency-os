@@ -116,17 +116,28 @@ async function main(): Promise<void> {
       update public.calls set status = 'cancelled'
       where organization_id = ${organizationId} and status = 'scheduled' and starts_at > now()
     `;
-    // Every test seeds its own deals and clients; earlier runs' records would otherwise keep
-    // growing the pipeline and the client list that the accessibility checks scan in full.
+    // Every test seeds its own records; earlier runs' deals, clients, tasks and projects would
+    // otherwise keep growing every list the home and the accessibility checks render in full. The
+    // window only spares a run that started moments ago.
     await sql`
       update public.deals set archived_at = now()
       where organization_id = ${organizationId} and archived_at is null
-        and created_at < now() - interval '6 hours'
+        and created_at < now() - interval '20 minutes'
     `;
     await sql`
       update public.clients set archived_at = now()
       where organization_id = ${organizationId} and archived_at is null and id <> ${clientId}
-        and created_at < now() - interval '6 hours'
+        and created_at < now() - interval '20 minutes'
+    `;
+    await sql`
+      update public.tasks set status = 'done', completed_at = now()
+      where organization_id = ${organizationId} and status = 'open'
+        and created_at < now() - interval '20 minutes'
+    `;
+    await sql`
+      update public.projects set status = 'completed'
+      where organization_id = ${organizationId} and status = 'active' and client_id <> ${clientId}
+        and created_at < now() - interval '20 minutes'
     `;
     // An interrupted run leaves approvals waiting, which later runs and global sweeps would see.
     await sql`

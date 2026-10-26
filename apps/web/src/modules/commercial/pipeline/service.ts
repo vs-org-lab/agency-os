@@ -237,7 +237,20 @@ export async function applyStageChange(
     };
   }
 
+  // The stage column is not writable by authenticated users, so a user's update runs as the owner
+  // once the row lock above (which passes the update policy) and an explicit write check agree.
+  // The history trigger still reads the caller from the claims.
+  const [{ role } = { role: '' }] = await tx.execute<{ role: string }>(
+    sql`select current_user::text as role`,
+  );
+  if (role === 'authenticated') {
+    const [{ allowed } = { allowed: false }] = await tx.execute<{ allowed: boolean }>(
+      sql`select app.can_write_pipeline(${deal.organizationId}, ${deal.clientId}) as allowed`,
+    );
+    if (!allowed) return NOT_FOUND;
+  }
   await tx.execute(sql`select set_config('app.stage_change_reason', ${reason ?? ''}, true)`);
+  if (role === 'authenticated') await tx.execute(sql`reset role`);
   await tx
     .update(deals)
     .set({
@@ -245,6 +258,7 @@ export async function applyStageChange(
       ...(input.to === 'X.4' ? { lostReason: reason } : {}),
     })
     .where(eq(deals.id, deal.id));
+  if (role === 'authenticated') await tx.execute(sql`set local role authenticated`);
   await tx.execute(sql`select set_config('app.stage_change_reason', '', true)`);
   if (FINAL_CODES.includes(input.to)) await cancelScheduledCalls(tx, deal, input.actor);
 

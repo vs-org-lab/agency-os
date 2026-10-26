@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { z } from 'zod';
 import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
@@ -36,7 +37,9 @@ const EMPTY_ANSWERS: ApplicationAnswers = {
   texts: {},
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** The same rule the server applies, so an address is never refused only after the last step. */
+const emailSchema = z.email();
+const NAME_MAX = 200;
 const UTM_KEYS = ['source', 'medium', 'campaign', 'term', 'content'] as const;
 
 function draftKey(version: number): string {
@@ -95,7 +98,7 @@ function isAnswered(
   switch (question.kind) {
     case 'contact':
       if (!answers.contact.fullName.trim() || !answers.contact.email.trim()) return 'required';
-      return EMAIL_PATTERN.test(answers.contact.email.trim()) ? 'ok' : 'email';
+      return emailSchema.safeParse(answers.contact.email.trim()).success ? 'ok' : 'email';
     case 'company':
       return answers.company.name.trim() ? 'ok' : 'required';
     case 'single_choice':
@@ -119,6 +122,7 @@ export function ApplicationForm({ definition, version, embed, action }: Applicat
   const [consent, setConsent] = useState(false);
   const [source, setSource] = useState<ReturnType<typeof collectSource> | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const handledState = useRef<ApplyActionState | null>(null);
 
   useEffect(() => {
     const saved = readDraft(version);
@@ -135,6 +139,16 @@ export function ApplicationForm({ definition, version, embed, action }: Applicat
     () => visibleQuestions(definition, draft.answers.choices),
     [definition, draft.answers.choices],
   );
+  // The server names the answers it refused: the form goes back to the first of them.
+  useEffect(() => {
+    if (state.status !== 'invalid' || handledState.current === state) return;
+    handledState.current = state;
+    const target = questions.findIndex((candidate) => state.questionIds.includes(candidate.id));
+    if (target < 0) return;
+    setDraft((current) => ({ ...current, step: target }));
+    setError(questions[target]?.kind === 'contact' ? 'email' : 'required');
+  }, [state, questions]);
+
   const step = Math.min(draft.step, questions.length - 1);
   const question = questions[step];
   const isLast = step === questions.length - 1;
@@ -231,6 +245,7 @@ export function ApplicationForm({ definition, version, embed, action }: Applicat
             <TextField
               label={t('fields.fullName')}
               autoComplete="name"
+              maxLength={NAME_MAX}
               value={draft.answers.contact.fullName}
               onChange={(event) =>
                 updateAnswers((answers) => ({
@@ -262,6 +277,7 @@ export function ApplicationForm({ definition, version, embed, action }: Applicat
             <TextField
               label={t('fields.companyName')}
               autoComplete="organization"
+              maxLength={NAME_MAX}
               value={draft.answers.company.name}
               onChange={(event) =>
                 updateAnswers((answers) => ({

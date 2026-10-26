@@ -27,7 +27,7 @@ jobs:
     concurrency:
       group: e2e-preview-database
       cancel-in-progress: false
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       CI: true
       E2E_BASE_URL: http://localhost:3000

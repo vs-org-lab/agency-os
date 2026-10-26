@@ -19,6 +19,7 @@ import {
   startVersionAction,
   withdrawDocumentAction,
 } from '../../../../document-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,4 +87,8 @@ export default async function RoomDocumentPage({ params }: PageProps) {
       </div>
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'projectDocuments.title');
 }

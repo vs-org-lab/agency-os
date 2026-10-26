@@ -15,6 +15,7 @@ import {
   saveSubscriptionAction,
   startReceiptUploadAction,
 } from '../../money-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,4 +49,8 @@ export default async function MoneyPage({ params, searchParams }: PageProps) {
       }}
     />
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'money.title');
 }

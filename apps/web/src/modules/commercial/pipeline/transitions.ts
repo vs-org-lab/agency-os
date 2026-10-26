@@ -7,7 +7,7 @@ import {
   type PipelineStage,
 } from './codes';
 
-export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'approvals' | 'retainers';
+export type PendingModule = 'diagnosis' | 'documents' | 'billing' | 'approvals';
 
 export type TransitionRefusal =
   | 'same_code'
@@ -58,14 +58,14 @@ export const ENABLED_STAGES: ReadonlySet<PipelineStage> = new Set([
   'pre_sale',
   'core',
   'orbit',
+  'gravity',
+  'constellation',
   'off_cycle',
 ]);
 
 export const STAGE_MODULE: Readonly<Partial<Record<PipelineStage, PendingModule>>> = {
   core: 'diagnosis',
   orbit: 'approvals',
-  gravity: 'retainers',
-  constellation: 'retainers',
 };
 
 const STAGE_LINKS: ReadonlyArray<readonly [PipelineCode, PipelineCode]> = [

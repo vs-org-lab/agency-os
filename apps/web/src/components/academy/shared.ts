@@ -20,12 +20,14 @@ export const linesOf = (value: string) =>
     .map((line) => line.trim())
     .filter(Boolean);
 
+const CALENDAR_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
 /** A calendar date (YYYY-MM-DD) or an instant as dd/mm/yyyy. */
 export function useShortDate() {
   const format = useFormatter();
   const options = { day: '2-digit', month: '2-digit', year: 'numeric' } as const;
   return (value: string | Date) =>
-    typeof value === 'string'
+    typeof value === 'string' && CALENDAR_DATE.test(value)
       ? format.dateTime(new Date(`${value}T12:00:00Z`), { ...options, timeZone: 'UTC' })
-      : format.dateTime(value, options);
+      : format.dateTime(new Date(value), options);
 }

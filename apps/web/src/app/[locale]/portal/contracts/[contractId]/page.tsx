@@ -6,6 +6,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalContract } from '@/modules/contracts/server';
 import { signPortalContractAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,4 +73,8 @@ export default async function PortalContractPage({ params }: PageProps) {
       ) : null}
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'portal.contract.title');
 }

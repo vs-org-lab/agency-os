@@ -43,7 +43,8 @@
       "title": "Accept invitation",
       "description": "Confirm to activate your access.",
       "accept": "Accept invitation",
-      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation."
+      "invalid": "The invitation has expired or was already used. Ask the sender for a new invitation.",
+      "signIn": "Go to sign in"
     },
     "setPassword": {
       "title": "Set password",
@@ -64,6 +65,7 @@
     "studio": "Studio",
     "allClients": "All clients",
     "toggleSidebar": "Show or hide menu",
+    "skipToContent": "Skip to content",
     "navigation": "Navigation",
     "navigationDescription": "Main application menu.",
     "theme": {
@@ -127,7 +129,7 @@
       "description": "Content will appear here when there is some."
     },
     "loading": {
-      "title": "Loading"
+      "title": "Loading…"
     },
     "error": {
       "title": "Something went wrong",
@@ -421,8 +423,7 @@
         "diagnosis": "Diagnosis",
         "documents": "Documents and contracts",
         "billing": "Billing",
-        "approvals": "Approvals",
-        "retainers": "Retainers"
+        "approvals": "Approvals"
       },
       "rules": {
         "same_code": "The deal is already at this code.",
@@ -1137,7 +1138,10 @@
         "current": "Booked for {when}.",
         "reschedule": "Change the time",
         "cancel": "Cancel the call",
-        "cancelled": "The call was cancelled. You can choose another time if you want."
+        "cancelled": "The call was cancelled. You can choose another time if you want.",
+        "confirmCancel": "Yes, cancel",
+        "keep": "Keep the call",
+        "cancelFailed": "The call could not be cancelled. Try again in a moment."
       }
     }
   },
@@ -2655,7 +2659,7 @@
     },
     "access": {
       "signInTitle": "Sign in to see the Brand Hub",
-      "signInDescription": "This Brand Hub opens only to the company team. Sign in to the OS and go back to the Brand Hub.",
+      "signInDescription": "This Brand Hub opens only to the company team. Sign in with the company account and come back to the Brand Hub.",
       "signIn": "Sign in",
       "magicLink": "Get a link by email",
       "deniedTitle": "No access to this Brand Hub",

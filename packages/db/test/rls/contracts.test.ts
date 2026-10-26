@@ -179,4 +179,48 @@ describe('contracts access', () => {
       ).rejects.toThrow(/row-level security/);
     });
   });
+
+  it('pipeline writers cannot edit a sent proposal or its options', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createContractFixture(sql, world);
+      const [spare] = await sql<{ id: string }[]>`
+        insert into public.proposal_options (organization_id, client_id, proposal_id, position,
+                                             name, summary, scope, one_off_amount, payment_plan)
+        select organization_id, client_id, proposal_id, 3, 'Reserva', summary, scope, 1,
+               payment_plan
+        from public.proposal_options where id = ${fixture.a.optionId}
+        returning id
+      `;
+      await asUser(sql, world.users.manager);
+
+      const proposal = await sql`
+        update public.proposals set valid_until = current_date + 90
+        where id = ${fixture.a.proposalId}
+      `;
+      const option = await sql`
+        update public.proposal_options set one_off_amount = 1 where id = ${fixture.a.optionId}
+      `;
+      const removed = await sql`
+        delete from public.proposal_options where id = ${spare?.id ?? ''}
+      `;
+      await expect(
+        sql.savepoint(
+          (tx) => tx`
+            insert into public.proposal_options (organization_id, client_id, proposal_id, position,
+                                                 name, summary, scope, one_off_amount, payment_plan)
+            select organization_id, client_id, proposal_id, 2, 'Extra', summary, scope, 1,
+                   payment_plan
+            from public.proposal_options where id = ${fixture.a.optionId}
+          `,
+        ),
+      ).rejects.toThrow(/row-level security/);
+      const draft = await sql`
+        update public.proposals set valid_until = current_date + 90
+        where id = ${fixture.a.draftProposalId}
+      `;
+
+      expect([proposal.count, option.count, removed.count, draft.count]).toEqual([0, 0, 0, 1]);
+    });
+  });
 });

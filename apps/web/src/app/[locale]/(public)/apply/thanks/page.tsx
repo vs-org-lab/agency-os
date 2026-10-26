@@ -4,6 +4,7 @@ import { PublicFrame } from '@/components/public/public-frame';
 import { requireLocale } from '@/i18n/require-locale';
 import { publicBookingView, resolveThanks } from '@/modules/commercial/server';
 import { bookSlotAction } from '../booking-actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,4 +53,8 @@ export default async function ApplyThanksPage({ params, searchParams }: PageProp
       </section>
     </PublicFrame>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'publicApply.title');
 }

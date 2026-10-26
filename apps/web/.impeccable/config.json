@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/agenda/item-chip.tsx"
+        ],
+        "createdAt": "2026-10-16T01:40:10.803Z",
+        "reason": "Claude decided: calendar item chip whose left edge carries the item kind's color (itemColor), the standard calendar convention; functional encoding, not decoration"
+      }
+    ]
+  }
+}

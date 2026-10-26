@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { requireLocale } from '@/i18n/require-locale';
 import { AuthCard } from '../auth-card';
 import { AcceptInvitationForm } from './accept-invitation-form';
+import { pageMetadata } from '@/i18n/page-title';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -18,4 +19,8 @@ export default async function AcceptInvitationPage({ params, searchParams }: Pag
       <AcceptInvitationForm tokenHash={type === 'invite' && tokenHash ? tokenHash : ''} />
     </AuthCard>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'auth.invitation.title');
 }

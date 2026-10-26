@@ -6,6 +6,7 @@ import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadTeam } from '@/modules/team/server';
 import { inviteTeamAction, resendTeamInvitationAction } from './actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,4 +42,8 @@ export default async function TeamSettingsPage({ params }: PageProps) {
       <TeamTable members={members} resend={resendTeamInvitationAction} />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'team.title');
 }

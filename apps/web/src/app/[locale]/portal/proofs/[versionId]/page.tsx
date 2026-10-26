@@ -9,6 +9,7 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadClientProofVersion } from '@/modules/proofing/server';
 import { portalRoomAccess } from '../../room-session';
 import { commentOnClientProofAction, decideProofAction } from '../actions';
+import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,4 +58,8 @@ export default async function PortalProofPage({ params }: PageProps) {
       />
     </div>
   );
+}
+
+export function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return pageMetadata(params, 'proofing.clientList.title');
 }

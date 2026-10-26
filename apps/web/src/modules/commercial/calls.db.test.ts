@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createCommercialFixture,
+  createCoreFixture,
   createFixtureWorld,
   testDatabase,
   withTestTransaction,
@@ -133,6 +134,28 @@ describe('calls', () => {
 
       expect((await dealCode(sql, fixture.a.dealId))?.code).toBe('1.1');
       expect((await dealCode(sql, fixture.b.dealId))?.code).toBe('0.4');
+    });
+  });
+
+  it('advance moves a deal that already has a Core engagement to 1.1', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+
+      const result = await recordCallOutcome(
+        claimsFor(world.users.founder),
+        {
+          callId: core.a.callId,
+          status: 'completed',
+          outcome: 'advance',
+          reason: null,
+          notes: null,
+        },
+        depsFor(sql),
+      );
+
+      expect(result).toEqual({ ok: true });
+      expect((await dealCode(sql, core.a.dealId))?.code).toBe('1.1');
     });
   });
 

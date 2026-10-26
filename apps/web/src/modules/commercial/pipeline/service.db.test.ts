@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { sql as query } from 'drizzle-orm';
 import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
@@ -274,6 +275,53 @@ describe('pipeline stage service', () => {
       );
 
       expect(result).toEqual({ ok: false, rule: 'not_found' });
+    });
+  });
+
+  it('finance calling the stage service directly gets not_found and keeps its role', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const outcome = await contexts.withUserContext(
+        claimsFor(world.users.finance),
+        async (tx) => ({
+          result: await applyStageChange(tx, {
+            dealId: fixture.a.dealId,
+            to: 'X.1',
+            reason: null,
+            actor: { userId: world.users.finance, isFounder: false },
+          }),
+          role: (await tx.execute<{ role: string }>(query`select current_user::text as role`))[0]
+            ?.role,
+        }),
+      );
+
+      expect(outcome).toEqual({ result: { ok: false, rule: 'not_found' }, role: 'authenticated' });
+      expect(await codeOf(sql, fixture.a.dealId)).toBe('0.3');
+    });
+  });
+
+  it('a founder stage change through the service returns to the authenticated role', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const fixture = await createCommercialFixture(sql, world);
+      const contexts = createDbContexts(testDatabase(sql));
+
+      const role = await contexts.withUserContext(claimsFor(world.users.founder), async (tx) => {
+        await applyStageChange(tx, {
+          dealId: fixture.a.dealId,
+          to: 'X.1',
+          reason: null,
+          actor: { userId: world.users.founder, isFounder: true },
+        });
+        return (await tx.execute<{ role: string }>(query`select current_user::text as role`))[0]
+          ?.role;
+      });
+
+      expect(role).toBe('authenticated');
+      expect(await codeOf(sql, fixture.a.dealId)).toBe('X.1');
     });
   });
 

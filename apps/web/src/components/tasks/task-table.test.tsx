@@ -200,13 +200,24 @@ describe('task table', () => {
     expect(screen.queryByRole('columnheader', { name: 'Cliente' })).toBeNull();
   });
 
-  it('renders cards below 768px', () => {
-    window.innerWidth = 500;
+  it('renders table and cards together, each hidden by CSS at the other breakpoint', () => {
     renderTable([task({ title: 'No telemóvel', dueOn: '2026-10-20' })]);
 
-    expect(screen.queryByRole('table')).toBeNull();
-    expect(screen.getByRole('list', { name: 'Tarefas' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'No telemóvel' })).toBeTruthy();
+    const table = screen.getByRole('table', { name: 'Tarefas' });
+    const cards = screen.getByRole('list', { name: 'Tarefas' });
+    expect(table.closest('.hidden')?.className).toContain('md:block');
+    expect(cards.className).toContain('md:hidden');
+    expect(within(cards).getByRole('button', { name: 'No telemóvel' })).toBeTruthy();
+  });
+
+  it('labels the status checkbox with the action and the task title', () => {
+    renderTable([task({ title: 'Aberta' }), task({ title: 'Feita', status: 'done' })]);
+
+    const table = within(screen.getByRole('table'));
+    expect(table.getByRole('checkbox', { name: 'Concluir Aberta' })).toBeTruthy();
+    expect(table.getByRole('checkbox', { name: 'Reabrir Feita' })).toBeTruthy();
+    const cards = within(screen.getByRole('list', { name: 'Tarefas' }));
+    expect(cards.getByRole('checkbox', { name: 'Concluir Aberta' })).toBeTruthy();
   });
 
   it('title opens the panel by setting task in the url', async () => {
@@ -215,7 +226,7 @@ describe('task table', () => {
     renderTable([row]);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Abrir' }));
+      fireEvent.click(within(screen.getByRole('table')).getByRole('button', { name: 'Abrir' }));
     });
 
     expect(replace).toHaveBeenCalledWith(`/tasks?status=all&task=${row.id}`, { scroll: false });

@@ -81,7 +81,7 @@ test.describe('Tasks, home and updates', () => {
     await panel.getByRole('button', { name: 'Fechar' }).click();
     await expect(panel).toBeHidden();
 
-    await page.getByRole('checkbox', { name: title, exact: true }).click();
+    await page.getByRole('checkbox', { name: `Concluir ${title}`, exact: true }).click();
     await expect(roomTitle).toHaveCount(0, { timeout: 30_000 });
 
     await page.goto('/tasks');

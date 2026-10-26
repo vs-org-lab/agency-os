@@ -119,7 +119,7 @@ export function TaskRow({
       <TableRow className="h-10">
         <TableCell className="w-10 py-0 pr-0 pl-3">
           <Checkbox
-            aria-label={task.title}
+            aria-label={t(done ? 'table.reopen' : 'table.complete', { title: task.title })}
             checked={done}
             disabled={actions.pending}
             onCheckedChange={(checked) =>
@@ -199,7 +199,9 @@ export function TaskCard({ task, today, showClient, ...actions }: RowProps) {
       <div className="flex items-start gap-3">
         <Checkbox
           className="mt-0.5"
-          aria-label={task.title}
+          aria-label={t(task.status === 'done' ? 'table.reopen' : 'table.complete', {
+            title: task.title,
+          })}
           checked={task.status === 'done'}
           disabled={actions.pending}
           onCheckedChange={(checked) =>

@@ -55,6 +55,7 @@ type PanelProps = {
 };
 
 const PANEL_ID = 'task-panel-content';
+const TAB_ID = { details: 'task-panel-tab-details', collaboration: 'task-panel-tab-collaboration' };
 
 function Checklist({
   task,
@@ -298,17 +299,17 @@ function PanelContent({
       tabs={
         <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
           <TabsList className="w-full">
-            <TabsTrigger value="details" aria-controls={PANEL_ID}>
+            <TabsTrigger value="details" id={TAB_ID.details} aria-controls={PANEL_ID}>
               {t('tabs.details')}
             </TabsTrigger>
-            <TabsTrigger value="collaboration" aria-controls={PANEL_ID}>
+            <TabsTrigger value="collaboration" id={TAB_ID.collaboration} aria-controls={PANEL_ID}>
               {t('tabs.collaboration', { count: task.commentCount })}
             </TabsTrigger>
           </TabsList>
         </Tabs>
       }
     >
-      <div id={PANEL_ID} role="tabpanel">
+      <div id={PANEL_ID} role="tabpanel" aria-labelledby={TAB_ID[tab]}>
         {tab === 'details' ? (
           <Details task={task} people={people} actions={actions} />
         ) : (

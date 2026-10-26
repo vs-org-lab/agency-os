@@ -121,6 +121,16 @@ describe('task panel', () => {
     expect(screen.getByRole('tab', { name: 'Comentários e ficheiros (2)' })).toBeTruthy();
   });
 
+  it('names the tab panel after the selected tab', async () => {
+    const user = userEvent.setup();
+    search = `task=${TASK_ID}`;
+    renderPanel(detail());
+
+    expect(screen.getByRole('tabpanel', { name: 'Detalhes' })).toBeTruthy();
+    await openCollaboration(user);
+    expect(screen.getByRole('tabpanel', { name: /Comentários e ficheiros/ })).toBeTruthy();
+  });
+
   it('closing removes only the task param from the address', async () => {
     const user = userEvent.setup();
     search = `task=${TASK_ID}&status=all`;

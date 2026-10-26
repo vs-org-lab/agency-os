@@ -4,6 +4,11 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@agency-os/ui/components/collapsible';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
@@ -70,18 +75,22 @@ export function ContractTemplateEditor({
           }}
         />
       </div>
-      <details className="text-body-sm text-text-secondary">
-        <summary className="cursor-pointer">{t('fields')}</summary>
-        <ul className="flex flex-wrap gap-2 pt-2">
-          {TEMPLATE_FIELDS.map((field) => (
-            <li key={field}>
-              <code className="rounded bg-surface-muted px-1.5 py-0.5 text-caption text-text">
-                {fieldToken(field)}
-              </code>
-            </li>
-          ))}
-        </ul>
-      </details>
+      <Collapsible className="text-body-sm text-text-secondary">
+        <CollapsibleTrigger className="font-normal text-text-secondary">
+          {t('fields')}
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <ul className="flex flex-wrap gap-2 pt-2">
+            {TEMPLATE_FIELDS.map((field) => (
+              <li key={field}>
+                <code className="rounded bg-surface-muted px-1.5 py-0.5 text-caption text-text">
+                  {fieldToken(field)}
+                </code>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
       {outcome.kind === 'unknown' ? (
         <FormMessage tone="danger">
           {t('errors.unknown', { fields: outcome.fields.join(', ') })}

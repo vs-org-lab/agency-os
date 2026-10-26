@@ -82,11 +82,14 @@ export function TaskForm({
   people,
   fixedClientId,
   create,
+  onDone,
 }: {
   clients: TaskOptionView[];
   people: TaskPerson[];
   fixedClientId: string | null;
   create: (input: NewTaskInput) => Promise<TaskActionResult>;
+  /** Called once with the success message when the task has been created. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('tasks');
   const [title, setTitle] = useState('');
@@ -105,6 +108,7 @@ export function TaskForm({
     setAssigneeId('');
     setDueOn('');
     setItems('');
+    onDone?.(t('form.created'));
   };
 
   return (
@@ -212,7 +216,9 @@ export function TaskForm({
         {outcome?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
         ) : null}
-        {outcome?.ok ? <FormMessage tone="success">{t('form.created')}</FormMessage> : null}
+        {outcome?.ok && !onDone ? (
+          <FormMessage tone="success">{t('form.created')}</FormMessage>
+        ) : null}
       </div>
     </form>
   );
@@ -223,10 +229,13 @@ export function TaskEditForm({
   task,
   people,
   update,
+  onDone,
 }: {
   task: TaskView;
   people: TaskPerson[];
   update: (input: TaskChanges) => Promise<TaskActionResult>;
+  /** Called once with the success message when the changes have been saved. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('tasks');
   const [title, setTitle] = useState(task.title);
@@ -242,14 +251,16 @@ export function TaskEditForm({
       onChange={() => setOutcome(null)}
       onSubmit={(event) => {
         event.preventDefault();
-        run(() =>
-          update({
-            taskId: task.id,
-            title,
-            notes,
-            assigneeId: assigneeId || null,
-            dueOn: dueOn || null,
-          }),
+        run(
+          () =>
+            update({
+              taskId: task.id,
+              title,
+              notes,
+              assigneeId: assigneeId || null,
+              dueOn: dueOn || null,
+            }),
+          () => onDone?.(t('form.saved')),
         );
       }}
     >
@@ -298,7 +309,9 @@ export function TaskEditForm({
         {outcome?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
         ) : null}
-        {outcome?.ok ? <FormMessage tone="success">{t('form.saved')}</FormMessage> : null}
+        {outcome?.ok && !onDone ? (
+          <FormMessage tone="success">{t('form.saved')}</FormMessage>
+        ) : null}
       </div>
     </form>
   );

@@ -571,7 +571,9 @@
           "duplicate_email": "A contact with this email already exists.",
           "invalid_input": "Check the contact fields.",
           "not_found": "The contact could not be saved."
-        }
+        },
+        "saved": "Contact saved.",
+        "editLabel": "Edit {name}"
       },
       "application": {
         "empty": "This deal has no application.",
@@ -701,6 +703,7 @@
       "description": "Target companies by sector, approach notes and messages ready to copy.",
       "add": "New target company",
       "edit": "Edit",
+      "editLabel": "Edit {name}",
       "form": {
         "companyName": "Company",
         "sector": "Sector",
@@ -708,7 +711,8 @@
         "notes": "Approach notes",
         "status": "Status",
         "save": "Save",
-        "error": "Check the fields and try again."
+        "error": "Check the fields and try again.",
+        "saved": "Target saved."
       },
       "statuses": {
         "to_contact": "To contact",
@@ -1267,7 +1271,8 @@
       "save": "Save template",
       "saved": "Template saved.",
       "invalid": "Check the template fields.",
-      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up."
+      "empty": "No templates yet. Follow-up templates are created automatically with the first follow-up.",
+      "editLabel": "Edit {name}"
     },
     "coreTemplates": {
       "title": "Core templates",
@@ -1336,7 +1341,8 @@
       "cancel": "Cancel",
       "saved": "Entity saved.",
       "error": "The entity could not be saved. Check the fields.",
-      "summary": "{taxId} · {address} · {representative} ({role})"
+      "summary": "{taxId} · {address} · {representative} ({role})",
+      "editLabel": "Edit {name}"
     },
     "contractTemplates": {
       "title": "Contracts",
@@ -1737,7 +1743,8 @@
         "invalid_input": "Write the reason.",
         "invalid_state": "The agreement can no longer be voided.",
         "not_found": "The action could not be completed."
-      }
+      },
+      "voided": "Contract voided."
     }
   },
   "billing": {
@@ -2042,7 +2049,8 @@
       "invalid_input": "Check the fields and try again."
     },
     "delete": "Delete",
-    "deleteLabel": "Delete task {title}"
+    "deleteLabel": "Delete task {title}",
+    "editLabel": "Edit task {title}"
   },
   "team": {
     "title": "Team",
@@ -2239,12 +2247,25 @@
       }
     }
   },
+  "command": {
+    "open": "Search",
+    "title": "Command palette",
+    "description": "Go to a page, create something or search clients, deals and tasks.",
+    "placeholder": "Type a command or search…",
+    "groups": { "goTo": "Go to", "create": "Create", "search": "Search" },
+    "create": { "newTask": "New task" },
+    "kind": { "client": "Client", "deal": "Deal", "task": "Task" },
+    "empty": "No results.",
+    "searching": "Searching…",
+    "error": "The search is unavailable."
+  },
   "interaction": {
     "holdToConfirm": "{label}, hold to confirm",
     "holding": "Keep holding…",
     "confirmed": "Confirmed.",
     "confirmAction": "Confirm: {label}",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "testimonials": {
     "title": "Testimonial",

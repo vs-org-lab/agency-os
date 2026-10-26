@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -53,15 +53,61 @@ describe('ContractSection', () => {
       void: vi.fn(async () => ({ ok: true as const })),
     };
     renderSection(actions);
-    fireEvent.click(screen.getByText('Anular contrato', { selector: 'summary' }));
-    fireEvent.change(screen.getByLabelText('Motivo'), { target: { value: 'Valor errado' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Anular contrato' }));
+    const dialog = screen.getByRole('dialog', { name: 'Anular contrato' });
+    fireEvent.change(within(dialog).getByLabelText('Motivo'), {
+      target: { value: 'Valor errado' },
+    });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Anular contrato' }));
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Anular contrato' }));
     });
 
     expect(actions.void).toHaveBeenCalledWith('contract-1', 'deal-1', 'Valor errado');
     expect(refresh).toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('keeps the void dialog open when the action is refused', async () => {
+    const actions: ContractSectionActions = {
+      sign: vi.fn(async () => ({ ok: true as const })),
+      void: vi.fn(async () => ({ ok: false as const, code: 'invalid_state' })),
+    };
+    renderSection(actions);
+    fireEvent.click(screen.getByRole('button', { name: 'Anular contrato' }));
+    const dialog = screen.getByRole('dialog', { name: 'Anular contrato' });
+    fireEvent.change(within(dialog).getByLabelText('Motivo'), {
+      target: { value: 'Valor errado' },
+    });
+
+    await act(async () => {
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Anular contrato' }));
+    });
+
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(screen.getByText('O contrato já não pode ser anulado.')).toBeTruthy();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it('moves focus to the section heading once the contract is voided', async () => {
+    const actions = { sign: vi.fn(), void: vi.fn() };
+    const view = (contract: ContractView) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <ContractSection contract={contract} dealId="deal-1" founder actions={actions} />
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(view(CONTRACT));
+    rerender(view({ ...CONTRACT, status: 'void' }));
+    await vi.waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Contrato' })),
+    );
+  });
+
+  it('reveals the contract text from the read disclosure', () => {
+    renderSection({ sign: vi.fn(), void: vi.fn() });
+    expect(screen.getByText(/Texto./).closest('[hidden]')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Ler o contrato' }));
+    expect(screen.getByText(/Texto./).closest('[hidden]')).toBeNull();
   });
 
   it('shows who signed and offers the studio signature', () => {

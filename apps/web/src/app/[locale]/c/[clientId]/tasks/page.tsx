@@ -1,7 +1,8 @@
+import { PageHeader } from '@agency-os/ui/components/page-header';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { TaskFilters } from '@/components/tasks/task-filters';
-import { TaskForm } from '@/components/tasks/task-form';
+import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
 import { getPathname } from '@/i18n/navigation';
@@ -21,7 +22,7 @@ export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ locale: string; clientId: string }>;
-  searchParams: Promise<{ assignee?: string; status?: string }>;
+  searchParams: Promise<{ assignee?: string; status?: string; new?: string }>;
 };
 
 export default async function RoomTasksPage({ params, searchParams }: PageProps) {
@@ -31,33 +32,29 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
   const session = await requireArea('/', locale);
   const options = await loadTaskOptions(session, clientId);
   if (!options) notFound();
-  const filter = parseTaskFilter(await searchParams);
+  const query = await searchParams;
+  const filter = parseTaskFilter(query);
   const tasks = await loadTasks(session, { ...filter, clientId });
   const clientName = options.clients.find((client) => client.id === clientId)?.name ?? '';
   const t = await getTranslations('tasks');
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <p className="text-caption text-text-secondary">{clientName}</p>
-        <h1 className="text-title text-text">{t('title')}</h1>
-        <p className="text-body text-text-secondary">{t('roomDescription')}</p>
-      </header>
-      {options.canCreate ? (
-        <details className="rounded-lg border border-border bg-surface px-4 py-3">
-          <summary className="cursor-pointer text-body font-medium text-text">
-            {t('form.heading')}
-          </summary>
-          <div className="pt-4">
-            <TaskForm
-              clients={[]}
-              people={options.people}
-              fixedClientId={clientId}
-              create={createTaskAction}
-            />
-          </div>
-        </details>
-      ) : null}
+      <PageHeader
+        title={t('title')}
+        description={t('roomDescription')}
+        context={<span className="text-caption text-text-secondary">{clientName}</span>}
+        actions={
+          <TaskCreate
+            canCreate={options.canCreate}
+            openRequested={query.new === '1'}
+            clients={[]}
+            people={options.people}
+            fixedClientId={clientId}
+            create={createTaskAction}
+          />
+        }
+      />
       <TaskFilters
         action={getPathname({ href: `/c/${clientId}/tasks`, locale })}
         clients={null}

@@ -20,15 +20,16 @@ describe('route loading', () => {
     expect(region.textContent).toContain('A carregar…');
   });
 
-  it('does not pulse when the reader prefers reduced motion', () => {
+  it('announces loading once and leaves the shimmer to the reduced-motion aware stylesheet', () => {
     const { container } = render(
       <NextIntlClientProvider locale="pt-PT" messages={messages}>
-        <RouteLoading />
+        <RouteLoading shape="cards" />
       </NextIntlClientProvider>,
     );
 
+    expect(screen.getAllByRole('status')).toHaveLength(1);
     const bars = container.querySelectorAll('[data-slot="skeleton"]');
     expect(bars.length).toBeGreaterThan(0);
-    for (const bar of bars) expect(bar.className).toContain('motion-reduce:animate-none');
+    for (const bar of bars) expect(bar.className).toContain('skeleton');
   });
 });

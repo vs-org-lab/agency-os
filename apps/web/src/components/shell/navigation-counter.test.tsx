@@ -1,7 +1,12 @@
 // @vitest-environment jsdom
-import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { COUNTER_REFRESH_EVENT, formatCounter, useLiveCounter } from './navigation-counter';
+import {
+  COUNTER_REFRESH_EVENT,
+  CounterValue,
+  formatCounter,
+  useLiveCounter,
+} from './navigation-counter';
 
 const pathname = { current: '/' };
 
@@ -71,5 +76,26 @@ describe('useLiveCounter', () => {
 
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(result.current).toBe(2);
+  });
+});
+
+describe('CounterValue', () => {
+  it('shows 9+ above nine without an animated number', () => {
+    const { container } = render(<CounterValue count={10} locale="pt-PT" />);
+
+    expect(container.textContent).toBe('9+');
+    expect(container.querySelector('number-flow-react')).toBeNull();
+  });
+
+  it('animates numeric counts up to nine', () => {
+    const { container } = render(<CounterValue count={9} locale="pt-PT" />);
+
+    expect(container.querySelector('number-flow-react')).not.toBeNull();
+  });
+
+  it('renders nothing for an empty count', () => {
+    const { container } = render(<CounterValue count={0} locale="pt-PT" />);
+
+    expect(container.firstChild).toBeNull();
   });
 });

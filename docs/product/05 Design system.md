@@ -114,9 +114,10 @@ Valores monetários e tabelas usam algarismos tabulares, para as colunas alinhar
 | fast | 120 ms | Hover, pressionar, mudar de separador |
 | base | 180 ms | Menus, popovers, tooltips |
 | slow | 240 ms | Painéis laterais, diálogos, troca de fase no workshop |
+| morph | 300 ms, mola sem ressalto | Elementos partilhados: indicador de separador, item ativo do menu, botão que abre o seu painel, listas que se reordenam, números que rolam |
 | moment | 600 ms a 1,2 s | Só momentos do cliente: aprovação final, pagamento, publicação do hub |
 
-Todas as transições usam ease-out. Com "reduzir movimento" ativo no sistema, as transições passam a instantâneas e os momentos passam a uma mudança de estado sem animação.
+Todas as transições usam ease-out; o morph usa uma mola sem ressalto. Só se animam transform e opacity (e a altura nas secções que abrem). A animação vem da biblioteca Motion, carregada a pedido. Com "reduzir movimento" ativo no sistema, as transições passam a instantâneas, os números aparecem no valor final e os momentos passam a uma mudança de estado sem animação.
 
 ## Componentes e estados
 
@@ -130,7 +131,7 @@ Quase todos os componentes vêm de bibliotecas prontas e são ajustados aos toke
 | Etiqueta de estado | Ponto + texto, nos tons do estado | shadcn/ui Badge, ajustado |
 | Cartão de documento | Ícone, título, etiqueta, linha de origem; borda forte em hover | shadcn/ui Card |
 | Barra lateral | Os dois níveis (estúdio e sala), recolhível | shadcn/ui Sidebar |
-| Paleta de comandos | ⌘K: navegar, procurar, criar | shadcn/ui Command |
+| Paleta de comandos | ⌘K: navegar, procurar clientes, negócios e tarefas, criar | shadcn/ui Command (cmdk) |
 | Tabela | Listas, faturas, candidaturas, auditoria | shadcn/ui Table + TanStack Table |
 | Quadro | Pipeline e tarefas em quadro | dnd-kit |
 | Separadores segmentados | Passos · Plano; Workshop · Respostas · Estratégia; Editar · Pré-visualizar | shadcn/ui Tabs ou Toggle Group |
@@ -148,6 +149,12 @@ Quase todos os componentes vêm de bibliotecas prontas e são ajustados aos toke
 | Gráficos | Relatórios, resultado acordado, dinheiro | shadcn/ui Charts (Recharts) |
 | Calendário | Seletores de data e vistas de semana e mês | shadcn/ui Calendar e uma biblioteca de agenda |
 
+### Criar e editar
+
+- Criar um item de topo é sempre um botão principal identificado no cabeçalho ("+ Nova tarefa"), que abre um diálogo (formulários curtos) ou um painel lateral (formulários longos). Ao concluir, o painel fecha e aparece uma notificação.
+- Criar um filho dentro de uma lista é uma linha inline ("+ Adicionar subtarefa").
+- Editar é um botão "Editar" que abre o mesmo diálogo. Secções que abrem e fecham servem só para divulgar informação, nunca para esconder formulários.
+
 ### Estados que todo o componente tem de ter
 
 | Estado | Como se mostra |
@@ -156,7 +163,7 @@ Quase todos os componentes vêm de bibliotecas prontas e são ajustados aos toke
 | Foco | Anel de 2 px com o token accent, sempre visível ao navegar com o teclado |
 | Desativado | Opacidade a 50% e motivo num tooltip quando não é óbvio |
 | A carregar | Esqueleto com a forma do conteúdo; botões mantêm o texto e mostram um indicador |
-| Vazio | Ícone, uma frase sobre o que aparece ali e a ação para começar |
+| Vazio | Até três ícones em leque, uma frase sobre o que aparece ali e a ação para começar; nas listas grandes, linhas fantasma atrás do texto |
 | Erro | O que aconteceu e o que fazer, junto ao sítio do erro, com "Tentar de novo" |
 | Bloqueado | Ícone de cadeado e o motivo ("Aprovado pelo cliente a 16/04; crie uma nova versão para alterar") |
 
@@ -179,7 +186,7 @@ O OS não cria componentes de raiz quando já existem prontos. Mas misturar vár
 ### Regras
 
 1. **Uma base.** shadcn/ui com Tailwind e os tokens deste documento. Tudo o que vem de fora adapta-se aos tokens; nunca o contrário.
-2. **Animação com lugar certo.** Nos ecrãs de trabalho: só transições funcionais até 240 ms. No portal: micro-interações e um momento de celebração por evento. Efeitos fortes ficam no site.
+2. **Animação com lugar certo.** Nos ecrãs de trabalho: transições e morphs funcionais até 300 ms, que mostram de onde vem e para onde vai cada coisa; nada anima em ciclo nem atrasa uma ação. No portal: micro-interações e um momento de celebração por evento. Efeitos fortes ficam no site.
 3. **Copiar, não instalar tudo.** Traz-se só o componente necessário, não a biblioteca inteira.
 4. **Origem registada.** Cada componente importado vive em components/ui ou components/motion, com a origem, a versão e a licença registadas num ficheiro de inventário.
 5. **Licenças verificadas.** Cada componente é verificado antes de entrar, com atenção às versões pagas e a licenças que restringem o uso em produtos vendidos, porque o OS pode vir a ser vendido (M22).

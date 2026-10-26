@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { currencies } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
@@ -9,6 +10,8 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
+import { useSavedNotice } from '@/components/forms/use-saved-notice';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import { SubmitButton } from '@/components/forms/submit-button';
 import type { PipelineCode } from '@/modules/commercial';
 import { moveDealAction } from '../actions';
@@ -239,23 +242,29 @@ export function OutcomeForm({ action }: { action: BoundAction }) {
   );
 }
 
+type ContactDefaults = {
+  fullName: string;
+  email: string | null;
+  phone: string | null;
+  jobTitle: string | null;
+  role: string;
+};
+
 export function ContactForm({
   action,
   defaults,
   submitLabel,
+  onDone,
 }: {
   action: BoundAction;
-  defaults: {
-    fullName: string;
-    email: string | null;
-    phone: string | null;
-    jobTitle: string | null;
-    role: string;
-  } | null;
+  defaults: ContactDefaults | null;
   submitLabel: string;
+  /** Called once with the success message when the contact has been saved. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('commercial.deal.contacts');
   const [state, formAction] = useActionState(action, { status: 'idle' });
+  useSavedNotice(state, onDone, t('saved'));
   const prefix = defaults ? 'edit' : 'new';
 
   return (
@@ -312,6 +321,37 @@ export function ContactForm({
         </div>
       </div>
     </form>
+  );
+}
+
+/** The "add contact" button or a contact's "edit" button, each opening the form in a dialog. */
+export function ContactDialog({
+  action,
+  defaults,
+  submitLabel,
+}: {
+  action: BoundAction;
+  defaults: ContactDefaults | null;
+  submitLabel: string;
+}) {
+  const t = useTranslations('commercial.deal.contacts');
+  return (
+    <CreateDialog
+      label={defaults ? t('edit') : t('add')}
+      triggerLabel={defaults ? t('editLabel', { name: defaults.fullName }) : undefined}
+      title={defaults ? defaults.fullName : t('add')}
+      variant="outline"
+      icon={defaults ? <Pencil aria-hidden /> : undefined}
+    >
+      {(close) => (
+        <ContactForm
+          action={action}
+          defaults={defaults}
+          submitLabel={submitLabel}
+          onDone={(message) => close({ message })}
+        />
+      )}
+    </CreateDialog>
   );
 }
 

@@ -6,6 +6,7 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateSheet } from '@/components/ui/create-sheet';
 import { roomError, type ActionResult, type RoomError } from './room-errors';
 
 const FIELD = 'h-11 rounded-md border border-border bg-surface px-3 text-body text-text md:h-9';
@@ -15,10 +16,13 @@ export function NewProjectForm({
   clientId,
   templates,
   create,
+  onDone,
 }: {
   clientId: string;
   templates: ReadonlyArray<{ key: string; name: string }>;
   create: (input: { clientId: string; name: string; templateKey: string }) => Promise<ActionResult>;
+  /** Called once with the success message when the project has been created. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('rooms');
   const [name, setName] = useState('');
@@ -28,14 +32,17 @@ export function NewProjectForm({
 
   return (
     <form
-      className="grid gap-3 md:grid-cols-[1fr_16rem_auto] md:items-end"
+      className="flex flex-col gap-3"
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
           const outcome = await create({ clientId, name, templateKey }).catch(
             () => ({ ok: false, code: 'not_found' }) as const,
           );
-          if (outcome.ok) setName('');
+          if (outcome.ok) {
+            setName('');
+            onDone?.(t('done.created'));
+          }
           setResult(outcome.ok ? { ok: true } : { ok: false, error: roomError(outcome.code) });
         });
       }}
@@ -71,12 +78,24 @@ export function NewProjectForm({
       <Button type="submit" disabled={pending}>
         {t('createProject')}
       </Button>
-      <div className="md:col-span-3">
+      <div>
         {result?.ok === false ? (
           <FormMessage tone="danger">{t(`errors.${result.error}`)}</FormMessage>
         ) : null}
-        {result?.ok ? <FormMessage tone="success">{t('done.created')}</FormMessage> : null}
+        {result?.ok && !onDone ? (
+          <FormMessage tone="success">{t('done.created')}</FormMessage>
+        ) : null}
       </div>
     </form>
+  );
+}
+
+/** The "Novo projeto" button and its side panel. */
+export function NewProjectSheet(props: Omit<Parameters<typeof NewProjectForm>[0], 'onDone'>) {
+  const t = useTranslations('rooms');
+  return (
+    <CreateSheet label={t('newProject')} title={t('newProject')}>
+      {(close) => <NewProjectForm {...props} onDone={(message) => close({ message })} />}
+    </CreateSheet>
   );
 }

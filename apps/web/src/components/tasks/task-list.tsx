@@ -6,7 +6,9 @@ import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
 import { Checkbox } from '@agency-os/ui/components/checkbox';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
+import { Pencil } from 'lucide-react';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import { taskGroup, type TaskGroup, type TaskPerson, type TaskView } from '@/modules/tasks';
 import { taskError, type TaskActionResult, type TaskError } from './task-errors';
 import { TaskEditForm, type TaskChanges } from './task-form';
@@ -126,24 +128,33 @@ function TaskRow({
       ) : null}
       {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
       {edit && task.canEdit && !done ? (
-        <details className="pl-7">
-          <summary className="cursor-pointer text-body-sm text-link">{t('edit')}</summary>
-          <div className="flex flex-col gap-3 pt-3">
-            <TaskEditForm task={task} people={edit.people} update={edit.update} />
-            <div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={pending}
-                aria-label={t('deleteLabel', { title: task.title })}
-                onClick={() => run(() => edit.remove(task.id))}
-              >
-                {t('delete')}
-              </Button>
-            </div>
-          </div>
-        </details>
+        <div className="flex flex-wrap items-center gap-2 pl-7">
+          <CreateDialog
+            label={t('edit')}
+            triggerLabel={t('editLabel', { title: task.title })}
+            title={task.title}
+            icon={<Pencil aria-hidden />}
+            variant="outline"
+          >
+            {(close) => (
+              <TaskEditForm
+                task={task}
+                people={edit.people}
+                update={edit.update}
+                onDone={(message) => close({ message })}
+              />
+            )}
+          </CreateDialog>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            aria-label={t('deleteLabel', { title: task.title })}
+            onClick={() => run(() => edit.remove(task.id))}
+          >
+            {t('delete')}
+          </Button>
+        </div>
       ) : null}
     </li>
   );

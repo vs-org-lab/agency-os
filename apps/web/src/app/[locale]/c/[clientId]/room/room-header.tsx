@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
@@ -12,23 +13,29 @@ export function RoomHeader({
   projects,
   selectedId,
   basePath,
+  actions,
 }: {
   clientId: string;
   clientName: string;
   projects: readonly ProjectSummary[];
   selectedId: string | null;
   basePath: string;
+  /** Primary actions of the page, shown beside the preview link. */
+  actions?: ReactNode;
 }) {
   const t = useTranslations('rooms');
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="text-title text-text">{clientName}</h1>
-        {selectedId ? (
-          <Link href={`/c/${clientId}/preview?project=${selectedId}`} className={LINK}>
-            {t('previewAsClient')}
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-3">
+          {selectedId ? (
+            <Link href={`/c/${clientId}/preview?project=${selectedId}`} className={LINK}>
+              {t('previewAsClient')}
+            </Link>
+          ) : null}
+          {actions}
+        </div>
       </div>
       {projects.length > 1 ? (
         <nav aria-label={t('projectSelector')}>

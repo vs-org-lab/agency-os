@@ -1,14 +1,21 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Ban } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@agency-os/ui/components/collapsible';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { SignatureForm, type SignActionResult } from '@/components/contracts/signature-form';
 import { FormMessage } from '@/components/forms/form-message';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import type { ContractView } from '@/modules/contracts/server';
 
 export type ContractSectionActions = {
@@ -24,6 +31,57 @@ function voidError(code: string): VoidError {
   return (VOID_ERRORS as readonly string[]).includes(code) ? (code as VoidError) : 'not_found';
 }
 
+function VoidContractForm({
+  contractId,
+  dealId,
+  voidContract,
+  onDone,
+}: {
+  contractId: string;
+  dealId: string;
+  voidContract: ContractSectionActions['void'];
+  onDone: (message: string) => void;
+}) {
+  const t = useTranslations('contracts.contract');
+  const router = useRouter();
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<VoidError | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        startTransition(async () => {
+          const result = await voidContract(contractId, dealId, reason).catch(
+            () => ({ ok: false, code: 'not_found' }) as const,
+          );
+          if (!result.ok) return setError(voidError(result.code));
+          router.refresh();
+          onDone(t('voided'));
+        });
+      }}
+    >
+      <Label htmlFor={`void-${contractId}`}>{t('voidReason')}</Label>
+      <Textarea
+        id={`void-${contractId}`}
+        rows={2}
+        required
+        maxLength={500}
+        value={reason}
+        onChange={(event) => setReason(event.target.value)}
+      />
+      {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
+      <div>
+        <Button type="submit" variant="destructive" disabled={pending}>
+          {t('voidSubmit')}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export function ContractSection({
   contract,
   dealId,
@@ -37,10 +95,6 @@ export function ContractSection({
 }) {
   const t = useTranslations('contracts.contract');
   const format = useFormatter();
-  const router = useRouter();
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState<VoidError | null>(null);
-  const [pending, startTransition] = useTransition();
   const signedOn = (party: 'client' | 'studio') => {
     const signature = contract.signatures.find((entry) => entry.party === party);
     return signature
@@ -51,6 +105,15 @@ export function ContractSection({
   };
   const studioSigned = contract.signatures.some((entry) => entry.party === 'studio');
   const awaiting = contract.status === 'awaiting_signatures';
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const wasVoid = useRef(contract.status === 'void');
+
+  // Voiding removes the control that held focus; the section heading takes it over.
+  useEffect(() => {
+    const isVoid = contract.status === 'void';
+    if (isVoid && !wasVoid.current) headingRef.current?.focus();
+    wasVoid.current = isVoid;
+  }, [contract.status]);
 
   return (
     <section
@@ -58,7 +121,12 @@ export function ContractSection({
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
     >
       <header className="flex flex-wrap items-center gap-2">
-        <h2 id="contract-title" className="text-title-sm text-text">
+        <h2
+          id="contract-title"
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-title-sm text-text outline-none"
+        >
           {t('title')}
         </h2>
         <Badge variant={contract.status === 'signed' ? 'default' : 'secondary'}>
@@ -80,19 +148,21 @@ export function ContractSection({
         </a>
       ) : null}
 
-      <details className="rounded-md border border-border p-3">
-        <summary className="cursor-pointer text-body-sm text-link">{t('read')}</summary>
-        <div
-          tabIndex={0}
-          aria-label={t('title')}
-          className="mt-3 max-h-120 overflow-y-auto text-body-sm whitespace-pre-wrap text-text"
-        >
-          {contract.body}
-        </div>
-        <p className="mt-2 text-caption break-all text-text-tertiary">
-          {t('fingerprint', { hash: contract.bodyHash })}
-        </p>
-      </details>
+      <Collapsible className="rounded-md border border-border p-3">
+        <CollapsibleTrigger className="text-link">{t('read')}</CollapsibleTrigger>
+        <CollapsibleContent>
+          <div
+            tabIndex={0}
+            aria-label={t('title')}
+            className="mt-3 max-h-120 overflow-y-auto text-body-sm whitespace-pre-wrap text-text"
+          >
+            {contract.body}
+          </div>
+          <p className="mt-2 text-caption break-all text-text-tertiary">
+            {t('fingerprint', { hash: contract.bodyHash })}
+          </p>
+        </CollapsibleContent>
+      </Collapsible>
 
       {founder && awaiting && !studioSigned ? (
         <div className="flex flex-col gap-2 border-t border-border pt-4">
@@ -108,39 +178,24 @@ export function ContractSection({
       ) : null}
 
       {founder && awaiting ? (
-        <details className="border-t border-border pt-4">
-          <summary className="cursor-pointer text-body-sm text-danger">{t('voidTitle')}</summary>
-          <form
-            className="mt-3 flex flex-col gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              startTransition(async () => {
-                const result = await actions
-                  .void(contract.id, dealId, reason)
-                  .catch(() => ({ ok: false, code: 'not_found' }) as const);
-                if (!result.ok) return setError(voidError(result.code));
-                router.refresh();
-              });
-            }}
+        <div className="border-t border-border pt-4">
+          <CreateDialog
+            label={t('voidTitle')}
+            title={t('voidTitle')}
+            description={t('voidHint')}
+            variant="destructive"
+            icon={<Ban aria-hidden />}
           >
-            <p className="text-body-sm text-text-secondary">{t('voidHint')}</p>
-            <Label htmlFor={`void-${contract.id}`}>{t('voidReason')}</Label>
-            <Textarea
-              id={`void-${contract.id}`}
-              rows={2}
-              required
-              maxLength={500}
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-            />
-            {error ? <FormMessage tone="danger">{t(`errors.${error}`)}</FormMessage> : null}
-            <div>
-              <Button type="submit" variant="destructive" disabled={pending}>
-                {t('voidSubmit')}
-              </Button>
-            </div>
-          </form>
-        </details>
+            {(close) => (
+              <VoidContractForm
+                contractId={contract.id}
+                dealId={dealId}
+                voidContract={actions.void}
+                onDone={(message) => close({ message })}
+              />
+            )}
+          </CreateDialog>
+        </div>
       ) : null}
     </section>
   );

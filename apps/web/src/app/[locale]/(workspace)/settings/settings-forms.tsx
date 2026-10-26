@@ -1,12 +1,15 @@
 'use client';
 
 import { useActionState } from 'react';
+import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
+import { useSavedNotice } from '@/components/forms/use-saved-notice';
+import { CreateSheet } from '@/components/ui/create-sheet';
 import type { SettingsFormState } from './commercial-actions';
 
 type BoundAction = (state: SettingsFormState, formData: FormData) => Promise<SettingsFormState>;
@@ -143,15 +146,19 @@ export function TemplateForm({
   action,
   defaults,
   idPrefix,
+  onDone,
 }: {
   action: BoundAction;
   defaults: TemplateDefaults | null;
   idPrefix: string;
+  /** Called once with the success message when the template has been saved. */
+  onDone?: (message: string) => void;
 }) {
   const t = useTranslations('settings.templates');
   const [state, formAction] = useActionState<SettingsFormState, FormData>(action, {
     status: 'idle',
   });
+  useSavedNotice(state, onDone, t('saved'));
 
   return (
     <form action={formAction} className="grid gap-3 md:grid-cols-2">
@@ -224,12 +231,45 @@ export function TemplateForm({
         />
       </div>
       <div className="flex flex-col gap-2 md:col-span-2">
-        {state.status === 'saved' ? <FormMessage tone="success">{t('saved')}</FormMessage> : null}
+        {state.status === 'saved' && !onDone ? (
+          <FormMessage tone="success">{t('saved')}</FormMessage>
+        ) : null}
         {state.status === 'error' ? <FormMessage tone="danger">{t('invalid')}</FormMessage> : null}
         <div className="md:w-48">
           <SubmitButton>{t('save')}</SubmitButton>
         </div>
       </div>
     </form>
+  );
+}
+
+/** The "new template" button or a template's "edit" button, each opening the form in a side panel. */
+export function TemplateSheet({
+  action,
+  defaults,
+  idPrefix,
+}: {
+  action: BoundAction;
+  defaults: TemplateDefaults | null;
+  idPrefix: string;
+}) {
+  const t = useTranslations('settings.templates');
+  return (
+    <CreateSheet
+      label={defaults ? t('edit') : t('new')}
+      triggerLabel={defaults ? t('editLabel', { name: defaults.name }) : undefined}
+      title={defaults ? defaults.name : t('new')}
+      variant={defaults ? 'outline' : 'default'}
+      icon={defaults ? <Pencil aria-hidden /> : undefined}
+    >
+      {(close) => (
+        <TemplateForm
+          action={action}
+          defaults={defaults}
+          idPrefix={idPrefix}
+          onDone={(message) => close({ message })}
+        />
+      )}
+    </CreateSheet>
   );
 }

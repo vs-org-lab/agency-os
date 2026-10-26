@@ -71,7 +71,7 @@ export function ActionButton({
               key={key}
               aria-hidden="true"
               className={cn(
-                '[grid-area:1/1] motion-safe:transition-opacity motion-safe:duration-120 motion-safe:ease-out',
+                '[grid-area:1/1] motion-safe:transition-opacity motion-safe:duration-(--duration-fast) motion-safe:ease-out',
                 key === state ? 'opacity-100' : 'opacity-0',
               )}
             >

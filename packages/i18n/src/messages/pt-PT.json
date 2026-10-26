@@ -571,7 +571,9 @@
           "duplicate_email": "Já existe um contacto com este email.",
           "invalid_input": "Verifique os campos do contacto.",
           "not_found": "Não foi possível guardar o contacto."
-        }
+        },
+        "saved": "Contacto guardado.",
+        "editLabel": "Editar {name}"
       },
       "application": {
         "empty": "Este negócio não tem candidatura.",
@@ -701,6 +703,7 @@
       "description": "Empresas-alvo por setor, notas de abordagem e mensagens prontas a copiar.",
       "add": "Nova empresa-alvo",
       "edit": "Editar",
+      "editLabel": "Editar {name}",
       "form": {
         "companyName": "Empresa",
         "sector": "Setor",
@@ -708,7 +711,8 @@
         "notes": "Notas de abordagem",
         "status": "Estado",
         "save": "Guardar",
-        "error": "Verifique os campos e tente de novo."
+        "error": "Verifique os campos e tente de novo.",
+        "saved": "Empresa-alvo guardada."
       },
       "statuses": {
         "to_contact": "Por contactar",
@@ -1267,7 +1271,8 @@
       "save": "Guardar modelo",
       "saved": "Modelo guardado.",
       "invalid": "Verifique os campos do modelo.",
-      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento."
+      "empty": "Ainda não há modelos. Os de acompanhamento são criados automaticamente no primeiro acompanhamento.",
+      "editLabel": "Editar {name}"
     },
     "coreTemplates": {
       "title": "Modelos do Core",
@@ -1336,7 +1341,8 @@
       "cancel": "Cancelar",
       "saved": "Entidade guardada.",
       "error": "Não foi possível guardar. Confirme os campos.",
-      "summary": "{taxId} · {address} · {representative} ({role})"
+      "summary": "{taxId} · {address} · {representative} ({role})",
+      "editLabel": "Editar {name}"
     },
     "contractTemplates": {
       "title": "Contratos",
@@ -1737,7 +1743,8 @@
         "invalid_input": "Escreva o motivo.",
         "invalid_state": "O contrato já não pode ser anulado.",
         "not_found": "Não foi possível concluir a ação."
-      }
+      },
+      "voided": "Contrato anulado."
     }
   },
   "billing": {
@@ -2042,7 +2049,8 @@
       "invalid_input": "Verifique os campos e tente de novo."
     },
     "delete": "Apagar",
-    "deleteLabel": "Apagar tarefa {title}"
+    "deleteLabel": "Apagar tarefa {title}",
+    "editLabel": "Editar tarefa {title}"
   },
   "team": {
     "title": "Equipa",
@@ -2239,12 +2247,25 @@
       }
     }
   },
+  "command": {
+    "open": "Procurar",
+    "title": "Paleta de comandos",
+    "description": "Vá a uma página, crie algo ou procure clientes, negócios e tarefas.",
+    "placeholder": "Escreva um comando ou procure…",
+    "groups": { "goTo": "Ir para", "create": "Criar", "search": "Procurar" },
+    "create": { "newTask": "Nova tarefa" },
+    "kind": { "client": "Cliente", "deal": "Negócio", "task": "Tarefa" },
+    "empty": "Sem resultados.",
+    "searching": "A procurar…",
+    "error": "A procura não está disponível."
+  },
   "interaction": {
     "holdToConfirm": "{label}, mantenha premido para confirmar",
     "holding": "Continue a premir…",
     "confirmed": "Confirmado.",
     "confirmAction": "Confirmar: {label}",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "close": "Fechar"
   },
   "testimonials": {
     "title": "Testemunho",

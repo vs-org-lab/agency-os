@@ -8,6 +8,7 @@
     "./components/*": "./src/components/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
+    "./motion": "./src/motion/index.ts",
     "./theme": "./src/theme/theme-provider.tsx",
     "./brand": "./src/brand/symbol.tsx",
     "./theme-toggle": "./src/theme/theme-toggle.tsx"
@@ -17,10 +18,13 @@
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
+    "@number-flow/react": "0.6.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "cmdk": "1.1.1",
     "input-otp": "1.5.0",
     "lucide-react": "1.52.0",
+    "motion": "14.1.0",
     "next-themes": "0.4.6",
     "radix-ui": "1.7.0",
     "react-hook-form": "7.89.0",
@@ -34,12 +38,12 @@
   },
   "devDependencies": {
     "@agency-os/config": "workspace:*",
+    "@types/node": "^22.19.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "tailwindcss": "4.3.3",
-    "typescript": "6.0.3",
-    "@types/node": "^22.19.0"
+    "typescript": "6.0.3"
   }
 }

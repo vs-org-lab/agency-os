@@ -121,6 +121,7 @@ Este ficheiro é o registo vivo do que foi feito, do que está em curso e do que
 | 2026-10-14 | Repositório `vs-org-lab/agency-os` tornado público para usar minutos ilimitados do GitHub Actions (os 2.000 minutos gratuitos do repositório privado esgotaram); PRs de forks exigem aprovação. Volta a privado depois do teste completo do OS | Decisão do fundador |
 | 2026-10-14 | Spec e plano do 2F.3 aprovados (luz verde permanente do fundador) | [Spec 2F.3](superpowers/specs/2026-10-14-brand-hub-domain-manual-design.md) |
 | 2026-10-26 | Cliente demo não real ("Estúdio Demo") para testar sala, tarefas, retainer e Brand Hub sem clientes: `pnpm --filter web seed:demo --founder-email <email>`, idempotente; documentos, reuniões e imagens do hub ficam de fora (exigem armazenamento ou calendário) | Ramo `feat/demo-seed` |
+| 2026-10-26 | UX-0 Fundação de interação: `motion` com morph funcional (indicador partilhado em separadores e menu), criação por botões identificados com diálogo ou painel (nenhum `<details>` para criar), estado vazio v2, notificações, skeletons por rota, números animados, paleta ⌘K com procura sob RLS; design system 05 e inventário atualizados | [Spec](superpowers/specs/2026-10-26-interaction-foundation-design.md), [Plano](superpowers/plans/2026-10-26-interaction-foundation.md), ramo `feat/interaction-foundation` |
 
 ## Critérios de aceitação da fundação
 

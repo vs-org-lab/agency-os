@@ -2667,6 +2667,7 @@
       "microphone": "Microphone",
       "level": "Microphone level",
       "preview": "Camera preview",
+      "enable": "Turn on camera and microphone",
       "start": "Start recording",
       "pause": "Pause",
       "resume": "Resume",

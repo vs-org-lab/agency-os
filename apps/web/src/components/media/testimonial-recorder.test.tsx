@@ -42,8 +42,14 @@ function renderRecorder(
   return { submit, onWriteInstead };
 }
 
+async function enableCamera() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Ativar câmara e microfone' }));
+  });
+}
+
 async function startRecording() {
-  await act(async () => {});
+  await enableCamera();
   await act(async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Começar a gravar' }));
   });
@@ -61,6 +67,12 @@ describe('TestimonialRecorder', () => {
     renderRecorder();
     await act(async () => {});
 
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(screen.getByText('1 de 3 · Antes')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Escrever em vez disso' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Começar a gravar' })).toBeNull();
+
+    await enableCamera();
     expect(getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
     expect(screen.getByRole('combobox', { name: 'Câmara' })).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Microfone' })).toBeTruthy();
@@ -70,7 +82,7 @@ describe('TestimonialRecorder', () => {
   it('holds the recording back until the author has consented', async () => {
     installFakeMedia({ kinds: ['audio', 'video'] });
     renderRecorder({ disabled: true });
-    await act(async () => {});
+    await enableCamera();
 
     expect(
       (screen.getByRole('button', { name: 'Começar a gravar' }) as HTMLButtonElement).disabled,
@@ -173,7 +185,7 @@ describe('TestimonialRecorder', () => {
   it('offers to write instead when the camera is denied', async () => {
     installFakeMedia({ deny: true });
     const { onWriteInstead } = renderRecorder();
-    await act(async () => {});
+    await enableCamera();
 
     expect(screen.getByRole('alert').textContent).toContain('câmara e ao microfone');
     fireEvent.click(screen.getByRole('button', { name: 'Escrever em vez disso' }));

@@ -95,11 +95,13 @@ export function TestimonialRecorder({
   const previewRef = useRef<HTMLVideoElement>(null);
   const playback = usePlayback<HTMLVideoElement>();
   const [reviewUrl, setReviewUrl] = useState<string | null>(null);
+  const [enabled, setEnabled] = useState(false);
 
-  // The camera opens with the page, again after a discarded take and when a device is changed.
+  // The devices are asked for only once the author turns them on; after that a discarded take or
+  // a changed device opens them again.
   useEffect(() => {
-    if (status === 'idle') void open();
-  }, [open, status]);
+    if (enabled && status === 'idle') void open();
+  }, [enabled, open, status]);
 
   useEffect(() => {
     if (previewRef.current) previewRef.current.srcObject = stream;
@@ -147,6 +149,7 @@ export function TestimonialRecorder({
 
   const question = questions[questionIndex];
   const recordingNow = status === 'recording' || status === 'paused';
+  const previewQuestion = recordingNow || !enabled ? question : null;
 
   if (recorder.failure) {
     return (
@@ -243,7 +246,7 @@ export function TestimonialRecorder({
             />
           </div>
         ) : null}
-        {recordingNow && question ? (
+        {previewQuestion ? (
           <div
             aria-live="polite"
             className="absolute inset-x-3 bottom-3 rounded-md bg-black/60 p-3 text-white backdrop-blur"
@@ -252,10 +255,18 @@ export function TestimonialRecorder({
               {t('question', {
                 current: questionIndex + 1,
                 total: questions.length,
-                topic: question.topic,
+                topic: previewQuestion.topic,
               })}
             </p>
-            <p className="text-body">{question.text}</p>
+            <p className="text-body">{previewQuestion.text}</p>
+          </div>
+        ) : null}
+        {!enabled ? (
+          <div className="absolute inset-0 flex items-center justify-center pb-24">
+            <Button type="button" size="lg" onClick={() => setEnabled(true)}>
+              <Camera aria-hidden="true" />
+              {t('enable')}
+            </Button>
           </div>
         ) : null}
         {!recordingNow && stream ? (
@@ -309,13 +320,15 @@ export function TestimonialRecorder({
             <Button type="button" variant="ghost" onClick={onWriteInstead}>
               {t('writeInstead')}
             </Button>
-            <Button
-              type="button"
-              disabled={disabled || !stream || status === 'starting'}
-              onClick={() => void begin()}
-            >
-              {t('start')}
-            </Button>
+            {enabled ? (
+              <Button
+                type="button"
+                disabled={disabled || !stream || status === 'starting'}
+                onClick={() => void begin()}
+              >
+                {t('start')}
+              </Button>
+            ) : null}
           </>
         )}
       </div>

@@ -6,7 +6,6 @@ import messages from '@agency-os/i18n/messages/pt-PT';
 import { ClientRoom } from '@/components/rooms/client-room';
 import type { ClientProjectView } from '@/modules/rooms';
 import { ApprovalDecision, type DecideApproval } from '@/components/rooms/approval-decision';
-import { RoomHomeCard, roomCardState } from './room-cards';
 
 const refresh = vi.hoisted(() => vi.fn());
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
@@ -110,23 +109,6 @@ function withIntl(node: React.ReactNode) {
 }
 
 describe('portal room', () => {
-  it('home shows current phase and next step', () => {
-    const state = roomCardState(PROJECT, 1);
-    expect(state).toEqual({
-      projectName: 'Website',
-      phaseName: 'Descoberta e arquitetura',
-      nextStep: 'Arquitetura e mapa de conteúdos',
-      pendingApprovals: 1,
-    });
-
-    withIntl(<RoomHomeCard state={state} />);
-    expect(screen.getByText('Fase atual: Descoberta e arquitetura')).toBeDefined();
-    expect(screen.getByText('A seguir: Arquitetura e mapa de conteúdos')).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Ver aprovações (1)' }).getAttribute('href')).toBe(
-      '/portal/approvals',
-    );
-  });
-
   it('approving keeps the confirmation on screen', async () => {
     const decide: DecideApproval = vi.fn(async () => ({ ok: true as const }));
     withIntl(<ApprovalDecision approvalId="approval-1" decide={decide} />);

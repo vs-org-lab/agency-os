@@ -50,14 +50,17 @@ describe('searchWorkspace', () => {
         insert into public.deals (organization_id, client_id, title, source)
         values (${world.organizationId}, ${clientId}, 'Zebra rebrand', 'acquisition')
       `;
-      await sql`
+      const [kickoff] = await sql<{ id: string }[]>`
         insert into public.tasks (organization_id, client_id, title)
         values (${world.organizationId}, ${clientId}, 'Zebra kickoff')
+        returning id
       `;
-      await sql`
+      const [internal] = await sql<{ id: string }[]>`
         insert into public.tasks (organization_id, title)
         values (${world.organizationId}, 'Zebra internal')
+        returning id
       `;
+      if (!kickoff || !internal) throw new Error('Tasks were not created');
 
       const result = await searchWorkspace(claimsFor(world.users.founder), 'zebra', { contexts });
 
@@ -77,8 +80,8 @@ describe('searchWorkspace', () => {
       expect(byKind('deal')[0]?.href).toMatch(/^\/pipeline\/[0-9a-f-]{36}$/);
       expect(byKind('task').map((r) => [r.title, r.context, r.href])).toEqual(
         expect.arrayContaining([
-          ['Zebra kickoff', 'Zebra Studio', `/c/${clientId}/tasks`],
-          ['Zebra internal', null, '/tasks'],
+          ['Zebra kickoff', 'Zebra Studio', `/c/${clientId}/tasks?task=${kickoff.id}`],
+          ['Zebra internal', null, `/tasks?task=${internal.id}`],
         ]),
       );
     });

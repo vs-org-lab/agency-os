@@ -1,6 +1,7 @@
 export {
   ALERT_THRESHOLDS,
   allowance,
+  CARRY_SHARE,
   crossedThresholds,
   limitState,
   type AlertThreshold,

@@ -376,6 +376,75 @@
         "invalid_input": "Check the comment."
       },
       "projectSelector": "Project"
+    },
+    "dashboard": {
+      "greeting": "Hello, {name}",
+      "greetingAnonymous": "Hello",
+      "action": {
+        "title": "Needs your action",
+        "due": "By {date}",
+        "kinds": {
+          "approval": "Approval",
+          "proof": "Proof",
+          "proposal": "Proposal",
+          "contract": "Contract",
+          "payment": "Payment"
+        },
+        "cta": {
+          "approval": "Decide",
+          "proof": "Review",
+          "proposal": "View the proposal",
+          "contract": "Sign",
+          "payment": "Pay"
+        }
+      },
+      "plan": {
+        "title": "Your plan",
+        "tier": "{tier} tier",
+        "includes": "What it includes",
+        "perMonth": "{count} per month",
+        "rules": "Rules",
+        "carry": "Up to {share}% of what you do not use in a month carries over to the next, once.",
+        "expires": "What carried over and is not used the following month expires.",
+        "extra": "Work above what is available needs a quote, which you approve before it starts."
+      },
+      "requestWork": {
+        "label": "Request work",
+        "title": "Request work",
+        "description": "Tell us what you need. If it fits this month's plan, the team starts right away."
+      },
+      "board": {
+        "title": "Your work",
+        "seeAll": "See all",
+        "empty": "You have not requested any work yet.",
+        "columns": {
+          "received": "Received",
+          "in_progress": "In progress",
+          "done": "Done this month"
+        },
+        "emptyColumn": {
+          "received": "Nothing waiting.",
+          "in_progress": "Nothing in progress.",
+          "done": "Nothing finished this month."
+        },
+        "requestedOn": "Requested on {date}",
+        "views": {
+          "label": "View",
+          "board": "Board",
+          "list": "List"
+        }
+      },
+      "project": {
+        "title": "Your project",
+        "phases": "Project phases",
+        "current": "Current phase",
+        "nextStep": "Next step: {name}",
+        "dueOn": "Expected by {date}",
+        "open": "Open the room"
+      },
+      "documents": {
+        "title": "Recent documents"
+      }
     }
   },
   "commercial": {
@@ -2354,9 +2423,19 @@
     "title": "Command palette",
     "description": "Go to a page, create something or search clients, deals and tasks.",
     "placeholder": "Type a command or search…",
-    "groups": { "goTo": "Go to", "create": "Create", "search": "Search" },
-    "create": { "newTask": "New task" },
-    "kind": { "client": "Client", "deal": "Deal", "task": "Task" },
+    "groups": {
+      "goTo": "Go to",
+      "create": "Create",
+      "search": "Search"
+    },
+    "create": {
+      "newTask": "New task"
+    },
+    "kind": {
+      "client": "Client",
+      "deal": "Deal",
+      "task": "Task"
+    },
     "empty": "No results.",
     "searching": "Searching…",
     "error": "The search is unavailable."
@@ -2427,7 +2506,11 @@
     "dropHere": "Drop files to upload",
     "dropFolders": "Folders are not supported; drop files",
     "progressLabel": "Uploads",
-    "fileStatus": { "pending": "Uploading", "done": "Done", "failed": "Failed" },
+    "fileStatus": {
+      "pending": "Uploading",
+      "done": "Done",
+      "failed": "Failed"
+    },
     "downloadAll": "Download all",
     "downloadFolder": "Download folder",
     "preparingZip": "Preparing the ZIP…",

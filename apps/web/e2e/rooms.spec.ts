@@ -40,10 +40,12 @@ test.describe('Rooms', () => {
 
     await finishStep(page, 'Questionário de descoberta');
     await finishStep(page, 'Análise técnica');
-    await page.getByRole('button', { name: 'Análise técnica', exact: true }).click();
-    await expect(page.getByRole('dialog', { name: 'Análise técnica' })).toContainText(
-      'Enviado ao cliente',
-    );
+    await page
+      .getByRole('button', { name: 'Arquitetura e mapa de conteúdos', exact: true })
+      .click();
+    await expect(
+      page.getByRole('dialog', { name: 'Arquitetura e mapa de conteúdos' }),
+    ).toContainText('Enviado ao cliente');
     await page.getByRole('button', { name: 'Fechar painel do passo' }).click();
     await finishStep(page, 'Arquitetura e mapa de conteúdos');
 

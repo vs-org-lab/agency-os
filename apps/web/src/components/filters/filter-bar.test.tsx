@@ -60,7 +60,8 @@ const SELECTS = [
 function renderBar() {
   return render(
     <MotionProvider>
-      <FilterBar segments={SEGMENTS} selects={SELECTS} />
+      <FilterBar segments={SEGMENTS} selects={SELECTS} controls="task-list" />
+      <div id="task-list" />
     </MotionProvider>,
   );
 }
@@ -71,6 +72,16 @@ function lastUrl(): URL {
 }
 
 describe('FilterBar', () => {
+  it('points every segment at an element that exists', () => {
+    renderBar();
+
+    for (const tab of screen.getAllByRole('tab')) {
+      const target = tab.getAttribute('aria-controls');
+      expect(target).toBe('task-list');
+      expect(document.getElementById(target ?? '')).not.toBeNull();
+    }
+  });
+
   it('changes the url without a submit button', async () => {
     const user = userEvent.setup();
     renderBar();

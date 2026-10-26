@@ -23,9 +23,12 @@ export function loadTaskOptions(session: TaskSession, clientId: string | null) {
 
 export function loadTasks(
   session: TaskSession,
-  filter: { clientId?: string; assigneeId?: string; status?: TaskStatus },
+  filter: { clientId?: string; assigneeId?: string; status?: TaskStatus | 'all' },
 ) {
-  return withUserContext(session.claims, (tx) => listTasks(tx, filter));
+  const { status, ...rest } = filter;
+  return withUserContext(session.claims, (tx) =>
+    listTasks(tx, { ...rest, status: status === 'all' ? undefined : status }),
+  );
 }
 
 export function loadTaskCounts(

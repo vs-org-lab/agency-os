@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type TaskFilter = { clientId?: string; assigneeId?: string; status: 'open' | 'done' };
+export type TaskFilter = { clientId?: string; assigneeId?: string; status: 'open' | 'done' | 'all' };
 
 const LISBON_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' });
 
@@ -20,6 +20,6 @@ export function parseTaskFilter(params: {
   return {
     clientId: uuid(params.client),
     assigneeId: uuid(params.assignee),
-    status: params.status === 'done' ? 'done' : 'open',
+    status: params.status === 'done' || params.status === 'all' ? params.status : 'open',
   };
 }

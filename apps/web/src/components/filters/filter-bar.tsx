@@ -36,9 +36,12 @@ const ALL = '__all__';
 export function FilterBar({
   segments,
   selects = [],
+  controls,
 }: {
   segments?: FilterSegments;
   selects?: FilterSelect[];
+  /** Id of the region the segments filter; each trigger points at it. */
+  controls?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -70,10 +73,14 @@ export function FilterBar({
   return (
     <div data-slot="filter-bar" className="flex flex-wrap items-end gap-3">
       {segments ? (
-        <Tabs value={segments.value} onValueChange={(value) => apply(segments.param, value)}>
+        <Tabs
+          value={segments.value}
+          activationMode="manual"
+          onValueChange={(value) => apply(segments.param, value)}
+        >
           <TabsList>
             {segments.options.map((option) => (
-              <TabsTrigger key={option.value} value={option.value}>
+              <TabsTrigger key={option.value} value={option.value} aria-controls={controls}>
                 {option.label}
                 {option.count !== undefined ? (
                   <span className="text-caption text-text-secondary tabular-nums">

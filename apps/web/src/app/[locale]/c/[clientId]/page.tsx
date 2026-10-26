@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { HealthCard } from '@/components/health/health-card';
+import { hasHealthData } from '@/components/health/has-health-data';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomHealth } from '@/modules/health/server';
@@ -87,7 +88,6 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
           ) : null
         }
       />
-      {health ? <HealthCard health={health} /> : null}
 
       {room.project ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -144,11 +144,12 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
               />
             </TabsContent>
           </Tabs>
-          <ProjectCard project={room.project} team={room.team} />
+          <ProjectCard project={room.project} team={room.team} health={health} />
         </div>
       ) : (
         <EmptyState title={t('noProject')} description={t('noProjectHint')} />
       )}
+      {health && hasHealthData(health) ? <HealthCard health={health} /> : null}
     </div>
   );
 }

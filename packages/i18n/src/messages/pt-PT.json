@@ -1886,7 +1886,8 @@
       "endsOn": "Fim previsto",
       "noEnd": "Por definir",
       "people": "Pessoas",
-      "nobody": "Ninguém atribuído"
+      "nobody": "Ninguém atribuído",
+      "healthLine": "Saúde: {score} de 100, {level}"
     },
     "phases": "Fases",
     "phaseDue": "Data prevista da fase",
@@ -1915,7 +1916,14 @@
         "todo": "Começar",
         "in_progress": "Marcar como feito",
         "done": "Reabrir"
-      }
+      },
+      "noDate": "Sem data",
+      "panelClose": "Fechar painel do passo",
+      "status": "Estado",
+      "reopenTitle": "Reabrir este passo?",
+      "reopenBody": "O cliente já viu este passo. Ao reabri-lo, volta a aparecer como em curso.",
+      "reopenConfirm": "Reabrir passo",
+      "reopenCancel": "Cancelar"
     },
     "plan": {
       "title": "Plano",

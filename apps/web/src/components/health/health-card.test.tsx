@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ClientHealthView } from '@/modules/health';
 import { HealthCard } from './health-card';
+import { hasHealthData } from './has-health-data';
 
 afterEach(() => {
   cleanup();
@@ -100,5 +101,18 @@ describe('C-01 health card', () => {
       expect(screen.getByText(hoursText)).toBeTruthy();
       unmount();
     }
+  });
+});
+
+describe('C-01 health card visibility', () => {
+  it('hides the health card when no indicator has data', () => {
+    expect(hasHealthData(EMPTY)).toBe(false);
+    expect(hasHealthData(FULL)).toBe(true);
+    expect(
+      hasHealthData({
+        ...EMPTY,
+        signals: { ...EMPTY.signals, payments: FULL.signals.payments },
+      }),
+    ).toBe(true);
   });
 });

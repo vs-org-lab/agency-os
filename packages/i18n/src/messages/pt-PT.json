@@ -2995,6 +2995,11 @@
     },
     "month": "Consumo de {month}",
     "usedOf": "{used} de {available}",
+    "period": {
+      "label": "Período",
+      "remaining": "{count, plural, =0 {Fecha hoje} one {# dia para o fecho} other {# dias para o fecho}}",
+      "progress": "Dia {day} de {total}"
+    },
     "carry": "Inclui {carry} transportado do mês anterior.",
     "remaining": "Disponível: {remaining}",
     "usage": {
@@ -3009,6 +3014,7 @@
       "extra": "Pedido extra",
       "delete": "Apagar",
       "deleted": "Registo apagado.",
+      "deleteEntry": "Apagar registo: {description}",
       "line": "{quantity} × {kind} · {description}"
     },
     "limitReached": "Este registo passa o disponível do mês. O trabalho acima do limite só começa com um pedido extra aprovado pelo cliente.",

@@ -2995,6 +2995,11 @@
     },
     "month": "Usage in {month}",
     "usedOf": "{used} of {available}",
+    "period": {
+      "label": "Period",
+      "remaining": "{count, plural, =0 {Closes today} one {# day until close} other {# days until close}}",
+      "progress": "Day {day} of {total}"
+    },
     "carry": "Includes {carry} carried over from last month.",
     "remaining": "Available: {remaining}",
     "usage": {
@@ -3009,6 +3014,7 @@
       "extra": "Extra request",
       "delete": "Delete",
       "deleted": "Entry deleted.",
+      "deleteEntry": "Delete entry: {description}",
       "line": "{quantity} × {kind} · {description}"
     },
     "limitReached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",

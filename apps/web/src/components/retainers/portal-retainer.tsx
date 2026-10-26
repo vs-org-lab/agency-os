@@ -9,7 +9,7 @@ import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
 import type { PortalRetainerView, RetainerExtraRow } from '@/modules/retainers';
-import { LimitBars } from './limit-bars';
+import { LimitRings } from './limit-rings';
 import {
   decimal,
   retainerError,
@@ -233,7 +233,7 @@ export function PortalRetainer({
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3" aria-label={t('month', { month: monthLabel })}>
         <h2 className="text-title-sm text-text">{t('month', { month: monthLabel })}</h2>
-        <LimitBars limits={view.limits} />
+        <LimitRings limits={view.limits} />
       </section>
       {view.retainer.status !== 'active' ? null : view.suspended ? (
         <FormMessage tone="danger">{t('portal.suspended')}</FormMessage>

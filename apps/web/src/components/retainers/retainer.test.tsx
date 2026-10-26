@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { RetainerExtraRow, StaffRetainerView } from '@/modules/retainers';
 import { chooseDay, chooseOption, installRadixDomPolyfills } from '../../../test/radix-dom';
+import { MotionProvider } from '@agency-os/ui/motion';
 import { ExtraRequests } from './extra-requests';
-import { LimitBars } from './limit-bars';
+import { LimitRings } from './limit-rings';
 import { RetainerForm } from './retainer-form';
 import { RetainerScreen, type RetainerActions } from './retainer-screen';
 import { UsageForm } from './usage-form';
@@ -21,16 +22,39 @@ vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
-beforeAll(installRadixDomPolyfills);
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn(), info: vi.fn() }));
+vi.mock('sonner', () => ({ toast }));
+
+beforeAll(() => {
+  installRadixDomPolyfills();
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }),
+  });
+});
 
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
 });
 
 function withIntl(node: React.ReactNode) {
   return render(
-    <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      {node}
+    <NextIntlClientProvider
+      locale="pt-PT"
+      messages={messages}
+      timeZone="Europe/Lisbon"
+      now={new Date('2026-10-26T12:00:00Z')}
+    >
+      <MotionProvider>{node}</MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -100,20 +124,49 @@ function actions(): RetainerActions {
 }
 
 describe('C-10 retainer', () => {
-  it('the bars show used, carry and available per limit', () => {
-    withIntl(<LimitBars limits={LIMITS} />);
-    const pieces = screen.getByRole('region', { name: 'Peças de conteúdo' });
+  it('shows one ring per limit kind with remaining', () => {
+    withIntl(<LimitRings limits={LIMITS} />);
+    const pieces = screen.getByRole('group', { name: 'Peças de conteúdo' });
+    expect(within(pieces).getByText('Disponível: 2,8')).toBeTruthy();
     expect(within(pieces).getByText('2 de 4,8')).toBeTruthy();
-    expect(within(pieces).getByText('Inclui 0,8 transportado do mês anterior.')).toBeTruthy();
-    expect(within(pieces).getByRole('progressbar').getAttribute('aria-valuenow')).toBe('42');
-    const hours = screen.getByRole('region', { name: 'Horas de manutenção' });
+    expect(screen.getByText('Inclui 0,8 transportado do mês anterior.')).toBeTruthy();
+    const hours = screen.getByRole('group', { name: 'Horas de manutenção' });
     expect(within(hours).getByText('9 de 10')).toBeTruthy();
-    expect(within(hours).queryByText(/transportado/)).toBeNull();
+    expect(screen.queryByText(/Inclui 0 /)).toBeNull();
+  });
+
+  it('shows the days left until the month closes in Lisbon', () => {
+    withIntl(<LimitRings limits={LIMITS} />);
+    const period = screen.getByRole('group', { name: 'Período' });
+    expect(within(period).getByText('5 dias para o fecho')).toBeTruthy();
+  });
+
+  it('over limit shows zero remaining in danger', () => {
+    withIntl(
+      <LimitRings
+        limits={[
+          {
+            kind: 'campaigns',
+            limit: 2,
+            carry: 0,
+            available: 2,
+            used: 3,
+            remaining: -1,
+            percent: 150,
+          },
+        ]}
+      />,
+    );
+    const ring = screen.getByRole('group', { name: 'Campanhas' });
+    expect(ring.getAttribute('data-tone')).toBe('danger');
+    expect(within(ring).getByText('Disponível: 0')).toBeTruthy();
   });
 
   it('usage above the available shows the extra request hint', async () => {
     const record = vi.fn(async () => ({ ok: false as const, code: 'limit_reached' }));
-    withIntl(<UsageForm retainerId="retainer-1" limits={LIMITS} record={record} />);
+    withIntl(
+      <UsageForm retainerId="retainer-1" limits={LIMITS} record={record} onDone={vi.fn()} />,
+    );
     fireEvent.change(screen.getByLabelText('Quantidade'), { target: { value: '3' } });
     fireEvent.change(screen.getByLabelText('Descrição'), { target: { value: 'Carrossel' } });
     fireEvent.click(screen.getByRole('button', { name: 'Registar' }));
@@ -131,12 +184,13 @@ describe('C-10 retainer', () => {
   it('usage form submits the chosen kind as before', async () => {
     const user = userEvent.setup();
     const record = vi.fn(async () => ({ ok: true as const }));
-    withIntl(<UsageForm retainerId="retainer-1" limits={LIMITS} record={record} />);
+    const onDone = vi.fn();
+    withIntl(<UsageForm retainerId="retainer-1" limits={LIMITS} record={record} onDone={onDone} />);
 
     await chooseOption(user, 'Tipo', 'Horas de manutenção');
     fireEvent.change(screen.getByLabelText('Descrição'), { target: { value: 'Atualizações' } });
     fireEvent.click(screen.getByRole('button', { name: 'Registar' }));
-    await screen.findByText('Consumo registado.');
+    await waitFor(() => expect(onDone).toHaveBeenCalledWith('Consumo registado.'));
 
     expect(record).toHaveBeenCalledWith({
       retainerId: 'retainer-1',
@@ -144,6 +198,53 @@ describe('C-10 retainer', () => {
       quantity: '1',
       description: 'Atualizações',
     });
+  });
+
+  it('register usage opens a dialog and notifies on success', async () => {
+    const user = userEvent.setup();
+    const retainerActions = actions();
+    withIntl(<RetainerScreen view={view()} actions={retainerActions} />);
+    expect(screen.queryByLabelText('Descrição')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Registar consumo' }));
+    fireEvent.change(await screen.findByLabelText('Descrição'), { target: { value: 'Reels' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Registar' }));
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Consumo registado.', undefined),
+    );
+    await waitFor(() => expect(screen.queryByLabelText('Descrição')).toBeNull());
+    expect(retainerActions.recordUsage).toHaveBeenCalledWith({
+      retainerId: 'retainer-1',
+      kind: 'content_pieces',
+      quantity: '1',
+      description: 'Reels',
+    });
+  });
+
+  it('empty usage shows an empty state and entries have a named delete', () => {
+    withIntl(<RetainerScreen view={view()} actions={actions()} />);
+    expect(screen.getByText('Ainda não há consumo este mês.')).toBeTruthy();
+    cleanup();
+
+    withIntl(
+      <RetainerScreen
+        view={view({
+          usage: [
+            {
+              id: 'usage-1',
+              kind: 'content_pieces',
+              quantity: 1,
+              description: 'Reels',
+              extra: false,
+              createdAt: '2026-10-10T10:00:00.000Z',
+            },
+          ],
+        })}
+        actions={actions()}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Apagar registo: Reels' })).toBeTruthy();
   });
 
   it('retainer form submits the same data as before', async () => {

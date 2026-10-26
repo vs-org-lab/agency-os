@@ -353,7 +353,14 @@
         "unavailable": "O pagamento com cartão não está disponível para este pedido.",
         "not_found": "Este pedido já não está disponível. Atualize a página."
       },
-      "receipts": "Comprovativos"
+      "receipts": "Comprovativos",
+      "receipt": {
+        "title": "Pagamento recebido",
+        "thanks": "Obrigado. Recebemos o seu pagamento.",
+        "request": "Pedido",
+        "amount": "Valor",
+        "date": "Data"
+      }
     },
     "room": {
       "title": "O seu projeto: {name}",

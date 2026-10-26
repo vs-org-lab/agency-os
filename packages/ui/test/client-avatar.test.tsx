@@ -25,6 +25,13 @@ describe('ClientAvatar', () => {
     expect(avatar('a', 'aurion').textContent).toBe('A');
   });
 
+  it('stays on the muted tone for people', () => {
+    const { container } = render(<ClientAvatar id="id-3" name="Rui Costa" tone="neutral" />);
+    expect(container.querySelector('[data-slot="client-avatar"]')?.className).toContain(
+      'bg-surface-muted',
+    );
+  });
+
   it('never uses the gold token', () => {
     for (let index = 0; index < 50; index += 1) {
       expect(avatar(`id-${index}`, 'X Y').className).not.toContain('gold');

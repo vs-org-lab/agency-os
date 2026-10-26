@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+import { Eye } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
+import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { PageHeader } from '@agency-os/ui/components/page-header';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
@@ -41,6 +43,11 @@ export function RoomHeader({
       <PageHeader
         title={title}
         description={description}
+        leading={
+          title === client.name ? (
+            <ClientAvatar id={client.id} name={client.name} size="lg" />
+          ) : undefined
+        }
         context={
           title === client.name ? undefined : (
             <span className="text-caption text-text-secondary">{client.name}</span>
@@ -51,7 +58,10 @@ export function RoomHeader({
             <>
               {showPreviewLink ? (
                 <Button asChild variant="outline">
-                  <Link href={previewHref}>{t('previewAsClient')}</Link>
+                  <Link href={previewHref}>
+                    <Eye aria-hidden="true" />
+                    {t('previewAsClient')}
+                  </Link>
                 </Button>
               ) : null}
               {actions}

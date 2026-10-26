@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export type TaskFilter = { clientId?: string; assigneeId?: string; status: 'open' | 'done' | 'all' };
+export type TaskFilter = {
+  clientId?: string;
+  assigneeId?: string;
+  status: 'open' | 'done' | 'all';
+};
 
 const LISBON_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' });
 

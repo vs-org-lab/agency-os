@@ -5,6 +5,8 @@ type PageHeaderProps = {
   title: string;
   description?: string;
   context?: ReactNode;
+  /** Decorative element before the title, such as an avatar. */
+  leading?: ReactNode;
   actions?: ReactNode;
   headingLevel?: 1 | 2;
   className?: string;
@@ -14,6 +16,7 @@ export function PageHeader({
   title,
   description,
   context,
+  leading,
   actions,
   headingLevel = 1,
   className,
@@ -26,7 +29,10 @@ export function PageHeader({
       className={cn('flex flex-col gap-3 md:flex-row md:items-start md:justify-between', className)}
     >
       <div className="flex min-w-0 flex-col gap-1">
-        <Heading className="text-title text-text">{title}</Heading>
+        <Heading className={cn('text-title text-text', leading && 'flex items-center gap-3')}>
+          {leading}
+          {title}
+        </Heading>
         {description ? <p className="text-body text-text-secondary">{description}</p> : null}
         {context ? <div className="flex flex-wrap items-center gap-2 pt-1">{context}</div> : null}
       </div>

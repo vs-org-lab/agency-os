@@ -1,3 +1,4 @@
+import 'server-only';
 import { and, desc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import type { PgColumn } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
@@ -19,7 +20,8 @@ export type CommandResult = {
 };
 
 export type SearchOutcome =
-  { ok: true; results: CommandResult[] } | { ok: false; rule: 'forbidden' | 'invalid_input' };
+  | { ok: true; results: CommandResult[] }
+  | { ok: false; rule: 'forbidden' | 'invalid_input' | 'unavailable' };
 
 /** Escapes the LIKE metacharacters so the query always matches literally. */
 function escapeLike(value: string): string {

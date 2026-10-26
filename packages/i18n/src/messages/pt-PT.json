@@ -2417,6 +2417,7 @@
     "version": "Versão {number}",
     "uploadingFirst": "A carregar",
     "empty": "Ainda não há documentos neste projeto.",
+    "emptyHint": "Crie o primeiro para o partilhar com o cliente.",
     "noProject": "Ainda não há projetos com documentos.",
     "cards": {
       "projectDocuments": "Documentos do projeto",
@@ -2430,6 +2431,8 @@
       "contract": "Contrato",
       "invoices": "Faturas",
       "none": "Ainda não existe",
+      "sourceDeal": "Negócio",
+      "sourcePayments": "Pagamentos",
       "proposalStatus": {
         "draft": "Rascunho",
         "sent": "Com o cliente",

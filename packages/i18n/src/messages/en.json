@@ -2417,6 +2417,7 @@
     "version": "Version {number}",
     "uploadingFirst": "Uploading",
     "empty": "There are no documents in this project yet.",
+    "emptyHint": "Create the first one to share it with the client.",
     "noProject": "There are no projects with documents yet.",
     "cards": {
       "projectDocuments": "Project documents",
@@ -2430,6 +2431,8 @@
       "contract": "Contract",
       "invoices": "Invoices",
       "none": "Not yet",
+      "sourceDeal": "Deal",
+      "sourcePayments": "Payments",
       "proposalStatus": {
         "draft": "Draft",
         "sent": "With the client",

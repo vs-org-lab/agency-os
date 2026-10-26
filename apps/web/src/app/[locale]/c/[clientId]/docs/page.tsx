@@ -31,6 +31,17 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
   const view = await loadClientRoomDocuments(session.claims, clientId, project);
   const t = await getTranslations('projectDocuments');
   const basePath = `/c/${clientId}/docs`;
+  const createControl =
+    view?.projectId && view.canWrite ? (
+      <NewRoomDocument
+        projectId={view.projectId}
+        basePath={basePath}
+        actions={{
+          startDocument: startDocumentAction,
+          finishUpload: finishDocumentUploadAction,
+        }}
+      />
+    ) : null;
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -41,21 +52,10 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
         selectedId={view?.projectId ?? null}
         showPreviewLink={Boolean(view?.projectId)}
         basePath={basePath}
-        actions={
-          view?.projectId && view.canWrite ? (
-            <NewRoomDocument
-              projectId={view.projectId}
-              basePath={basePath}
-              actions={{
-                startDocument: startDocumentAction,
-                finishUpload: finishDocumentUploadAction,
-              }}
-            />
-          ) : null
-        }
+        actions={createControl}
       />
       {view?.projectId ? (
-        <RoomDocumentCards clientId={clientId} view={view} />
+        <RoomDocumentCards clientId={clientId} view={view} createAction={createControl} />
       ) : (
         <EmptyState title={t('noProject')} description="" />
       )}

@@ -2,6 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button } from '@agency-os/ui/components/button';
+import { ImageCompare } from '@agency-os/ui/components/image-compare';
 import type { ProofKind } from '@agency-os/db';
 import type { ProofAnchor, ProofCommentView } from '@/modules/proofing';
 import { anchorLabel } from './anchor-format';
@@ -30,6 +32,7 @@ export function ProofViewer({
   title,
   number,
   pages,
+  previousVersion = null,
   comments,
   audience,
   canComment,
@@ -41,6 +44,8 @@ export function ProofViewer({
   title: string;
   number: number;
   pages: number | null;
+  /** The version before this one, offered for comparison when both are images. */
+  previousVersion?: { id: string; number: number } | null;
   comments: ProofCommentView[];
   audience: 'team' | 'client';
   canComment: boolean;
@@ -52,6 +57,8 @@ export function ProofViewer({
   const [pending, setPending] = useState<ProofAnchor | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [comparing, setComparing] = useState(false);
+  const comparable = kind === 'image' && previousVersion !== null;
   const nextNumber = Math.max(0, ...comments.map((comment) => comment.number ?? 0)) + 1;
 
   const pins: Pin[] = comments.flatMap((comment) => {
@@ -95,7 +102,16 @@ export function ProofViewer({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <section aria-label={t('viewer.label')} className="flex flex-col gap-3">
-        {kind === 'image' ? (
+        {comparable && comparing ? (
+          <ImageCompare
+            before={{
+              src: `/api/proofs/${previousVersion.id}/file`,
+              alt: t('viewer.imageAlt', { title, number: previousVersion.number }),
+            }}
+            after={{ src, alt: t('viewer.imageAlt', { title, number }) }}
+            label={t('viewer.compareLabel', { before: previousVersion.number, after: number })}
+          />
+        ) : kind === 'image' ? (
           <ImageCanvas
             src={src}
             alt={t('viewer.imageAlt', { title, number })}
@@ -128,7 +144,19 @@ export function ProofViewer({
             onPickTime={(seconds) => setPending({ type: 'time', seconds })}
           />
         )}
-        {canComment && kind !== 'video' ? (
+        {comparable ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="self-start"
+            aria-pressed={comparing}
+            onClick={() => setComparing(!comparing)}
+          >
+            {comparing ? t('viewer.closeCompare') : t('viewer.compare')}
+          </Button>
+        ) : null}
+        {canComment && kind !== 'video' && !comparing ? (
           <p className="text-caption text-text-secondary">{t('viewer.pinHint')}</p>
         ) : null}
       </section>

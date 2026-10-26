@@ -2387,7 +2387,10 @@
       "loading": "Loading the file…",
       "failed": "The file could not be shown.",
       "pinSurface": "File to comment on a spot. Enter marks the centre, arrow keys move the marker (Shift for larger steps).",
-      "pinPosition": "Marker at {x}% of the width and {y}% of the height."
+      "pinPosition": "Marker at {x}% of the width and {y}% of the height.",
+      "compare": "Compare with the previous version",
+      "closeCompare": "Back to the current version",
+      "compareLabel": "Divider between version {before} and version {after}"
     },
     "comments": {
       "title": "Comments",

@@ -2387,7 +2387,10 @@
       "loading": "A carregar o ficheiro…",
       "failed": "Não foi possível mostrar o ficheiro.",
       "pinSurface": "Ficheiro para comentar num ponto. Enter marca o centro, as setas movem o marcador (Shift para passos maiores).",
-      "pinPosition": "Marcador a {x}% da largura e {y}% da altura."
+      "pinPosition": "Marcador a {x}% da largura e {y}% da altura.",
+      "compare": "Comparar com a versão anterior",
+      "closeCompare": "Voltar à versão atual",
+      "compareLabel": "Divisória entre a versão {before} e a versão {after}"
     },
     "comments": {
       "title": "Comentários",

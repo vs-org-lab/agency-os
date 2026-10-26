@@ -93,8 +93,10 @@ function DatePicker({
             selected={selected}
             defaultMonth={selected}
             onSelect={(next) => {
+              // Clicking the selected day reports undefined; clearing is the button's job.
+              if (!next) return;
               commit(next);
-              if (next) setOpen(false);
+              setOpen(false);
             }}
           />
           <div className="flex justify-end border-t border-border pt-2">
@@ -111,7 +113,14 @@ function DatePicker({
           </div>
         </PopoverContent>
       </Popover>
-      {name ? <input type="hidden" name={name} value={selected ? toIso(selected) : ''} /> : null}
+      {name ? (
+        <input
+          type="hidden"
+          name={name}
+          value={selected ? toIso(selected) : ''}
+          disabled={disabled}
+        />
+      ) : null}
     </div>
   );
 }

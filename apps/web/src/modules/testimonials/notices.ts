@@ -4,6 +4,8 @@ import type { DbContexts } from '@/platform/db';
 
 const { clients, testimonials } = schema;
 
+const VIDEO_TESTIMONIAL_NOTICE = 'Testemunho em vídeo, disponível na sala do cliente.';
+
 export type TestimonialNotice = {
   organizationId: string;
   params: { companyName: string; authorName: string; body: string; roomUrl: string };
@@ -33,7 +35,7 @@ export async function testimonialNotice(
     params: {
       companyName: row.companyName,
       authorName: row.authorName,
-      body: row.body,
+      body: row.body === '' ? VIDEO_TESTIMONIAL_NOTICE : row.body,
       roomUrl: new URL(`/c/${row.clientId}`, deps.appBaseUrl).toString(),
     },
   };

@@ -1,7 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { NewTaskInput, TaskChanges } from '@/components/tasks/task-form';
+import type { NewTaskInput } from '@/components/tasks/task-form';
+import type { TaskChanges } from '@/components/tasks/task-panel';
 import type { TaskActionResult } from '@/components/tasks/task-errors';
 import {
   addStudioTaskItem,

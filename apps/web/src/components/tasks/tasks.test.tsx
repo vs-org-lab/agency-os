@@ -1,15 +1,13 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import { MotionProvider } from '@agency-os/ui/motion';
-import type { TaskView } from '@/modules/tasks';
 import { chooseDay, chooseOption, installRadixDomPolyfills } from '../../../test/radix-dom';
 import { TaskFilters } from './task-filters';
-import { TaskEditForm, TaskForm } from './task-form';
-import { TaskList } from './task-list';
+import { TaskForm } from './task-form';
 
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
 vi.mock('@/i18n/navigation', () => ({
@@ -26,7 +24,6 @@ afterEach(() => {
 const CLIENT_A = '0b5e7f10-1c1a-4a8e-9a55-2f6a0b1c2d3e';
 const CLIENT_B = '1c6f8a21-2d2b-4b9f-8b66-3a7b1c2d3e4f';
 const PERSON = '2d7a9b32-3e3c-4c0a-9c77-4b8c2d3e4f50';
-const TODAY = '2026-10-12';
 
 function renderWithIntl(node: React.ReactNode) {
   render(
@@ -34,30 +31,6 @@ function renderWithIntl(node: React.ReactNode) {
       {node}
     </NextIntlClientProvider>,
   );
-}
-
-function task(overrides: Partial<TaskView>): TaskView {
-  return {
-    id: crypto.randomUUID(),
-    title: 'Tarefa',
-    notes: '',
-    clientId: CLIENT_A,
-    clientName: 'Atlas Lda',
-    projectId: null,
-    assigneeId: null,
-    assigneeName: null,
-    dueOn: null,
-    status: 'open',
-    items: [],
-    itemsDone: 0,
-    itemsTotal: 0,
-    commentCount: 0,
-    fileCount: 0,
-    phaseName: null,
-    createdAt: '2026-10-01T09:00:00.000Z',
-    canEdit: true,
-    ...overrides,
-  };
 }
 
 const OK = async () => ({ ok: true as const });
@@ -77,52 +50,6 @@ const FOUNDER = {
 const FREELANCER = { id: PERSON, name: 'Rui Freelancer', clientIds: [CLIENT_A] };
 
 describe('tasks', () => {
-  it('offers edit and delete only on tasks the reader may edit', async () => {
-    const remove = vi.fn(OK);
-    const editable = task({ title: 'Minha sala' });
-    renderWithIntl(
-      <TaskList
-        tasks={[editable, task({ title: 'Só concluir', canEdit: false })]}
-        today={TODAY}
-        showClient
-        setStatus={OK}
-        setItem={OK}
-        edit={{ people: [FOUNDER], update: OK, remove }}
-      />,
-    );
-
-    expect(screen.getAllByText('Editar')).toHaveLength(1);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Apagar tarefa Minha sala' }));
-    });
-    expect(remove).toHaveBeenCalledWith(editable.id);
-  });
-
-  it('opens the edit dialog from the Editar button and saves the changes', async () => {
-    const update = vi.fn(OK);
-    const editable = task({ title: 'Minha sala' });
-    renderWithIntl(
-      <TaskList
-        tasks={[editable]}
-        today={TODAY}
-        showClient
-        setStatus={OK}
-        setItem={OK}
-        edit={{ people: [FOUNDER], update, remove: OK }}
-      />,
-    );
-
-    expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Editar tarefa Minha sala' }));
-    const dialog = screen.getByRole('dialog', { name: 'Minha sala' });
-    await act(async () => {
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Guardar' }));
-    });
-
-    expect(update).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('dialog')).toBeNull();
-  });
-
   it('task form offers only people who may take the chosen client task', async () => {
     const user = userEvent.setup();
     renderWithIntl(
@@ -147,67 +74,6 @@ describe('tasks', () => {
     expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora']);
     await chooseOption(user, 'Cliente', 'Atlas Lda');
     expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora', 'Rui Freelancer']);
-  });
-
-  it('groups tasks by today, this week and later', () => {
-    renderWithIntl(
-      <TaskList
-        tasks={[
-          task({ title: 'Atrasada', dueOn: '2026-10-10' }),
-          task({ title: 'Para hoje', dueOn: TODAY }),
-          task({ title: 'Sexta', dueOn: '2026-10-16' }),
-          task({ title: 'Próximo mês', dueOn: '2026-11-03' }),
-          task({ title: 'Quando der', dueOn: null }),
-        ]}
-        today={TODAY}
-        showClient
-        setStatus={OK}
-        setItem={OK}
-      />,
-    );
-
-    const today = screen.getByRole('region', { name: 'Hoje' });
-    const week = screen.getByRole('region', { name: 'Esta semana' });
-    const later = screen.getByRole('region', { name: 'Mais tarde' });
-    expect(
-      within(today)
-        .getAllByRole('checkbox')
-        .map((box) => box.getAttribute('aria-label')),
-    ).toEqual(['Atrasada', 'Para hoje']);
-    expect(within(today).getByText('Atrasada')).toBeTruthy();
-    expect(within(today).getAllByText('Atrasado')).toHaveLength(1);
-    expect(within(week).getByText('Sexta')).toBeTruthy();
-    expect(within(later).getByText('Próximo mês')).toBeTruthy();
-    expect(within(later).getByText('Quando der')).toBeTruthy();
-  });
-
-  it('completing a task and an item calls the actions', async () => {
-    const setStatus = vi.fn(OK);
-    const setItem = vi.fn(OK);
-    const subject = task({
-      title: 'Exportar ficheiros',
-      dueOn: TODAY,
-      items: [{ id: 'item-1', position: 1, title: 'Logótipo', done: false }],
-    });
-    renderWithIntl(
-      <TaskList
-        tasks={[subject]}
-        today={TODAY}
-        showClient={false}
-        setStatus={setStatus}
-        setItem={setItem}
-      />,
-    );
-
-    await act(async () => {
-      fireEvent.click(screen.getByRole('checkbox', { name: 'Logótipo' }));
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole('checkbox', { name: 'Exportar ficheiros' }));
-    });
-
-    expect(setItem).toHaveBeenCalledWith('item-1', true);
-    expect(setStatus).toHaveBeenCalledWith(subject.id, 'done');
   });
 
   it('filters by client and assignee with counts per status', () => {
@@ -303,52 +169,6 @@ describe('tasks', () => {
     });
   });
 
-  it('task edit form submits the same data as before', async () => {
-    const user = userEvent.setup();
-    const update = vi.fn(OK);
-    renderWithIntl(
-      <TaskEditForm
-        task={task({ id: 'task-1', title: 'Rever', dueOn: '2026-10-14' })}
-        people={[FOUNDER, FREELANCER]}
-        update={update}
-      />,
-    );
-
-    await chooseOption(user, 'Responsável', 'Ana Fundadora');
-    await chooseDay(user, /^Data/, 20);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
-    });
-
-    expect(update).toHaveBeenCalledWith({
-      taskId: 'task-1',
-      title: 'Rever',
-      notes: '',
-      assigneeId: FOUNDER.id,
-      dueOn: '2026-10-20',
-    });
-  });
-
-  it('task form clears the date with the clear button', async () => {
-    const user = userEvent.setup();
-    const update = vi.fn(OK);
-    renderWithIntl(
-      <TaskEditForm
-        task={task({ id: 'task-1', title: 'Rever', dueOn: '2026-10-14' })}
-        people={[]}
-        update={update}
-      />,
-    );
-
-    await user.click(screen.getByRole('button', { name: /^Data/ }));
-    await user.click(await screen.findByRole('button', { name: 'Limpar' }));
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
-    });
-
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ dueOn: null }));
-  });
-
   describe('inside an overlay (onDone given)', () => {
     it('reports creation through onDone without an inline success message', async () => {
       const onDone = vi.fn();
@@ -360,18 +180,6 @@ describe('tasks', () => {
         fireEvent.submit(screen.getByRole('form'));
       });
       expect(onDone).toHaveBeenCalledWith('Tarefa criada.');
-      expect(screen.queryByRole('status')).toBeNull();
-    });
-
-    it('reports edits through onDone without an inline success message', async () => {
-      const onDone = vi.fn();
-      renderWithIntl(
-        <TaskEditForm task={task({ title: 'Rever' })} people={[]} update={OK} onDone={onDone} />,
-      );
-      await act(async () => {
-        fireEvent.submit(screen.getByLabelText('Título').closest('form') as HTMLFormElement);
-      });
-      expect(onDone).toHaveBeenCalledTimes(1);
       expect(screen.queryByRole('status')).toBeNull();
     });
   });

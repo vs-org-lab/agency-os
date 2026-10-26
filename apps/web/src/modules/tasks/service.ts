@@ -35,6 +35,7 @@ export type TaskView = {
   clientId: string | null;
   clientName: string | null;
   projectId: string | null;
+  projectName: string | null;
   assigneeId: string | null;
   assigneeName: string | null;
   dueOn: string | null;
@@ -384,6 +385,7 @@ export async function listTasks(
     client_id: string | null;
     client_name: string | null;
     project_id: string | null;
+    project_name: string | null;
     assignee_id: string | null;
     assignee_name: string | null;
     due_on: string | null;
@@ -408,10 +410,11 @@ export async function listTasks(
            (select count(*) from public.task_items i where i.task_id = t.id)::int as items_total,
            (select count(*) from public.task_comments k where k.task_id = t.id)::int as comment_count,
            (select count(*) from public.task_files f where f.task_id = t.id)::int as file_count,
-           s.name as phase_name,
+           s.name as phase_name, pr.name as project_name,
            to_char(t.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
     from public.tasks t
     left join public.project_steps s on s.id = t.step_id
+    left join public.projects pr on pr.id = t.project_id
     left join public.clients c on c.id = t.client_id
     left join public.profiles p on p.id = t.assignee_id
     where (${filter.taskId ?? null}::uuid is null or t.id = ${filter.taskId ?? null}::uuid)
@@ -435,6 +438,7 @@ export async function listTasks(
     clientId: row.client_id,
     clientName: row.client_name,
     projectId: row.project_id,
+    projectName: row.project_name,
     assigneeId: row.assignee_id,
     assigneeName: row.assignee_name,
     dueOn: row.due_on,

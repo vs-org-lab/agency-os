@@ -2016,18 +2016,9 @@
     "title": "Tasks",
     "description": "What needs doing, for the studio and for clients.",
     "roomDescription": "This client's internal tasks. The client does not see them.",
-    "groups": {
-      "today": "Today",
-      "this_week": "This week",
-      "later": "Later",
-      "done": "Done"
-    },
-    "overdue": "Overdue",
     "noDate": "No date",
     "studio": "Studio",
     "unassigned": "Unassigned",
-    "edit": "Edit",
-    "itemsLabel": "Subtasks of {title}",
     "empty": {
       "title": "No tasks",
       "description": "Tasks created here or by the process appear in this list."
@@ -2083,14 +2074,76 @@
       },
       "commentCount": "{count, plural, one {# comment} other {# comments}}"
     },
+    "panel": {
+      "close": "Close",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied.",
+      "copyFailed": "The link could not be copied.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this task?",
+      "deleteHint": "Its comments, linked files and links are removed too.",
+      "confirmDelete": "Delete task",
+      "cancel": "Cancel",
+      "deleted": "Task deleted.",
+      "tabs": {
+        "details": "Details",
+        "collaboration": "Comments and files ({count})"
+      },
+      "details": {
+        "title": "Title",
+        "notes": "Notes",
+        "assignee": "Assignee",
+        "dueOn": "Due date",
+        "client": "Client",
+        "project": "Project",
+        "checklist": "Checklist",
+        "addItem": "Add item",
+        "itemTitle": "New checklist item",
+        "none": "—"
+      },
+      "comments": {
+        "heading": "Comments",
+        "placeholder": "Write a comment…",
+        "send": "Comment",
+        "hint": "Ctrl+Enter to send",
+        "empty": "No comments yet.",
+        "delete": "Delete comment by {author}",
+        "unknownAuthor": "Former member"
+      },
+      "files": {
+        "heading": "Files",
+        "add": "Add file",
+        "chooseTitle": "Library files",
+        "upload": "Upload files",
+        "none": "No files linked.",
+        "noneAvailable": "The project library has no other files to link.",
+        "attach": "Link {name}",
+        "detach": "Remove {name}",
+        "noProject": "Files live in a project library.",
+        "dropHere": "Drop files to link them to the task",
+        "dropFolders": "Folders cannot be uploaded and were skipped.",
+        "uploading": "Uploading {done} of {total}…",
+        "uploadFailed": "Some files could not be uploaded.",
+        "filter": "Search the library",
+        "attachShort": "Link",
+        "attached": "File linked to the task."
+      },
+      "links": {
+        "heading": "Links",
+        "add": "Add link",
+        "url": "Address",
+        "linkTitle": "Title (optional)",
+        "submit": "Add",
+        "none": "No links.",
+        "remove": "Remove link {name}",
+        "invalid": "Use an address that starts with https://."
+      }
+    },
     "errors": {
       "not_found": "You are not allowed to do this.",
       "invalid_input": "Check the fields and try again.",
       "forbidden": "You do not have access to this task."
-    },
-    "delete": "Delete",
-    "deleteLabel": "Delete task {title}",
-    "editLabel": "Edit task {title}"
+    }
   },
   "team": {
     "title": "Team",

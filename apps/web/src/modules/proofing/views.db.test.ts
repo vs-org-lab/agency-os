@@ -198,3 +198,44 @@ describe('proof views', () => {
     });
   });
 });
+
+describe('previous version for comparison', () => {
+  it('the team view names the previous image version', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps } = proofingDeps(sql);
+      const manager = proofClaims(world.users.manager);
+
+      const second = await loadProofVersion(manager, proof.versionTwoId, deps);
+      const first = await loadProofVersion(manager, proof.versionOneId, deps);
+
+      expect(second?.previousVersion).toEqual({ id: proof.versionOneId, number: 1 });
+      expect(first?.previousVersion).toBeNull();
+    });
+  });
+
+  it('the client view names the previous version only when the client can read it', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const proof = await createProofFixture(sql, world);
+      const { deps } = proofingDeps(sql);
+      const read = () =>
+        deps.contexts.withUserContext(proofClaims(world.users.operationalA, 'client'), (tx) =>
+          getClientProofVersion(tx, proof.versionTwoId),
+        );
+
+      expect((await read())?.previousVersion).toBeNull();
+
+      await sql`reset role`;
+      await sql`
+        insert into public.approvals (organization_id, client_id, project_id, subject_type,
+                                      subject_id, requested_by)
+        values (${world.organizationId}, ${world.clients.a}, ${proof.rooms.a.projectId},
+                'file_version', ${proof.versionOneId}, ${world.users.founder})
+      `;
+
+      expect((await read())?.previousVersion).toEqual({ id: proof.versionOneId, number: 1 });
+    });
+  });
+});

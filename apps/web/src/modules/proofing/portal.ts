@@ -14,6 +14,8 @@ export type ClientProofVersionView = {
   kind: ProofKind;
   mimeType: string;
   pages: number | null;
+  /** The version before this one, when both are images the client may read. */
+  previousVersion: { id: string; number: number } | null;
   approval: ProofApprovalView | null;
   comments: ProofCommentView[];
   rounds: RoundsStatus;
@@ -28,6 +30,7 @@ export async function getClientProofVersion(
   const [version] = await tx.execute<{
     id: string;
     project_id: string;
+    file_id: string;
     title: string;
     number: number;
     kind: ProofKind;
@@ -35,12 +38,20 @@ export async function getClientProofVersion(
     pages: number | null;
     revision_limit: number;
   }>(sql`
-    select v.id, v.project_id, v.title, v.number, v.kind, v.mime_type, v.pages, p.revision_limit
+    select v.id, v.project_id, v.file_id, v.title, v.number, v.kind, v.mime_type, v.pages, p.revision_limit
     from public.portal_proof_versions v
     join public.portal_projects p on p.id = v.project_id
     where v.id = ${versionId}::uuid
   `);
   if (!version) return null;
+  const [previous] =
+    version.kind === 'image'
+      ? await tx.execute<{ id: string; number: number }>(sql`
+          select id, number from public.portal_proof_versions
+          where file_id = ${version.file_id}::uuid and number = ${version.number - 1}
+            and kind = 'image'
+        `)
+      : [];
   const comments = await tx.execute<{
     id: string;
     parent_id: string | null;
@@ -81,6 +92,7 @@ export async function getClientProofVersion(
     kind: version.kind,
     mimeType: version.mime_type,
     pages: version.pages,
+    previousVersion: previous ? { id: previous.id, number: previous.number } : null,
     approval: approval
       ? {
           id: approval.id,

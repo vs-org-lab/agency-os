@@ -172,12 +172,15 @@ export async function saveScoresAction(
 ): Promise<CoreFormState> {
   const current = await session();
   if (!current) return NOT_FOUND;
-  const scores = criterionIds.map((criterionId) => ({
-    front,
-    criterionId,
-    points: Number(text(formData, `points-${criterionId}`)),
-    justification: text(formData, `justification-${criterionId}`),
-  }));
+  const scores = criterionIds.map((criterionId) => {
+    const rawPoints = text(formData, `points-${criterionId}`);
+    return {
+      front,
+      criterionId,
+      points: rawPoints === '' ? Number.NaN : Number(rawPoints),
+      justification: text(formData, `justification-${criterionId}`),
+    };
+  });
   if (scores.some((score) => !Number.isInteger(score.points))) {
     return { status: 'error', code: 'invalid_input' };
   }

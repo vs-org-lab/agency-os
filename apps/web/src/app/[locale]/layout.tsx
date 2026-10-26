@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { Fraunces, Inter, Space_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { MotionProvider } from '@agency-os/ui/motion';
 import { ThemeProvider } from '@agency-os/ui/theme';
 import { requireLocale } from '@/i18n/require-locale';
 import '../globals.css';
@@ -46,7 +47,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     >
       <body>
         <NextIntlClientProvider>
-          <ThemeProvider nonce={nonce}>{children}</ThemeProvider>
+          <ThemeProvider nonce={nonce}>
+            <MotionProvider>{children}</MotionProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

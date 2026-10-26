@@ -4,7 +4,7 @@ import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Collapsible as CollapsiblePrimitive } from 'radix-ui';
 import { cn } from '@agency-os/ui/lib/utils';
-import { AnimatePresence, m, transitions, useReducedMotion } from '@agency-os/ui/motion';
+import { m, transitions, useReducedMotion } from '@agency-os/ui/motion';
 
 const CollapsibleOpenContext = React.createContext(false);
 
@@ -68,23 +68,35 @@ function CollapsibleContent({
   const open = React.useContext(CollapsibleOpenContext);
   const reducedMotion = useReducedMotion();
   const transition = reducedMotion ? { duration: 0 } : transitions.slow;
+  // Content stays mounted so local state survives; it is only taken out of the
+  // accessibility tree and tab order once the closing animation has finished.
+  const [settledClosed, setSettledClosed] = React.useState(!open);
+  const hidden = !open && settledClosed;
+
+  React.useEffect(() => {
+    if (open) setSettledClosed(false);
+  }, [open]);
 
   return (
-    <AnimatePresence initial={false}>
-      {open ? (
-        <CollapsiblePrimitive.Content data-slot="collapsible-content" forceMount asChild {...props}>
-          <m.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={transition}
-            className={cn('overflow-hidden', className)}
-          >
-            {children}
-          </m.div>
-        </CollapsiblePrimitive.Content>
-      ) : null}
-    </AnimatePresence>
+    <CollapsiblePrimitive.Content
+      data-slot="collapsible-content"
+      forceMount
+      asChild
+      {...props}
+      hidden={hidden}
+    >
+      <m.div
+        initial={false}
+        animate={open ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+        transition={transition}
+        onAnimationComplete={() => {
+          if (!open) setSettledClosed(true);
+        }}
+        className={cn('overflow-hidden', className)}
+      >
+        {children}
+      </m.div>
+    </CollapsiblePrimitive.Content>
   );
 }
 

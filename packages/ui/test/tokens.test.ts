@@ -102,6 +102,17 @@ describe('design tokens', () => {
     }
   });
 
+  it('data scale chart-1 to chart-5 has 3:1 contrast against surface in both themes', () => {
+    for (const [name, theme] of Object.entries(themes)) {
+      for (const index of [1, 2, 3, 4, 5]) {
+        const color = theme.get(`chart-${index}`) as string;
+        expect(color, `${name} chart-${index}`).toMatch(/^#[0-9A-F]{6}$/);
+        const ratio = contrastRatio(color, theme.get('surface') as string);
+        expect(ratio, `${name} chart-${index}`).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
   it('durations fast, base and slow are 120ms, 180ms and 240ms', () => {
     expect(themes.light.get('duration-fast')).toBe('120ms');
     expect(themes.light.get('duration-base')).toBe('180ms');

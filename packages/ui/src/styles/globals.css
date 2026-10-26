@@ -133,24 +133,26 @@
   }
 }
 
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background-color: var(--surface-muted);
-}
+@layer components {
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--surface-muted);
+  }
 
-.skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(90deg, transparent, var(--border), transparent);
-  opacity: 0.6;
-  animation: skeleton-sheen 1.4s var(--ease-standard) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
   .skeleton::after {
-    animation: none;
-    display: none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(90deg, transparent, var(--border), transparent);
+    opacity: 0.6;
+    animation: skeleton-sheen 1.4s var(--ease-standard) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+      display: none;
+    }
   }
 }

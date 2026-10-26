@@ -1,4 +1,4 @@
-export { endOfWeek, startOfWeek, taskGroup, type TaskGroup } from './domain/groups';
+export { endOfWeek, startOfWeek } from './domain/week';
 export { parseTaskFilter, taskToday, type TaskFilter } from './domain/filter';
 export { sortByUrgency } from './domain/urgency';
 export { canCreateTasks } from './domain/creators';

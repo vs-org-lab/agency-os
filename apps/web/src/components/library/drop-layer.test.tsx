@@ -10,7 +10,12 @@ function setup(enabled = true, folderNotice = 'Pastas não são suportadas; larg
   const onFiles = vi.fn();
   render(
     <MotionProvider>
-      <DropLayer enabled={enabled} onFiles={onFiles} label="Largue aqui" folderNotice={folderNotice}>
+      <DropLayer
+        enabled={enabled}
+        onFiles={onFiles}
+        label="Largue aqui"
+        folderNotice={folderNotice}
+      >
         <p data-testid="area">content</p>
       </DropLayer>
     </MotionProvider>,

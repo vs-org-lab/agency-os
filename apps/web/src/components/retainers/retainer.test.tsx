@@ -297,6 +297,11 @@ describe('C-10 retainer', () => {
 
     expect(await screen.findByText('Verifique os campos.')).toBeTruthy();
     expect(save).not.toHaveBeenCalled();
+    const starts = screen.getByRole('button', { name: /Início/ });
+    expect(starts.getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(starts);
+    expect(starts.getAttribute('aria-describedby')).toBeTruthy();
+    expect(screen.getAllByText('Indique a data.').length).toBe(2);
   });
 
   it('quoting an extra request sends the amount', async () => {

@@ -8,6 +8,8 @@ import type { TaskFilePreview, TaskView } from '@/modules/tasks';
 
 const OPEN_DELAY_MS = 300;
 const MAX_FILES = 3;
+// Signed thumbnail links last 15 minutes; a preview older than this is fetched again.
+const PREVIEW_MAX_AGE_MS = 10 * 60 * 1000;
 
 type Preview =
   { status: 'idle' | 'loading' | 'failed' } | { status: 'ready'; files: TaskFilePreview[] };
@@ -40,12 +42,14 @@ export function TaskFilesPreview({
   const [preview, setPreview] = useState<Preview>({ status: 'idle' });
   // Radix opens on focus too; only a pointer that is over the trigger is allowed to open it.
   const overTrigger = useRef(false);
+  const loadedAt = useRef(0);
 
   if (task.fileCount === 0) return <>{children}</>;
 
   const load = async () => {
     setPreview({ status: 'loading' });
     const result = await loadPreview(task.id).catch(() => null);
+    loadedAt.current = Date.now();
     setPreview(
       result?.ok
         ? { status: 'ready', files: result.files.slice(0, MAX_FILES) }
@@ -61,7 +65,12 @@ export function TaskFilesPreview({
       onOpenChange={(next) => {
         if (next && !overTrigger.current) return;
         setOpen(next);
-        if (next && preview.status !== 'ready') void load();
+        if (
+          next &&
+          (preview.status !== 'ready' || Date.now() - loadedAt.current > PREVIEW_MAX_AGE_MS)
+        ) {
+          void load();
+        }
       }}
     >
       <HoverCardTrigger asChild>

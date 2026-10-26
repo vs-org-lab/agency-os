@@ -13,6 +13,22 @@ export type TestimonialDeps = {
   flush?: () => Promise<void>;
 };
 
+/** The client's decision maker of a delivered project, the only one who speaks for it. */
+export async function isProjectDecisionMaker(
+  claims: VerifiedClaims,
+  projectId: string,
+  deps: Pick<TestimonialDeps, 'contexts'>,
+): Promise<boolean> {
+  return deps.contexts.withUserContext(claims, async (tx) => {
+    const rows = await tx.execute<{ id: string }>(sql`
+      select p.id from public.portal_projects p
+      where p.id = ${projectId}::uuid and p.status = 'delivered'
+        and app.is_client_member(p.client_id, array['decision_maker']::app.client_role[])
+    `);
+    return rows.length > 0;
+  });
+}
+
 /**
  * The client's decision maker leaves, or replaces, the testimonial of a delivered project
  * (AUT-21, spec 2D.2 decision 8). The founder is told through `testimonials.received`.
@@ -29,14 +45,7 @@ export async function submitTestimonial(
       : { ok: false, rule: 'not_found' };
   }
   const data = parsed.data;
-  const allowed = await deps.contexts.withUserContext(claims, async (tx) => {
-    const rows = await tx.execute<{ id: string }>(sql`
-      select p.id from public.portal_projects p
-      where p.id = ${data.projectId}::uuid and p.status = 'delivered'
-        and app.is_client_member(p.client_id, array['decision_maker']::app.client_role[])
-    `);
-    return rows.length > 0;
-  });
+  const allowed = await isProjectDecisionMaker(claims, data.projectId, deps);
   if (!allowed) return { ok: false, rule: 'not_found' };
 
   await deps.contexts.withSystemContext(async (tx) => {

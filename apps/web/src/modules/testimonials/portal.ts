@@ -7,6 +7,8 @@ export type TestimonialView = {
   authorName: string;
   authorRole: string;
   consentPublish: boolean;
+  /** A recorded video was sent for this testimonial. */
+  hasVideo: boolean;
 };
 
 export type ClientTestimonial = { projectName: string; testimonial: TestimonialView | null };
@@ -23,8 +25,9 @@ export async function getClientTestimonial(
     author_name: string | null;
     author_role: string | null;
     consent_publish: boolean | null;
+    video_status: 'pending' | 'ready' | null;
   }>(sql`
-    select p.name, t.body, t.author_name, t.author_role, t.consent_publish
+    select p.name, t.body, t.author_name, t.author_role, t.consent_publish, t.video_status
     from public.portal_projects p
     left join public.portal_testimonials t on t.project_id = p.id
     where p.id = ${projectId}::uuid and p.status = 'delivered'
@@ -41,6 +44,7 @@ export async function getClientTestimonial(
             authorName: row.author_name ?? '',
             authorRole: row.author_role ?? '',
             consentPublish: row.consent_publish === true,
+            hasVideo: row.video_status === 'ready',
           },
   };
 }

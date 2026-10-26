@@ -302,6 +302,7 @@ Evidência de cada critério da secção 12 do [spec](superpowers/specs/2026-10-
 Nenhum dado real de cliente entra no sistema antes de todos estarem cumpridos ([ADR 0003](decisions/0003-zero-cost-until-launch.md)).
 
 - [ ] Repositório `vs-org-lab/agency-os` de volta a privado depois do teste completo do OS
+- [ ] Recuperação de palavra-passe para a equipa (o link mágico só serve clientes e o PRD não prevê recuperação; hoje só um script de administração repõe a palavra-passe). Repor exige o fator TOTP no fim, como no início de sessão (detetado a 2026-10-26)
 - [ ] Projeto Supabase de produção em eu-west-1, plano Pro
 - [ ] Plano Vercel Pro (o Hobby não permite uso comercial e pausa por excesso de CPU; decidido a 2026-10-25)
 - [ ] Domínio comprado (o mesmo do site da agência, alojado na Hostinger; o nome da agência pode mudar antes da compra). O OS e o portal ficam em `os.<domínio>` e o Brand Hub em `marca.<domínio>`; os registos da raiz, que servem o site, não mudam (decidido a 2026-10-25)

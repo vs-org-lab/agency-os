@@ -65,7 +65,12 @@ describe('tasks', () => {
     );
     const assigneeNames = async () => {
       await user.click(screen.getByRole('combobox', { name: 'Responsável' }));
-      const names = screen.getAllByRole('option').map((option) => option.textContent);
+      const names = screen
+        .getAllByRole('option')
+        .map(
+          (option) =>
+            option.querySelector('[data-slot="member-name"]')?.textContent ?? option.textContent,
+        );
       await user.keyboard('{Escape}');
       return names;
     };
@@ -73,7 +78,7 @@ describe('tasks', () => {
     await chooseOption(user, 'Cliente', 'Boreal SA');
     expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora']);
     await chooseOption(user, 'Cliente', 'Atlas Lda');
-    expect(await assigneeNames()).toEqual(['Sem responsável', 'Ana Fundadora', 'Rui Freelancer']);
+    expect(await assigneeNames()).toEqual(['Sem responsável', 'Rui Freelancer', 'Ana Fundadora']);
   });
 
   it('filters by client and assignee with counts per status', () => {
@@ -153,7 +158,8 @@ describe('tasks', () => {
 
     fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Rever' } });
     await chooseOption(user, 'Cliente', 'Atlas Lda');
-    await chooseOption(user, 'Responsável', 'Rui Freelancer');
+    await user.click(screen.getByRole('combobox', { name: 'Responsável' }));
+    await user.click(screen.getByRole('option', { name: /Rui Freelancer/ }));
     await chooseDay(user, /^Data/, 9);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Criar tarefa' }));

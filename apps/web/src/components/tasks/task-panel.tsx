@@ -7,11 +7,11 @@ import { Checkbox } from '@agency-os/ui/components/checkbox';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { SidePanel } from '@agency-os/ui/components/side-panel';
+import { MemberSelector } from '@agency-os/ui/components/member-selector';
 import { Tabs, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { Textarea } from '@agency-os/ui/components/textarea';
 import { Copy, Trash2 } from 'lucide-react';
 import { DateField } from '@/components/forms/date-field';
-import { SelectField } from '@/components/forms/select-field';
 import { notify } from '@/components/ui/notify';
 import type { AttachableFile } from '@/modules/library';
 import { canTakeTask, type TaskDetail, type TaskPerson } from '@/modules/tasks';
@@ -132,6 +132,7 @@ function Details({
 }) {
   const t = useTranslations('tasks.panel.details');
   const tf = useTranslations('tasks.form');
+  const tInteraction = useTranslations('interaction');
   const { run } = useTaskAction();
   const [title, setTitle] = useState(task.title);
   const [notes, setNotes] = useState(task.notes);
@@ -179,19 +180,26 @@ function Details({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="task-panel-assignee">{t('assignee')}</Label>
-          <SelectField
+          <MemberSelector
             id="task-panel-assignee"
             name="assignee"
-            value={assigneeId}
+            label={t('assignee')}
+            value={assigneeId || null}
             disabled={!editable}
-            onValueChange={(next) => {
-              setAssigneeId(next);
-              void save({ assigneeId: next || null });
+            onChange={(next) => {
+              setAssigneeId(next ?? '');
+              void save({ assigneeId: next });
             }}
-            options={people
+            members={people
               .filter((person) => canTakeTask(person, task.clientId))
-              .map((person) => ({ value: person.id, label: person.name }))}
-            emptyLabel={tf('none')}
+              .map((person) => ({
+                id: person.id,
+                name: person.name,
+                priority:
+                  task.clientId !== null && person.clientIds?.includes(task.clientId) === true,
+              }))}
+            unassignedLabel={tf('none')}
+            searchPlaceholder={tInteraction('searchMember')}
           />
         </div>
         <div className="flex flex-col gap-1">

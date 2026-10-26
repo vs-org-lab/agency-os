@@ -2483,7 +2483,8 @@
     "datePicker": {
       "placeholder": "Choose date",
       "clear": "Clear"
-    }
+    },
+    "searchMember": "Search by name"
   },
   "testimonials": {
     "title": "Testimonial",

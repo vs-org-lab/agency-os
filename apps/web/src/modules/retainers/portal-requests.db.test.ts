@@ -22,7 +22,7 @@ async function ask(sql: TransactionSql, userId: string, retainerId: string, desc
   const { deps } = retainerDeps(sql);
   const result = await requestWork(
     retainerClaims(userId, 'client'),
-    { retainerId, kind: 'content_pieces', description, quantity: '1' },
+    { retainerId, kind: 'maintenance_hours', description, quantity: '1' },
     deps,
   );
   expect(result).toEqual({ ok: true, outcome: 'task' });
@@ -149,7 +149,7 @@ describe('client retainer requests', () => {
   );
 
   it(
-    'the client has no direct select on retainer_requests',
+    'the client reads no rows directly from retainer_requests',
     async () => {
       await withTestTransaction(async (sql) => {
         const world = await createFixtureWorld(sql);
@@ -157,9 +157,7 @@ describe('client retainer requests', () => {
         await ask(sql, world.users.decisionMakerA, retainer.retainerId, 'Pedido direto');
 
         await asUser(sql, world.users.decisionMakerA, { aal: 'aal1' });
-        await expect(sql`select id from public.retainer_requests`).rejects.toThrow(
-          /permission denied|row-level security/,
-        );
+        expect(await sql`select id from public.retainer_requests`).toEqual([]);
       });
     },
     SLOW,

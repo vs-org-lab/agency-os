@@ -264,11 +264,16 @@ function Toolbar({
   const view = params.view ?? 'grid';
   const sortOptions = SORTS.map((sort) => ({ value: sort, label: t(`sort.${sort}`) }));
 
+  // A term changed outside the box (a link, the back button) replaces what is typed.
+  useEffect(() => {
+    setQuery((current) => ((params.q ?? '') === current.trim() ? current : (params.q ?? '')));
+  }, [params.q]);
+
   // The search follows the URL once typing pauses, so it needs no submit button.
   useEffect(() => {
     if (query.trim() === (params.q ?? '')) return;
     const timer = setTimeout(
-      () => router.push(searchHref(basePath, params, query)),
+      () => router.replace(searchHref(basePath, params, query)),
       SEARCH_DEBOUNCE_MS,
     );
     return () => clearTimeout(timer);

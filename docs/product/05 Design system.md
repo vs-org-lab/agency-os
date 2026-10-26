@@ -72,6 +72,20 @@ Cada estado tem uma cor de texto e um fundo suave, usados juntos nas etiquetas c
 
 O aviso é laranja e não amarelo, para nunca se confundir com o dourado da marca. Os estados nunca dependem só da cor: a etiqueta tem sempre o texto do estado.
 
+### Escala de dados
+
+Cinco cores categóricas para gráficos, atribuídas por ordem fixa (a primeira série é sempre `chart-1`) e nunca recicladas: a sexta série passa a "Outros". Foram validadas por cálculo (distância de cor entre vizinhas, também para daltonismo, e contraste de pelo menos 3:1 contra a superfície) e a escala escura tem passos próprios, não é uma inversão.
+
+| Token | Claro | Escuro | Matiz |
+| --- | --- | --- | --- |
+| chart-1 | #2A78D6 | #3987E5 | Azul |
+| chart-2 | #E0552A | #D95926 | Laranja |
+| chart-3 | #12906A | #199E70 | Verde-água |
+| chart-4 | #8A5A00 | #C98500 | Âmbar |
+| chart-5 | #D0507F | #D55181 | Magenta |
+
+Regras: linhas de 2 px, marcadores de pelo menos 8 px com anel de 2 px da cor da superfície, uma só escala no eixo Y (nunca dois eixos), grelha discreta, legenda sempre que há duas ou mais séries, texto nos tokens de texto e nunca na cor da série, e a tabela com os mesmos números mantém-se como fonte completa dos dados. Estas cores não se usam para estados.
+
 ## Tipografia, espaço, forma e movimento
 
 Uma família para trabalhar (Inter), uma para códigos (Space Mono) e uma para os títulos que o cliente vê (Fraunces). O resto da escala é deliberadamente curta.
@@ -146,7 +160,7 @@ Quase todos os componentes vêm de bibliotecas prontas e são ajustados aos toke
 | Visualizador | Figma incorporado, PDF, vídeo, imagem | iframe do Figma, react-pdf, vídeo nativo |
 | Comentário posicionado | Ponto na imagem ou PDF, tempo no vídeo | **Construído de raiz** sobre o visualizador |
 | Editor do Brand Hub | Páginas, blocos, painel de design | **Construído de raiz**, com componentes shadcn por dentro |
-| Gráficos | Relatórios, resultado acordado, dinheiro | shadcn/ui Charts (Recharts) |
+| Gráficos | Relatórios e dinheiro: linhas mensais e barras empilhadas | **Construído de raiz** (SVG, sem dependência), com a escala de dados |
 | Calendário | Seletores de data e vistas de semana e mês | shadcn/ui Calendar e uma biblioteca de agenda |
 
 ### Criar e editar

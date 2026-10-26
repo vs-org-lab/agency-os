@@ -51,8 +51,9 @@ test.describe('Tasks, home and updates', () => {
     await form.getByRole('button', { name: 'Criar tarefa' }).click();
     await expect(page.getByText('Tarefa criada.')).toBeVisible({ timeout: 30_000 });
     await page.goto('/tasks');
-    const today = page.getByRole('region', { name: 'Hoje' });
-    await expect(today.getByText(title)).toBeVisible();
+    const table = page.getByRole('table', { name: 'Tarefas' });
+    const titleButton = table.getByRole('button', { name: title, exact: true });
+    await expect(titleButton).toBeVisible();
     await expectAccessible(page);
 
     await page.goto('/');
@@ -61,19 +62,36 @@ test.describe('Tasks, home and updates', () => {
     await expect(homeItem.getByText('Atrasado')).toBeVisible();
 
     await page.goto(`/c/${room.clientId}/tasks`);
-    await expect(page.getByText(title)).toBeVisible();
+    const roomTitle = page.getByRole('button', { name: title, exact: true });
+    await expect(roomTitle).toBeVisible();
     await expectAccessible(page);
+    await page.getByRole('button', { name: `Mostrar subtarefas de ${title}` }).click();
     await page.getByRole('checkbox', { name: 'Exportar ficheiros' }).click();
     await expect(page.getByRole('checkbox', { name: 'Exportar ficheiros' })).toBeChecked({
       timeout: 30_000,
     });
-    await page.getByRole('checkbox', { name: title }).click();
-    await expect(page.getByText(title)).toHaveCount(0, { timeout: 30_000 });
+
+    await roomTitle.click();
+    await expect(page).toHaveURL(/[?&]task=/);
+    const panel = page.getByRole('dialog', { name: title });
+    await expect(panel.getByLabel('Título')).toHaveValue(title);
+    await panel.getByLabel('Notas').fill('Rever com o cliente');
+    await panel.getByLabel('Título').click();
+    await expect(page.getByText('Alterações guardadas.')).toBeVisible({ timeout: 30_000 });
+    await panel.getByRole('button', { name: 'Fechar' }).click();
+    await expect(panel).toBeHidden();
+
+    await page.getByRole('checkbox', { name: title, exact: true }).click();
+    await expect(roomTitle).toHaveCount(0, { timeout: 30_000 });
 
     await page.goto('/tasks');
     await page.getByRole('tab', { name: /^Concluídas/ }).click();
     await expect(page).toHaveURL(/\/tasks\?.*status=done/);
-    await expect(page.getByRole('region', { name: 'Concluídas' }).getByText(title)).toBeVisible();
+    await expect(
+      page
+        .getByRole('table', { name: 'Tarefas' })
+        .getByRole('button', { name: title, exact: true }),
+    ).toBeVisible();
 
     await page.goto('/');
     await expect(page.getByRole('link', { name: new RegExp(`Tarefa: ${title}`) })).toHaveCount(0);

@@ -15,6 +15,7 @@ import {
   setTaskItemAction,
   setTaskStatusAction,
 } from '../../../(workspace)/tasks/actions';
+import { taskFilePreviewAction } from '../../../(workspace)/tasks/collaboration-actions';
 import { loadPanelData } from '../../../(workspace)/tasks/panel-data';
 import { taskPanelActions } from '../../../(workspace)/tasks/panel-actions';
 import { pageMetadata } from '@/i18n/page-title';
@@ -87,6 +88,7 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
           setStatus={setTaskStatusAction}
           setItem={setTaskItemAction}
           addItem={addTaskItemAction}
+          loadPreview={taskFilePreviewAction}
         />
       </div>
       <TaskPanel

@@ -8,8 +8,11 @@ import {
   deleteTaskComment,
   detachTaskFile,
   removeTaskLink,
+  taskFilePreviews,
   taskUploadFolder,
+  type TaskFilePreview,
 } from './collaboration';
+import { libraryFileLink } from '@/modules/library/server';
 import { loadTaskDetail } from './detail';
 import { listTaskOptions } from './options';
 import {
@@ -117,4 +120,25 @@ export function detachStudioTaskFile(session: TaskSession, taskId: string, libra
 
 export function loadStudioTaskUploadFolder(session: TaskSession, taskId: string) {
   return taskUploadFolder(session.claims, { taskId }, deps());
+}
+
+/** Signed links are created only for images, which are the files shown as thumbnails. */
+export async function loadStudioTaskFilePreviews(
+  session: TaskSession,
+  taskId: string,
+): Promise<
+  | { ok: true; files: TaskFilePreview[] }
+  | { ok: false; rule: 'forbidden' | 'not_found' | 'invalid_input' }
+> {
+  const result = await taskFilePreviews(session.claims, { taskId }, deps());
+  if (!result.ok) return result;
+  const files = await Promise.all(
+    result.files.map(async (file) => ({
+      ...file,
+      url: file.mimeType?.startsWith('image/')
+        ? await libraryFileLink(session.claims, file.id)
+        : null,
+    })),
+  );
+  return { ok: true, files };
 }

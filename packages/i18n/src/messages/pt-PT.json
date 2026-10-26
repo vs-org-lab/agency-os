@@ -2139,6 +2139,12 @@
         "invalid": "Use um endereço que comece por https://."
       }
     },
+    "preview": {
+      "label": "Ficheiros de {title}",
+      "loading": "A carregar ficheiros…",
+      "more": "e mais {count}",
+      "failed": "Não foi possível mostrar os ficheiros."
+    },
     "errors": {
       "not_found": "Não tem permissão para esta ação.",
       "invalid_input": "Verifique os campos e tente de novo.",

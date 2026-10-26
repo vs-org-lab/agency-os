@@ -7,14 +7,19 @@ import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { TableCell, TableRow } from '@agency-os/ui/components/table';
 import { cn } from '@agency-os/ui/lib/utils';
 import { ChevronRight, MessageSquare } from 'lucide-react';
-import type { TaskView } from '@/modules/tasks';
+import type { TaskFilePreview, TaskView } from '@/modules/tasks';
 import { SubtaskRows, type SubtaskActions } from './subtask-rows';
 import { calendarDate } from './task-date';
+import { TaskFilesPreview } from './task-files-preview';
 import type { TaskActionResult } from './task-errors';
 
 export type TaskRowActions = SubtaskActions & {
   setStatus: (taskId: string, status: 'open' | 'done') => Promise<TaskActionResult>;
   onOpen: (taskId: string) => void;
+  /** Fetches the files shown when the pointer rests on a title; without it there is no preview. */
+  loadPreview?: (
+    taskId: string,
+  ) => Promise<{ ok: true; files: TaskFilePreview[] } | { ok: false; code: string }>;
 };
 
 type RowProps = TaskRowActions & {
@@ -67,8 +72,12 @@ function CommentCount({ count }: { count: number }) {
   );
 }
 
-function TitleButton({ task, onOpen }: { task: TaskView; onOpen: (taskId: string) => void }) {
-  return (
+function TitleButton({
+  task,
+  onOpen,
+  loadPreview,
+}: Pick<TaskRowActions, 'onOpen' | 'loadPreview'> & { task: TaskView }) {
+  const button = (
     <button
       type="button"
       onClick={() => onOpen(task.id)}
@@ -81,6 +90,13 @@ function TitleButton({ task, onOpen }: { task: TaskView; onOpen: (taskId: string
     >
       {task.title}
     </button>
+  );
+  return loadPreview ? (
+    <TaskFilesPreview task={task} loadPreview={loadPreview}>
+      {button}
+    </TaskFilesPreview>
+  ) : (
+    button
   );
 }
 
@@ -128,7 +144,7 @@ export function TaskRow({
                 )}
               />
             </button>
-            <TitleButton task={task} onOpen={actions.onOpen} />
+            <TitleButton task={task} onOpen={actions.onOpen} loadPreview={actions.loadPreview} />
           </span>
         </TableCell>
         {showClient ? (
@@ -190,7 +206,7 @@ export function TaskCard({ task, today, showClient, ...actions }: RowProps) {
             void actions.run(() => actions.setStatus(task.id, checked === true ? 'done' : 'open'))
           }
         />
-        <TitleButton task={task} onOpen={actions.onOpen} />
+        <TitleButton task={task} onOpen={actions.onOpen} loadPreview={actions.loadPreview} />
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 text-caption text-text-secondary">
         <Due task={task} today={today} />

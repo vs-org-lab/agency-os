@@ -2139,6 +2139,12 @@
         "invalid": "Use an address that starts with https://."
       }
     },
+    "preview": {
+      "label": "Files of {title}",
+      "loading": "Loading files…",
+      "more": "and {count} more",
+      "failed": "The files could not be shown."
+    },
     "errors": {
       "not_found": "You are not allowed to do this.",
       "invalid_input": "Check the fields and try again.",

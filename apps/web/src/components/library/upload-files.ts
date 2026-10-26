@@ -29,6 +29,7 @@ export async function uploadFiles(
   files: File[],
   actions: { startUploads: StartUploads; finishUpload: (fileId: string) => Promise<ActionResult> },
   onProgress: (done: number, total: number) => void,
+  onFile?: (file: File, status: 'done' | 'failed') => void,
 ): Promise<UploadOutcome> {
   const accepted = files.filter((file) => file.size > 0 && file.size <= MAX_LIBRARY_BYTES);
   const outcome: UploadOutcome = {
@@ -56,6 +57,7 @@ export async function uploadFiles(
       if (!sent) outcome.error = 'upload_failed';
       else if (finished.ok) outcome.uploaded += 1;
       else outcome.rejected += 1;
+      if (file) onFile?.(file, sent && finished.ok ? 'done' : 'failed');
       done += 1;
       onProgress(done, accepted.length);
     }

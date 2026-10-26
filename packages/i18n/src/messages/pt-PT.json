@@ -2299,7 +2299,6 @@
     "title": "Biblioteca",
     "breadcrumb": "Caminho da pasta",
     "search": "Pesquisar ficheiros",
-    "searchSubmit": "Pesquisar",
     "clearSearch": "Limpar pesquisa",
     "filters": {
       "label": "Filtrar",
@@ -2330,6 +2329,9 @@
     "rejected": "{count, plural, one {# ficheiro recusado: o tipo não é aceite ou não corresponde ao conteúdo.} other {# ficheiros recusados: o tipo não é aceite ou não corresponde ao conteúdo.}}",
     "uploadHint": "Imagens, vídeos, PDF, Word, Excel, PowerPoint, ZIP, PSD e fontes, até 50 MB cada.",
     "openFolderToUpload": "Abra ou crie uma pasta para carregar ficheiros.",
+    "dropHere": "Largue os ficheiros para carregar",
+    "progressLabel": "Carregamentos",
+    "fileStatus": { "pending": "A carregar", "done": "Concluído", "failed": "Falhou" },
     "downloadAll": "Descarregar tudo",
     "downloadFolder": "Descarregar pasta",
     "preparingZip": "A preparar o ZIP…",

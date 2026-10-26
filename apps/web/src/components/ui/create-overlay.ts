@@ -7,7 +7,7 @@ export type CreateOverlayProps = {
   title: string;
   description?: string;
   icon?: ReactNode;
-  variant?: 'default' | 'outline';
+  variant?: 'default' | 'outline' | 'destructive';
   defaultOpen?: boolean;
   children: (close: (result?: CreateResult) => void) => ReactNode;
 };

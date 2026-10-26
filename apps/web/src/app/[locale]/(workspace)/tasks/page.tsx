@@ -1,7 +1,8 @@
+import { PageHeader } from '@agency-os/ui/components/page-header';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { TaskFilters } from '@/components/tasks/task-filters';
-import { TaskForm } from '@/components/tasks/task-form';
+import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskList } from '@/components/tasks/task-list';
 import { requireArea } from '@/components/shell/session-guard';
 import { getPathname } from '@/i18n/navigation';
@@ -37,28 +38,20 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
 
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-title text-text">{t('title')}</h1>
-        <p className="text-body text-text-secondary">{t('description')}</p>
-      </header>
-      {options.canCreate ? (
-        <details
-          open={query.new === '1'}
-          className="rounded-lg border border-border bg-surface px-4 py-3"
-        >
-          <summary className="cursor-pointer text-body font-medium text-text">
-            {t('form.heading')}
-          </summary>
-          <div className="pt-4">
-            <TaskForm
-              clients={options.clients}
-              people={options.people}
-              fixedClientId={null}
-              create={createTaskAction}
-            />
-          </div>
-        </details>
-      ) : null}
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <TaskCreate
+            canCreate={options.canCreate}
+            openRequested={query.new === '1'}
+            clients={options.clients}
+            people={options.people}
+            fixedClientId={null}
+            create={createTaskAction}
+          />
+        }
+      />
       <TaskFilters
         action={getPathname({ href: '/tasks', locale })}
         clients={options.clients}

@@ -74,6 +74,31 @@ describe('tasks', () => {
     expect(remove).toHaveBeenCalledWith(editable.id);
   });
 
+  it('opens the edit dialog from the Editar button and saves the changes', async () => {
+    const update = vi.fn(OK);
+    const editable = task({ title: 'Minha sala' });
+    renderWithIntl(
+      <TaskList
+        tasks={[editable]}
+        today={TODAY}
+        showClient
+        setStatus={OK}
+        setItem={OK}
+        edit={{ people: [FOUNDER], update, remove: OK }}
+      />,
+    );
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Editar' }));
+    const dialog = screen.getByRole('dialog', { name: 'Minha sala' });
+    await act(async () => {
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Guardar' }));
+    });
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('task form offers only people who may take the chosen client task', () => {
     renderWithIntl(
       <TaskForm

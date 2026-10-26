@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { magicLinkPath } from './support/admin';
 import { signInWithPassword } from './support/auth';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 import { seedRoomProject } from './support/rooms';
 
 const credentials = readCredentials();
@@ -69,8 +70,13 @@ test.describe('Rooms', () => {
     const client = await clientContext.newPage();
     await client.goto(await magicLinkPath(seeded.decisionMakerEmail));
     await client.goto('/portal');
-    await expect(client.getByText('Fase atual: Descoberta e arquitetura')).toBeVisible();
-    await client.getByRole('link', { name: 'Ver aprovações (1)' }).click();
+    await dismissPortalWelcome(client);
+    await expect(
+      client
+        .getByRole('list', { name: 'Fases do projeto' })
+        .getByText('Descoberta e arquitetura'),
+    ).toBeVisible();
+    await client.getByRole('link', { name: 'Decidir' }).click();
     await expectAccessible(client);
     await client.getByRole('button', { name: 'Aprovar' }).click();
     await expect(client.getByText('Decisão registada. Obrigado.')).toBeVisible({

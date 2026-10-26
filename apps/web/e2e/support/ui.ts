@@ -25,3 +25,15 @@ export async function pickDate(page: Page, trigger: Locator, isoDate: string): P
   await target.click();
   await expect(calendar).toBeHidden();
 }
+
+/** Skips the portal's first-visit welcome when it is on screen, so it never blocks the page. */
+export async function dismissPortalWelcome(page: Page): Promise<void> {
+  const skip = page.getByRole('button', { name: 'Saltar' });
+  try {
+    await skip.waitFor({ state: 'visible', timeout: 5_000 });
+  } catch {
+    return;
+  }
+  await skip.click();
+  await expect(skip).toBeHidden();
+}

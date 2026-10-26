@@ -304,6 +304,19 @@ describe('C-10 retainer', () => {
     expect(quote).toHaveBeenCalledWith('extra-1', '150.00', 'EUR');
   });
 
+  it('quotes an extra request in the chosen currency', async () => {
+    const user = userEvent.setup();
+    const quote = vi.fn(async () => ({ ok: true as const }));
+    withIntl(<ExtraRequests extras={[EXTRA]} canWrite quote={quote} />);
+
+    fireEvent.change(screen.getByLabelText('Valor do orçamento'), { target: { value: '90' } });
+    await chooseOption(user, 'Moeda', 'GBP');
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar orçamento' }));
+
+    await screen.findByText('Orçamento enviado ao cliente.');
+    expect(quote).toHaveBeenCalledWith('extra-1', '90', 'GBP');
+  });
+
   it('freelancers see no fee and no write actions', () => {
     withIntl(
       <RetainerScreen

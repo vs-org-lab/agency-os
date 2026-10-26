@@ -7,11 +7,11 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import type { RetainerExtraRow } from '@/modules/retainers';
 import {
   decimal,
   retainerError,
-  SELECT,
   useQuantity,
   type RetainerError,
   type RetainerResult,
@@ -60,18 +60,14 @@ function QuoteForm({ extra, quote }: { extra: RetainerExtraRow; quote: QuoteExtr
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor={`${id}-currency`}>{t('currency')}</Label>
-        <select
+        <SelectField
           id={`${id}-currency`}
+          name="currency"
           value={currency}
-          onChange={(event) => setCurrency(event.target.value)}
-          className={SELECT}
-        >
-          {CURRENCIES.map((code) => (
-            <option key={code} value={code}>
-              {code}
-            </option>
-          ))}
-        </select>
+          onValueChange={setCurrency}
+          options={CURRENCIES.map((code) => ({ value: code, label: code }))}
+          className="w-28"
+        />
       </div>
       <Button type="submit" size="sm" disabled={pending}>
         {t('send')}

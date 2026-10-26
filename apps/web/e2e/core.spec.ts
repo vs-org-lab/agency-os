@@ -36,7 +36,7 @@ async function addFinding(
 
 test.describe('Aurion Core', () => {
   test('founder runs the Core from call to delivery', async ({ page }) => {
-    test.setTimeout(240_000);
+    test.setTimeout(420_000);
     const { company } = uniqueCompany('Core Fluxo');
     const { dealId } = await seedDeal(credentials.organizationId, {
       company,

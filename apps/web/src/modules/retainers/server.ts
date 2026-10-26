@@ -6,6 +6,7 @@ import type { RetainersDeps } from './access';
 import { loadRetainerBilling } from './billing-view';
 import { decideExtra, quoteExtra } from './extras';
 import { loadPortalRetainer } from './portal';
+import { loadClientRetainerRequests } from './portal-requests';
 import { loadStaffRetainer } from './readers';
 import { requestWork } from './requests';
 import { saveRetainer, type RetainerInput } from './retainers';
@@ -54,6 +55,9 @@ export const decideExtraRequest = (
 ) => decideExtra(claims, input, deps());
 export const loadClientRetainer = (claims: VerifiedClaims, clientId: string) =>
   loadPortalRetainer(claims, clientId, deps());
+
+export const loadClientRequests = (claims: VerifiedClaims, clientId: string) =>
+  loadClientRetainerRequests(claims, clientId, deps());
 
 export const loadRoomRetainerBilling = (claims: VerifiedClaims, clientId: string) =>
   loadRetainerBilling(claims, clientId, deps());

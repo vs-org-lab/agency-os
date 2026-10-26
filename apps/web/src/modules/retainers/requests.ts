@@ -21,7 +21,7 @@ import { limitMonths } from './month';
 import { quantity } from './retainers';
 import { countUsage, lockRetainer, type LockedRetainer } from './usage';
 
-const { retainerExtraRequests, tasks } = schema;
+const { retainerExtraRequests, retainerRequests, tasks } = schema;
 
 const TASK_TITLE_PREFIX = 'Pedido do cliente: ';
 const TASK_DUE_DAYS = 5;
@@ -93,6 +93,14 @@ export async function requestWork(
 
     if (fits) {
       const taskId = await createRequestTask(tx, retainer, data.description, claims.sub, now);
+      await tx.insert(retainerRequests).values({
+        organizationId: retainer.organizationId,
+        clientId: retainer.clientId,
+        retainerId: retainer.id,
+        taskId,
+        description: data.description,
+        createdBy: claims.sub,
+      });
       const counted = await countUsage(
         tx,
         retainer,

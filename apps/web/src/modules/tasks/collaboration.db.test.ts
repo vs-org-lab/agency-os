@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
 import type { TransactionSql } from 'postgres';
 import {
@@ -16,7 +17,7 @@ import {
   taskFilePreviews,
   taskUploadFolder,
 } from './collaboration';
-import { createTask } from './service';
+import { createTask, listTasks } from './service';
 import { taskClaims, taskDeps } from './testing';
 
 afterAll(async () => {
@@ -375,6 +376,72 @@ describe('task collaboration', () => {
           deps,
         ),
       ).toEqual({ ok: false, rule: 'forbidden' });
+    });
+  });
+
+  it('finance reads rooms but cannot comment, link or attach', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, library, deps, taskId } = await seed(sql);
+      const finance = taskClaims(world.users.finance);
+      const attached = taskClaims(world.users.founder);
+      await attachTaskFile(attached, { taskId, libraryFileId: library.a.rootFileId }, deps);
+      const link = await addTaskLink(attached, { taskId, url: 'https://example.com/a' }, deps);
+      if (!link.ok) throw new Error('Link was not created');
+
+      const forbidden = { ok: false, rule: 'forbidden' };
+      expect(await addTaskComment(finance, { taskId, body: 'Olá' }, deps)).toEqual(forbidden);
+      expect(await addTaskLink(finance, { taskId, url: 'https://example.com/b' }, deps)).toEqual(
+        forbidden,
+      );
+      expect(
+        await attachTaskFile(finance, { taskId, libraryFileId: library.a.subfolderFileId }, deps),
+      ).toEqual(forbidden);
+      expect(
+        await detachTaskFile(finance, { taskId, libraryFileId: library.a.rootFileId }, deps),
+      ).toEqual(forbidden);
+      expect(await count(sql, 'task_comments', taskId)).toBe(0);
+      expect(await count(sql, 'task_links', taskId)).toBe(1);
+      expect(await count(sql, 'task_files', taskId)).toBe(1);
+    });
+  });
+
+  it('refuses a client-visible "Tarefas" folder as the upload folder', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, library, deps, taskId } = await seed(sql);
+      const folderId = randomUUID();
+      await sql`
+        insert into public.library_folders (id, organization_id, client_id, project_id, root_id, depth,
+                                            name, visibility, created_by)
+        values (${folderId}, ${world.organizationId}, ${world.clients.a}, ${library.a.projectId},
+                ${folderId}, 0, 'tarefas', 'client', ${world.users.founder})
+      `;
+
+      expect(await taskUploadFolder(taskClaims(world.users.manager), { taskId }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+    });
+  });
+
+  it('file count and previews only include ready files the caller reads', async () => {
+    await withTestTransaction(async (sql) => {
+      const { world, library, deps, taskId } = await seed(sql);
+      const manager = taskClaims(world.users.manager);
+      for (const libraryFileId of [library.a.rootFileId, library.a.subfolderFileId]) {
+        await attachTaskFile(manager, { taskId, libraryFileId }, deps);
+      }
+      await sql`reset role`;
+      await sql`update public.library_files set status = 'uploading' where id = ${library.a.rootFileId}`;
+
+      const [view] = await deps.contexts.withUserContext(manager, (tx) =>
+        listTasks(tx, { taskId }),
+      );
+      const previews = await taskFilePreviews(manager, { taskId }, deps);
+
+      expect(view?.fileCount).toBe(1);
+      expect(previews.ok && previews.files.map((file) => file.id)).toEqual([
+        library.a.subfolderFileId,
+      ]);
     });
   });
 });

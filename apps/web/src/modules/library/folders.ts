@@ -235,7 +235,8 @@ export async function deleteFolder(
 
 /**
  * The root folder of the project with this name for the team, created internal on first use and
- * reused afterwards (ignoring case).
+ * reused afterwards (ignoring case). An existing folder that is visible to the client is refused,
+ * so internal content is never placed in it.
  */
 export async function ensureRootFolder(
   claims: VerifiedClaims,
@@ -254,7 +255,14 @@ export async function ensureRootFolder(
       (await childFolder(tx, writer, null, name.data)) ??
       (await childFolder(tx, writer, null, name.data));
     if (!folder) throw new Error('Root folder was not created');
-    if (folder.created) {
+    if (!folder.created) {
+      const [root] = await tx
+        .select({ visibility: libraryFolders.visibility })
+        .from(libraryFolders)
+        .where(eq(libraryFolders.id, folder.id));
+      if (root?.visibility !== 'internal')
+        return { ok: false as const, rule: 'invalid_input' as const };
+    } else {
       await recordAudit(tx, {
         organizationId: writer.organizationId,
         action: 'library.folder_created',

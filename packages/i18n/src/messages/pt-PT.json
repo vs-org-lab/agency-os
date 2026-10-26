@@ -2055,6 +2055,8 @@
       "noPhase": "—",
       "noValue": "—",
       "subtaskRatio": "{done}/{total}",
+      "complete": "Concluir {title}",
+      "reopen": "Reabrir {title}",
       "expand": "Mostrar subtarefas de {title}",
       "collapse": "Ocultar subtarefas de {title}",
       "subtasksOf": "Subtarefas de {title}",
@@ -2124,6 +2126,7 @@
         "dropFolders": "As pastas não podem ser carregadas e foram ignoradas.",
         "uploading": "A carregar {done} de {total}…",
         "uploadFailed": "Não foi possível carregar alguns ficheiros.",
+        "uploadFolderShared": "A pasta \"Tarefas\" deste projeto está visível ao cliente, por isso os ficheiros das tarefas não podem ser carregados para lá. Torne-a interna ou mude-lhe o nome.",
         "filter": "Procurar na biblioteca",
         "attachShort": "Ligar",
         "attached": "Ficheiro ligado à tarefa."

@@ -2055,6 +2055,8 @@
       "noPhase": "—",
       "noValue": "—",
       "subtaskRatio": "{done}/{total}",
+      "complete": "Complete {title}",
+      "reopen": "Reopen {title}",
       "expand": "Show subtasks of {title}",
       "collapse": "Hide subtasks of {title}",
       "subtasksOf": "Subtasks of {title}",
@@ -2124,6 +2126,7 @@
         "dropFolders": "Folders cannot be uploaded and were skipped.",
         "uploading": "Uploading {done} of {total}…",
         "uploadFailed": "Some files could not be uploaded.",
+        "uploadFolderShared": "The \"Tarefas\" folder of this project is visible to the client, so task files cannot be uploaded there. Make it internal or rename it.",
         "filter": "Search the library",
         "attachShort": "Link",
         "attached": "File linked to the task."

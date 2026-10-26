@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { portalActionItems } from '@/components/portal/action-items';
+import { OnboardingDialog } from '@/components/portal/onboarding-dialog';
 import { PortalHome } from '@/components/portal/portal-home';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
@@ -8,11 +9,13 @@ import { requireLocale } from '@/i18n/require-locale';
 import { loadPortalInvoices } from '@/modules/billing/server';
 import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
+import { isPortalOnboardingPending } from '@/modules/onboarding/server';
 import { findProfileName, findVisibleClient } from '@/modules/organizations';
 import { loadClientRequests, loadClientRetainer } from '@/modules/retainers/server';
 import { loadPortalApprovals, loadPortalRoom } from '@/modules/rooms/server';
 import { withUserContext } from '@/platform/db';
 import { requestWorkAction } from '../retainer-actions';
+import { dismissPortalOnboardingAction } from './onboarding-actions';
 import { ProposalHomeCard, proposalCardState } from './portal-cards';
 import { portalRoomAccess } from './room-session';
 import { pageMetadata } from '@/i18n/page-title';
@@ -45,6 +48,10 @@ export default async function PortalHomePage({ params }: PageProps) {
         })),
       ])
     : [null, null, [], null, [], null, [], null];
+  const onboarding = await isPortalOnboardingPending(session.claims, {
+    userId: session.actor.userId,
+    organizationId: session.actor.organizationId,
+  });
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
@@ -72,86 +79,89 @@ export default async function PortalHomePage({ params }: PageProps) {
   }
 
   return (
-    <PortalHome
-      client={identity?.client ?? null}
-      contactName={identity?.contactName ?? null}
-      now={new Date().toISOString()}
-      actions={actions}
-      retainer={retainer ? { view: retainer, requests, request: requestWorkAction } : null}
-      project={project}
-    >
-      {statusCard ? <ProposalHomeCard state={statusCard} /> : null}
-      {documents.length > 0 ? (
-        <section aria-labelledby="portal-presentations" className="flex flex-col gap-3">
-          <h2 id="portal-presentations" className="text-title-sm text-text">
-            {t('core.presentations')}
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {documents.map((document) => (
-              <li
-                key={document.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface p-4"
-              >
-                <div className="flex flex-col">
-                  <span className="text-body font-medium text-text">{document.title}</span>
-                  <span className="text-caption text-text-tertiary">
-                    {t('core.sharedOn', {
-                      date: format.dateTime(document.sharedAt, { dateStyle: 'medium' }),
-                    })}
-                  </span>
-                </div>
-                <Link
-                  href={`/portal/documents/${document.id}`}
-                  className="text-body-sm text-link hover:underline"
-                >
-                  {t('core.open')}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-      {briefing ? (
-        <section aria-labelledby="portal-briefing" className="flex flex-col gap-4">
-          <header className="flex flex-col gap-1">
-            <h2 id="portal-briefing" className="text-title-sm text-text">
-              {t('core.briefingTitle')}
+    <>
+      {onboarding ? <OnboardingDialog onSeen={dismissPortalOnboardingAction} /> : null}
+      <PortalHome
+        client={identity?.client ?? null}
+        contactName={identity?.contactName ?? null}
+        now={new Date().toISOString()}
+        actions={actions}
+        retainer={retainer ? { view: retainer, requests, request: requestWorkAction } : null}
+        project={project}
+      >
+        {statusCard ? <ProposalHomeCard state={statusCard} /> : null}
+        {documents.length > 0 ? (
+          <section aria-labelledby="portal-presentations" className="flex flex-col gap-3">
+            <h2 id="portal-presentations" className="text-title-sm text-text">
+              {t('core.presentations')}
             </h2>
-            <p className="text-body text-text-secondary">{t('core.briefingDescription')}</p>
-            <p className="text-caption text-text-tertiary">
-              {t('core.sharedOn', {
-                date: format.dateTime(briefing.sharedAt, { dateStyle: 'medium' }),
-              })}
-            </p>
-          </header>
-          {briefing.guide.blocks.map((block) => {
-            const notes = briefing.notes.filter((note) => note.blockId === block.id);
-            if (notes.length === 0) return null;
-            return (
-              <article
-                key={block.id}
-                className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
-              >
-                <h3 className="text-title-sm text-text">{block.title[locale]}</h3>
-                {notes.map((note) => {
-                  const question = block.questions.find((entry) => entry.id === note.questionId);
-                  return (
-                    <div key={note.questionId ?? block.id} className="flex flex-col gap-1">
-                      {question ? (
-                        <span className="text-body-sm font-medium text-text">
-                          {question.text[locale]}
-                        </span>
-                      ) : null}
-                      <p className="whitespace-pre-line text-body text-text">{note.body}</p>
-                    </div>
-                  );
+            <ul className="flex flex-col gap-2">
+              {documents.map((document) => (
+                <li
+                  key={document.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface p-4"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-body font-medium text-text">{document.title}</span>
+                    <span className="text-caption text-text-tertiary">
+                      {t('core.sharedOn', {
+                        date: format.dateTime(document.sharedAt, { dateStyle: 'medium' }),
+                      })}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/portal/documents/${document.id}`}
+                    className="text-body-sm text-link hover:underline"
+                  >
+                    {t('core.open')}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {briefing ? (
+          <section aria-labelledby="portal-briefing" className="flex flex-col gap-4">
+            <header className="flex flex-col gap-1">
+              <h2 id="portal-briefing" className="text-title-sm text-text">
+                {t('core.briefingTitle')}
+              </h2>
+              <p className="text-body text-text-secondary">{t('core.briefingDescription')}</p>
+              <p className="text-caption text-text-tertiary">
+                {t('core.sharedOn', {
+                  date: format.dateTime(briefing.sharedAt, { dateStyle: 'medium' }),
                 })}
-              </article>
-            );
-          })}
-        </section>
-      ) : null}
-    </PortalHome>
+              </p>
+            </header>
+            {briefing.guide.blocks.map((block) => {
+              const notes = briefing.notes.filter((note) => note.blockId === block.id);
+              if (notes.length === 0) return null;
+              return (
+                <article
+                  key={block.id}
+                  className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+                >
+                  <h3 className="text-title-sm text-text">{block.title[locale]}</h3>
+                  {notes.map((note) => {
+                    const question = block.questions.find((entry) => entry.id === note.questionId);
+                    return (
+                      <div key={note.questionId ?? block.id} className="flex flex-col gap-1">
+                        {question ? (
+                          <span className="text-body-sm font-medium text-text">
+                            {question.text[locale]}
+                          </span>
+                        ) : null}
+                        <p className="whitespace-pre-line text-body text-text">{note.body}</p>
+                      </div>
+                    );
+                  })}
+                </article>
+              );
+            })}
+          </section>
+        ) : null}
+      </PortalHome>
+    </>
   );
 }
 

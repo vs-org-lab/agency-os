@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { schema } from '@agency-os/db';
 import { withActor } from '@/modules/access';
 import type { VerifiedClaims } from '@/platform/db';
+import { canCreateTasks } from './domain/creators';
 import { canTakeTask, type TaskPerson } from './domain/people';
 import type { TasksDeps } from './service';
 
@@ -18,7 +19,6 @@ export type TaskOptions = {
 };
 
 const STAFF_ROLES = ['founder', 'project_manager', 'freelancer', 'finance'];
-const CREATOR_ROLES = ['founder', 'project_manager'];
 
 /**
  * Choices for the task filters and form: the clients the caller can read and the people a task may
@@ -51,7 +51,7 @@ export async function listTaskOptions(
       return {
         organizationId: actor.organizationId,
         clients: readable,
-        canCreate: actor.roles.some((role) => CREATOR_ROLES.includes(role)),
+        canCreate: canCreateTasks(actor.roles),
       };
     },
     null,

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Toaster } from '@agency-os/ui/components/sonner';
 import { AppShell } from '@/components/shell/app-shell';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -15,6 +16,7 @@ export default async function PortalLayout({ children, params }: LayoutProps) {
   return (
     <AppShell session={session} level={{ level: 'portal', permissions: { invoices, room, team } }}>
       {children}
+      <Toaster />
     </AppShell>
   );
 }

@@ -2244,7 +2244,8 @@
     "holding": "Keep holding…",
     "confirmed": "Confirmed.",
     "confirmAction": "Confirm: {label}",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "testimonials": {
     "title": "Testimonial",

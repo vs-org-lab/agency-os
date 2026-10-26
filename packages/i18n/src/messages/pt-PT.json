@@ -2244,7 +2244,8 @@
     "holding": "Continue a premir…",
     "confirmed": "Confirmado.",
     "confirmAction": "Confirmar: {label}",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "close": "Fechar"
   },
   "testimonials": {
     "title": "Testemunho",

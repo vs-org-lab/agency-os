@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Toaster } from '@agency-os/ui/components/sonner';
 import { AppShell } from '@/components/shell/app-shell';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -37,6 +38,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps)
       }
     >
       {children}
+      <Toaster />
     </AppShell>
   );
 }

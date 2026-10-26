@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
+import { Toaster } from '@agency-os/ui/components/sonner';
 import { AppShell } from '@/components/shell/app-shell';
 import { roomAccess } from '@/components/shell/routing';
 import { requireArea } from '@/components/shell/session-guard';
@@ -38,6 +39,7 @@ export default async function RoomLayout({ children, params }: LayoutProps) {
   return (
     <AppShell session={session} level={{ level: 'room', clientId, retainer, outcome }}>
       {children}
+      <Toaster />
     </AppShell>
   );
 }

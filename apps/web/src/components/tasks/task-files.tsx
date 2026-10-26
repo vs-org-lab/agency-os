@@ -126,7 +126,11 @@ export function TaskFiles({
     if (!hasProject || files.length === 0 || progress) return;
     const folder = await actions.uploadFolder(task.id).catch(() => null);
     if (!folder?.ok) {
-      notify.error(te(taskError(folder?.code ?? 'not_found')));
+      notify.error(
+        folder?.code === 'invalid_input'
+          ? t('uploadFolderShared')
+          : te(taskError(folder?.code ?? 'not_found')),
+      );
       return;
     }
     const fileIds: string[] = [];

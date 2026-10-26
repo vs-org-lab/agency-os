@@ -70,8 +70,9 @@ type ReadableTask = {
 type Collaborator = { actor: Actor; task: ReadableTask };
 
 /**
- * Internal members with a verified second factor who read the task under row level security;
- * everyone else, including a guessed task id, is told `forbidden` and nothing is written.
+ * Founders, project managers and freelancers with a verified second factor who read the task under
+ * row level security (08 matrix: finance only reads rooms and the library); everyone else,
+ * including a guessed task id, is told `forbidden` and nothing is written.
  */
 async function collaborator(
   deps: TasksDeps,
@@ -83,7 +84,11 @@ async function collaborator(
     deps.contexts,
     claims,
     async (tx, actor) => {
-      if (actor.mfaVerifiedAt === null) return null;
+      if (
+        actor.mfaVerifiedAt === null ||
+        !actor.roles.some((role) => COLLABORATOR_ROLES.includes(role))
+      )
+        return null;
       const [task] = await tx
         .select({
           id: tasks.id,
@@ -99,6 +104,8 @@ async function collaborator(
     null,
   );
 }
+
+const COLLABORATOR_ROLES: readonly string[] = ['founder', 'project_manager', 'freelancer'];
 
 const isFounder = (actor: Actor) => actor.roles.includes('founder');
 
@@ -378,7 +385,10 @@ export async function taskUploadFolder(
   return { ok: true, folderId: folder.folderId };
 }
 
-/** The first files linked to a task that the caller reads in the library, for the hover preview. */
+/**
+ * The first files linked to a task that the caller reads in the library (ready, under row level
+ * security), for the hover preview. Unreadable files are filtered before the limit applies.
+ */
 export async function taskFilePreviews(
   claims: VerifiedClaims,
   input: { taskId: string },
@@ -393,14 +403,9 @@ export async function taskFilePreviews(
       .select({ id: libraryFiles.id, name: libraryFiles.name, mimeType: libraryFiles.mimeType })
       .from(taskFiles)
       .innerJoin(libraryFiles, eq(libraryFiles.id, taskFiles.libraryFileId))
-      .where(eq(taskFiles.taskId, access.task.id))
+      .where(and(eq(taskFiles.taskId, access.task.id), eq(libraryFiles.status, 'ready')))
       .orderBy(asc(taskFiles.createdAt), asc(libraryFiles.id))
       .limit(PREVIEW_FILES),
   );
-  const readable = await readableFileIds(
-    claims,
-    linked.map((file) => file.id),
-    deps,
-  );
-  return { ok: true, files: linked.filter((file) => readable.has(file.id)) };
+  return { ok: true, files: linked };
 }

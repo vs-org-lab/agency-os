@@ -70,7 +70,11 @@ describe('task detail', () => {
 
       expect(asManager).toMatchObject({ id: taskId, title: 'Preparar entrega', canEdit: true });
       expect(asManager?.items.map((item) => item.title)).toEqual(['Rever']);
-      expect(asManager?.comments.map((c) => [c.authorName, c.body, c.canDelete])).toEqual([
+      // Both comments share the transaction's timestamp, so their order is not defined here.
+      const byAuthor = asManager?.comments
+        .map((c) => [c.authorName, c.body, c.canDelete])
+        .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+      expect(byAuthor).toEqual([
         ['Founder', 'Do fundador', false],
         ['Manager', 'Do gestor', true],
       ]);

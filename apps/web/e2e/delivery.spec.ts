@@ -72,9 +72,9 @@ test.describe('Delivery', () => {
     await client.getByLabel('O seu testemunho').fill('Um site rápido e claro, entregue a tempo.');
     await client.getByLabel('Nome', { exact: true }).fill('Rita Moura');
     await client.getByLabel('Função', { exact: true }).fill('Administradora');
-    await client.getByRole('checkbox', { name: /Autorizo/ }).click();
+    await client.getByRole('checkbox', { name: /Autorizo a publicação/ }).check();
     await expectAccessible(client);
-    await client.getByRole('button', { name: 'Enviar testemunho' }).click();
+    await client.getByRole('button', { name: 'Atualizar testemunho' }).click();
     await expect(client.getByText('Obrigado pelo seu testemunho.')).toBeVisible({
       timeout: 30_000,
     });

@@ -127,7 +127,9 @@ test.describe('Aurion Core', () => {
     await moveTo(page, '1.6');
   });
 
-  test('call mode may use the microphone and tab capture', async ({ page }) => {
+  test('only call mode may use tab capture and embeddable pages block the microphone', async ({
+    page,
+  }) => {
     const { company } = uniqueCompany('Core Microfone');
     const { dealId } = await seedDeal(credentials.organizationId, {
       company,
@@ -147,8 +149,11 @@ test.describe('Aurion Core', () => {
         feature,
       );
 
-    await page.goto(`/pipeline/${dealId}`);
+    await page.goto('/apply');
     expect(await allows('microphone')).toBe(false);
+
+    await page.goto(`/pipeline/${dealId}`);
+    expect(await allows('display-capture')).toBe(false);
     await page.getByRole('tab', { name: 'Core' }).click();
     await page.getByRole('link', { name: 'Abrir modo call' }).click();
     await expect(page.getByRole('heading', { name: 'Gravação da call' })).toBeVisible();

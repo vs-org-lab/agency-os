@@ -21,6 +21,7 @@ export * from './tasks';
 export * from './team';
 export * from './proofing';
 export * from './testimonials';
+export * from './voice-notes';
 export * from './library';
 export * from './project-documents';
 export * from './brand-hub';

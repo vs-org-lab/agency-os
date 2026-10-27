@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import type { VerifiedClaims } from '@/platform/db';
 import { nowOf, retainerReader, retainerWriter, seesFee, type RetainersDeps } from './access';
 import type { RetainerLimitKind } from './domain/kinds';
-import { lisbonMonth } from './domain/months';
+import { lisbonMonth, monthProgress, type MonthProgress } from './domain/months';
 import { limitMonths, type LimitMonth } from './month';
 
 export type RetainerUsageRow = {
@@ -30,6 +30,7 @@ export type StaffRetainerView = {
   canWrite: boolean;
   canSeeFee: boolean;
   month: string;
+  period: MonthProgress;
   projects: { id: string; name: string }[];
   retainer: {
     id: string;
@@ -66,7 +67,8 @@ export async function loadStaffRetainer(
   if (!reader) return null;
   const writer = await retainerWriter(claims, clientId, deps);
   const canSeeFee = seesFee(reader);
-  const month = lisbonMonth(nowOf(deps));
+  const now = nowOf(deps);
+  const month = lisbonMonth(now);
 
   return deps.contexts.withSystemContext(async (tx) => {
     const projects = await tx.execute<{ id: string; name: string }>(sql`
@@ -87,6 +89,7 @@ export async function loadStaffRetainer(
         canWrite: writer !== null,
         canSeeFee,
         month,
+        period: monthProgress(now),
         projects: [...projects],
         retainer: null,
         limits: [],
@@ -129,6 +132,7 @@ export async function loadStaffRetainer(
       canWrite: writer !== null,
       canSeeFee,
       month,
+      period: monthProgress(now),
       projects: [...projects],
       retainer: {
         id: retainer.id,

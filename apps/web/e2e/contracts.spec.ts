@@ -4,6 +4,7 @@ import { magicLinkPath } from './support/admin';
 import { signInWithPassword } from './support/auth';
 import { CLIENT_SIGNER, seedContractDeal, studioSignerName } from './support/contracts';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -31,12 +32,13 @@ test.describe('Proposal and contract', () => {
       await line.fill('Novo site institucional');
     }
     await proposal.getByRole('button', { name: 'Enviar ao cliente' }).click();
-    await expect(proposal.getByText('Enviada ao cliente')).toBeVisible({ timeout: 30_000 });
+    await expect(proposal.getByText('Enviada ao cliente')).toBeVisible({ timeout: 60_000 });
 
     const clientContext = await browser.newContext();
     const client = await clientContext.newPage();
     await client.goto(await magicLinkPath(seeded.signerEmail));
     await client.goto('/portal');
+    await dismissPortalWelcome(client);
     await client.getByRole('link', { name: 'Ver a proposta' }).click();
     await expect(client.getByRole('heading', { name: 'Proposta', level: 1 })).toBeVisible();
     await expectAccessible(client);

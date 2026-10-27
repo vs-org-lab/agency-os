@@ -49,7 +49,9 @@ test.describe('Brand Hub', () => {
     await expect(page.getByText('Bloco guardado.')).toBeVisible({ timeout: 30_000 });
 
     await page.getByRole('button', { name: 'Design', exact: true }).click();
+    await page.getByRole('button', { name: /^Acento #/ }).click();
     await page.getByLabel('Acento (hex)').fill('#E11D48');
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Guardar design' }).click();
     await expect(page.getByText('Design guardado.')).toBeVisible({ timeout: 30_000 });
 

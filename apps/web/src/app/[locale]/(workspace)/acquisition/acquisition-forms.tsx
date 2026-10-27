@@ -17,6 +17,7 @@ import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
 import { useSavedNotice } from '@/components/forms/use-saved-notice';
 import { CreateDialog } from '@/components/ui/create-dialog';
+import { useStripNewParam } from '@/components/ui/use-strip-new-param';
 import { SubmitButton } from '@/components/forms/submit-button';
 import type { AcquisitionFormState } from './actions';
 
@@ -123,12 +124,16 @@ export function TargetDialog({
   action,
   defaults,
   idPrefix,
+  openRequested = false,
 }: {
   action: BoundAction;
   defaults: Parameters<typeof TargetForm>[0]['defaults'];
   idPrefix: string;
+  /** `?new=1`: opens the dialog on arrival; the page passes it only to readers who may create. */
+  openRequested?: boolean;
 }) {
   const t = useTranslations('commercial.acquisition');
+  const stripNewParam = useStripNewParam();
   return (
     <CreateDialog
       label={defaults ? t('edit') : t('add')}
@@ -136,6 +141,8 @@ export function TargetDialog({
       title={defaults ? defaults.companyName : t('add')}
       variant={defaults ? 'outline' : 'default'}
       icon={defaults ? <Pencil aria-hidden /> : undefined}
+      openRequested={openRequested}
+      onClose={openRequested ? stripNewParam : undefined}
     >
       {(close) => (
         <TargetForm

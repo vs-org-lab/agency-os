@@ -1,84 +1,72 @@
 import { useTranslations } from 'next-intl';
-import { Button } from '@agency-os/ui/components/button';
-import { Label } from '@agency-os/ui/components/label';
-import { TASK_FIELD, type TaskOptionView } from './task-errors';
+import { FilterBar, type FilterSelect } from '@/components/filters/filter-bar';
+import { MineFilter } from './mine-filter';
+import type { TaskCounts } from '@/modules/tasks';
+import type { TaskOptionView } from './task-errors';
+
+export const TASK_LIST_ID = 'task-list';
 
 export type TaskFilterValues = {
   clientId: string | null;
   assigneeId: string | null;
-  status: 'open' | 'done';
+  status: 'open' | 'done' | 'all';
 };
 
-/** A plain GET form so filtered lists are linkable and work without JavaScript. */
+/** Filters applied through the URL as they change, so filtered lists stay linkable. */
 export function TaskFilters({
-  action,
   clients,
   people,
   current,
+  counts,
+  currentUserId,
 }: {
-  action: string;
   clients: TaskOptionView[] | null;
   people: TaskOptionView[];
   current: TaskFilterValues;
+  counts: TaskCounts;
+  currentUserId: string;
 }) {
   const t = useTranslations('tasks.filters');
+  const options = (items: TaskOptionView[]) =>
+    items.map((item) => ({ value: item.id, label: item.name }));
+
+  const selects: FilterSelect[] = [
+    ...(clients
+      ? [
+          {
+            param: 'client',
+            label: t('client'),
+            options: options(clients),
+            value: current.clientId,
+            allLabel: t('all'),
+          },
+        ]
+      : []),
+    {
+      param: 'assignee',
+      label: t('assignee'),
+      options: options(people),
+      value: current.assigneeId,
+      allLabel: t('all'),
+    },
+  ];
 
   return (
-    <form
-      method="get"
-      action={action}
-      aria-label={t('label')}
-      className="flex flex-wrap items-end gap-3"
-    >
-      {clients ? (
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="task-filter-client">{t('client')}</Label>
-          <select
-            id="task-filter-client"
-            name="client"
-            defaultValue={current.clientId ?? ''}
-            className={TASK_FIELD}
-          >
-            <option value="">{t('all')}</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="task-filter-assignee">{t('assignee')}</Label>
-        <select
-          id="task-filter-assignee"
-          name="assignee"
-          defaultValue={current.assigneeId ?? ''}
-          className={TASK_FIELD}
-        >
-          <option value="">{t('all')}</option>
-          {people.map((person) => (
-            <option key={person.id} value={person.id}>
-              {person.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="task-filter-status">{t('status')}</Label>
-        <select
-          id="task-filter-status"
-          name="status"
-          defaultValue={current.status}
-          className={TASK_FIELD}
-        >
-          <option value="open">{t('open')}</option>
-          <option value="done">{t('done')}</option>
-        </select>
-      </div>
-      <Button type="submit" variant="outline">
-        {t('submit')}
-      </Button>
-    </form>
+    <div className="flex flex-wrap items-end gap-3">
+      <FilterBar
+        segments={{
+          param: 'status',
+          value: current.status,
+          options: [
+            { value: 'open', label: t('open'), count: counts.open },
+            { value: 'done', label: t('done'), count: counts.done },
+            { value: 'all', label: t('allTasks'), count: counts.all },
+          ],
+        }}
+        selects={selects}
+        controls={TASK_LIST_ID}
+      />
+      <MineFilter userId={currentUserId} assigneeId={current.assigneeId} controls={TASK_LIST_ID} />
+    </div>
   );
 }

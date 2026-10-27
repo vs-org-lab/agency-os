@@ -32,4 +32,20 @@ describe('route loading', () => {
     expect(bars.length).toBeGreaterThan(0);
     for (const bar of bars) expect(bar.className).toContain('skeleton');
   });
+
+  it('shows the monogram only when branded', () => {
+    const { container, rerender } = render(
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <RouteLoading />
+      </NextIntlClientProvider>,
+    );
+    expect(container.querySelector('[data-slot="logo-trace-loader"]')).toBeNull();
+    rerender(
+      <NextIntlClientProvider locale="pt-PT" messages={messages}>
+        <RouteLoading branded />
+      </NextIntlClientProvider>,
+    );
+    expect(container.querySelector('[data-slot="logo-trace-loader"]')).not.toBeNull();
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+  });
 });

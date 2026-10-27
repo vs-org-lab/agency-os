@@ -50,7 +50,7 @@ test.describe('Client reports', () => {
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/reports`);
-    await expect(page.getByRole('heading', { level: 2, name: 'Relatórios' })).toBeVisible({
+    await expect(page.getByRole('heading', { level: 1, name: 'Relatórios' })).toBeVisible({
       timeout: 30_000,
     });
     await expectAccessible(page);

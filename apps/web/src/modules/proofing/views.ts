@@ -58,6 +58,8 @@ export type ProofVersionView = {
   mimeType: string;
   pages: number | null;
   isLatest: boolean;
+  /** The version before this one, when both are images the caller may read. */
+  previousVersion: { id: string; number: number } | null;
   approval: ProofApprovalView | null;
   comments: ProofCommentView[];
   rounds: RoundsStatus;
@@ -212,6 +214,20 @@ export async function loadProofVersion(
       .where(eq(proofVersions.fileId, version.version.fileId))
       .orderBy(desc(proofVersions.number))
       .limit(1);
+    const [previous] =
+      version.version.kind === 'image'
+        ? await tx
+            .select({ id: proofVersions.id, number: proofVersions.number })
+            .from(proofVersions)
+            .where(
+              and(
+                eq(proofVersions.fileId, version.version.fileId),
+                eq(proofVersions.number, version.version.number - 1),
+                eq(proofVersions.status, 'ready'),
+                eq(proofVersions.kind, 'image'),
+              ),
+            )
+        : [];
     const comments = await tx
       .select({
         id: proofComments.id,
@@ -241,6 +257,7 @@ export async function loadProofVersion(
       mimeType: version.version.mimeType,
       pages: version.version.pages,
       isLatest: latest?.id === version.version.id,
+      previousVersion: previous ?? null,
       approval,
       comments: threadComments(
         comments.map((comment) => ({

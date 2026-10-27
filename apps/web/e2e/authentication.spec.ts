@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createTeamInvitation, magicLinkPath } from './support/admin';
 import { signInWithPassword, submitTotp } from './support/auth';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -43,6 +44,7 @@ test('client signs in with magic link and reaches portal', async ({ page }) => {
   await page.goto(await magicLinkPath(credentials.client.email));
 
   await expect(page).toHaveURL(/\/portal$/);
+  await dismissPortalWelcome(page);
   await expect(page.getByRole('link', { name: 'Início' })).toBeVisible();
 });
 

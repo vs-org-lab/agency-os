@@ -9,7 +9,7 @@ import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
 import type { PortalRetainerView, RetainerExtraRow } from '@/modules/retainers';
-import { LimitBars } from './limit-bars';
+import { LimitRings } from './limit-rings';
 import {
   decimal,
   retainerError,
@@ -29,12 +29,15 @@ export type PortalRetainerActions = {
   decide: (extraRequestId: string, decision: 'approved' | 'declined') => Promise<RetainerResult>;
 };
 
-function RequestForm({
+export function RequestForm({
   view,
   request,
+  onDone,
 }: {
   view: PortalRetainerView;
   request: PortalRetainerActions['request'];
+  /** Called after the request was accepted, with how it was handled. */
+  onDone?: (outcome: 'task' | 'extra') => void;
 }) {
   const t = useTranslations('retainers');
   const id = useId();
@@ -71,6 +74,7 @@ function RequestForm({
           if (result.ok) {
             setDescription('');
             setMessage(result.outcome);
+            onDone?.(result.outcome);
           } else setMessage(retainerError(result.code));
         });
       }}
@@ -233,7 +237,7 @@ export function PortalRetainer({
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3" aria-label={t('month', { month: monthLabel })}>
         <h2 className="text-title-sm text-text">{t('month', { month: monthLabel })}</h2>
-        <LimitBars limits={view.limits} />
+        <LimitRings limits={view.limits} period={view.period} />
       </section>
       {view.retainer.status !== 'active' ? null : view.suspended ? (
         <FormMessage tone="danger">{t('portal.suspended')}</FormMessage>

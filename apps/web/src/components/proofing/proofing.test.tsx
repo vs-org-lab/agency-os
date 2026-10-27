@@ -358,3 +358,46 @@ describe('keyboard pins', () => {
     expect([pin.style.left, pin.style.top]).toEqual(['52%', '40%']);
   });
 });
+
+describe('version comparison', () => {
+  const viewer = (props: {
+    kind: 'image' | 'pdf';
+    previousVersion: { id: string; number: number } | null;
+  }) =>
+    renderWithIntl(
+      <ProofViewer
+        kind={props.kind}
+        src="/api/proofs/v2/file"
+        title="Logótipo"
+        number={2}
+        pages={props.kind === 'pdf' ? 2 : null}
+        previousVersion={props.previousVersion}
+        comments={[]}
+        audience="client"
+        canComment
+        addComment={OK}
+      />,
+    );
+
+  it('compare button only with two image versions', () => {
+    viewer({ kind: 'image', previousVersion: null });
+    expect(screen.queryByRole('button', { name: 'Comparar com a versão anterior' })).toBeNull();
+    cleanup();
+
+    viewer({ kind: 'pdf', previousVersion: { id: 'v1', number: 1 } });
+    expect(screen.queryByRole('button', { name: 'Comparar com a versão anterior' })).toBeNull();
+    cleanup();
+
+    viewer({ kind: 'image', previousVersion: { id: 'v1', number: 1 } });
+    fireEvent.click(screen.getByRole('button', { name: 'Comparar com a versão anterior' }));
+
+    expect(
+      screen.getByRole('slider', { name: 'Divisória entre a versão 1 e a versão 2' }),
+    ).toBeTruthy();
+    expect(screen.getByAltText('Logótipo, versão 1').getAttribute('src')).toBe(
+      '/api/proofs/v1/file',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar à versão atual' }));
+    expect(screen.queryByRole('slider')).toBeNull();
+  });
+});

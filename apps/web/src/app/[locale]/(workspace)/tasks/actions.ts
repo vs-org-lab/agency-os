@@ -1,9 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { NewTaskInput, TaskChanges } from '@/components/tasks/task-form';
+import type { NewTaskInput } from '@/components/tasks/task-form';
+import type { TaskChanges } from '@/components/tasks/task-panel';
 import type { TaskActionResult } from '@/components/tasks/task-errors';
 import {
+  addStudioTaskItem,
   createStudioTask,
   deleteStudioTask,
   setStudioTaskItem,
@@ -46,4 +48,8 @@ export async function setTaskStatusAction(taskId: string, status: 'open' | 'done
 
 export async function setTaskItemAction(itemId: string, done: boolean) {
   return run((session) => setStudioTaskItem(session, itemId, done));
+}
+
+export async function addTaskItemAction(taskId: string, title: string) {
+  return run((session) => addStudioTaskItem(session, taskId, title));
 }

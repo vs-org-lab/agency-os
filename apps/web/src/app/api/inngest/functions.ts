@@ -14,6 +14,7 @@ import { PROOFING_FUNCTIONS } from '@/modules/proofing/server';
 import { ROOM_FUNCTIONS } from '@/modules/rooms/server';
 import { TASK_FUNCTIONS } from '@/modules/tasks/server';
 import { TESTIMONIAL_FUNCTIONS } from '@/modules/testimonials/server';
+import { VOICE_NOTE_FUNCTIONS } from '@/modules/voice-notes/server';
 
 export const INNGEST_FUNCTIONS = [
   outboxDispatch,
@@ -24,6 +25,7 @@ export const INNGEST_FUNCTIONS = [
   ...TASK_FUNCTIONS,
   ...PROOFING_FUNCTIONS,
   ...TESTIMONIAL_FUNCTIONS,
+  ...VOICE_NOTE_FUNCTIONS,
   ...LIBRARY_FUNCTIONS,
   ...DOCUMENT_FUNCTIONS,
   ...BRAND_HUB_FUNCTIONS,

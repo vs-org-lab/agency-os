@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { OutcomeScreen } from '@/components/outcomes/outcome-screen';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -30,13 +30,16 @@ export default async function RoomOutcomePage({ params }: PageProps) {
   const view = await loadRoomOutcome(session.claims, clientId);
   if (!view || (!view.outcome && !view.canWrite)) notFound();
 
+  const t = await getTranslations('outcomes');
+
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={`/c/${clientId}/outcome`}
       />
       <OutcomeScreen

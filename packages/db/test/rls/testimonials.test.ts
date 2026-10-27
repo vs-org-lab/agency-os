@@ -85,3 +85,42 @@ describe('testimonials access', () => {
     });
   });
 });
+
+describe('testimonial videos', () => {
+  async function insertTestimonial(
+    sql: TransactionSql,
+    values: { body: string; videoStatus: 'pending' | 'ready' | null; videoPath: string | null },
+  ): Promise<Error | null> {
+    const world = await createFixtureWorld(sql);
+    const delivery = await createDeliveryFixture(sql, world);
+    const outcome = await sql`
+      insert into public.testimonials (organization_id, client_id, project_id, author_name,
+                                       author_role, body, video_status, video_path)
+      values (${world.organizationId}, ${world.clients.a}, ${delivery.projectId}, 'Marta Lopes',
+              'Diretora', ${values.body}, ${values.videoStatus}::app.testimonial_video_status,
+              ${values.videoPath})
+    `.catch((error: Error) => error);
+    return outcome instanceof Error ? outcome : null;
+  }
+
+  it('accepts a video without text and refuses an empty testimonial', async () => {
+    await withTestTransaction(async (sql) => {
+      expect(
+        await insertTestimonial(sql, { body: '', videoStatus: 'ready', videoPath: 'a/b.webm' }),
+      ).toBeNull();
+    });
+    await withTestTransaction(async (sql) => {
+      expect(
+        await insertTestimonial(sql, { body: '', videoStatus: null, videoPath: null }),
+      ).toBeInstanceOf(Error);
+    });
+  });
+
+  it('keeps the video status and the video path together', async () => {
+    await withTestTransaction(async (sql) => {
+      expect(
+        await insertTestimonial(sql, { body: 'Texto', videoStatus: 'ready', videoPath: null }),
+      ).toBeInstanceOf(Error);
+    });
+  });
+});

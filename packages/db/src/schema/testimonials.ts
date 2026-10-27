@@ -1,7 +1,18 @@
 import { sql } from 'drizzle-orm';
-import { boolean, check, foreignKey, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  check,
+  foreignKey,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { clients } from './clients';
 import { id, timestamps } from './columns';
+import { testimonialVideoStatusEnum } from './enums';
 import { organizations } from './organizations';
 import { profiles } from './profiles';
 import { projects } from './rooms';
@@ -21,6 +32,12 @@ export const testimonials = pgTable(
     authorName: text('author_name').notNull(),
     authorRole: text('author_role').notNull(),
     consentPublish: boolean('consent_publish').notNull().default(false),
+    videoPath: text('video_path'),
+    videoContentType: text('video_content_type'),
+    videoDurationSeconds: integer('video_duration_seconds'),
+    /** Where each question started in the recording: [{ index, startedAtMs }]. */
+    chapters: jsonb('chapters'),
+    videoStatus: testimonialVideoStatusEnum('video_status'),
     ...timestamps,
   },
   (table) => [
@@ -35,7 +52,16 @@ export const testimonials = pgTable(
       name: 'testimonials_project_client_fk',
     }).onDelete('cascade'),
     unique('testimonials_project_key').on(table.projectId),
-    check('testimonials_body_length', sql`char_length(${table.body}) between 1 and 1000`),
+    check(
+      'testimonials_body_length',
+      sql`char_length(${table.body}) between 1 and 1000
+        or (${table.videoStatus} is not null and char_length(${table.body}) <= 1000)`,
+    ),
+    check(
+      'testimonials_video_columns',
+      sql`(${table.videoStatus} is null) = (${table.videoPath} is null)
+        and (${table.videoDurationSeconds} is null or ${table.videoDurationSeconds} between 1 and 300)`,
+    ),
     check(
       'testimonials_author_name_length',
       sql`char_length(${table.authorName}) between 1 and 120`,

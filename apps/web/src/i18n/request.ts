@@ -9,5 +9,5 @@ export default getRequestConfig(async ({ requestLocale }) => {
     default: Record<string, unknown>;
   };
 
-  return { locale, messages: messages.default };
+  return { locale, messages: messages.default, timeZone: 'Europe/Lisbon' };
 });

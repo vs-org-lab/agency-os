@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
@@ -11,17 +12,24 @@ import { ListView } from './list-view';
 import { MonthView } from './month-view';
 import { WeekView } from './week-view';
 
+const navigation = vi.hoisted(() => ({ replace: vi.fn() }));
+
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>
       {children}
     </a>
   ),
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => '/calendar',
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), replace: navigation.replace }),
+}));
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams('new=1'),
 }));
 
 afterEach(() => {
   cleanup();
+  navigation.replace.mockClear();
 });
 
 function withIntl(node: React.ReactNode) {
@@ -78,6 +86,37 @@ const actions = (): AgendaActions => ({
   schedule: vi.fn(async () => ({ ok: true as const, syncStatus: 'pending' as const })),
   update: vi.fn(async () => ({ ok: true as const })),
   cancel: vi.fn(async () => ({ ok: true as const })),
+});
+
+describe('calendar new=1', () => {
+  const calendar = (canSchedule: boolean) => (
+    <AgendaCalendar
+      view="month"
+      date="2026-10-01"
+      today="2026-10-12"
+      basePath="/calendar"
+      items={[]}
+      busy={[]}
+      canSchedule={canSchedule}
+      openNewRequested
+      clients={[{ id: CLIENT, name: 'Atlas Lda' }]}
+      projects={[]}
+      fixedClientId={null}
+      actions={actions()}
+    />
+  );
+
+  it('the calendar opens the new meeting dialog with new=1 when allowed', async () => {
+    withIntl(calendar(true));
+    expect(screen.getByRole('dialog', { name: 'Nova reunião' })).toBeTruthy();
+    await userEvent.keyboard('{Escape}');
+    expect(navigation.replace).toHaveBeenCalledWith('/calendar');
+  });
+
+  it('does not open for readers who cannot schedule', () => {
+    withIntl(calendar(false));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });
 
 describe('agenda', () => {

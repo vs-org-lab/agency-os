@@ -1,13 +1,15 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
+import { MotionProvider } from '@agency-os/ui/motion';
 import type { LibraryView } from '@/modules/library';
 import { AttachmentPicker } from './attachment-picker';
 import { LibraryBrowser, type LibraryActions, type LibraryParams } from './library-browser';
 
 const push = vi.fn();
+const replace = vi.fn();
 
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -15,12 +17,29 @@ vi.mock('@/i18n/navigation', () => ({
       {children}
     </a>
   ),
-  useRouter: () => ({ push, refresh: vi.fn() }),
+  useRouter: () => ({ push, replace, refresh: vi.fn() }),
 }));
+
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }),
+  });
+});
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   push.mockReset();
+  replace.mockReset();
   vi.unstubAllGlobals();
 });
 
@@ -67,13 +86,15 @@ function renderBrowser(
 ) {
   render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      <LibraryBrowser
-        view={view}
-        basePath="/c/client-1/library"
-        params={params}
-        actions={libraryActions}
-        audience={audience}
-      />
+      <MotionProvider>
+        <LibraryBrowser
+          view={view}
+          basePath="/c/client-1/library"
+          params={params}
+          actions={libraryActions}
+          audience={audience}
+        />
+      </MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -110,8 +131,77 @@ describe('LibraryBrowser', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Pesquisar ficheiros' }), {
       target: { value: ' logo ' },
     });
-    fireEvent.submit(screen.getByRole('search'));
-    expect(push).toHaveBeenCalledWith('/c/client-1/library?project=project-1&q=logo&sort=size');
+  });
+
+  it('searches without a button after typing stops', () => {
+    vi.useFakeTimers();
+    renderBrowser(FOLDER_VIEW, { project: 'project-1', folder: 'folder-1', sort: 'size' });
+    expect(screen.queryByRole('button', { name: 'Pesquisar' })).toBeNull();
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Pesquisar ficheiros' }), {
+      target: { value: ' logo ' },
+    });
+    act(() => vi.advanceTimersByTime(249));
+    expect(replace).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
+    expect(replace).toHaveBeenCalledWith('/c/client-1/library?project=project-1&q=logo&sort=size');
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('follows the search term when the url changes from outside', () => {
+    const element = (params: LibraryParams) => (
+      <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
+        <MotionProvider>
+          <LibraryBrowser
+            view={FOLDER_VIEW}
+            basePath="/c/client-1/library"
+            params={params}
+            actions={actions()}
+            audience="staff"
+          />
+        </MotionProvider>
+      </NextIntlClientProvider>
+    );
+    const { rerender } = render(element({ folder: 'folder-1', q: 'logo' }));
+    const box = screen.getByRole('searchbox', { name: 'Pesquisar ficheiros' }) as HTMLInputElement;
+    expect(box.value).toBe('logo');
+
+    rerender(element({ folder: 'folder-1' }));
+
+    expect(box.value).toBe('');
+  });
+
+  it('shows the drop layer on dragenter and hides on drop', async () => {
+    renderBrowser(FOLDER_VIEW, { folder: 'folder-1' });
+    const area = screen.getByRole('navigation', { name: 'Caminho da pasta' });
+    expect(screen.queryByText('Largue os ficheiros para carregar')).toBeNull();
+    fireEvent.dragEnter(area, { dataTransfer: { types: ['Files'], files: [] } });
+    expect(screen.getByText('Largue os ficheiros para carregar')).toBeTruthy();
+    fireEvent.drop(area, { dataTransfer: { types: ['Files'], files: [] } });
+    await waitFor(() => expect(screen.queryByText('Largue os ficheiros para carregar')).toBeNull());
+  });
+
+  it('dropped files go through the same validation as the upload button', async () => {
+    const libraryActions = actions({
+      startUploads: vi.fn(async () => ({ ok: false as const, code: 'invalid_file' })),
+    });
+    renderBrowser(FOLDER_VIEW, { folder: 'folder-1' }, libraryActions);
+    const file = new File(['x'], 'script.exe', { type: 'application/x-msdownload' });
+    fireEvent.drop(screen.getByRole('navigation', { name: 'Caminho da pasta' }), {
+      dataTransfer: { types: ['Files'], files: [file] },
+    });
+    await waitFor(() => expect(screen.getByText(/O ficheiro foi recusado/)).toBeTruthy());
+    expect(libraryActions.startUploads).toHaveBeenCalledWith('folder-1', [
+      { path: 'script.exe', sizeBytes: 1 },
+    ]);
+  });
+
+  it('upload button only inside a folder', () => {
+    renderBrowser({ ...FOLDER_VIEW, folder: null }, {});
+    expect(screen.queryByLabelText('Carregar ficheiros')).toBeNull();
+    cleanup();
+    renderBrowser(FOLDER_VIEW, { folder: 'folder-1' });
+    expect(screen.getByLabelText('Carregar ficheiros')).toBeTruthy();
   });
 
   it('actions follow permissions', () => {

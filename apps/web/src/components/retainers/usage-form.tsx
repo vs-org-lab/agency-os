@@ -6,8 +6,9 @@ import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import type { LimitMonth } from '@/modules/retainers';
-import { decimal, retainerError, SELECT, type RetainerError, type RetainerResult } from './shared';
+import { decimal, retainerError, type RetainerError, type RetainerResult } from './shared';
 
 export type RecordUsage = (input: {
   retainerId: string;
@@ -21,22 +22,25 @@ export function UsageForm({
   retainerId,
   limits,
   record,
+  onDone,
 }: {
   retainerId: string;
   limits: LimitMonth[];
   record: RecordUsage;
+  /** Called with the confirmation once the usage is saved, so the dialog can close and notify. */
+  onDone: (message: string) => void;
 }) {
   const t = useTranslations('retainers');
   const id = useId();
   const [kind, setKind] = useState<string>(limits[0]?.kind ?? '');
   const [quantity, setQuantity] = useState('1');
   const [description, setDescription] = useState('');
-  const [message, setMessage] = useState<'saved' | RetainerError | null>(null);
+  const [error, setError] = useState<RetainerError | null>(null);
   const [pending, startTransition] = useTransition();
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3"
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
@@ -46,29 +50,24 @@ export function UsageForm({
             quantity: decimal(quantity),
             description: description.trim(),
           }).catch(() => ({ ok: false as const, code: 'not_found' }));
-          if (result.ok) {
-            setDescription('');
-            setMessage('saved');
-          } else setMessage(retainerError(result.code));
+          if (result.ok) onDone(t('usage.saved'));
+          else setError(retainerError(result.code));
         });
       }}
     >
-      <h4 className="text-body-sm font-medium text-text">{t('usage.title')}</h4>
       <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${id}-kind`}>{t('usage.kind')}</Label>
-          <select
+          <SelectField
             id={`${id}-kind`}
+            name="kind"
             value={kind}
-            onChange={(event) => setKind(event.target.value)}
-            className={SELECT}
-          >
-            {limits.map((limit) => (
-              <option key={limit.kind} value={limit.kind}>
-                {t(`kinds.${limit.kind}`)}
-              </option>
-            ))}
-          </select>
+            onValueChange={setKind}
+            options={limits.map((limit) => ({
+              value: limit.kind,
+              label: t(`kinds.${limit.kind}`),
+            }))}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${id}-quantity`}>{t('usage.quantity')}</Label>
@@ -91,11 +90,9 @@ export function UsageForm({
           />
         </div>
       </div>
-      {message === 'saved' ? (
-        <FormMessage tone="success">{t('usage.saved')}</FormMessage>
-      ) : message ? (
-        <FormMessage tone={message === 'limit_reached' ? 'info' : 'danger'}>
-          {t(`errors.${message}`)}
+      {error ? (
+        <FormMessage tone={error === 'limit_reached' ? 'info' : 'danger'}>
+          {t(`errors.${error}`)}
         </FormMessage>
       ) : null}
       <Button type="submit" size="sm" disabled={pending} className="self-start">

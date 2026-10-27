@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { MotionProvider } from '@agency-os/ui/motion';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { PortalRetainerView } from '@/modules/retainers';
 import { PortalRetainer, type PortalRetainerActions } from './portal-retainer';
@@ -10,6 +11,21 @@ vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }),
+  });
+});
+
 afterEach(() => {
   cleanup();
 });
@@ -17,7 +33,7 @@ afterEach(() => {
 function withIntl(node: React.ReactNode) {
   return render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      {node}
+      <MotionProvider>{node}</MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -27,6 +43,7 @@ function view(decides: boolean, suspended = false): PortalRetainerView {
     decides,
     suspended,
     month: '2026-10-01',
+    period: { day: 26, total: 31, left: 5 },
     retainer: { id: 'retainer-1', tier: 'Essencial', status: 'active' },
     limits: [
       {
@@ -67,7 +84,7 @@ function actions(outcome: 'task' | 'extra' = 'task'): PortalRetainerActions & {
 describe('P-10 retainer', () => {
   it('the client sees the month per limit', () => {
     withIntl(<PortalRetainer view={view(true)} actions={actions()} />);
-    const pieces = screen.getByRole('region', { name: 'Peças de conteúdo' });
+    const pieces = screen.getByRole('group', { name: 'Peças de conteúdo' });
     expect(within(pieces).getByText('2 de 4,8')).toBeTruthy();
     expect(screen.queryByText(/1500|Valor mensal/)).toBeNull();
   });

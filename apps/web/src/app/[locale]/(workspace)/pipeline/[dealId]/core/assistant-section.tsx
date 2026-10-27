@@ -4,7 +4,9 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Label } from '@agency-os/ui/components/label';
+import { ScrambleText } from '@agency-os/ui/components/scramble-text';
 import { Textarea } from '@agency-os/ui/components/textarea';
+import { ThinkingOrbs } from '@agency-os/ui/components/thinking-orbs';
 import { FormMessage } from '@/components/forms/form-message';
 import { applyDraftAction, saveNarrativeAction } from './actions';
 
@@ -31,6 +33,14 @@ function CopyPrompt({ prompt }: { prompt: string }) {
 }
 
 type Feedback = { tone: 'success' | 'danger'; text: string } | null;
+
+function FeedbackMessage({ feedback }: { feedback: NonNullable<Feedback> }) {
+  return (
+    <FormMessage tone={feedback.tone}>
+      {feedback.tone === 'success' ? <ScrambleText text={feedback.text} /> : feedback.text}
+    </FormMessage>
+  );
+}
 
 export function AssistantSection({
   engagementId,
@@ -113,9 +123,8 @@ export function AssistantSection({
                 </Button>
               </div>
             ) : null}
-            {briefingFeedback ? (
-              <FormMessage tone={briefingFeedback.tone}>{briefingFeedback.text}</FormMessage>
-            ) : null}
+            {briefingFeedback ? <FeedbackMessage feedback={briefingFeedback} /> : null}
+            {pending ? <ThinkingOrbs label={t('thinking')} /> : null}
             <div>
               <Button
                 type="button"
@@ -142,9 +151,8 @@ export function AssistantSection({
           maxLength={20_000}
           onChange={(event) => setNarrativeText(event.target.value)}
         />
-        {narrativeFeedback ? (
-          <FormMessage tone={narrativeFeedback.tone}>{narrativeFeedback.text}</FormMessage>
-        ) : null}
+        {narrativeFeedback ? <FeedbackMessage feedback={narrativeFeedback} /> : null}
+        {pending ? <ThinkingOrbs label={t('thinking')} /> : null}
         <div>
           <Button
             type="button"

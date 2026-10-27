@@ -1,10 +1,14 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
-import { TestimonialForm } from '@/components/testimonials/testimonial-form';
+import { TestimonialExperience } from '@/components/testimonials/testimonial-experience';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadClientTestimonial } from '@/modules/testimonials/server';
-import { sendTestimonialAction } from './actions';
+import {
+  beginTestimonialVideoAction,
+  finishTestimonialVideoAction,
+  sendTestimonialAction,
+} from './actions';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
@@ -25,11 +29,15 @@ export default async function PortalTestimonialPage({ params }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
       <h1 className="text-title text-text">{t('title')}</h1>
-      <TestimonialForm
+      <TestimonialExperience
         projectId={projectId}
         projectName={data.projectName}
         initial={data.testimonial}
         send={sendTestimonialAction}
+        videoActions={{
+          begin: beginTestimonialVideoAction,
+          finish: finishTestimonialVideoAction,
+        }}
       />
     </div>
   );

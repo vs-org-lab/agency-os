@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
+import userEvent from '@testing-library/user-event';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import { ApprovalsList } from '@/components/proofing/approvals-list';
 import { DEFAULT_HUB_DESIGN, type HubEditorView, type HubSnapshot } from '@/modules/brand-hub';
+import { AspectPreview } from './aspect-preview';
+import { contrastLevel } from './contrast-level';
 import { DesignPanel } from './design-panel';
 import { HubDownloads } from './hub-downloads';
 import { HubEditor, type HubEditorActions } from './hub-editor';
@@ -285,6 +288,7 @@ describe('brand hub', () => {
     const save = vi.fn(async () => ({ ok: true as const }));
     withIntl(<DesignPanel hubId="hub-1" design={DEFAULT_HUB_DESIGN} save={save} />);
     expect(screen.queryByText(/abaixo do contraste AA/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Texto #/ }));
     fireEvent.change(screen.getByLabelText('Texto (hex)'), { target: { value: '#BBBBBB' } });
     expect(screen.getByText(/abaixo do contraste AA/)).toBeTruthy();
     fireEvent.click(screen.getByRole('radio', { name: 'Dividido' }));
@@ -295,6 +299,41 @@ describe('brand hub', () => {
       colors: { ...DEFAULT_HUB_DESIGN.colors, text: '#BBBBBB' },
       layout: 'split',
     });
+  });
+
+  it('classifies contrast ratios against WCAG levels', () => {
+    expect(contrastLevel(21)).toBe('AAA');
+    expect(contrastLevel(7)).toBe('AAA');
+    expect(contrastLevel(4.6)).toBe('AA');
+    expect(contrastLevel(4.49)).toBe('fail');
+  });
+
+  it('the palette shows each swatch with the text contrast over it', () => {
+    const design = {
+      ...DEFAULT_HUB_DESIGN,
+      colors: { ...DEFAULT_HUB_DESIGN.colors, text: '#FFFFFF', surface: '#000000' },
+    };
+    withIntl(<DesignPanel hubId="hub-1" design={design} save={vi.fn()} />);
+    const surface = screen.getByRole('button', { name: /^Superfície #000000/ });
+    expect(within(surface).getByText('21:1 · AAA')).toBeTruthy();
+  });
+
+  it('the aspect selector only changes the preview frame', async () => {
+    const user = userEvent.setup();
+    const { container } = withIntl(
+      <AspectPreview images={[{ name: 'loja.jpg', url: 'blob:loja' }]} />,
+    );
+    const frame = () => container.querySelector<HTMLElement>('[data-slot="aspect-frame"]');
+    expect((screen.getByRole('radio', { name: 'Original' }) as HTMLInputElement).checked).toBe(
+      true,
+    );
+    expect(frame()?.style.aspectRatio).toBe('');
+    await user.click(screen.getByRole('radio', { name: '16:9' }));
+    expect(frame()?.style.aspectRatio).toBe('16 / 9');
+    await user.click(screen.getByRole('radio', { name: '4:5' }));
+    expect(frame()?.style.aspectRatio).toBe('4 / 5');
+    await user.click(screen.getByRole('radio', { name: '1:1' }));
+    expect(frame()?.style.aspectRatio).toBe('1 / 1');
   });
 
   it('downloads offer each page and all assets', () => {

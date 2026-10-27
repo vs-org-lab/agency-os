@@ -119,7 +119,7 @@
       "library": "Library",
       "documents": "Documents",
       "brandHub": "Brand Hub",
-      "progress": "Progress",
+      "progress": "Plan and results",
       "academy": "Academy"
     }
   },
@@ -171,9 +171,14 @@
     "home": {
       "title": "Home",
       "date": "{date}",
+      "create": {
+        "label": "New",
+        "task": "New task",
+        "target": "New acquisition target",
+        "event": "New event"
+      },
       "actions": {
         "label": "Quick actions",
-        "newTask": "New task",
         "pipeline": "Open the pipeline",
         "updates": "See updates"
       },
@@ -348,7 +353,14 @@
         "unavailable": "Card payment is not available for this request.",
         "not_found": "This request is no longer available. Refresh the page."
       },
-      "receipts": "Receipts"
+      "receipts": "Receipts",
+      "receipt": {
+        "title": "Payment received",
+        "thanks": "Thank you. We received your payment.",
+        "request": "Request",
+        "amount": "Amount",
+        "date": "Date"
+      }
     },
     "room": {
       "title": "Your project: {name}",
@@ -371,6 +383,98 @@
         "invalid_input": "Check the comment."
       },
       "projectSelector": "Project"
+    },
+    "dashboard": {
+      "greeting": "Hello, {name}",
+      "greetingAnonymous": "Hello",
+      "action": {
+        "title": "Needs your action",
+        "due": "By {date}",
+        "kinds": {
+          "approval": "Approval",
+          "proof": "Proof",
+          "proposal": "Proposal",
+          "contract": "Contract",
+          "payment": "Payment"
+        },
+        "cta": {
+          "approval": "Decide",
+          "proof": "Review",
+          "proposal": "View the proposal",
+          "contract": "Sign",
+          "payment": "Pay"
+        }
+      },
+      "plan": {
+        "title": "Your plan",
+        "details": "What it includes and rules",
+        "tier": "{tier} tier",
+        "includes": "What it includes",
+        "perMonth": "{count} per month",
+        "rules": "Rules",
+        "carry": "Up to {share}% of what you do not use in a month carries over to the next, once.",
+        "expires": "What carried over and is not used the following month expires.",
+        "extra": "Work above what is available needs a quote, which you approve before it starts."
+      },
+      "requestWork": {
+        "label": "Request work",
+        "title": "Request work",
+        "description": "Tell us what you need. If it fits this month's plan, the team starts right away."
+      },
+      "board": {
+        "title": "Your work",
+        "seeAll": "See all",
+        "empty": "You have not requested any work yet.",
+        "columns": {
+          "received": "Received",
+          "in_progress": "In progress",
+          "done": "Done this month"
+        },
+        "emptyColumn": {
+          "received": "Nothing waiting.",
+          "in_progress": "Nothing in progress.",
+          "done": "Nothing finished this month."
+        },
+        "requestedOn": "Requested on {date}",
+        "views": {
+          "label": "View",
+          "board": "Board",
+          "list": "List"
+        }
+      },
+      "project": {
+        "title": "Your project: {name}",
+        "phases": "Project phases",
+        "current": "Current phase",
+        "nextStep": "Next step: {name}",
+        "dueOn": "Expected by {date}",
+        "open": "Open the room"
+      },
+      "documents": {
+        "title": "Recent documents"
+      }
+    },
+    "onboarding": {
+      "label": "Welcome to the portal",
+      "step": "Step {current} of {total}",
+      "next": "Next",
+      "previous": "Back",
+      "skip": "Skip",
+      "start": "Get started",
+      "steps": {
+        "work": {
+          "title": "Where you see your work",
+          "body": "Home shows what needs you, what is left of your plan and where each request stands."
+        },
+        "approve": {
+          "title": "How you approve",
+          "body": "Approvals and proofs appear under \"Needs your action\". Open, review and decide; the team is told right away."
+        },
+        "request": {
+          "title": "How you request work",
+          "body": "Use \"Request work\" and tell us what you need. If it fits this month's plan, the team starts right away."
+        }
+      }
     }
   },
   "commercial": {
@@ -1061,6 +1165,12 @@
         "heading": "You have a new task",
         "body": "Hello {fullName}, you are now responsible for the task \"{title}\" {scope, select, client {for {clientName}} other {for the studio}}, {due, select, none {with no date set} other {due {due}}}.",
         "action": "Open the task"
+      },
+      "task_comment": {
+        "subject": "New comment on: {title}",
+        "heading": "New comment on your task",
+        "body": "Hello {fullName}, {authorName} commented on the task \"{title}\". Open the task to read it.",
+        "action": "Open the task"
       }
     },
     "client": {
@@ -1152,7 +1262,7 @@
   "settings": {
     "integrations": {
       "title": "Integrations",
-      "description": "External services connected to the studio.",
+      "description": "What the OS connects today and what it could connect.",
       "google": {
         "title": "Google Calendar",
         "description": "Reads your availability and creates discovery calls with Google Meet."
@@ -1171,6 +1281,79 @@
         "connected": "Google Calendar connected.",
         "disconnected": "Google Calendar disconnected.",
         "error": "The Google Calendar connection could not be completed. Try again."
+      },
+      "groups": {
+        "account": {
+          "title": "Your account",
+          "description": "Yours alone. Everyone on the team connects their own."
+        },
+        "studio": {
+          "title": "Studio",
+          "description": "Services configured on the server, for the whole team. Read only."
+        },
+        "ideas": {
+          "title": "Ideas to connect",
+          "description": "They do not exist yet. They show what we could connect next."
+        }
+      },
+      "state": {
+        "active": "Active",
+        "test": "Test mode",
+        "missing": "Not configured"
+      },
+      "services": {
+        "payments": {
+          "title": "Payments",
+          "description": "Card payments with Stripe."
+        },
+        "email": {
+          "title": "Email",
+          "description": "Sends the OS emails over SMTP."
+        },
+        "transcription": {
+          "title": "Transcription",
+          "description": "Transcribes calls and audio with Groq."
+        },
+        "receipts": {
+          "title": "Receipt reading",
+          "description": "Suggests the expense fields from a photo of the receipt."
+        },
+        "domains": {
+          "title": "Brand Hub domains",
+          "description": "Verifies and connects the client's domain to the brand site."
+        },
+        "events": {
+          "title": "Events",
+          "description": "Runs automations and reminders in the background with Inngest."
+        }
+      },
+      "soon": "Coming soon",
+      "ideas": {
+        "mcp": {
+          "title": "AI through MCP",
+          "description": "Claude and ChatGPT read clients, phases, tasks and the agenda with the permissions of whoever connects."
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Team notices in the right channel."
+        },
+        "drive": {
+          "title": "Google Drive",
+          "description": "Import files into the Library."
+        },
+        "dropbox": {
+          "title": "Dropbox",
+          "description": "Import files into the Library."
+        },
+        "figma": {
+          "title": "Figma",
+          "description": "Proofs from frames."
+        }
+      },
+      "connected": {
+        "title": "Active connections",
+        "empty": "There are no active connections yet.",
+        "since": "since {date}"
       }
     },
     "nav": {
@@ -1511,6 +1694,9 @@
       "description": "Each front is worth 25 points, justified by evidence.",
       "total": "{total} of {max}",
       "points": "Points (0 to {max})",
+      "clear": "Clear",
+      "noScore": "No score",
+      "score": "{value} of {max}",
       "justification": "Justification",
       "save": "Save score",
       "saved": "Score saved.",
@@ -1576,6 +1762,7 @@
       "confirmOverwrite": "There are notes in: {blocks}. Replace them?",
       "overwrite": "Replace",
       "applied": "Saved.",
+      "thinking": "Thinking…",
       "narrative": "Saved narrative",
       "needsTranscript": "Save the transcript before asking for the briefing.",
       "errors": {
@@ -1857,7 +2044,8 @@
     "createProject": "Create project",
     "tabs": {
       "steps": "Steps",
-      "plan": "Plan"
+      "plan": "Plan",
+      "timeline": "Timeline"
     },
     "projectStatus": {
       "active": "In progress",
@@ -1886,7 +2074,9 @@
       "endsOn": "Expected end",
       "noEnd": "To be set",
       "people": "People",
-      "nobody": "Nobody assigned"
+      "nobody": "Nobody assigned",
+      "healthLine": "Health: {score} of 100, {level}",
+      "healthEmpty": "Health: not enough data yet"
     },
     "phases": "Phases",
     "phaseDue": "Phase due date",
@@ -1911,16 +2101,27 @@
         "in_progress": "Mark as done: {name}",
         "done": "Reopen: {name}"
       },
-      "nextShort": {
-        "todo": "Start",
-        "in_progress": "Mark as done",
-        "done": "Reopen"
-      }
+      "noDate": "No date",
+      "panelClose": "Close step panel",
+      "reopenTitle": "Reopen this step?",
+      "reopenBody": "The client has already seen this step. Reopening it shows it as in progress again.",
+      "reopenConfirm": "Reopen step",
+      "reopenCancel": "Cancel"
     },
     "plan": {
       "title": "Plan",
       "week": "Week {start}",
       "weeks": "Weeks {start} to {end}"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "today": "Today",
+      "zoom": "Scale",
+      "week": "Week",
+      "month": "Month",
+      "row": "{name}, from {start} to {end}",
+      "empty": "No phase has dates yet, so there is nothing to draw.",
+      "undated": "No dates, left out of the timeline: {names}."
     },
     "updates": {
       "title": "Updates",
@@ -2002,18 +2203,9 @@
     "title": "Tasks",
     "description": "What needs doing, for the studio and for clients.",
     "roomDescription": "This client's internal tasks. The client does not see them.",
-    "groups": {
-      "today": "Today",
-      "this_week": "This week",
-      "later": "Later",
-      "done": "Done"
-    },
-    "overdue": "Overdue",
     "noDate": "No date",
     "studio": "Studio",
     "unassigned": "Unassigned",
-    "edit": "Edit",
-    "itemsLabel": "Subtasks of {title}",
     "empty": {
       "title": "No tasks",
       "description": "Tasks created here or by the process appear in this list."
@@ -2026,7 +2218,8 @@
       "all": "All",
       "open": "To do",
       "done": "Done",
-      "submit": "Filter"
+      "allTasks": "All",
+      "mine": "Mine"
     },
     "form": {
       "heading": "New task",
@@ -2044,13 +2237,109 @@
       "created": "Task created.",
       "saved": "Changes saved."
     },
+    "table": {
+      "label": "Tasks",
+      "noPhase": "—",
+      "noValue": "—",
+      "subtaskRatio": "{done}/{total}",
+      "complete": "Complete {title}",
+      "reopen": "Reopen {title}",
+      "expand": "Show subtasks of {title}",
+      "collapse": "Hide subtasks of {title}",
+      "subtasksOf": "Subtasks of {title}",
+      "addSubtask": "Add subtask",
+      "subtaskTitle": "Subtask title",
+      "subtaskPlaceholder": "New subtask — Enter saves, Esc cancels",
+      "columns": {
+        "done": "Done",
+        "title": "Task",
+        "client": "Client",
+        "phase": "Phase",
+        "assignee": "Assignee",
+        "due": "Due",
+        "subtasks": "Subtasks",
+        "comments": "Comments",
+        "created": "Created"
+      },
+      "commentCount": "{count, plural, one {# comment} other {# comments}}"
+    },
+    "panel": {
+      "close": "Close",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied.",
+      "copyFailed": "The link could not be copied.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this task?",
+      "deleteHint": "Its comments, linked files and links are removed too.",
+      "confirmDelete": "Delete task",
+      "cancel": "Cancel",
+      "deleted": "Task deleted.",
+      "tabs": {
+        "details": "Details",
+        "collaboration": "Comments and files ({count})"
+      },
+      "details": {
+        "title": "Title",
+        "notes": "Notes",
+        "assignee": "Assignee",
+        "dueOn": "Due date",
+        "client": "Client",
+        "project": "Project",
+        "checklist": "Checklist",
+        "addItem": "Add item",
+        "itemTitle": "New checklist item",
+        "none": "—"
+      },
+      "comments": {
+        "heading": "Comments",
+        "placeholder": "Write a comment…",
+        "send": "Comment",
+        "hint": "Ctrl+Enter to send",
+        "empty": "No comments yet.",
+        "delete": "Delete comment by {author}",
+        "unknownAuthor": "Former member"
+      },
+      "files": {
+        "heading": "Files",
+        "add": "Add file",
+        "chooseTitle": "Library files",
+        "upload": "Upload files",
+        "none": "No files linked.",
+        "noneAvailable": "The project library has no other files to link.",
+        "attach": "Link {name}",
+        "detach": "Remove {name}",
+        "noProject": "Files live in a project library.",
+        "dropHere": "Drop files to link them to the task",
+        "dropFolders": "Folders cannot be uploaded and were skipped.",
+        "uploading": "Uploading {done} of {total}…",
+        "uploadFailed": "Some files could not be uploaded.",
+        "uploadFolderShared": "The \"Tarefas\" folder of this project is visible to the client, so task files cannot be uploaded there. Make it internal or rename it.",
+        "filter": "Search the library",
+        "attachShort": "Link",
+        "attached": "File linked to the task."
+      },
+      "links": {
+        "heading": "Links",
+        "add": "Add link",
+        "url": "Address",
+        "linkTitle": "Title (optional)",
+        "submit": "Add",
+        "none": "No links.",
+        "remove": "Remove link {name}",
+        "invalid": "Use an address that starts with https://."
+      }
+    },
+    "preview": {
+      "label": "Files of {title}",
+      "loading": "Loading files…",
+      "more": "and {count} more",
+      "failed": "The files could not be shown."
+    },
     "errors": {
       "not_found": "You are not allowed to do this.",
-      "invalid_input": "Check the fields and try again."
-    },
-    "delete": "Delete",
-    "deleteLabel": "Delete task {title}",
-    "editLabel": "Edit task {title}"
+      "invalid_input": "Check the fields and try again.",
+      "forbidden": "You do not have access to this task."
+    }
   },
   "team": {
     "title": "Team",
@@ -2186,7 +2475,10 @@
       "loading": "Loading the file…",
       "failed": "The file could not be shown.",
       "pinSurface": "File to comment on a spot. Enter marks the centre, arrow keys move the marker (Shift for larger steps).",
-      "pinPosition": "Marker at {x}% of the width and {y}% of the height."
+      "pinPosition": "Marker at {x}% of the width and {y}% of the height.",
+      "compare": "Compare with the previous version",
+      "closeCompare": "Back to the current version",
+      "compareLabel": "Divider between version {before} and version {after}"
     },
     "comments": {
       "title": "Comments",
@@ -2252,9 +2544,19 @@
     "title": "Command palette",
     "description": "Go to a page, create something or search clients, deals and tasks.",
     "placeholder": "Type a command or search…",
-    "groups": { "goTo": "Go to", "create": "Create", "search": "Search" },
-    "create": { "newTask": "New task" },
-    "kind": { "client": "Client", "deal": "Deal", "task": "Task" },
+    "groups": {
+      "goTo": "Go to",
+      "create": "Create",
+      "search": "Search"
+    },
+    "create": {
+      "newTask": "New task"
+    },
+    "kind": {
+      "client": "Client",
+      "deal": "Deal",
+      "task": "Task"
+    },
     "empty": "No results.",
     "searching": "Searching…",
     "error": "The search is unavailable."
@@ -2265,7 +2567,12 @@
     "confirmed": "Confirmed.",
     "confirmAction": "Confirm: {label}",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "datePicker": {
+      "placeholder": "Choose date",
+      "clear": "Clear"
+    },
+    "searchMember": "Search by name"
   },
   "testimonials": {
     "title": "Testimonial",
@@ -2282,13 +2589,113 @@
       "sent": "Thank you for your testimonial.",
       "required": "Write the testimonial and your name.",
       "failed": "It could not be saved. Try again."
+    },
+    "mode": {
+      "label": "How would you like to answer",
+      "video": "Video",
+      "write": "Write"
+    },
+    "video": {
+      "intro": "Answer five short questions on camera, for as long as you like up to {max} minutes. The questions appear one at a time.",
+      "name": "Name",
+      "role": "Role",
+      "recordConsent": "I authorise the recording and its internal use.",
+      "publishConsent": "I authorise publishing this testimonial, with my name and role, on the website and in agency presentations.",
+      "consentRequired": "Confirm the recording authorisation and enter your name.",
+      "sent": "Thank you for your video testimonial.",
+      "failed": "The video could not be sent. Try again.",
+      "hasVideo": "Your video was already sent. You can record another to replace it.",
+      "questions": {
+        "q1": {
+          "topic": "Before",
+          "text": "What was your situation before we worked together?"
+        },
+        "q2": {
+          "topic": "The change",
+          "text": "What changed after the project?"
+        },
+        "q3": {
+          "topic": "Working together",
+          "text": "What was it like working with the studio?"
+        },
+        "q4": {
+          "topic": "The result",
+          "text": "What concrete result have you seen so far?"
+        },
+        "q5": {
+          "topic": "The recommendation",
+          "text": "Who would you recommend the studio to, and why?"
+        }
+      }
+    },
+    "team": {
+      "title": "Client testimonial",
+      "empty": "The client has not left a testimonial for this project yet.",
+      "video": "Testimonial video",
+      "chapters": "Questions",
+      "publish": "Authorises publishing",
+      "internal": "Internal use only",
+      "author": "{name}, {role}",
+      "written": "Written testimonial"
+    }
+  },
+  "media": {
+    "voiceNote": {
+      "record": "Record a voice note",
+      "recording": "Recording a voice note",
+      "ready": "Voice note ready",
+      "stop": "Stop",
+      "delete": "Delete",
+      "send": "Send voice note",
+      "sending": "Sending…",
+      "play": "Play",
+      "pause": "Pause",
+      "position": "Voice note position",
+      "denied": "The microphone could not be accessed. Check the browser permission or write the message.",
+      "unsupported": "This browser cannot record audio. Write the message.",
+      "failed": "The voice note could not be sent. Try again.",
+      "limit": "Limit of {max} reached.",
+      "body": "Voice note",
+      "transcribing": "Transcribing…",
+      "transcriptFailed": "This note could not be transcribed.",
+      "noSpeech": "No speech recognised.",
+      "transcript": "Transcript",
+      "list": "Voice notes"
+    },
+    "recorder": {
+      "camera": "Camera",
+      "microphone": "Microphone",
+      "level": "Microphone level",
+      "preview": "Camera preview",
+      "enable": "Turn on camera and microphone",
+      "start": "Start recording",
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "next": "Next",
+      "question": "{current} of {total} · {topic}",
+      "idle": "Ready to record",
+      "recording": "Recording",
+      "paused": "Paused",
+      "stopped": "Recording finished",
+      "sent": "Video sent",
+      "limit": "Limit of {max} reached. The recording stopped.",
+      "review": "Review the recording",
+      "position": "Video position",
+      "chapter": "Question {index}",
+      "again": "Record again",
+      "send": "Send video",
+      "sending": "Sending…",
+      "denied": "The camera and microphone could not be accessed. You can write the testimonial instead.",
+      "unsupported": "This browser cannot record video. You can write the testimonial.",
+      "failed": "The video could not be sent. Try again.",
+      "writeInstead": "Write instead"
     }
   },
   "library": {
     "title": "Library",
     "breadcrumb": "Folder path",
     "search": "Search files",
-    "searchSubmit": "Search",
     "clearSearch": "Clear search",
     "filters": {
       "label": "Filter",
@@ -2319,6 +2726,14 @@
     "rejected": "{count, plural, one {# file refused: its type is not accepted or does not match its content.} other {# files refused: their type is not accepted or does not match their content.}}",
     "uploadHint": "Images, videos, PDF, Word, Excel, PowerPoint, ZIP, PSD and fonts, up to 50 MB each.",
     "openFolderToUpload": "Open or create a folder to upload files.",
+    "dropHere": "Drop files to upload",
+    "dropFolders": "Folders are not supported; drop files",
+    "progressLabel": "Uploads",
+    "fileStatus": {
+      "pending": "Uploading",
+      "done": "Done",
+      "failed": "Failed"
+    },
     "downloadAll": "Download all",
     "downloadFolder": "Download folder",
     "preparingZip": "Preparing the ZIP…",
@@ -2406,6 +2821,7 @@
     "version": "Version {number}",
     "uploadingFirst": "Uploading",
     "empty": "There are no documents in this project yet.",
+    "emptyHint": "Create the first one to share it with the client.",
     "noProject": "There are no projects with documents yet.",
     "cards": {
       "projectDocuments": "Project documents",
@@ -2419,6 +2835,8 @@
       "contract": "Contract",
       "invoices": "Invoices",
       "none": "Not yet",
+      "sourceDeal": "Deal",
+      "sourcePayments": "Payments",
       "proposalStatus": {
         "draft": "Draft",
         "sent": "With the client",
@@ -2633,10 +3051,16 @@
         "compact": "Compact"
       },
       "contrast": "Text on the surface falls below AA contrast. The brand is the client’s, so you can still save.",
+      "contrastRatio": "{ratio}:1 · {level}",
+      "contrastFail": "below AA",
       "save": "Save design",
       "saved": "Design saved."
     },
     "assets": {
+      "aspect": {
+        "label": "Preview aspect ratio",
+        "original": "Original"
+      },
       "title": "Files",
       "upload": "Upload files",
       "uploading": "Uploading {done} of {total}…",
@@ -2848,6 +3272,21 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "chart": {
+      "title": "Received and expenses by month",
+      "summary": "Paid requests and expenses of {year} in euros, by month.",
+      "otherCurrencies": "Only EUR amounts are charted; other currencies are in the tables."
+    },
+    "range": {
+      "label": "Period",
+      "placeholder": "Whole year",
+      "clear": "Clear",
+      "presets": {
+        "month": "This month",
+        "quarter": "Last quarter",
+        "year": "This year"
+      }
+    },
     "title": "Money",
     "description": "What came in, what is open and what went out, per year.",
     "year": "Year",
@@ -2961,6 +3400,7 @@
       "currency": "Currency",
       "startsOn": "Start",
       "reviewOn": "Annual review",
+      "dateRequired": "Enter the date.",
       "status": "Status",
       "statuses": {
         "active": "Active",
@@ -2979,6 +3419,11 @@
     },
     "month": "Usage in {month}",
     "usedOf": "{used} of {available}",
+    "period": {
+      "label": "Period",
+      "remaining": "{count, plural, =0 {Closes today} one {# day until close} other {# days until close}}",
+      "progress": "Day {day} of {total}"
+    },
     "carry": "Includes {carry} carried over from last month.",
     "remaining": "Available: {remaining}",
     "usage": {
@@ -2993,6 +3438,7 @@
       "extra": "Extra request",
       "delete": "Delete",
       "deleted": "Entry deleted.",
+      "deleteEntry": "Delete entry: {description}",
       "line": "{quantity} × {kind} · {description}"
     },
     "limitReached": "This entry passes the month's allowance. Work above the limit only starts with an extra request the client approves.",
@@ -3012,7 +3458,7 @@
       "sent": "Quote sent to the client."
     },
     "portal": {
-      "title": "Progress",
+      "title": "Plan and results",
       "description": "This month's retainer usage and your requests.",
       "none": "There is no active retainer.",
       "request": {
@@ -3146,6 +3592,11 @@
     }
   },
   "reports": {
+    "charts": {
+      "revenue": "Revenue by month in {year}, one line per currency: {currencies}.",
+      "pipeline": "Deals by stage and code.",
+      "load": "Tasks this week and active projects per person."
+    },
     "title": "Reports",
     "year": "Year {year}",
     "previousYear": "Previous year",

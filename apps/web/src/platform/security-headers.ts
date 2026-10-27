@@ -9,6 +9,10 @@ export type SecurityHeaderOptions = {
   frameAncestors?: string[];
   /** Allows the microphone and tab capture for this document (call mode recording). */
   mediaCapture?: boolean;
+  /** Allows the microphone for this document (voice notes on proofs and approvals). */
+  voiceCapture?: boolean;
+  /** Allows the camera and the microphone for this document (client video testimonials). */
+  cameraCapture?: boolean;
 };
 
 const FIGMA_FRAME_SOURCES = ['https://www.figma.com', 'https://embed.figma.com'];
@@ -16,6 +20,8 @@ const FIGMA_FRAME_SOURCES = ['https://www.figma.com', 'https://embed.figma.com']
 const EMBEDDABLE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?apply(?:\/|$)/;
 
 const MEDIA_CAPTURE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?pipeline\/[^/]+\/core\/call\/?$/;
+
+const CAMERA_CAPTURE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?portal(?:\/|$)/;
 
 function originOf(candidate: string): string | null {
   try {
@@ -34,6 +40,16 @@ export function embedOriginsForPath(pathname: string, configured: string | undef
 
 export function allowsMediaCapture(pathname: string): boolean {
   return MEDIA_CAPTURE_PATH.test(pathname);
+}
+
+// Pages change without a document load, so the policy of the first document covers every page
+// reached from it: voice capture spans the app and camera capture spans the portal.
+export function allowsVoiceCapture(pathname: string): boolean {
+  return !EMBEDDABLE_PATH.test(pathname);
+}
+
+export function allowsCameraCapture(pathname: string): boolean {
+  return CAMERA_CAPTURE_PATH.test(pathname);
 }
 
 export function generateNonce(): string {
@@ -75,8 +91,10 @@ export function buildSecurityHeaders(nonce: string, options: SecurityHeaderOptio
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': [
-      'camera=()',
-      options.mediaCapture ? 'microphone=(self)' : 'microphone=()',
+      options.cameraCapture ? 'camera=(self)' : 'camera=()',
+      options.mediaCapture || options.voiceCapture || options.cameraCapture
+        ? 'microphone=(self)'
+        : 'microphone=()',
       options.mediaCapture ? 'display-capture=(self)' : 'display-capture=()',
       'geolocation=()',
       'payment=()',

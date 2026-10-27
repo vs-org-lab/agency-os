@@ -71,6 +71,41 @@ describe('retainer requests', () => {
   );
 
   it(
+    'requestWork creates the request and its task together',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const retainer = await createRetainerFixture(sql, world);
+        const { deps } = retainerDeps(sql);
+        await requestWork(
+          retainerClaims(world.users.operationalA, 'client'),
+          {
+            retainerId: retainer.retainerId,
+            kind: 'content_pieces',
+            description: 'Publicação do evento',
+            quantity: '1',
+          },
+          deps,
+        );
+        await sql`reset role`;
+        const linked = await sql<{ description: string; task_title: string }[]>`
+          select rr.description, t.title as task_title
+          from public.retainer_requests rr
+          join public.tasks t on t.id = rr.task_id
+          where rr.retainer_id = ${retainer.retainerId}
+        `;
+        expect(linked).toEqual([
+          {
+            description: 'Publicação do evento',
+            task_title: 'Pedido do cliente: Publicação do evento',
+          },
+        ]);
+      });
+    },
+    SLOW,
+  );
+
+  it(
     'a request that exactly uses up a decimal allowance is still a task',
     async () => {
       await withTestTransaction(async (sql) => {

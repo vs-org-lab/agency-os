@@ -7,7 +7,7 @@ import { createGroqTranscription } from './transcription/groq';
 import type { TranscriptionPort } from './transcription/port';
 import { createSupabaseRecordingStorage } from './transcription/supabase-storage';
 
-function transcriptionPort(): TranscriptionPort {
+export function transcriptionPort(): TranscriptionPort {
   const env = transcriptionEnv();
   return env.TRANSCRIPTION_PROVIDER === 'groq'
     ? createGroqTranscription({ apiKey: env.GROQ_API_KEY })

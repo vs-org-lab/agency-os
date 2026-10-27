@@ -37,7 +37,6 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       '**/next-env.d.ts',
-      '.superpowers/**',
       'supabase/migrations/**',
       'References/**',
       'Software/**',

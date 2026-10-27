@@ -45,13 +45,13 @@ export default async function RoomAgendaPage({ params, searchParams }: PageProps
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('roomTitle')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={basePath}
       />
-      <h2 className="text-title-sm text-text">{t('roomTitle')}</h2>
       <AgendaCalendar
         view={period.view}
         date={period.date}

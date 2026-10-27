@@ -269,7 +269,7 @@ export async function deleteFile(
 export async function readableFileIds(
   claims: VerifiedClaims,
   fileIds: string[],
-  deps: LibraryDeps,
+  deps: Pick<LibraryDeps, 'contexts'>,
 ): Promise<Set<string>> {
   if (fileIds.length === 0) return new Set();
   const ids = sql.join(

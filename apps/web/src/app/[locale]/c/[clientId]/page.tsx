@@ -3,11 +3,14 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { HealthCard } from '@/components/health/health-card';
+import { hasHealthData } from '@/components/health/has-health-data';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
+import { phaseTimeline } from '@/modules/rooms';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
+import { loadProjectTestimonial } from '@/modules/testimonials/server';
 import {
   completePhaseAction,
   createProjectAction,
@@ -34,6 +37,8 @@ import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
+import { TimelineView } from './room/timeline-view';
+import { TestimonialSection } from './room/testimonial-section';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
@@ -60,21 +65,25 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
       })
     : [];
   const t = await getTranslations('rooms');
+  const timeline = room.project ? phaseTimeline(room.project.phases, room.project.startsOn) : null;
   const tp = await getTranslations('proofing.section');
-  const [proofs, rounds] = room.project
+  const tt = await getTranslations('testimonials.team');
+  const [proofs, rounds, testimonial] = room.project
     ? await Promise.all([
         loadProjectProofs(session.claims, clientId, room.project.id),
         loadProjectRounds(session.claims, room.project.id),
+        loadProjectTestimonial(session.claims, room.project.id),
       ])
-    : [null, null];
+    : [null, null, null];
 
   return (
     <div className="flex flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={room.clientName}
+        title={room.clientName}
+        client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
+        showPreviewLink={room.project !== null}
         basePath={`/c/${clientId}`}
         actions={
           writable && templates.length > 0 ? (
@@ -86,7 +95,6 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
           ) : null
         }
       />
-      {health ? <HealthCard health={health} /> : null}
 
       {room.project ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -94,7 +102,9 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             <TabsList>
               <TabsTrigger value="steps">{t('tabs.steps')}</TabsTrigger>
               <TabsTrigger value="plan">{t('tabs.plan')}</TabsTrigger>
+              <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
               <TabsTrigger value="proofs">{tp('title')}</TabsTrigger>
+              <TabsTrigger value="testimonial">{tt('title')}</TabsTrigger>
             </TabsList>
             <TabsContent value="steps" className="pt-4">
               <ProcessBoard
@@ -125,6 +135,15 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
             <TabsContent value="plan" className="pt-4">
               <PlanView phases={room.project.phases} startsOn={room.project.startsOn} />
             </TabsContent>
+            <TabsContent value="timeline" className="pt-4">
+              <TimelineView
+                rows={timeline?.rows ?? []}
+                undated={(timeline?.undated ?? []).map(
+                  (id) => room.project?.phases.find((phase) => phase.id === id)?.name ?? id,
+                )}
+                today={new Date().toISOString().slice(0, 10)}
+              />
+            </TabsContent>
             <TabsContent value="proofs" className="pt-4">
               <ProofsSection
                 clientId={clientId}
@@ -142,12 +161,16 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
                 }}
               />
             </TabsContent>
+            <TabsContent value="testimonial" className="pt-4">
+              <TestimonialSection testimonial={testimonial} />
+            </TabsContent>
           </Tabs>
-          <ProjectCard project={room.project} team={room.team} />
+          <ProjectCard project={room.project} team={room.team} health={health} />
         </div>
       ) : (
         <EmptyState title={t('noProject')} description={t('noProjectHint')} />
       )}
+      {health && hasHealthData(health) ? <HealthCard health={health} /> : null}
     </div>
   );
 }

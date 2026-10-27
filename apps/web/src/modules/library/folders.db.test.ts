@@ -1,12 +1,19 @@
 import type { TransactionSql } from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
+import { schema } from '@agency-os/db';
 import {
   closeTestSql,
   createFixtureWorld,
   createLibraryFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
-import { createFolder, deleteFolder, renameFolder, setFolderVisibility } from './folders';
+import {
+  createFolder,
+  deleteFolder,
+  ensureRootFolder,
+  renameFolder,
+  setFolderVisibility,
+} from './folders';
 import { libraryClaims, libraryDeps } from './testing';
 
 afterAll(async () => {
@@ -243,6 +250,64 @@ describe('library folders', () => {
           ),
         ).toEqual({ ok: false, rule: 'not_found' });
       }
+    });
+  });
+
+  it('ensuring a root folder returns the existing one when a concurrent call created it first', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = libraryDeps(sql);
+      const manager = libraryClaims(world.users.manager);
+      const input = { projectId: library.a.projectId, name: 'Tarefas' };
+      const first = await ensureRootFolder(manager, input, deps);
+      if (!first.ok) throw new Error('Root folder was not created');
+
+      // The first lookup misses the folder, as when the other call has not committed yet.
+      const empty: unknown = new Proxy(
+        {},
+        {
+          get: (_target, key) =>
+            key === 'then' ? (done: (rows: []) => void) => done([]) : () => empty,
+        },
+      );
+      const racing = {
+        ...deps,
+        contexts: {
+          ...deps.contexts,
+          withSystemContext: ((run) =>
+            deps.contexts.withSystemContext((tx) => {
+              let blind = true;
+              return run(
+                new Proxy(tx, {
+                  get(target, key) {
+                    if (key === 'select') {
+                      return (...args: unknown[]) => {
+                        const query = (target.select as (...a: unknown[]) => unknown)(...args) as {
+                          from: (table: unknown) => unknown;
+                        };
+                        return {
+                          from(table: unknown) {
+                            if (table !== schema.libraryFolders || !blind) return query.from(table);
+                            blind = false;
+                            return empty;
+                          },
+                        };
+                      };
+                    }
+                    const value = Reflect.get(target, key) as unknown;
+                    return typeof value === 'function' ? value.bind(target) : value;
+                  },
+                }),
+              );
+            })) as typeof deps.contexts.withSystemContext,
+        },
+      };
+
+      expect(await ensureRootFolder(manager, input, racing)).toEqual({
+        ok: true,
+        folderId: first.folderId,
+      });
     });
   });
 });

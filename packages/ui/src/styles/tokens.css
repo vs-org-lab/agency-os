@@ -22,6 +22,11 @@
   --warning-bg: #fdf0e1;
   --danger: #b42f25;
   --danger-bg: #fce9e7;
+  --chart-1: #2a78d6;
+  --chart-2: #e0552a;
+  --chart-3: #12906a;
+  --chart-4: #8a5a00;
+  --chart-5: #d0507f;
   --radius-field: 6px;
   --radius-button: 8px;
   --radius-card: 12px;
@@ -64,6 +69,11 @@
   --warning-bg: #3a2410;
   --danger: #f2776d;
   --danger-bg: #3a1714;
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
 }
 
 @media (prefers-reduced-motion: reduce) {

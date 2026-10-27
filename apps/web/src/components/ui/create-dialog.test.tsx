@@ -134,6 +134,19 @@ describe.each([
     expect(screen.getByRole('button', { name: 'Editar Atlas' })).toBeTruthy();
   });
 
+  it('opens when requested and reports the close', async () => {
+    const onClose = vi.fn();
+    wrap(
+      <Component label="Nova tarefa" title="Criar tarefa" openRequested onClose={onClose}>
+        {() => <p>Formulário</p>}
+      </Component>,
+    );
+    expect(screen.getByRole(role, { name: 'Criar tarefa' })).toBeTruthy();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole(role)).toBeNull();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('opens initially when defaultOpen', () => {
     wrap(
       <Component label="Nova tarefa" title="Criar tarefa" defaultOpen>

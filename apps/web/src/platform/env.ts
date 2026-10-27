@@ -94,11 +94,17 @@ export type TranscriptionEnv = z.infer<typeof transcriptionEnvSchema>;
 
 let cachedTranscriptionEnv: TranscriptionEnv | undefined;
 
-export function transcriptionEnv(): TranscriptionEnv {
-  cachedTranscriptionEnv ??= transcriptionEnvSchema.parse({
-    TRANSCRIPTION_PROVIDER: process.env.TRANSCRIPTION_PROVIDER ?? 'fake',
-    GROQ_API_KEY: process.env.GROQ_API_KEY,
+export function parseTranscriptionEnv(
+  source: Record<string, string | undefined>,
+): TranscriptionEnv {
+  return transcriptionEnvSchema.parse({
+    TRANSCRIPTION_PROVIDER: source.TRANSCRIPTION_PROVIDER ?? 'fake',
+    GROQ_API_KEY: source.GROQ_API_KEY,
   });
+}
+
+export function transcriptionEnv(): TranscriptionEnv {
+  cachedTranscriptionEnv ??= parseTranscriptionEnv(process.env);
   return cachedTranscriptionEnv;
 }
 
@@ -147,14 +153,18 @@ export type EmailEnv = z.infer<typeof emailEnvSchema>;
 
 let cachedEmailEnv: EmailEnv | undefined;
 
-export function emailEnv(): EmailEnv {
-  cachedEmailEnv ??= emailEnvSchema.parse({
-    EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
-    SMTP_HOST: process.env.SMTP_HOST,
-    SMTP_PORT: process.env.SMTP_PORT,
-    SMTP_USER: process.env.SMTP_USER,
-    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+export function parseEmailEnv(source: Record<string, string | undefined>): EmailEnv {
+  return emailEnvSchema.parse({
+    EMAIL_TRANSPORT: source.EMAIL_TRANSPORT,
+    SMTP_HOST: source.SMTP_HOST,
+    SMTP_PORT: source.SMTP_PORT,
+    SMTP_USER: source.SMTP_USER,
+    SMTP_PASSWORD: source.SMTP_PASSWORD,
   });
+}
+
+export function emailEnv(): EmailEnv {
+  cachedEmailEnv ??= parseEmailEnv(process.env);
   return cachedEmailEnv;
 }
 

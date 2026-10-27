@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { schema, type DbTransaction, type TaskStatus } from '@agency-os/db';
 import { withActor, type Actor } from '@/modules/access';
@@ -35,11 +35,19 @@ export type TaskView = {
   clientId: string | null;
   clientName: string | null;
   projectId: string | null;
+  projectName: string | null;
   assigneeId: string | null;
   assigneeName: string | null;
   dueOn: string | null;
   status: TaskStatus;
   items: TaskItemView[];
+  itemsDone: number;
+  itemsTotal: number;
+  commentCount: number;
+  fileCount: number;
+  /** The process step the task came from, when it did and the reader may see it. */
+  phaseName: string | null;
+  createdAt: string;
   /** Whether the reader may edit or delete the task, beyond completing it. */
   canEdit: boolean;
 };
@@ -327,10 +335,74 @@ export async function setTaskItem(
   return { ok: true };
 }
 
+const MAX_TASK_ITEMS = 30;
+
+/** A subtask at the end of the checklist, by whoever may complete the task. */
+export async function addTaskItem(
+  claims: VerifiedClaims,
+  input: { taskId: string; title: string },
+  deps: TasksDeps,
+): Promise<{ ok: true; itemId: string } | NotFound | { ok: false; rule: 'invalid_input' }> {
+  const task = await canWork(deps, claims, input.taskId);
+  if (!task) return NOT_FOUND;
+  const parsed = title.safeParse(input.title);
+  if (!parsed.success) return { ok: false, rule: 'invalid_input' };
+
+  const append = () => appendTaskItem(deps, task.id, parsed.data);
+  try {
+    return await append();
+  } catch (error) {
+    // A concurrent add took the same position; the next attempt reads the new last one.
+    if (!isPositionConflict(error)) throw error;
+    return append();
+  }
+}
+
+function isPositionConflict(error: unknown): boolean {
+  for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
+    const { code, constraint_name: constraint } = current as {
+      code?: unknown;
+      constraint_name?: unknown;
+    };
+    if (code === '23505' && constraint === 'task_items_position_key') return true;
+  }
+  return false;
+}
+
+async function appendTaskItem(
+  deps: TasksDeps,
+  taskId: string,
+  itemTitle: string,
+): Promise<{ ok: true; itemId: string } | { ok: false; rule: 'invalid_input' }> {
+  return deps.contexts.withSystemContext(async (tx) => {
+    const [last] = await tx
+      .select({ position: taskItems.position, organizationId: tasks.organizationId })
+      .from(tasks)
+      .leftJoin(taskItems, eq(taskItems.taskId, tasks.id))
+      .where(eq(tasks.id, taskId))
+      .orderBy(desc(taskItems.position))
+      .limit(1);
+    const count = await tx.$count(taskItems, eq(taskItems.taskId, taskId));
+    if (!last || count >= MAX_TASK_ITEMS)
+      return { ok: false as const, rule: 'invalid_input' as const };
+    const [item] = await tx
+      .insert(taskItems)
+      .values({
+        organizationId: last.organizationId,
+        taskId,
+        position: (last.position ?? 0) + 1,
+        title: itemTitle,
+      })
+      .returning({ id: taskItems.id });
+    if (!item) throw new Error('Task item was not created');
+    return { ok: true as const, itemId: item.id };
+  });
+}
+
 /** S-03 and C-03: the tasks the caller can read, with their items, client and assignee. */
 export async function listTasks(
   tx: DbTransaction,
-  filter: { clientId?: string; assigneeId?: string; status?: TaskStatus },
+  filter: { taskId?: string; clientId?: string; assigneeId?: string; status?: TaskStatus },
 ): Promise<TaskView[]> {
   const rows = await tx.execute<{
     id: string;
@@ -339,11 +411,18 @@ export async function listTasks(
     client_id: string | null;
     client_name: string | null;
     project_id: string | null;
+    project_name: string | null;
     assignee_id: string | null;
     assignee_name: string | null;
     due_on: string | null;
     status: TaskStatus;
     can_edit: boolean;
+    items_done: number;
+    items_total: number;
+    comment_count: number;
+    file_count: number;
+    phase_name: string | null;
+    created_at: string;
   }>(sql`
     select t.id, t.title, t.notes, t.client_id, c.name as client_name, t.project_id, t.assignee_id,
            p.full_name as assignee_name, t.due_on::text as due_on, t.status::text as status,
@@ -352,11 +431,22 @@ export async function listTasks(
                t.organization_id, array['founder', 'project_manager']::app.org_role[]
              )
              else app.can_write_rooms(t.organization_id, t.client_id)
-           end as can_edit
+           end as can_edit,
+           (select count(*) filter (where i.done) from public.task_items i where i.task_id = t.id)::int as items_done,
+           (select count(*) from public.task_items i where i.task_id = t.id)::int as items_total,
+           (select count(*) from public.task_comments k where k.task_id = t.id)::int as comment_count,
+           (select count(*) from public.task_files f
+             join public.library_files lf on lf.id = f.library_file_id and lf.status = 'ready'
+             where f.task_id = t.id)::int as file_count,
+           s.name as phase_name, pr.name as project_name,
+           to_char(t.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
     from public.tasks t
+    left join public.project_steps s on s.id = t.step_id
+    left join public.projects pr on pr.id = t.project_id
     left join public.clients c on c.id = t.client_id
     left join public.profiles p on p.id = t.assignee_id
-    where (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
+    where (${filter.taskId ?? null}::uuid is null or t.id = ${filter.taskId ?? null}::uuid)
+      and (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
       and (${filter.assigneeId ?? null}::uuid is null or t.assignee_id = ${filter.assigneeId ?? null}::uuid)
       and (${filter.status ?? null}::text is null or t.status::text = ${filter.status ?? null}::text)
     order by t.due_on nulls last, t.created_at
@@ -376,11 +466,18 @@ export async function listTasks(
     clientId: row.client_id,
     clientName: row.client_name,
     projectId: row.project_id,
+    projectName: row.project_name,
     assigneeId: row.assignee_id,
     assigneeName: row.assignee_name,
     dueOn: row.due_on,
     status: row.status,
     canEdit: row.can_edit,
+    itemsDone: row.items_done,
+    itemsTotal: row.items_total,
+    commentCount: row.comment_count,
+    fileCount: row.file_count,
+    phaseName: row.phase_name,
+    createdAt: row.created_at,
     items: items
       .filter((item) => item.taskId === row.id)
       .map((item) => ({
@@ -390,6 +487,27 @@ export async function listTasks(
         done: item.done,
       })),
   }));
+}
+
+export type TaskCounts = { open: number; done: number; all: number };
+
+/** Tasks per status under the client and assignee filters of the list, in the caller's context. */
+export async function countTasksByStatus(
+  tx: DbTransaction,
+  filter: { clientId?: string; assigneeId?: string },
+): Promise<TaskCounts> {
+  const rows = await tx.execute<{ status: TaskStatus; count: string }>(sql`
+    select t.status::text as status, count(*)::text as count
+    from public.tasks t
+    where (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
+      and (${filter.assigneeId ?? null}::uuid is null or t.assignee_id = ${filter.assigneeId ?? null}::uuid)
+    group by t.status
+  `);
+  const countOf = (status: TaskStatus) =>
+    Number(rows.find((row) => row.status === status)?.count ?? 0);
+  const open = countOf('open');
+  const done = countOf('done');
+  return { open, done, all: open + done };
 }
 
 /**

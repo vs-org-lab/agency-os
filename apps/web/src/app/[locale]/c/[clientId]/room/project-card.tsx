@@ -1,9 +1,19 @@
 import { useFormatter, useTranslations } from 'next-intl';
+import type { ClientHealthView } from '@/modules/health';
 import type { Person, ProjectView } from '@/modules/rooms';
 
 /** The project card on C-01: status, current phase, dates and the staff assigned to the client. */
-export function ProjectCard({ project, team }: { project: ProjectView; team: readonly Person[] }) {
+export function ProjectCard({
+  project,
+  team,
+  health = null,
+}: {
+  project: ProjectView;
+  team: readonly Person[];
+  health?: ClientHealthView | null;
+}) {
   const t = useTranslations('rooms');
+  const th = useTranslations('health');
   const format = useFormatter();
   const current = project.phases.find(
     (phase) => phase.status === 'in_progress' || phase.status === 'awaiting_approval',
@@ -33,6 +43,13 @@ export function ProjectCard({ project, team }: { project: ProjectView; team: rea
           {team.length > 0 ? team.map((person) => person.name).join(', ') : t('card.nobody')}
         </dd>
       </dl>
+      {health && health.score !== null && health.level !== null ? (
+        <p className="text-caption text-text-secondary">
+          {t('card.healthLine', { score: health.score, level: th(`levels.${health.level}`) })}
+        </p>
+      ) : (
+        <p className="text-caption text-text-secondary">{t('card.healthEmpty')}</p>
+      )}
     </section>
   );
 }

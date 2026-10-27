@@ -4,6 +4,7 @@ import { magicLinkPath } from './support/admin';
 import { signInWithPassword } from './support/auth';
 import { LEGAL_INVOICE_PDF, seedSignedContract } from './support/billing';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -40,8 +41,9 @@ test.describe('Billing', () => {
     const client = await clientContext.newPage();
     await client.goto(await magicLinkPath(seeded.signerEmail));
     await client.goto('/portal');
-    await expect(client.getByText('Tem 1 pedido de pagamento por pagar.')).toBeVisible();
-    await client.getByRole('link', { name: 'Ver pagamentos' }).click();
+    await dismissPortalWelcome(client);
+    await expect(client.getByRole('heading', { name: 'A sua ação' })).toBeVisible();
+    await client.getByRole('link', { name: 'Pagar' }).click();
     await expect(client.getByRole('heading', { name: 'Faturas e pagamentos' })).toBeVisible();
     await expect(client.getByText('Por pagar')).toBeVisible();
     await expect(client.getByText('IBAN', { exact: true })).toBeVisible();

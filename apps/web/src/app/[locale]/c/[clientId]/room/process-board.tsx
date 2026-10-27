@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
-import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
-import { cn } from '@agency-os/ui/lib/utils';
+import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
 import type { Person, PhaseView, ProjectView, StepStatus } from '@/modules/rooms';
+import { PhaseStepper } from './phase-stepper';
 import { roomError, type ActionResult, type RoomError } from './room-errors';
+import { StepPanel } from './step-panel';
+import { StepRow } from './step-row';
 
 export type ProcessActions = {
   startPhase(phaseId: string): Promise<ActionResult>;
@@ -30,15 +32,6 @@ export type ProcessActions = {
 type DoneKey = 'startPhase' | 'completePhase' | 'requestApproval' | 'withdrawApproval' | 'saved';
 
 type Feedback = { tone: 'success'; key: DoneKey } | { tone: 'danger'; error: RoomError };
-
-const FIELD = 'h-9 rounded-md border border-border bg-surface px-2 text-body-sm text-text';
-
-/** The one change each step status offers: start it, finish it, or reopen it. */
-const NEXT_STATUS: Record<StepStatus, StepStatus> = {
-  todo: 'in_progress',
-  in_progress: 'done',
-  done: 'in_progress',
-};
 
 function defaultPhase(phases: readonly PhaseView[]): string | null {
   const active = phases.find(
@@ -73,6 +66,8 @@ export function ProcessBoard({
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(defaultPhase(project.phases));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [openStepId, setOpenStepId] = useState<string | null>(null);
+  const [panelError, setPanelError] = useState<RoomError | null>(null);
   const [pending, startTransition] = useTransition();
   const selected = project.phases.find((phase) => phase.id === selectedId) ?? null;
   const approval = selected
@@ -81,11 +76,18 @@ export function ProcessBoard({
   const decided = selected
     ? project.approvals.find((entry) => entry.phaseId === selected.id && entry.status !== 'pending')
     : undefined;
+  const openStep = selected?.steps.find((step) => step.id === openStepId) ?? null;
   const [dueOn, setDueOn] = useState(selected?.dueOn ?? '');
 
-  const run = (key: DoneKey, action: () => Promise<ActionResult>) =>
+  const run = (key: DoneKey, action: () => Promise<ActionResult>, panel = false) =>
     startTransition(async () => {
       const result = await action().catch(() => ({ ok: false, code: 'not_found' }) as const);
+      if (panel) {
+        // The panel is modal, so its outcome is reported inside it rather than behind it.
+        setPanelError(result.ok ? null : roomError(result.code));
+        if (result.ok) router.refresh();
+        return;
+      }
       setFeedback(
         result.ok ? { tone: 'success', key } : { tone: 'danger', error: roomError(result.code) },
       );
@@ -94,34 +96,15 @@ export function ProcessBoard({
 
   return (
     <div className="grid gap-4 md:grid-cols-[16rem_1fr]">
-      <nav aria-label={t('phases')}>
-        <ol className="flex flex-col gap-1">
-          {project.phases.map((phase) => (
-            <li key={phase.id}>
-              <button
-                type="button"
-                aria-current={phase.id === selectedId ? 'step' : undefined}
-                onClick={() => {
-                  setSelectedId(phase.id);
-                  setDueOn(phase.dueOn ?? '');
-                  setFeedback(null);
-                }}
-                className={cn(
-                  'flex w-full flex-col items-start gap-1 rounded-md px-3 py-2 text-left hover:bg-surface-muted',
-                  phase.id === selectedId && 'bg-surface-muted',
-                )}
-              >
-                <span className="text-body-sm font-medium text-text">
-                  {t('phaseLabel', { position: phase.position, name: phase.name })}
-                </span>
-                <span className="text-caption text-text-secondary">
-                  {t(`phaseStatus.${phase.status}`)}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <PhaseStepper
+        phases={project.phases}
+        selectedId={selectedId}
+        onSelect={(phase) => {
+          setSelectedId(phase.id);
+          setDueOn(phase.dueOn ?? '');
+          setFeedback(null);
+        }}
+      />
 
       {selected ? (
         <section aria-labelledby="phase-title" className="flex flex-col gap-4">
@@ -219,12 +202,12 @@ export function ProcessBoard({
                 >
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="phase-due">{t('phaseDue')}</Label>
-                    <Input
+                    <DateField
                       id="phase-due"
-                      type="date"
-                      className="h-9"
+                      name="dueOn"
+                      label={t('phaseDue')}
                       value={dueOn}
-                      onChange={(event) => setDueOn(event.target.value)}
+                      onValueChange={setDueOn}
                     />
                   </div>
                   <Button type="submit" size="sm" variant="outline" disabled={pending}>
@@ -236,108 +219,39 @@ export function ProcessBoard({
           </header>
 
           <ol aria-label={t('stepsOf', { name: selected.name })} className="flex flex-col gap-2">
-            {selected.steps.map((step) => {
-              const canChangeStatus =
-                (editable || step.assigneeId === currentUserId) &&
-                selected.status === 'in_progress';
-              return (
-                <li
-                  key={step.id}
-                  className="flex flex-col gap-2 rounded-md border border-border p-3"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-body-sm font-medium text-text">{step.name}</span>
-                    {step.visibleToClient ? (
-                      <Badge variant="secondary">{t('step.visible')}</Badge>
-                    ) : null}
-                    {step.shared ? <Badge variant="outline">{t('step.shared')}</Badge> : null}
-                    {step.reopened ? <Badge variant="outline">{t('step.reopened')}</Badge> : null}
-                    {step.chained ? (
-                      <span className="text-caption text-text-tertiary">{t('step.chained')}</span>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge variant={step.status === 'done' ? 'secondary' : 'outline'}>
-                      {t(`stepStatus.${step.status}`)}
-                    </Badge>
-                    {canChangeStatus ? (
-                      <Button
-                        size="sm"
-                        variant={step.status === 'in_progress' ? 'default' : 'outline'}
-                        disabled={pending}
-                        aria-label={t(`step.next.${step.status}`, { name: step.name })}
-                        onClick={() =>
-                          run('saved', () =>
-                            actions.setStepStatus(step.id, NEXT_STATUS[step.status]),
-                          )
-                        }
-                      >
-                        {t(`step.nextShort.${step.status}`)}
-                      </Button>
-                    ) : null}
-                    {editable ? (
-                      <>
-                        <select
-                          aria-label={t('step.assignee', { name: step.name })}
-                          className={FIELD}
-                          value={step.assigneeId ?? ''}
-                          disabled={pending}
-                          onChange={(event) =>
-                            run('saved', () =>
-                              actions.updateStep({
-                                stepId: step.id,
-                                assigneeId: event.target.value || null,
-                              }),
-                            )
-                          }
-                        >
-                          <option value="">{t('step.unassigned')}</option>
-                          {people.map((person) => (
-                            <option key={person.id} value={person.id}>
-                              {person.name}
-                            </option>
-                          ))}
-                        </select>
-                        <Input
-                          aria-label={t('step.due', { name: step.name })}
-                          type="date"
-                          className="h-9 w-40"
-                          defaultValue={step.dueOn ?? ''}
-                          onBlur={(event) => {
-                            const value = event.target.value || null;
-                            if (value !== step.dueOn) {
-                              run('saved', () =>
-                                actions.updateStep({ stepId: step.id, dueOn: value }),
-                              );
-                            }
-                          }}
-                        />
-                        <label className="flex items-center gap-2 text-body-sm text-text">
-                          <input
-                            type="checkbox"
-                            className="size-4"
-                            checked={step.visibleToClient}
-                            disabled={pending}
-                            onChange={(event) =>
-                              run('saved', () =>
-                                actions.updateStep({
-                                  stepId: step.id,
-                                  visibleToClient: event.target.checked,
-                                }),
-                              )
-                            }
-                          />
-                          {t('step.visible')}
-                        </label>
-                      </>
-                    ) : null}
-                  </div>
-                </li>
-              );
-            })}
+            {selected.steps.map((step) => (
+              <StepRow
+                key={step.id}
+                step={step}
+                assignee={people.find((person) => person.id === step.assigneeId) ?? null}
+                canEdit={
+                  (editable || step.assigneeId === currentUserId) &&
+                  selected.status === 'in_progress'
+                }
+                pending={pending}
+                onOpen={() => {
+                  setPanelError(null);
+                  setOpenStepId(step.id);
+                }}
+                onToggle={async (done) => {
+                  run('saved', () => actions.setStepStatus(step.id, done ? 'done' : 'in_progress'));
+                }}
+              />
+            ))}
           </ol>
         </section>
       ) : null}
+      <StepPanel
+        step={openStep}
+        people={people}
+        editable={editable}
+        pending={pending}
+        error={panelError}
+        onClose={() => setOpenStepId(null)}
+        onChange={(stepId, changes) =>
+          run('saved', () => actions.updateStep({ stepId, ...changes }), true)
+        }
+      />
     </div>
   );
 }

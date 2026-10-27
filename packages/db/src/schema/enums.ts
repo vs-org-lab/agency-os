@@ -172,6 +172,23 @@ export const recordingStatusEnum = appSchema.enum('recording_status', [
   'failed',
 ]);
 
+export const voiceNoteTargetEnum = appSchema.enum('voice_note_target', [
+  'proof_comment',
+  'approval_change_request',
+]);
+
+export const voiceNoteStatusEnum = appSchema.enum('voice_note_status', [
+  'pending',
+  'uploaded',
+  'transcribed',
+  'failed',
+]);
+
+export const testimonialVideoStatusEnum = appSchema.enum('testimonial_video_status', [
+  'pending',
+  'ready',
+]);
+
 export const countryCodeEnum = appSchema.enum('country_code', ['PT', 'AO']);
 
 export const proposalStatusEnum = appSchema.enum('proposal_status', [
@@ -349,7 +366,7 @@ export const proofVersionStatusEnum = appSchema.enum('proof_version_status', [
 
 export const taskSourceEnum = appSchema.enum('task_source', ['manual', 'kickoff', 'welcome_kit']);
 
-export const seenAreaEnum = appSchema.enum('seen_area', ['applications']);
+export const seenAreaEnum = appSchema.enum('seen_area', ['applications', 'portal_onboarding']);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
   'application_ip',
@@ -381,6 +398,9 @@ export type DocumentKind = (typeof documentKindEnum.enumValues)[number];
 export type DocumentStatus = (typeof documentStatusEnum.enumValues)[number];
 export type RecordingSource = (typeof recordingSourceEnum.enumValues)[number];
 export type RecordingStatus = (typeof recordingStatusEnum.enumValues)[number];
+export type VoiceNoteTarget = (typeof voiceNoteTargetEnum.enumValues)[number];
+export type VoiceNoteStatus = (typeof voiceNoteStatusEnum.enumValues)[number];
+export type TestimonialVideoStatus = (typeof testimonialVideoStatusEnum.enumValues)[number];
 export type CountryCode = (typeof countryCodeEnum.enumValues)[number];
 export type ProposalStatus = (typeof proposalStatusEnum.enumValues)[number];
 export type ContractStatus = (typeof contractStatusEnum.enumValues)[number];

@@ -1,4 +1,4 @@
-export type ProofActionResult = { ok: true } | { ok: false; code: string };
+export type ProofActionResult = { ok: true; commentId?: string } | { ok: false; code: string };
 
 export const PROOF_ERRORS = [
   'not_found',

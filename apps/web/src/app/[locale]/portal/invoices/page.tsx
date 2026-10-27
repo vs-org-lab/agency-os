@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
+import { ReceiptMoment } from '@/components/portal/receipt-moment';
 import { FormMessage } from '@/components/forms/form-message';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -27,6 +28,11 @@ export default async function PortalInvoicesPage({ params, searchParams }: PageP
   const t = await getTranslations('portal.invoices');
   const returnedFromCheckout = (await searchParams).paid === '1';
 
+  const latestPaid =
+    invoices
+      .filter((invoice) => invoice.status === 'paid' && invoice.paidAt)
+      .sort((a, b) => (b.paidAt?.getTime() ?? 0) - (a.paidAt?.getTime() ?? 0))[0] ?? null;
+
   if (invoices.length === 0) {
     return <EmptyState title={t('title')} description={t('empty')} />;
   }
@@ -38,6 +44,7 @@ export default async function PortalInvoicesPage({ params, searchParams }: PageP
         <p className="text-body-sm text-text-secondary">{t('intro')}</p>
       </header>
       {returnedFromCheckout ? <FormMessage tone="success">{t('confirming')}</FormMessage> : null}
+      {latestPaid ? <ReceiptMoment invoice={latestPaid} /> : null}
       <ul className="flex flex-col gap-4">
         {invoices.map((invoice) => (
           <li key={invoice.id}>

@@ -1,12 +1,15 @@
+import { schema } from '@agency-os/db';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createLibraryFixture,
   createRoomFixture,
   createTeamFixture,
   withTestTransaction,
 } from '@agency-os/db/testing';
 import {
+  addTaskItem,
   createKickoffTasks,
   deleteTask,
   createTask,
@@ -15,6 +18,7 @@ import {
   setTaskStatus,
   updateTask,
 } from './service';
+import { addTaskComment, attachTaskFile } from './collaboration';
 import { listTaskOptions } from './options';
 import { taskClaims, taskDeps } from './testing';
 
@@ -324,6 +328,182 @@ describe('tasks', () => {
         where organization_id = ${world.organizationId} and type = 'tasks.task.assigned'
       `;
       expect(events).toHaveLength(0);
+    });
+  });
+
+  it('list counts items, comments and files', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const busy = await createTask(
+        founder,
+        {
+          title: 'Com movimento',
+          clientId: world.clients.a,
+          projectId: library.a.projectId,
+          items: ['Um', 'Dois', 'Três'],
+        },
+        deps,
+      );
+      const quiet = await createTask(founder, { title: 'Sem nada' }, deps);
+      if (!busy.ok || !quiet.ok) throw new Error('Tasks were not created');
+      await sql`
+        update public.task_items set done = true
+        where task_id = ${busy.taskId} and position in (1, 2)
+      `;
+      await addTaskComment(founder, { taskId: busy.taskId, body: 'Um' }, deps);
+      await addTaskComment(founder, { taskId: busy.taskId, body: 'Dois' }, deps);
+      await attachTaskFile(
+        founder,
+        { taskId: busy.taskId, libraryFileId: library.a.rootFileId },
+        deps,
+      );
+
+      const tasks = await deps.contexts.withUserContext(founder, (tx) => listTasks(tx, {}));
+
+      expect(
+        Object.fromEntries(
+          tasks.map((task) => [
+            task.title,
+            [task.itemsDone, task.itemsTotal, task.commentCount, task.fileCount],
+          ]),
+        ),
+      ).toEqual({ 'Com movimento': [2, 3, 2, 1], 'Sem nada': [0, 0, 0, 0] });
+    });
+  });
+
+  it('list returns the creation time and the process step name', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const rooms = await createRoomFixture(sql, world);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const created = await createTask(founder, { title: 'Do processo' }, deps);
+      if (!created.ok) throw new Error('Task was not created');
+      await sql`
+        update public.tasks
+        set step_id = ${rooms.a.visibleStepId}, client_id = ${world.clients.a},
+            project_id = ${rooms.a.projectId}
+        where id = ${created.taskId}
+      `;
+
+      const [task] = await deps.contexts.withUserContext(founder, (tx) =>
+        listTasks(tx, { taskId: created.taskId }),
+      );
+
+      expect(task?.phaseName).toBe('Passo visível');
+      expect(task?.projectName).toBe('Website');
+      expect(Number.isNaN(Date.parse(task?.createdAt ?? ''))).toBe(false);
+    });
+  });
+
+  it('adds a subtask at the end, for those who may work on the task', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const created = await createTask(
+        founder,
+        { title: 'Entrega', assigneeId: world.users.freelancer, items: ['Um', 'Dois'] },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+
+      expect(
+        await addTaskItem(
+          taskClaims(world.users.freelancer),
+          { taskId: created.taskId, title: '  Três  ' },
+          deps,
+        ),
+      ).toMatchObject({ ok: true });
+      expect(await addTaskItem(founder, { taskId: created.taskId, title: '   ' }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+      expect(
+        await addTaskItem(
+          taskClaims(world.users.finance),
+          { taskId: created.taskId, title: 'Quatro' },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'not_found' });
+
+      await sql`reset role`;
+      const rows = await sql<{ position: number; title: string; done: boolean }[]>`
+        select position, title, done from public.task_items
+        where task_id = ${created.taskId} order by position
+      `;
+      expect(rows.map((row) => [row.position, row.title, row.done])).toEqual([
+        [1, 'Um', false],
+        [2, 'Dois', false],
+        [3, 'Três', false],
+      ]);
+    });
+  });
+
+  it('retries once when a concurrent add took the same subtask position', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const founder = taskClaims(world.users.founder);
+      const created = await createTask(founder, { title: 'Entrega', items: ['Um'] }, deps);
+      if (!created.ok) throw new Error('Task was not created');
+
+      // The first attempt loses the race: its position is taken as it inserts, which the database
+      // reports as a unique violation; the transaction of that attempt is rolled back.
+      let raced = false;
+      let conflicts = 0;
+      const racing = {
+        ...deps,
+        contexts: {
+          ...deps.contexts,
+          withSystemContext: ((run) =>
+            deps.contexts.withSystemContext((tx) =>
+              run(
+                new Proxy(tx, {
+                  get(target, key) {
+                    const value = Reflect.get(target, key) as unknown;
+                    if (key !== 'insert') {
+                      return typeof value === 'function' ? value.bind(target) : value;
+                    }
+                    return (table: unknown) => {
+                      const builder = target.insert(table as typeof schema.taskItems);
+                      if (table !== schema.taskItems || raced) return builder;
+                      raced = true;
+                      conflicts += 1;
+                      return {
+                        values: (row: typeof schema.taskItems.$inferInsert) => ({
+                          returning: async (fields: { id: typeof schema.taskItems.id }) => {
+                            await builder.values(row).returning(fields);
+                            return target.insert(schema.taskItems).values(row).returning(fields);
+                          },
+                        }),
+                      };
+                    };
+                  },
+                }),
+              ),
+            )) as typeof deps.contexts.withSystemContext,
+        },
+      };
+
+      expect(
+        await addTaskItem(founder, { taskId: created.taskId, title: 'Três' }, racing),
+      ).toMatchObject({
+        ok: true,
+      });
+      await sql`reset role`;
+      const rows = await sql<{ position: number; title: string }[]>`
+        select position, title from public.task_items where task_id = ${created.taskId}
+        order by position
+      `;
+      expect(rows.map((row) => [row.position, row.title])).toEqual([
+        [1, 'Um'],
+        [2, 'Três'],
+      ]);
+      expect(conflicts).toBe(1);
     });
   });
 });

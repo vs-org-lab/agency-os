@@ -1,30 +1,40 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { MotionProvider } from '@agency-os/ui/motion';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import type { AgendaItem } from '@/modules/agenda';
 import type { HomeItem, HomeView } from '@/modules/studio';
+import { HomeCreateMenu } from './create-menu';
 import { ClientProgress } from './client-progress';
 import { HomeIndicators } from './indicators';
 import { TodayList } from './today-list';
 import { UpcomingEvents } from './upcoming-events';
 
 vi.mock('@/i18n/navigation', () => ({
-  Link: ({
-    href,
-    children,
-    className,
-  }: {
-    href: string;
-    children: React.ReactNode;
-    className?: string;
-  }) => (
-    <a href={href} className={className}>
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
       {children}
     </a>
   ),
 }));
+
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }),
+  });
+});
 
 afterEach(() => {
   cleanup();
@@ -33,7 +43,7 @@ afterEach(() => {
 function renderWithIntl(node: React.ReactNode) {
   render(
     <NextIntlClientProvider locale="pt-PT" messages={messages} timeZone="Europe/Lisbon">
-      {node}
+      <MotionProvider>{node}</MotionProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -60,6 +70,45 @@ function item(overrides: Partial<HomeItem>): HomeItem {
 }
 
 describe('home components', () => {
+  it('create menu lists only allowed items', async () => {
+    renderWithIntl(<HomeCreateMenu create={{ task: true, target: false, event: true }} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Novo' }));
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((entry) => entry.textContent)).toEqual(['Nova tarefa', 'Novo evento']);
+    expect(items.map((entry) => entry.getAttribute('href'))).toEqual([
+      '/tasks?new=1',
+      '/calendar?new=1',
+    ]);
+    cleanup();
+    renderWithIntl(<HomeCreateMenu create={{ task: false, target: false, event: false }} />);
+    expect(screen.queryByRole('button', { name: 'Novo' })).toBeNull();
+  });
+
+  it('clients section renders full width rows with phase progress', () => {
+    renderWithIntl(
+      <ClientProgress
+        clients={[
+          {
+            id: 'client-1',
+            name: 'Atlas Lda',
+            progress: { done: 1, total: 4 },
+            currentPhase: 'Design',
+            lastActivityAt: new Date('2026-10-10T10:00:00Z'),
+            retainer: true,
+            healthLevel: null,
+          },
+        ]}
+      />,
+    );
+    const row = screen.getByRole('link', { name: /Atlas Lda/ });
+    expect(within(row).getByText('Design')).toBeTruthy();
+    expect(within(row).getByText('Retainer')).toBeTruthy();
+    expect(within(row).getByText('AL')).toBeTruthy();
+    const steps = within(row).getAllByRole('presentation');
+    expect(steps).toHaveLength(4);
+    expect(steps.filter((step) => step.getAttribute('data-done') === 'true')).toHaveLength(1);
+  });
+
   it('indicators show receivable when the reader has billing', () => {
     renderWithIntl(<HomeIndicators indicators={INDICATORS} />);
 
@@ -108,6 +157,7 @@ describe('home components', () => {
             id: 'client-1',
             name: 'Atlas Lda',
             progress: { done: 1, total: 4 },
+            currentPhase: 'Design',
             lastActivityAt: new Date('2026-10-10T10:00:00Z'),
             retainer: false,
             healthLevel: null,
@@ -116,6 +166,7 @@ describe('home components', () => {
             id: 'client-2',
             name: 'Boreal SA',
             progress: null,
+            currentPhase: null,
             lastActivityAt: null,
             retainer: false,
             healthLevel: null,
@@ -143,6 +194,7 @@ describe('home components', () => {
             id: 'client-1',
             name: 'Atlas Lda',
             progress: { done: 1, total: 4 },
+            currentPhase: 'Design',
             lastActivityAt: null,
             retainer: true,
             healthLevel: 'at_risk',
@@ -151,6 +203,7 @@ describe('home components', () => {
             id: 'client-2',
             name: 'Boreal SA',
             progress: null,
+            currentPhase: null,
             lastActivityAt: null,
             retainer: false,
             healthLevel: null,

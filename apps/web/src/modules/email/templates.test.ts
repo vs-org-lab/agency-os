@@ -235,6 +235,12 @@ const SAMPLE_PARAMS: { [K in EmailTemplateKey]: EmailParams[K] } = {
     due: '16 de outubro',
     taskUrl: 'https://os.example.com/c/client/tasks',
   },
+  'team.task_comment': {
+    fullName: 'Rui Costa',
+    title: 'Exportar o logótipo',
+    authorName: 'Marta Lopes',
+    taskUrl: 'https://os.example.com/tasks?task=0b1d6c0e',
+  },
   'client.invitation': {
     fullName: 'Marta Lopes',
     agencyName: 'Aurion',

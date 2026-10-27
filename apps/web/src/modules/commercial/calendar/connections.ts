@@ -25,7 +25,7 @@ export type HostCalendarDeps = {
 };
 
 export type ConnectionStatus =
-  { status: 'none' } | { status: 'active' | 'revoked' | 'error'; email: string };
+  { status: 'none' } | { status: 'active' | 'revoked' | 'error'; email: string; connectedAt: Date };
 
 const ACCESS_TOKEN_MARGIN_MS = 60_000;
 const accessTokenCache = new Map<string, { token: string; expiresAt: number }>();
@@ -116,13 +116,19 @@ export async function calendarConnectionStatus(
 ): Promise<ConnectionStatus> {
   const [row] = await deps.contexts.withUserContext(claims, (tx) =>
     tx
-      .select({ status: calendarConnections.status, email: calendarConnections.accountEmail })
+      .select({
+        status: calendarConnections.status,
+        email: calendarConnections.accountEmail,
+        connectedAt: calendarConnections.createdAt,
+      })
       .from(calendarConnections)
       .where(
         and(eq(calendarConnections.userId, claims.sub), eq(calendarConnections.provider, 'google')),
       ),
   );
-  return row ? { status: row.status, email: row.email } : { status: 'none' };
+  return row
+    ? { status: row.status, email: row.email, connectedAt: row.connectedAt }
+    : { status: 'none' };
 }
 
 export async function disconnectGoogle(

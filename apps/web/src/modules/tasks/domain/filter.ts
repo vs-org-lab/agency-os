@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
-export type TaskFilter = { clientId?: string; assigneeId?: string; status: 'open' | 'done' };
+export type TaskFilter = {
+  clientId?: string;
+  assigneeId?: string;
+  status: 'open' | 'done' | 'all';
+};
 
 const LISBON_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon' });
 
-/** The calendar date task groups are measured against; the week runs Monday to Sunday in Lisbon. */
+/** The calendar date task due dates are measured against; the week runs Monday to Sunday in Lisbon. */
 export function taskToday(now: Date): string {
   return LISBON_DATE.format(now);
 }
@@ -20,6 +24,6 @@ export function parseTaskFilter(params: {
   return {
     clientId: uuid(params.client),
     assigneeId: uuid(params.assignee),
-    status: params.status === 'done' ? 'done' : 'open',
+    status: params.status === 'done' || params.status === 'all' ? params.status : 'open',
   };
 }

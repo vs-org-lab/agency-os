@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ReportsList } from '@/components/client-reports/reports-list';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -25,13 +25,16 @@ export default async function RoomReportsPage({ params }: PageProps) {
   const view = await loadRoomClientReports(session.claims, clientId);
   if (!view) notFound();
 
+  const t = await getTranslations('clientReports');
+
   return (
     <div className="flex w-full flex-col gap-6">
       <RoomHeader
-        clientId={clientId}
-        clientName={client.name}
+        title={t('title')}
+        client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
+        showPreviewLink={false}
         basePath={`/c/${clientId}/reports`}
       />
       <ReportsList clientId={clientId} view={view} create={createClientReportAction} />

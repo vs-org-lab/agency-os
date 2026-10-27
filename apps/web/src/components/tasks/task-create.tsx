@@ -1,9 +1,8 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/navigation';
 import { CreateSheet } from '@/components/ui/create-sheet';
+import { useStripNewParam } from '@/components/ui/use-strip-new-param';
 import type { TaskPerson } from '@/modules/tasks';
 import type { TaskActionResult, TaskOptionView } from './task-errors';
 import { TaskForm, type NewTaskInput } from './task-form';
@@ -26,18 +25,8 @@ export function TaskCreate({
   create: (input: NewTaskInput) => Promise<TaskActionResult>;
 }) {
   const t = useTranslations('tasks');
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const stripNewParam = useStripNewParam();
   if (!canCreate) return null;
-
-  const stripNewParam = () => {
-    if (!searchParams.has('new')) return;
-    const rest = new URLSearchParams(searchParams);
-    rest.delete('new');
-    const query = rest.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname);
-  };
 
   return (
     <CreateSheet

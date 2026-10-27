@@ -4,6 +4,7 @@ import { signInWithPassword } from './support/auth';
 import { seedDeal, uniqueCompany } from './support/commercial';
 import { EVIDENCE_PNG, seedCore, seedSharedCore } from './support/core';
 import { readCredentials } from './support/credentials';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -36,7 +37,7 @@ async function addFinding(
 
 test.describe('Aurion Core', () => {
   test('founder runs the Core from call to delivery', async ({ page }) => {
-    test.setTimeout(240_000);
+    test.setTimeout(420_000);
     const { company } = uniqueCompany('Core Fluxo');
     const { dealId } = await seedDeal(credentials.organizationId, {
       company,
@@ -83,7 +84,11 @@ test.describe('Aurion Core', () => {
       owner: 'Interno',
     });
 
-    for (const points of await page.getByLabel('Pontos (0 a 5)').all()) await points.fill('3');
+    for (const points of await page.getByRole('slider', { name: 'Pontos (0 a 5)' }).all()) {
+      await points.focus();
+      await page.keyboard.press('Home');
+      for (let step = 0; step < 3; step += 1) await page.keyboard.press('ArrowRight');
+    }
     for (const justification of await page.getByLabel('Justificação').all()) {
       await justification.fill('Prova na auditoria');
     }
@@ -122,7 +127,9 @@ test.describe('Aurion Core', () => {
     await moveTo(page, '1.6');
   });
 
-  test('call mode may use the microphone and tab capture', async ({ page }) => {
+  test('only call mode may use tab capture and embeddable pages block the microphone', async ({
+    page,
+  }) => {
     const { company } = uniqueCompany('Core Microfone');
     const { dealId } = await seedDeal(credentials.organizationId, {
       company,
@@ -142,8 +149,11 @@ test.describe('Aurion Core', () => {
         feature,
       );
 
-    await page.goto(`/pipeline/${dealId}`);
+    await page.goto('/apply');
     expect(await allows('microphone')).toBe(false);
+
+    await page.goto(`/pipeline/${dealId}`);
+    expect(await allows('display-capture')).toBe(false);
     await page.getByRole('tab', { name: 'Core' }).click();
     await page.getByRole('link', { name: 'Abrir modo call' }).click();
     await expect(page.getByRole('heading', { name: 'Gravação da call' })).toBeVisible();
@@ -187,6 +197,7 @@ test.describe('Aurion Core', () => {
 
     await page.goto(await magicLinkPath(credentials.client.email));
     await page.goto('/portal');
+    await dismissPortalWelcome(page);
 
     await expect(page.getByText(shared.note)).toBeVisible();
     await expect(page.getByText(shared.presentation)).toBeVisible();

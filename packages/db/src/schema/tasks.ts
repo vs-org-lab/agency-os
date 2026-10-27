@@ -7,6 +7,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -16,6 +17,7 @@ import {
 import { clients } from './clients';
 import { id, timestamps } from './columns';
 import { taskSourceEnum, taskStatusEnum } from './enums';
+import { libraryFiles } from './library';
 import { organizations } from './organizations';
 import { profiles } from './profiles';
 import { projects, projectSteps } from './rooms';
@@ -80,5 +82,68 @@ export const taskItems = pgTable(
   (table) => [
     unique('task_items_position_key').on(table.taskId, table.position),
     check('task_items_title_length', sql`char_length(${table.title}) between 1 and 200`),
+  ],
+).enableRLS();
+
+export const taskComments = pgTable(
+  'task_comments',
+  {
+    id: id(),
+    organizationId: uuid('organization_id').notNull(),
+    taskId: uuid('task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id').references(() => profiles.id, { onDelete: 'set null' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('task_comments_task_idx').on(table.taskId, table.createdAt),
+    check('task_comments_body_length', sql`char_length(${table.body}) between 1 and 5000`),
+  ],
+).enableRLS();
+
+export const taskFiles = pgTable(
+  'task_files',
+  {
+    taskId: uuid('task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    libraryFileId: uuid('library_file_id')
+      .notNull()
+      .references(() => libraryFiles.id, { onDelete: 'cascade' }),
+    organizationId: uuid('organization_id').notNull(),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.taskId, table.libraryFileId], name: 'task_files_pkey' }),
+    index('task_files_file_idx').on(table.libraryFileId),
+  ],
+).enableRLS();
+
+export const taskLinks = pgTable(
+  'task_links',
+  {
+    id: id(),
+    organizationId: uuid('organization_id').notNull(),
+    taskId: uuid('task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    title: text('title'),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('task_links_task_idx').on(table.taskId),
+    check(
+      'task_links_url_https',
+      sql`char_length(${table.url}) <= 2000 and ${table.url} like 'https://%'`,
+    ),
+    check(
+      'task_links_title_length',
+      sql`${table.title} is null or char_length(${table.title}) <= 200`,
+    ),
   ],
 ).enableRLS();

@@ -232,3 +232,45 @@ export async function deleteFolder(
   await deps.storage.removeMany(paths);
   return { ok: true, removed: paths.length };
 }
+
+/**
+ * The root folder of the project with this name for the team, created internal on first use and
+ * reused afterwards (ignoring case). An existing folder that is visible to the client is refused,
+ * so internal content is never placed in it.
+ */
+export async function ensureRootFolder(
+  claims: VerifiedClaims,
+  input: { projectId: string; name: string },
+  deps: Pick<LibraryDeps, 'contexts'>,
+): Promise<{ ok: true; folderId: string } | NotFound | InvalidInput> {
+  const writer = await libraryWriter(claims, input.projectId, deps);
+  if (!writer || writer.role !== 'team') return NOT_FOUND;
+  const name = nameSchema.safeParse(input.name);
+  if (!name.success) return { ok: false, rule: 'invalid_input' };
+
+  return deps.contexts.withSystemContext(async (tx) => {
+    // A concurrent call may have created the folder between the lookup and the insert; the second
+    // lookup then finds it.
+    const folder =
+      (await childFolder(tx, writer, null, name.data)) ??
+      (await childFolder(tx, writer, null, name.data));
+    if (!folder) throw new Error('Root folder was not created');
+    if (!folder.created) {
+      const [root] = await tx
+        .select({ visibility: libraryFolders.visibility })
+        .from(libraryFolders)
+        .where(eq(libraryFolders.id, folder.id));
+      if (root?.visibility !== 'internal')
+        return { ok: false as const, rule: 'invalid_input' as const };
+    } else {
+      await recordAudit(tx, {
+        organizationId: writer.organizationId,
+        action: 'library.folder_created',
+        resourceType: 'library_folder',
+        resourceId: folder.id,
+        clientId: writer.clientId,
+      });
+    }
+    return { ok: true as const, folderId: folder.id };
+  });
+}

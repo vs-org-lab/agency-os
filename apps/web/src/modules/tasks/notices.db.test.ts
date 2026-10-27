@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { closeTestSql, createFixtureWorld, withTestTransaction } from '@agency-os/db/testing';
 import type { EmailPort, OutgoingEmail } from '@/modules/email';
-import { sendTaskAssignedNotice } from './notices';
+import { sendTaskAssignedNotice, sendTaskCommentNotice } from './notices';
 import { createTask } from './service';
 import { taskClaims, taskDeps } from './testing';
 
@@ -106,6 +106,42 @@ describe('task notices', () => {
 
       expect(sent).toBe(false);
       expect(email.sent).toHaveLength(0);
+    });
+  });
+
+  it('task comment email names the author and links to the task without the comment', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const created = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Rever o mapa', clientId: world.clients.a, assigneeId: world.users.manager },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      const email = recordingEmail();
+      const noticeDeps = {
+        contexts: deps.contexts,
+        email,
+        appBaseUrl: 'https://os.example.com',
+      };
+      const input = {
+        taskId: created.taskId,
+        assigneeId: world.users.manager,
+        authorId: world.users.founder,
+      };
+
+      expect(await sendTaskCommentNotice(input, noticeDeps)).toBe(true);
+      expect(
+        await sendTaskCommentNotice({ ...input, authorId: world.users.manager }, noticeDeps),
+      ).toBe(false);
+
+      expect(email.sent).toHaveLength(1);
+      expect(email.sent[0]).toMatchObject({ template: 'team.task_comment' });
+      expect(email.sent[0]?.text).toContain('Founder');
+      expect(email.sent[0]?.text).toContain(
+        `https://os.example.com/c/${world.clients.a}/tasks?task=${created.taskId}`,
+      );
     });
   });
 });

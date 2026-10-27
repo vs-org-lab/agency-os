@@ -491,6 +491,48 @@
       "when": 1792957243925,
       "tag": "20261025194043_proposal_draft_edits",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1793012478667,
+      "tag": "20261026110118_task_collaboration",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1793012492398,
+      "tag": "20261026110132_task_collaboration_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1793040304557,
+      "tag": "20261026184504_retainer_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1793040320034,
+      "tag": "20261026184519_retainer_requests_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1793049361546,
+      "tag": "20261026211601_voice_notes_and_videos",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1793049368434,
+      "tag": "20261026211608_voice_notes_and_videos_access",
+      "breakpoints": true
     }
   ]
 }

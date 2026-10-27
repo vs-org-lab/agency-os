@@ -2,6 +2,8 @@
 
 import { useId, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { LineChart } from '@agency-os/ui/components/charts/line-chart';
+import { StackedBars } from '@agency-os/ui/components/charts/stacked-bars';
 import { Link } from '@/i18n/navigation';
 import type { PipelineStage } from '@/modules/commercial';
 import type { ReportPanel, ReportsView } from '@/modules/reports';
@@ -15,11 +17,13 @@ function Panel({
   panel,
   year,
   empty,
+  chart,
   children,
 }: {
   panel: ReportPanel;
   year: number;
   empty: string | null;
+  chart?: ReactNode;
   children: ReactNode;
 }) {
   const t = useTranslations('reports');
@@ -40,9 +44,12 @@ function Panel({
       {empty ? (
         <p className="text-body-sm text-text-secondary">{empty}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[32rem] border-collapse text-body-sm">{children}</table>
-        </div>
+        <>
+          {chart}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[32rem] border-collapse text-body-sm">{children}</table>
+          </div>
+        </>
       )}
     </section>
   );
@@ -56,19 +63,30 @@ export function ReportsScreen({ view }: { view: ReportsView }) {
     format.number(Number(amount), { style: 'currency', currency });
   const months = MONTH_KEYS.map((key) => t(`months.${key}`));
   const stage = (value: PipelineStage) => t(`stages.${value}`);
+  const count = (value: number) => format.number(value, { maximumFractionDigits: 0 });
+  const loadLabels = { tasks: t('columns.tasks'), projects: t('columns.projects') };
 
   return (
     <div className="flex w-full flex-col gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-title text-text">{t('title')}</h1>
-        <nav aria-label={t('year', { year: view.year })} className="flex items-center gap-3">
-          <Link href={`/reports?year=${view.year - 1}`} className="text-body-sm text-link">
+        <nav
+          aria-label={t('year', { year: view.year })}
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted p-0.5"
+        >
+          <Link
+            href={`/reports?year=${view.year - 1}`}
+            className="rounded px-2 py-1 text-body-sm text-link hover:bg-surface"
+          >
             {t('previousYear')}
           </Link>
-          <span className="text-body-sm font-medium text-text">
+          <span className="rounded bg-surface px-2 py-1 text-body-sm font-medium text-text shadow-xs">
             {t('year', { year: view.year })}
           </span>
-          <Link href={`/reports?year=${view.year + 1}`} className="text-body-sm text-link">
+          <Link
+            href={`/reports?year=${view.year + 1}`}
+            className="rounded px-2 py-1 text-body-sm text-link hover:bg-surface"
+          >
             {t('nextYear')}
           </Link>
         </nav>
@@ -77,7 +95,28 @@ export function ReportsScreen({ view }: { view: ReportsView }) {
         </a>
       </header>
 
-      <Panel panel="revenue" year={view.year} empty={view.revenue.length ? null : t('emptyYear')}>
+      <Panel
+        panel="revenue"
+        year={view.year}
+        empty={view.revenue.length ? null : t('emptyYear')}
+        chart={
+          <LineChart
+            series={view.revenue.map((row) => ({
+              key: row.currency,
+              label: row.currency,
+              values: row.months.map(Number),
+            }))}
+            labels={months}
+            formatValue={(value) =>
+              format.number(value, { notation: 'compact', maximumFractionDigits: 1 })
+            }
+            summary={t('charts.revenue', {
+              year: view.year,
+              currencies: view.revenue.map((row) => row.currency).join(', '),
+            })}
+          />
+        }
+      >
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <th scope="col" className={CELL}>
@@ -137,7 +176,27 @@ export function ReportsScreen({ view }: { view: ReportsView }) {
         </tbody>
       </Panel>
 
-      <Panel panel="pipeline" year={view.year} empty={view.pipeline.length ? null : t('empty')}>
+      <Panel
+        panel="pipeline"
+        year={view.year}
+        empty={view.pipeline.length ? null : t('empty')}
+        chart={
+          <StackedBars
+            rows={view.pipeline.map((group) => ({
+              key: group.stage,
+              label: stage(group.stage),
+              segments: group.codes.map((code) => ({
+                key: code.code,
+                value: code.deals,
+                label: code.code,
+              })),
+            }))}
+            segmentLabels={{}}
+            formatValue={count}
+            summary={t('charts.pipeline')}
+          />
+        }
+      >
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <th scope="col" className={CELL}>
@@ -199,7 +258,26 @@ export function ReportsScreen({ view }: { view: ReportsView }) {
         </tbody>
       </Panel>
 
-      <Panel panel="load" year={view.year} empty={view.load.length ? null : t('empty')}>
+      <Panel
+        panel="load"
+        year={view.year}
+        empty={view.load.length ? null : t('empty')}
+        chart={
+          <StackedBars
+            rows={view.load.map((row) => ({
+              key: row.userId,
+              label: row.name,
+              segments: [
+                { key: 'tasks', value: row.tasksThisWeek },
+                { key: 'projects', value: row.activeProjects },
+              ],
+            }))}
+            segmentLabels={loadLabels}
+            formatValue={count}
+            summary={t('charts.load')}
+          />
+        }
+      >
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <th scope="col" className={CELL}>

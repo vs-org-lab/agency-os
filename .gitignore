@@ -17,13 +17,11 @@ coverage/
 !.env.example
 
 # Tooling
-.claude/settings.local.json
 .DS_Store
 Thumbs.db
 *.log
 
 # Plan execution workspaces
-/.superpowers/
 .turbo/
 *.tsbuildinfo
 next-env.d.ts

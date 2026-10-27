@@ -5,11 +5,13 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { MemberSelector } from '@agency-os/ui/components/member-selector';
 import { Textarea } from '@agency-os/ui/components/textarea';
+import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
-import { canTakeTask, type TaskPerson, type TaskView } from '@/modules/tasks';
+import { SelectField } from '@/components/forms/select-field';
+import { canTakeTask, type TaskPerson } from '@/modules/tasks';
 import {
-  TASK_FIELD,
   taskError,
   type TaskActionResult,
   type TaskError,
@@ -23,14 +25,6 @@ export type NewTaskInput = {
   assigneeId: string | null;
   dueOn: string | null;
   items: string[];
-};
-
-export type TaskChanges = {
-  taskId: string;
-  title: string;
-  notes: string;
-  assigneeId: string | null;
-  dueOn: string | null;
 };
 
 type Outcome = { ok: true } | { ok: false; error: TaskError } | null;
@@ -52,27 +46,31 @@ function PersonSelect({
   people,
   value,
   onChange,
+  roomClientId,
 }: {
   id: string;
   people: TaskPerson[];
   value: string;
   onChange: (value: string) => void;
+  roomClientId: string | null;
 }) {
   const t = useTranslations('tasks.form');
+  const tInteraction = useTranslations('interaction');
   return (
-    <select
+    <MemberSelector
       id={id}
-      className={TASK_FIELD}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      <option value="">{t('none')}</option>
-      {people.map((person) => (
-        <option key={person.id} value={person.id}>
-          {person.name}
-        </option>
-      ))}
-    </select>
+      name="assignee"
+      label={t('assignee')}
+      members={people.map((person) => ({
+        id: person.id,
+        name: person.name,
+        priority: roomClientId !== null && person.clientIds?.includes(roomClientId) === true,
+      }))}
+      value={value || null}
+      onChange={(next) => onChange(next ?? '')}
+      unassignedLabel={t('none')}
+      searchPlaceholder={tInteraction('searchMember')}
+    />
   );
 }
 
@@ -148,24 +146,18 @@ export function TaskForm({
       {fixedClientId ? null : (
         <div className="flex flex-col gap-1">
           <Label htmlFor="task-client">{t('form.client')}</Label>
-          <select
+          <SelectField
             id="task-client"
-            className={TASK_FIELD}
+            name="client"
             value={clientId}
-            onChange={(event) => {
-              const next = event.target.value;
+            onValueChange={(next) => {
               setClientId(next);
               const current = people.find((person) => person.id === assigneeId);
               if (current && !canTakeTask(current, next || null)) setAssigneeId('');
             }}
-          >
-            <option value="">{t('form.studio')}</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            options={clients.map((client) => ({ value: client.id, label: client.name }))}
+            emptyLabel={t('form.studio')}
+          />
         </div>
       )}
       <div className="flex flex-col gap-1">
@@ -175,15 +167,17 @@ export function TaskForm({
           people={eligible}
           value={assigneeId}
           onChange={setAssigneeId}
+          roomClientId={targetClientId}
         />
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="task-due">{t('form.dueOn')}</Label>
-        <Input
+        <DateField
           id="task-due"
-          type="date"
+          name="dueOn"
+          label={t('form.dueOn')}
           value={dueOn}
-          onChange={(event) => setDueOn(event.target.value)}
+          onValueChange={setDueOn}
         />
       </div>
       <div className="flex flex-col gap-1 md:col-span-2">
@@ -218,99 +212,6 @@ export function TaskForm({
         ) : null}
         {outcome?.ok && !onDone ? (
           <FormMessage tone="success">{t('form.created')}</FormMessage>
-        ) : null}
-      </div>
-    </form>
-  );
-}
-
-/** Title, notes, assignee and date of an existing task; client and subtasks stay as created. */
-export function TaskEditForm({
-  task,
-  people,
-  update,
-  onDone,
-}: {
-  task: TaskView;
-  people: TaskPerson[];
-  update: (input: TaskChanges) => Promise<TaskActionResult>;
-  /** Called once with the success message when the changes have been saved. */
-  onDone?: (message: string) => void;
-}) {
-  const t = useTranslations('tasks');
-  const [title, setTitle] = useState(task.title);
-  const [notes, setNotes] = useState(task.notes);
-  const [assigneeId, setAssigneeId] = useState(task.assigneeId ?? '');
-  const [dueOn, setDueOn] = useState(task.dueOn ?? '');
-  const { outcome, setOutcome, pending, run } = useOutcome();
-  const prefix = `task-${task.id}`;
-
-  return (
-    <form
-      className="grid gap-3 md:grid-cols-2"
-      onChange={() => setOutcome(null)}
-      onSubmit={(event) => {
-        event.preventDefault();
-        run(
-          () =>
-            update({
-              taskId: task.id,
-              title,
-              notes,
-              assigneeId: assigneeId || null,
-              dueOn: dueOn || null,
-            }),
-          () => onDone?.(t('form.saved')),
-        );
-      }}
-    >
-      <div className="flex flex-col gap-1 md:col-span-2">
-        <Label htmlFor={`${prefix}-title`}>{t('form.title')}</Label>
-        <Input
-          id={`${prefix}-title`}
-          required
-          maxLength={200}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor={`${prefix}-assignee`}>{t('form.assignee')}</Label>
-        <PersonSelect
-          id={`${prefix}-assignee`}
-          people={people.filter((person) => canTakeTask(person, task.clientId))}
-          value={assigneeId}
-          onChange={setAssigneeId}
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor={`${prefix}-due`}>{t('form.dueOn')}</Label>
-        <Input
-          id={`${prefix}-due`}
-          type="date"
-          value={dueOn}
-          onChange={(event) => setDueOn(event.target.value)}
-        />
-      </div>
-      <div className="flex flex-col gap-1 md:col-span-2">
-        <Label htmlFor={`${prefix}-notes`}>{t('form.notes')}</Label>
-        <Textarea
-          id={`${prefix}-notes`}
-          rows={2}
-          maxLength={5000}
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-        />
-      </div>
-      <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-        <Button type="submit" size="sm" disabled={pending}>
-          {t('form.save')}
-        </Button>
-        {outcome?.ok === false ? (
-          <FormMessage tone="danger">{t(`errors.${outcome.error}`)}</FormMessage>
-        ) : null}
-        {outcome?.ok && !onDone ? (
-          <FormMessage tone="success">{t('form.saved')}</FormMessage>
         ) : null}
       </div>
     </form>

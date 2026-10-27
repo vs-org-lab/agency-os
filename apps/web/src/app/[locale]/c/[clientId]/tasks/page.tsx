@@ -1,28 +1,36 @@
 import { PageHeader } from '@agency-os/ui/components/page-header';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { TaskFilters } from '@/components/tasks/task-filters';
+import { TASK_LIST_ID, TaskFilters } from '@/components/tasks/task-filters';
 import { TaskCreate } from '@/components/tasks/task-create';
-import { TaskList } from '@/components/tasks/task-list';
+import { TaskPanel } from '@/components/tasks/task-panel';
+import { TaskTable } from '@/components/tasks/task-table';
 import { requireArea } from '@/components/shell/session-guard';
-import { getPathname } from '@/i18n/navigation';
 import { requireLocale } from '@/i18n/require-locale';
-import { parseTaskFilter, taskToday } from '@/modules/tasks';
-import { loadTaskOptions, loadTasks } from '@/modules/tasks/server';
+import { parseTaskFilter, parseTaskSort, sortTasks, taskToday } from '@/modules/tasks';
+import { loadTaskCounts, loadTaskOptions, loadTasks } from '@/modules/tasks/server';
 import {
+  addTaskItemAction,
   createTaskAction,
-  deleteTaskAction,
   setTaskItemAction,
   setTaskStatusAction,
-  updateTaskAction,
 } from '../../../(workspace)/tasks/actions';
+import { taskFilePreviewAction } from '../../../(workspace)/tasks/collaboration-actions';
+import { loadPanelData } from '../../../(workspace)/tasks/panel-data';
+import { taskPanelActions } from '../../../(workspace)/tasks/panel-actions';
 import { pageMetadata } from '@/i18n/page-title';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ locale: string; clientId: string }>;
-  searchParams: Promise<{ assignee?: string; status?: string; new?: string }>;
+  searchParams: Promise<{
+    assignee?: string;
+    status?: string;
+    new?: string;
+    task?: string;
+    sort?: string;
+  }>;
 };
 
 export default async function RoomTasksPage({ params, searchParams }: PageProps) {
@@ -34,12 +42,17 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
   if (!options) notFound();
   const query = await searchParams;
   const filter = parseTaskFilter(query);
-  const tasks = await loadTasks(session, { ...filter, clientId });
+  const sort = parseTaskSort(query.sort);
+  const [tasks, counts, panel] = await Promise.all([
+    loadTasks(session, { ...filter, clientId }),
+    loadTaskCounts(session, { clientId, assigneeId: filter.assigneeId }),
+    loadPanelData(session, query.task, clientId),
+  ]);
   const clientName = options.clients.find((client) => client.id === clientId)?.name ?? '';
   const t = await getTranslations('tasks');
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <PageHeader
         title={t('title')}
         description={t('roomDescription')}
@@ -56,22 +69,33 @@ export default async function RoomTasksPage({ params, searchParams }: PageProps)
         }
       />
       <TaskFilters
-        action={getPathname({ href: `/c/${clientId}/tasks`, locale })}
         clients={null}
         people={options.people}
+        counts={counts}
+        currentUserId={session.claims.sub}
         current={{
           clientId,
           assigneeId: filter.assigneeId ?? null,
           status: filter.status,
         }}
       />
-      <TaskList
-        tasks={tasks}
-        today={taskToday(new Date())}
-        showClient={false}
-        setStatus={setTaskStatusAction}
-        setItem={setTaskItemAction}
-        edit={{ people: options.people, update: updateTaskAction, remove: deleteTaskAction }}
+      <div id={TASK_LIST_ID}>
+        <TaskTable
+          tasks={sortTasks(tasks, sort)}
+          today={taskToday(new Date())}
+          showClient={false}
+          sort={sort}
+          setStatus={setTaskStatusAction}
+          setItem={setTaskItemAction}
+          addItem={addTaskItemAction}
+          loadPreview={taskFilePreviewAction}
+        />
+      </div>
+      <TaskPanel
+        detail={panel.detail}
+        people={options.people}
+        attachable={panel.attachable}
+        actions={taskPanelActions}
       />
     </div>
   );

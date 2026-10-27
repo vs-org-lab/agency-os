@@ -60,7 +60,7 @@ test.describe('accessibility @responsive', () => {
   test('studio screens have no serious or critical violations in light and dark', async ({
     page,
   }) => {
-    test.setTimeout(300_000);
+    test.setTimeout(600_000);
     const { dealId } = await seedDeal(credentials.organizationId, {
       ...uniqueCompany('Core Acessibilidade'),
       code: '0.3',

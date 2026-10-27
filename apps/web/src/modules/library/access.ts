@@ -30,7 +30,7 @@ export type LibraryWriter = ProjectScope & { actorId: string; role: 'team' | 'op
 export async function libraryWriter(
   claims: VerifiedClaims,
   projectId: string,
-  deps: LibraryDeps,
+  deps: Pick<LibraryDeps, 'contexts'>,
 ): Promise<LibraryWriter | null> {
   if (!uuid.safeParse(projectId).success) return null;
   const [project] = await deps.contexts.withSystemContext((tx) =>
@@ -73,7 +73,7 @@ export type FolderRecord = ProjectScope & {
 
 export async function loadFolder(
   folderId: string,
-  deps: LibraryDeps,
+  deps: Pick<LibraryDeps, 'contexts'>,
 ): Promise<FolderRecord | null> {
   if (!uuid.safeParse(folderId).success) return null;
   const rows = await deps.contexts.withSystemContext((tx) =>

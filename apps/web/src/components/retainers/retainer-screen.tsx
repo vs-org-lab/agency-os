@@ -4,11 +4,14 @@ import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
+import { ClipboardList } from 'lucide-react';
+import { EmptyState } from '@agency-os/ui/components/states/empty-state';
+import { CreateDialog } from '@/components/ui/create-dialog';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
 import type { StaffRetainerView } from '@/modules/retainers';
 import { ExtraRequests, type QuoteExtra } from './extra-requests';
-import { LimitBars } from './limit-bars';
+import { LimitRings } from './limit-rings';
 import { RetainerForm, type SaveRetainer } from './retainer-form';
 import { retainerError, useQuantity, type RetainerError, type RetainerResult } from './shared';
 import { UsageForm, type RecordUsage } from './usage-form';
@@ -43,7 +46,7 @@ function UsageList({
   const [error, setError] = useState<RetainerError | null>(null);
   const [pending, startTransition] = useTransition();
   if (view.usage.length === 0) {
-    return <p className="text-body-sm text-text-secondary">{t('usage.empty')}</p>;
+    return <EmptyState icon={<ClipboardList aria-hidden />} title={t('usage.empty')} />;
   }
   return (
     <div className="flex flex-col gap-2">
@@ -68,6 +71,7 @@ function UsageList({
                   size="sm"
                   variant="ghost"
                   disabled={pending}
+                  aria-label={t('usage.deleteEntry', { description: entry.description })}
                   onClick={() =>
                     startTransition(async () => {
                       const result = await remove(entry.id).catch(() => ({
@@ -163,16 +167,23 @@ export function RetainerScreen({
         <>
           <section className="flex flex-col gap-3" aria-label={t('month', { month: monthLabel })}>
             <h3 className="text-body font-medium text-text">{t('month', { month: monthLabel })}</h3>
-            <LimitBars limits={view.limits} />
+            <LimitRings limits={view.limits} period={view.period} />
           </section>
           <section className="flex flex-col gap-3" aria-label={t('usage.list')}>
             <h3 className="text-body font-medium text-text">{t('usage.list')}</h3>
             {view.canWrite && retainer.status === 'active' ? (
-              <UsageForm
-                retainerId={retainer.id}
-                limits={view.limits}
-                record={refreshing(actions.recordUsage, refresh)}
-              />
+              <div>
+                <CreateDialog label={t('usage.title')} title={t('usage.title')} variant="outline">
+                  {(close) => (
+                    <UsageForm
+                      retainerId={retainer.id}
+                      limits={view.limits}
+                      record={refreshing(actions.recordUsage, refresh)}
+                      onDone={(message) => close({ message })}
+                    />
+                  )}
+                </CreateDialog>
+              </div>
             ) : null}
             <UsageList view={view} remove={refreshing(actions.deleteUsage, refresh)} />
           </section>

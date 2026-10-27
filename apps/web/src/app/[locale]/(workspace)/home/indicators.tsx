@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { formatMoney, type Locale } from '@agency-os/i18n';
+import { AnimatedNumber } from '@agency-os/ui/components/animated-number';
 import type { HomeView } from '@/modules/studio';
 
-function Indicator({ label, value }: { label: string; value: string }) {
+function Indicator({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface px-4 py-3">
       <dt className="text-caption text-text-secondary">{label}</dt>
@@ -18,9 +20,18 @@ export function HomeIndicators({ indicators }: { indicators: HomeView['indicator
 
   return (
     <dl aria-label={t('label')} className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      <Indicator label={t('clients')} value={String(indicators.clients)} />
-      <Indicator label={t('activeProjects')} value={String(indicators.activeProjects)} />
-      <Indicator label={t('waiting')} value={String(indicators.waiting)} />
+      <Indicator
+        label={t('clients')}
+        value={<AnimatedNumber value={indicators.clients} locale={locale} />}
+      />
+      <Indicator
+        label={t('activeProjects')}
+        value={<AnimatedNumber value={indicators.activeProjects} locale={locale} />}
+      />
+      <Indicator
+        label={t('waiting')}
+        value={<AnimatedNumber value={indicators.waiting} locale={locale} />}
+      />
       {indicators.receivable === null ? null : (
         <Indicator
           label={t('receivable')}

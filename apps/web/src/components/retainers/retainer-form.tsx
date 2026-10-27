@@ -5,9 +5,11 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { DateField } from '@/components/forms/date-field';
 import { FormMessage } from '@/components/forms/form-message';
+import { SelectField } from '@/components/forms/select-field';
 import { RETAINER_LIMIT_KINDS, type StaffRetainerView } from '@/modules/retainers';
-import { decimal, retainerError, SELECT, type RetainerError, type RetainerResult } from './shared';
+import { decimal, retainerError, type RetainerError, type RetainerResult } from './shared';
 
 export type RetainerFormInput = {
   clientId: string;
@@ -52,6 +54,7 @@ export function RetainerForm({
   const [limits, setLimits] = useState<Record<string, string>>(() =>
     Object.fromEntries(view.limits.map((limit) => [limit.kind, String(limit.limit)])),
   );
+  const [missing, setMissing] = useState<'startsOn' | 'reviewOn' | null>(null);
   const [message, setMessage] = useState<'saved' | RetainerError | null>(null);
   const [pending, startTransition] = useTransition();
   const field = (name: string) => `${id}-${name}`;
@@ -63,6 +66,14 @@ export function RetainerForm({
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
       onSubmit={(event) => {
         event.preventDefault();
+        const absent = !fields.startsOn ? 'startsOn' : !fields.reviewOn ? 'reviewOn' : null;
+        if (absent) {
+          setMissing(absent);
+          setMessage('invalid_input');
+          document.getElementById(field(absent === 'startsOn' ? 'starts' : 'review'))?.focus();
+          return;
+        }
+        setMissing(null);
         startTransition(async () => {
           const result = await save({
             clientId,
@@ -82,19 +93,14 @@ export function RetainerForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('project')}>{t('form.project')}</Label>
-          <select
+          <SelectField
             id={field('project')}
+            name="project"
             value={fields.projectId}
             disabled={retainer !== null}
-            onChange={(event) => set('projectId')(event.target.value)}
-            className={SELECT}
-          >
-            {view.projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+            onValueChange={set('projectId')}
+            options={view.projects.map((project) => ({ value: project.id, label: project.name }))}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('tier')}>{t('form.tier')}</Label>
@@ -119,51 +125,61 @@ export function RetainerForm({
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor={field('currency')}>{t('form.currency')}</Label>
-            <select
+            <SelectField
               id={field('currency')}
+              name="currency"
               value={fields.currency}
-              onChange={(event) => set('currency')(event.target.value)}
-              className={SELECT}
-            >
-              {CURRENCIES.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </select>
+              onValueChange={set('currency')}
+              options={CURRENCIES.map((code) => ({ value: code, label: code }))}
+            />
           </div>
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('status')}>{t('form.status')}</Label>
-          <select
+          <SelectField
             id={field('status')}
+            name="status"
             value={fields.status}
-            onChange={(event) => set('status')(event.target.value)}
-            className={SELECT}
-          >
-            <option value="active">{t('form.statuses.active')}</option>
-            <option value="ended">{t('form.statuses.ended')}</option>
-          </select>
+            onValueChange={set('status')}
+            options={[
+              { value: 'active', label: t('form.statuses.active') },
+              { value: 'ended', label: t('form.statuses.ended') },
+            ]}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('starts')}>{t('form.startsOn')}</Label>
-          <Input
+          <DateField
             id={field('starts')}
-            type="date"
-            required
+            name="startsOn"
+            label={t('form.startsOn')}
             value={fields.startsOn}
-            onChange={(event) => set('startsOn')(event.target.value)}
+            invalid={!fields.startsOn && missing !== null}
+            describedBy={!fields.startsOn && missing !== null ? field('starts-error') : undefined}
+            onValueChange={set('startsOn')}
           />
+          {!fields.startsOn && missing !== null ? (
+            <p id={field('starts-error')} className="text-caption text-danger">
+              {t('form.dateRequired')}
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={field('review')}>{t('form.reviewOn')}</Label>
-          <Input
+          <DateField
             id={field('review')}
-            type="date"
-            required
+            name="reviewOn"
+            label={t('form.reviewOn')}
             value={fields.reviewOn}
-            onChange={(event) => set('reviewOn')(event.target.value)}
+            invalid={!fields.reviewOn && missing !== null}
+            describedBy={!fields.reviewOn && missing !== null ? field('review-error') : undefined}
+            onValueChange={set('reviewOn')}
           />
+          {!fields.reviewOn && missing !== null ? (
+            <p id={field('review-error')} className="text-caption text-danger">
+              {t('form.dateRequired')}
+            </p>
+          ) : null}
         </div>
       </div>
       <fieldset className="flex flex-col gap-2">

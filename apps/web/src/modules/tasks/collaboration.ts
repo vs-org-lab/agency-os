@@ -50,7 +50,8 @@ const linkSchema = z.object({
       } catch {
         return false;
       }
-    }),
+    })
+    .transform((value) => new URL(value).toString()),
   title: z
     .string()
     .trim()

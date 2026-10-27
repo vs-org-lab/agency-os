@@ -6,6 +6,7 @@ import { signInWithPassword, submitTotp } from './support/auth';
 import { readCredentials } from './support/credentials';
 import { seedRoomProject } from './support/rooms';
 import { addSecondProject, capturedInvitationPath } from './support/team';
+import { dismissPortalWelcome } from './support/ui';
 
 const credentials = readCredentials();
 
@@ -81,6 +82,7 @@ test.describe('Team and invitations', () => {
 
     await page.goto(await magicLinkPath(room.decisionMakerEmail));
     await expect(page).toHaveURL(/\/portal$/);
+    await dismissPortalWelcome(page);
     await page.getByRole('link', { name: 'Colegas' }).click();
     await expect(page.getByRole('heading', { name: 'Colegas', level: 1 })).toBeVisible();
     await expectAccessible(page);

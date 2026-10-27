@@ -85,9 +85,13 @@ test.describe('Retainers', () => {
     ).toBeVisible();
 
     await page.goto(`/c/${seeded.clientId}/tasks`);
-    await expect(page.getByText('Pedido do cliente: Publicação do evento')).toBeVisible({
+    await expect(
+      page.getByRole('button', { name: 'Pedido do cliente: Publicação do evento', exact: true }),
+    ).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByText('Pedido do cliente: Série de verão')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Pedido do cliente: Série de verão', exact: true }),
+    ).toBeVisible();
   });
 });

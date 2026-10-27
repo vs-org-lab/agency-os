@@ -41,7 +41,9 @@ test.describe('Portal dashboard', () => {
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/c/${seeded.clientId}/tasks`);
-    await page.getByRole('button', { name: `Pedido do cliente: ${description}` }).click();
+    await page
+      .getByRole('button', { name: `Pedido do cliente: ${description}`, exact: true })
+      .click();
     const panel = page.getByRole('dialog');
     await panel.getByRole('combobox', { name: 'Responsável' }).click();
     await page.getByRole('option').filter({ hasNotText: 'Sem responsável' }).first().click();

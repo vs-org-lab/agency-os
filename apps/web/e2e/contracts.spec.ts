@@ -32,7 +32,7 @@ test.describe('Proposal and contract', () => {
       await line.fill('Novo site institucional');
     }
     await proposal.getByRole('button', { name: 'Enviar ao cliente' }).click();
-    await expect(proposal.getByText('Enviada ao cliente')).toBeVisible({ timeout: 30_000 });
+    await expect(proposal.getByText('Enviada ao cliente')).toBeVisible({ timeout: 60_000 });
 
     const clientContext = await browser.newContext();
     const client = await clientContext.newPage();

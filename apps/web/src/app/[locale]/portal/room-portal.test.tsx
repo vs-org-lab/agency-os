@@ -149,4 +149,26 @@ describe('portal room', () => {
     expect(screen.queryByRole('button', { name: 'Aprovar' })).toBeNull();
     expect(screen.getByText(/^À espera da sua decisão desde/)).toBeDefined();
   });
+
+  it('opens on the phase in motion and switches phase on click', () => {
+    withIntl(<ClientRoom project={PROJECT} />);
+
+    expect(screen.getByText('Arquitetura e mapa de conteúdos')).toBeDefined();
+    expect(screen.queryByText('Ainda não há passos para mostrar nesta fase.')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: /Produção/ }));
+
+    expect(screen.queryByText('Arquitetura e mapa de conteúdos')).toBeNull();
+    expect(screen.getByText('Ainda não há passos para mostrar nesta fase.')).toBeDefined();
+  });
+
+  it('puts the pending decision ahead of the phases', () => {
+    withIntl(<ClientRoom project={PROJECT} />);
+
+    const decision = screen.getByRole('heading', { name: 'À espera da sua decisão' });
+    const phases = screen.getByRole('button', { name: /Produção/ });
+    expect(
+      decision.compareDocumentPosition(phases) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 });

@@ -2226,6 +2226,17 @@
       "attachment_hidden": "Some attachments come from internal folders. A client-visible update only carries files from visible folders."
     },
     "stepsOf": "Steps of {name}",
+    "room": {
+      "progress": "{done} of {total} phases done",
+      "phases": "Phases",
+      "needsDecision": "Waiting for your decision",
+      "stepsOfPhase": "Steps of {name}",
+      "noSteps": "No steps to show in this phase yet.",
+      "due": "Due {date}",
+      "decisions": "Decisions",
+      "showAll": "Show all {count} updates",
+      "showLess": "Show fewer updates"
+    },
     "phaseLabel": "{position}. {name}",
     "approvals": "Approvals",
     "clientApproval": {

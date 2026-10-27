@@ -2226,6 +2226,17 @@
       "attachment_hidden": "Há anexos de pastas internas. Uma atualização visível ao cliente só leva ficheiros de pastas visíveis."
     },
     "stepsOf": "Passos de {name}",
+    "room": {
+      "progress": "{done} de {total} fases concluídas",
+      "phases": "Fases",
+      "needsDecision": "À espera da sua decisão",
+      "stepsOfPhase": "Passos de {name}",
+      "noSteps": "Ainda não há passos para mostrar nesta fase.",
+      "due": "Até {date}",
+      "decisions": "Decisões",
+      "showAll": "Ver as {count} atualizações",
+      "showLess": "Ver menos atualizações"
+    },
     "phaseLabel": "{position}. {name}",
     "approvals": "Aprovações",
     "clientApproval": {

@@ -34,7 +34,7 @@ export default async function PortalUpdatesPage({ params, searchParams }: PagePr
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-240 flex-col gap-6">
       <h1 className="text-title text-text">{t('updatesTitle')}</h1>
       {room.projects.length > 1 ? (
         <nav aria-label={t('projectSelector')}>

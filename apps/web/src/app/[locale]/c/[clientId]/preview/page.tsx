@@ -28,7 +28,7 @@ export default async function RoomPreviewPage({ params, searchParams }: PageProp
   if (preview === null && projectId) notFound();
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-240 flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <FormMessage tone="info">{t('previewNotice')}</FormMessage>
         <Link

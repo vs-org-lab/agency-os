@@ -3098,7 +3098,10 @@
     },
     "view": {
       "contents": "Secções do Brand Hub",
-      "empty": "Esta secção ainda não tem conteúdo."
+      "empty": "Esta secção ainda não tem conteúdo.",
+      "copy": "Copiar {label} {value}",
+      "copied": "Copiado",
+      "copyHint": "Clicar para copiar"
     },
     "portal": {
       "decideHint": "A equipa pediu a sua aprovação deste Brand Hub.",

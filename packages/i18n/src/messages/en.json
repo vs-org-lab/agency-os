@@ -3098,7 +3098,10 @@
     },
     "view": {
       "contents": "Brand Hub sections",
-      "empty": "This section has no content yet."
+      "empty": "This section has no content yet.",
+      "copy": "Copy {label} {value}",
+      "copied": "Copied",
+      "copyHint": "Click to copy"
     },
     "portal": {
       "decideHint": "The team asked for your approval of this Brand Hub.",

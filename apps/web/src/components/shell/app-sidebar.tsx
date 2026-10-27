@@ -16,7 +16,6 @@ import {
   Inbox,
   KanbanSquare,
   LayoutDashboard,
-  LogOut,
   Newspaper,
   Palette,
   ReceiptText,
@@ -24,7 +23,7 @@ import {
   Settings,
   Target,
 } from 'lucide-react';
-import { BrandSymbol } from '@agency-os/ui/brand';
+import { BrandSymbol, BrandWordmark } from '@agency-os/ui/brand';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { LayoutGroup, m, transitions } from '@agency-os/ui/motion';
 import {
@@ -42,14 +41,12 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@agency-os/ui/components/sidebar';
-import { ThemeToggle } from '@agency-os/ui/theme-toggle';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { OPEN_COMMAND_PALETTE_EVENT } from '../command/command-palette';
-import { LocaleSwitcher } from './locale-switcher';
-import type { NavigationCounter, NavigationIcon } from './navigation';
+import { AccountMenu } from './account-menu';
+import { NAVIGATION_ICON_MOTION, type NavigationCounter, type NavigationIcon } from './navigation';
 import { CounterValue, formatCounter, useLiveCounter } from './navigation-counter';
-import { signOutAction } from './sign-out-action';
 
 export type ResolvedNavigationItem = {
   href: string;
@@ -76,6 +73,7 @@ export type AppSidebarProps = {
     mobileDescription: string;
     clients: string;
     noClients: string;
+    account: string;
     signOut: string;
     theme: string;
     themeOptions: { light: string; dark: string; system: string };
@@ -144,7 +142,7 @@ function NavigationItemLink({
           aria-current={active ? 'page' : undefined}
           aria-label={display ? t('unseenLabel', { label: item.label, count }) : undefined}
         >
-          <Icon aria-hidden />
+          <Icon aria-hidden data-icon-motion={NAVIGATION_ICON_MOTION[item.icon]} />
           <span>{item.label}</span>
         </Link>
       </SidebarMenuButton>
@@ -165,15 +163,6 @@ function NavigationItemLink({
 
 async function noCount(): Promise<number> {
   return 0;
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
 }
 
 export function AppSidebar(props: AppSidebarProps) {
@@ -197,18 +186,14 @@ export function AppSidebar(props: AppSidebarProps) {
         mobileTitle={props.labels.mobileTitle}
         mobileDescription={props.labels.mobileDescription}
       >
-        <SidebarHeader className="gap-3 px-3 pt-3">
-          <div className="flex items-center gap-2 overflow-hidden">
+        <SidebarHeader className="px-3 pt-3">
+          <div
+            className="flex h-8 items-center gap-2 overflow-hidden px-1"
+            title={props.workspaceName}
+          >
             <BrandSymbol className="size-5 shrink-0 text-text" title={props.labels.brand} />
-            <span className="truncate text-label text-text group-data-[collapsible=icon]:hidden">
-              {props.workspaceName}
-            </span>
+            <BrandWordmark className="h-3.5 w-auto shrink-0 text-text group-data-[collapsible=icon]:hidden" />
           </div>
-          <ThemeToggle
-            label={props.labels.theme}
-            labels={props.labels.themeOptions}
-            className="group-data-[collapsible=icon]:hidden"
-          />
         </SidebarHeader>
 
         <SidebarContent>
@@ -236,7 +221,7 @@ export function AppSidebar(props: AppSidebarProps) {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={props.back.label}>
                     <Link href={props.back.href}>
-                      <ArrowLeft aria-hidden />
+                      <ArrowLeft aria-hidden data-icon-motion="back" />
                       <span>{props.back.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -290,32 +275,17 @@ export function AppSidebar(props: AppSidebarProps) {
         <SidebarFooter className="gap-2 px-3 pb-3">
           <SidebarMenu>{props.footer.map(renderItem)}</SidebarMenu>
           <SidebarSeparator className="mx-0" />
-          <div className="flex items-center gap-2 overflow-hidden">
-            <span
-              aria-hidden
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-caption font-semibold text-text-secondary"
-            >
-              {initials(props.user.name)}
-            </span>
-            <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
-              <span className="truncate text-body-sm font-medium text-text">{props.user.name}</span>
-              {props.user.email ? (
-                <span className="truncate text-caption text-text-tertiary">{props.user.email}</span>
-              ) : null}
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:hidden">
-            <LocaleSwitcher label={props.labels.locale} labels={props.labels.localeOptions} />
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body-sm text-text-secondary transition-colors duration-(--duration-fast) hover:bg-surface-muted hover:text-text"
-              >
-                <LogOut className="size-4" aria-hidden />
-                {props.labels.signOut}
-              </button>
-            </form>
-          </div>
+          <AccountMenu
+            user={props.user}
+            labels={{
+              account: props.labels.account,
+              theme: props.labels.theme,
+              themeOptions: props.labels.themeOptions,
+              locale: props.labels.locale,
+              localeOptions: props.labels.localeOptions,
+              signOut: props.labels.signOut,
+            }}
+          />
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>

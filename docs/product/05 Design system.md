@@ -26,37 +26,40 @@ A interface segue o registo do Designer HQ: calma, precisa e funcional, com a co
 
 ### Onde entra a marca Aurion
 
-- **Aurion Blue** é o acento interativo: links, foco, seleção, progresso.
-- **Aurion Gold** é raro: marcos atingidos, celebrações, o selo da garantia. Nunca como cor de estado de aviso, para não ser confundido.
-- **Ink e Navy** são a base do modo escuro.
-- **Fraunces** aparece só em títulos que o cliente vê (boas-vindas do portal, documentos gerados pela Aurion). A interface de trabalho usa só Inter.
+Revisto a 2026-10-27 no programa de redesenho 2 ([RD-0](../specs/2026-10-27-rd-0-dark-foundation-design.md)).
+
+- **Quase monocromático.** Botão principal, anéis, barras, indicadores e foco em branco no escuro e Ink no claro. A cor fica para o estado e para os logótipos dos clientes.
+- **Aurion Gold** só no ponto do lettering e dentro dos documentos da marca. Nunca como cor de estado de aviso.
+- **Ink** é a base do modo escuro, que é o modo por defeito.
+- **Inter** em toda a interface, incluindo o portal. A serifa e o mono dourado dos templates ficam nos documentos gerados (proposta, contrato, relatório, fatura).
 
 ## Tokens de cor
 
-Toda a cor da interface vem destes tokens; nenhum componente usa um valor hexadecimal direto. Todas as combinações de texto abaixo passam o contraste AA (4,5:1 ou mais), verificado no cálculo WCAG. O modo segue o sistema por defeito e pode ser trocado na barra lateral.
+Toda a cor da interface vem destes tokens; nenhum componente usa um valor hexadecimal direto. Todas as combinações de texto abaixo passam o contraste AA (4,5:1 ou mais), verificado no cálculo WCAG (`packages/ui/test/tokens.test.ts`). O modo por defeito é o escuro; claro e sistema trocam-se no menu de conta da barra lateral.
 
 ### Superfícies e texto
 
 | Token | Claro | Escuro | Uso |
 | --- | --- | --- | --- |
-| canvas | #FBFBFB | #0A0F15 | Fundo da aplicação |
-| surface | #FFFFFF | #11171E | Cartões, painéis, barra lateral |
-| surface-muted | #F4F5F7 | #0D1319 | Cabeçalhos de tabela, áreas de entrada, item ativo do menu |
-| border | #E7E8EB | #232C36 | Bordas e divisores |
-| border-strong | #D3D6DB | #2F3A46 | Borda em hover, campos com foco perdido |
-| text | #0B1117 | #ECEFF3 | Texto principal |
-| text-secondary | #5B6672 | #9AA5B1 | Descrições, metadados |
-| text-tertiary | #6B7480 | #7D8894 | Datas, contadores, texto de ajuda |
+| canvas | #FAFAFA | #05090E | Fundo da aplicação |
+| sidebar | #F7F8F9 | #070C12 | Barra lateral |
+| surface | #FFFFFF | #0B1118 | Cartões e painéis |
+| surface-muted | #F3F4F6 | #111821 | Item ativo, hover, áreas de entrada, menus |
+| border | #E6E8EB | #1A232D | Hairlines e divisores |
+| border-strong | #D1D5DB | #26313D | Borda em hover, campos, separadores |
+| text | #0B1117 | #EDF0F3 | Texto principal |
+| text-secondary | #4B5563 | #9AA4AF | Descrições, metadados |
+| text-tertiary | #5F6B78 | #808B96 | Datas, contadores, texto de ajuda |
 
 ### Ação e marca
 
 | Token | Claro | Escuro | Uso |
 | --- | --- | --- | --- |
-| primary | #0B1117 | #ECEFF3 | Fundo do botão principal |
-| primary-foreground | #FFFFFF | #0B1117 | Texto do botão principal |
-| accent | #0A7FD1 | #4FA8EC | Foco, seleção, barras de progresso (Aurion Blue) |
-| link | #0A6FB8 | #4FA8EC | Links e texto interativo |
-| gold | #D9A441 | #F0B342 | Marcos, celebrações, selo da garantia; nunca texto sobre fundo claro |
+| primary | #0B1117 | #EDF0F3 | Fundo do botão principal |
+| primary-foreground | #FFFFFF | #05090E | Texto do botão principal |
+| accent | #0B1117 | #EDF0F3 | Foco, seleção, progresso, indicadores |
+| link | #0B1117 | #EDF0F3 | Links; dentro de texto corrido são sublinhados |
+| gold | #D9A441 | #F0B342 | Ponto do lettering e documentos da marca |
 
 ### Estados
 
@@ -64,31 +67,31 @@ Cada estado tem uma cor de texto e um fundo suave, usados juntos nas etiquetas c
 
 | Token | Texto claro | Fundo claro | Texto escuro | Fundo escuro | Exemplos |
 | --- | --- | --- | --- | --- | --- |
-| neutral | #5B6672 | #F4F5F7 | #9AA5B1 | #161D25 | Rascunho, Por fazer |
-| info | #0A6FB8 | #E7F2FB | #6CB6EE | #0E2A3F | Com o cliente, Enviado, Em curso |
-| success | #1F7A45 | #E8F5EC | #4CC27F | #12301F | Aprovado, Assinado, Pago, Feito |
-| warning | #A04F06 | #FDF0E1 | #F2A65A | #3A2410 | A vencer, Perto do limite, Bloqueado |
-| danger | #B42F25 | #FCE9E7 | #F2776D | #3A1714 | Vencida, Recusado, Erro |
+| neutral | #4B5563 | #F3F4F6 | #9AA4AF | #161D25 | Rascunho, Por fazer |
+| info | #0F4C81 | #EAF1F8 | #A9C7E2 | #122030 | Com o cliente, Enviado |
+| success | #1F7A45 | #E8F5EC | #5CC98C | #10261A | Aprovado, Assinado, Pago, Feito |
+| warning | #A04F06 | #FDF0E1 | #F2A65A | #2E1D0D | A vencer, Perto do limite, Bloqueado |
+| danger | #B42F25 | #FCE9E7 | #F2776D | #2E1311 | Vencida, Recusado, Erro |
 
 O aviso é laranja e não amarelo, para nunca se confundir com o dourado da marca. Os estados nunca dependem só da cor: a etiqueta tem sempre o texto do estado.
 
 ### Escala de dados
 
-Cinco cores categóricas para gráficos, atribuídas por ordem fixa (a primeira série é sempre `chart-1`) e nunca recicladas: a sexta série passa a "Outros". Foram validadas por cálculo (distância de cor entre vizinhas, também para daltonismo, e contraste de pelo menos 3:1 contra a superfície) e a escala escura tem passos próprios, não é uma inversão.
+A série principal é sempre `chart-1` (branco no escuro, Ink no claro) e a comparação `chart-2` (cinzento). As restantes só entram quando a série é um estado (`chart-3` sucesso, `chart-4` aviso, `chart-5` informação). Todas têm pelo menos 3:1 contra a superfície.
 
-| Token | Claro | Escuro | Matiz |
+| Token | Claro | Escuro | Uso |
 | --- | --- | --- | --- |
-| chart-1 | #2A78D6 | #3987E5 | Azul |
-| chart-2 | #E0552A | #D95926 | Laranja |
-| chart-3 | #12906A | #199E70 | Verde-água |
-| chart-4 | #8A5A00 | #C98500 | Âmbar |
-| chart-5 | #D0507F | #D55181 | Magenta |
+| chart-1 | #0B1117 | #EDF0F3 | Série principal |
+| chart-2 | #7C8792 | #5D6873 | Comparação (período anterior, objetivo) |
+| chart-3 | #1F7A45 | #5CC98C | Série de sucesso |
+| chart-4 | #A04F06 | #F2A65A | Série de aviso |
+| chart-5 | #0F4C81 | #A9C7E2 | Série informativa |
 
 Regras: linhas de 2 px, marcadores de pelo menos 8 px com anel de 2 px da cor da superfície, uma só escala no eixo Y (nunca dois eixos), grelha discreta, legenda sempre que há duas ou mais séries, texto nos tokens de texto e nunca na cor da série, e a tabela com os mesmos números mantém-se como fonte completa dos dados. Estas cores não se usam para estados.
 
 ## Tipografia, espaço, forma e movimento
 
-Uma família para trabalhar (Inter), uma para códigos (Space Mono) e uma para os títulos que o cliente vê (Fraunces). O resto da escala é deliberadamente curta.
+Uma família para toda a interface (Inter, também no portal) e uma para códigos (Space Mono). A serifa e o mono dos templates da marca ficam nos documentos gerados. O resto da escala é deliberadamente curta.
 
 ### Escala tipográfica
 
@@ -102,7 +105,7 @@ Uma família para trabalhar (Inter), uma para códigos (Space Mono) e uma para o
 | title | 20 / 28 px | 600 | Título do ecrã |
 | display | 28 / 34 px | 600 | Pergunta do workshop, boas-vindas do Início |
 | code | 12 / 16 px, Space Mono | 400 | Códigos do pipeline, números de fatura, valores hex |
-| brand-display | 32 / 38 px, Fraunces | 500 | Boas-vindas do portal e documentos gerados pela Aurion |
+| brand-display | 32 / 38 px, Inter | 600 | Saudação do portal e títulos de destaque |
 
 Valores monetários e tabelas usam algarismos tabulares, para as colunas alinharem.
 

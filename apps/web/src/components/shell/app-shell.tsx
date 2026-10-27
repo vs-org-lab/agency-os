@@ -79,6 +79,7 @@ export async function AppShell({
           mobileDescription: t('shell.navigationDescription'),
           clients: t('shell.clients'),
           noClients: t('shell.noClients'),
+          account: t('shell.account'),
           signOut: t('auth.signOut'),
           theme: t('shell.theme.label'),
           themeOptions: {

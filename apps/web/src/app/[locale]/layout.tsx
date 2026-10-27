@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import { Fraunces, Inter, Space_Mono } from 'next/font/google';
+import { Inter, Space_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { MotionProvider } from '@agency-os/ui/motion';
@@ -16,7 +16,6 @@ const spaceMono = Space_Mono({
   variable: '--font-space-mono',
   display: 'swap',
 });
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
 
 type LayoutProps = {
   children: ReactNode;
@@ -42,7 +41,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${spaceMono.variable} ${fraunces.variable}`}
+      className={`${inter.variable} ${spaceMono.variable}`}
       suppressHydrationWarning
     >
       <body>

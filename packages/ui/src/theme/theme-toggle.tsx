@@ -1,17 +1,13 @@
 'use client';
 
-import { useEffect, useState, type KeyboardEvent } from 'react';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { useTheme } from 'next-themes';
 import { cn } from '@agency-os/ui/lib/utils';
+import { LayoutGroup, m, transitions } from '../motion';
 
-const OPTIONS = [
-  { value: 'light', Icon: Sun },
-  { value: 'dark', Icon: Moon },
-  { value: 'system', Icon: Monitor },
-] as const;
+const OPTIONS = ['dark', 'light', 'system'] as const;
 
-type ThemeValue = (typeof OPTIONS)[number]['value'];
+type ThemeValue = (typeof OPTIONS)[number];
 
 export function ThemeToggle({
   label,
@@ -24,51 +20,61 @@ export function ThemeToggle({
 }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const groupId = useId();
   useEffect(() => setMounted(true), []);
-  const current: ThemeValue = mounted && theme ? (theme as ThemeValue) : 'system';
+  const current: ThemeValue =
+    mounted && theme && (OPTIONS as readonly string[]).includes(theme)
+      ? (theme as ThemeValue)
+      : 'dark';
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
     event.preventDefault();
-    const index = OPTIONS.findIndex((option) => option.value === current);
+    const index = OPTIONS.indexOf(current);
     const step = event.key === 'ArrowRight' ? 1 : -1;
     const next = OPTIONS[(index + step + OPTIONS.length) % OPTIONS.length];
-    if (next) setTheme(next.value);
+    if (next) setTheme(next);
   }
 
   return (
-    <div
-      role="radiogroup"
-      aria-label={label}
-      onKeyDown={onKeyDown}
-      className={cn(
-        'inline-flex items-center gap-0.5 rounded-md bg-surface-muted p-0.5',
-        className,
-      )}
-    >
-      {OPTIONS.map(({ value, Icon }) => {
-        const checked = current === value;
-        return (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            aria-label={labels[value]}
-            title={labels[value]}
-            tabIndex={checked ? 0 : -1}
-            onClick={() => setTheme(value)}
-            className={cn(
-              'flex size-7 items-center justify-center rounded-sm text-text-secondary transition-colors duration-(--duration-fast)',
-              checked
-                ? 'bg-surface text-text shadow-xs ring-1 ring-border-strong'
-                : 'hover:text-text',
-            )}
-          >
-            <Icon className="size-4" aria-hidden />
-          </button>
-        );
-      })}
-    </div>
+    <LayoutGroup id={groupId}>
+      <div
+        role="radiogroup"
+        aria-label={label}
+        onKeyDown={onKeyDown}
+        className={cn(
+          'grid grid-cols-3 rounded-md border border-border bg-canvas p-0.5',
+          className,
+        )}
+      >
+        {OPTIONS.map((value) => {
+          const checked = current === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              tabIndex={checked ? 0 : -1}
+              onClick={() => setTheme(value)}
+              className={cn(
+                'relative isolate h-7 rounded-sm px-2 text-caption font-medium transition-colors duration-(--duration-fast)',
+                checked ? 'text-text' : 'text-text-secondary hover:text-text',
+              )}
+            >
+              {checked ? (
+                <m.span
+                  layoutId="theme-indicator"
+                  aria-hidden="true"
+                  transition={transitions.morph}
+                  className="absolute inset-0 -z-10 rounded-sm bg-surface-muted ring-1 ring-border-strong"
+                />
+              ) : null}
+              {labels[value]}
+            </button>
+          );
+        })}
+      </div>
+    </LayoutGroup>
   );
 }

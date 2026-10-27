@@ -45,7 +45,7 @@
   --color-destructive: var(--danger);
   --color-input: var(--border-strong);
   --color-ring: var(--accent);
-  --color-sidebar: var(--surface);
+  --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--text);
   --color-sidebar-primary: var(--primary);
   --color-sidebar-primary-foreground: var(--primary-foreground);
@@ -56,7 +56,7 @@
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
-  --font-display: var(--font-fraunces), ui-serif, serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --text-caption: 12px;
   --text-caption--line-height: 16px;
@@ -80,7 +80,8 @@
   --text-code--line-height: 16px;
   --text-brand-display: 32px;
   --text-brand-display--line-height: 38px;
-  --text-brand-display--font-weight: 500;
+  --text-brand-display--font-weight: 600;
+  --text-brand-display--letter-spacing: -0.02em;
 
   --radius-sm: var(--radius-field);
   --radius-md: var(--radius-button);
@@ -120,7 +121,193 @@
   }
 
   ::selection {
-    background-color: var(--info-bg);
+    background-color: var(--border-strong);
+  }
+
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='range'],
+  progress {
+    accent-color: var(--primary);
+  }
+
+  select,
+  option,
+  optgroup {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='time']::-webkit-calendar-picker-indicator,
+  input[type='month']::-webkit-calendar-picker-indicator {
+    filter: var(--native-indicator-filter, none);
+  }
+
+  html.dark {
+    --native-indicator-filter: invert(0.85);
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  /* Links share the text colour, so links inside running text are told apart by the underline. */
+  :where(p, li, dd, td, blockquote) a:not([class*='btn']):not([data-slot]) {
+    text-decoration-line: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+  }
+}
+
+@keyframes rd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes icon-swing {
+  20% {
+    transform: rotate(14deg);
+  }
+  45% {
+    transform: rotate(-10deg);
+  }
+  70% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes icon-grow {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes icon-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes icon-pulse {
+  40% {
+    transform: scale(1.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes icon-needle {
+  from {
+    transform: rotate(-80deg);
+  }
+  to {
+    transform: rotate(0);
+  }
+}
+
+@layer components {
+  .rd-rise {
+    animation: rd-rise var(--duration-slow) var(--ease-standard) both;
+  }
+
+  .rd-lift {
+    transition:
+      transform var(--duration-base) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .rd-lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+  }
+
+  .rd-lift:active {
+    transform: scale(0.99);
+  }
+
+  [data-icon-motion] {
+    overflow: visible;
+    transition: transform var(--duration-slow) var(--ease-standard);
+  }
+
+  [data-icon-motion] * {
+    transform-box: fill-box;
+  }
+
+  :where(a, button):hover > [data-icon-motion='lift'] {
+    transform: translateY(-1.5px);
+  }
+
+  :where(a, button):hover > [data-icon-motion='spin'] {
+    transform: rotate(75deg);
+  }
+
+  :where(a, button):hover > [data-icon-motion='back'] {
+    transform: translateX(-2px);
+  }
+
+  :where(a, button):hover > [data-icon-motion='swing'] {
+    animation: icon-swing 560ms var(--ease-standard);
+  }
+
+  [data-icon-motion='grow'] path:not(:first-child) {
+    transform-origin: bottom;
+  }
+
+  :where(a, button):hover > [data-icon-motion='grow'] path:not(:first-child) {
+    animation: icon-grow 520ms var(--ease-standard);
+  }
+
+  [data-icon-motion='draw'] path {
+    stroke-dasharray: 24;
+  }
+
+  :where(a, button):hover > [data-icon-motion='draw'] path {
+    animation: icon-draw 520ms var(--ease-standard);
+  }
+
+  [data-icon-motion='pulse'] circle:last-child {
+    transform-origin: center;
+  }
+
+  :where(a, button):hover > [data-icon-motion='pulse'] circle:last-child {
+    animation: icon-pulse 640ms var(--ease-standard);
+  }
+
+  [data-icon-motion='needle'] path:first-child {
+    transform-origin: 0% 100%;
+  }
+
+  :where(a, button):hover > [data-icon-motion='needle'] path:first-child {
+    animation: icon-needle 600ms var(--ease-standard);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rd-rise,
+    [data-icon-motion],
+    [data-icon-motion] * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .rd-lift:hover,
+    .rd-lift:active {
+      transform: none;
+    }
   }
 }
 

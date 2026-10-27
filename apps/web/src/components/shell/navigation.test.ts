@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildNavigation } from './navigation';
+import { buildNavigation, NAVIGATION_ICON_MOTION } from './navigation';
 
 describe('buildNavigation', () => {
   it('room navigation links documents, the library, the brand hub, reports and the academy', () => {
@@ -190,5 +190,22 @@ describe('buildNavigation', () => {
       '/portal/settings/team',
       'users',
     ]);
+  });
+});
+
+describe('NAVIGATION_ICON_MOTION', () => {
+  it('gives each navigation icon the hover movement the design defines', () => {
+    expect(NAVIGATION_ICON_MOTION).toMatchObject({
+      home: 'lift',
+      settings: 'spin',
+      brand: 'spin',
+      calendar: 'swing',
+      kanban: 'grow',
+      chart: 'grow',
+      tasks: 'draw',
+      check: 'draw',
+      target: 'pulse',
+      gauge: 'needle',
+    });
   });
 });

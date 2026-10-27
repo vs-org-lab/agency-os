@@ -107,7 +107,8 @@
       "retainer": "Retainer",
       "outcome": "Outcome",
       "reports": "Reports",
-      "academy": "Academy"
+      "academy": "Academy",
+      "results": "Results"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -3808,5 +3809,109 @@
       "not_found": "This could not be completed. Refresh the page and try again."
     },
     "itemAction": "{action} · {title}"
+  },
+  "results": {
+    "title": "Results",
+    "description": "The figures the client sees in the portal and that go into the report. Enter them by hand or import the CSV each source exports.",
+    "strip": {
+      "title": "Results · {month}",
+      "compared": "Compared with {month}",
+      "open": "Open results",
+      "noValue": "No value this month",
+      "target": "Target {target}",
+      "met": "met",
+      "share": "{share}%",
+      "emptyTeam": "No indicators yet. Define the client KPIs to show them here and in the portal.",
+      "emptyAction": "Define indicators"
+    },
+    "change": {
+      "up": "up {amount}",
+      "down": "down {amount}",
+      "flat": "no change",
+      "percent": "{amount}%",
+      "points": "{amount} pp",
+      "value": "{amount}"
+    },
+    "table": {
+      "label": "Indicators by month",
+      "kpi": "Indicator",
+      "source": "Source",
+      "target": "Target",
+      "hidden": "Team only",
+      "edit": "Edit {name}",
+      "archive": "Archive {name}",
+      "cell": "{name} in {month}",
+      "saved": "Value saved.",
+      "manual": "Entered by hand",
+      "empty": "No indicators. Start with «+ Indicator».",
+      "archiveShort": "Archive"
+    },
+    "aggregationHint": {
+      "sum": "Sum",
+      "average": "Average",
+      "last": "Last value"
+    },
+    "form": {
+      "create": "+ Indicator",
+      "createTitle": "New indicator",
+      "editTitle": "Edit indicator",
+      "name": "Name",
+      "format": "Format",
+      "formats": {
+        "number": "Number",
+        "percent": "Percentage",
+        "currency": "Euros",
+        "ratio": "Ratio (×)"
+      },
+      "aggregation": "Monthly aggregation",
+      "source": "Source",
+      "sourcePlaceholder": "GA4, Meta Ads, CRM…",
+      "target": "Monthly target (optional)",
+      "clientVisible": "Show to the client in the portal",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Indicator saved.",
+      "archived": "Indicator archived.",
+      "errors": {
+        "duplicate_name": "There is already an indicator with this name.",
+        "invalid_input": "Check the fields: name up to 60 characters and a numeric target.",
+        "not_found": "It could not be saved. Refresh the page."
+      }
+    },
+    "import": {
+      "open": "Import CSV",
+      "title": "Import CSV",
+      "steps": {
+        "file": "File",
+        "columns": "Columns",
+        "review": "Review"
+      },
+      "drop": "Choose a CSV file",
+      "dropHint": "Export the table from GA4, Search Console, Meta Ads or Google Ads and choose it here. The file stays on your computer: only the monthly totals are saved.",
+      "detected": "{rows} rows · detected source: {source}",
+      "change": "Change",
+      "dateColumn": "Date column",
+      "mapping": "Link columns to indicators",
+      "csvColumn": "CSV column",
+      "kpi": "Indicator",
+      "ignore": "Ignore",
+      "total": "Total",
+      "aggregationNote": "Counts add up per month, rates are averaged and closing values keep the last day, following each indicator aggregation.",
+      "reviewIntro": "These values will be saved:",
+      "replaces": "replaces {value}",
+      "new": "new",
+      "back": "← Back",
+      "next": "Review {count, plural, one {# value} other {# values}} →",
+      "confirm": "Save values",
+      "done": "{count, plural, one {# value imported} other {# values imported}}.",
+      "errors": {
+        "tooLarge": "The file is over 2 MB or 20,000 rows.",
+        "empty": "No table was found in this file.",
+        "noDate": "Choose the date column.",
+        "nothing": "Link at least one column to an indicator.",
+        "failed": "The values could not be saved. Try again."
+      },
+      "stepLabel": "{position} · {name}"
+    }
   }
 }

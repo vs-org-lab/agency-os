@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildNavigation, NAVIGATION_ICON_MOTION } from './navigation';
 
 describe('buildNavigation', () => {
-  it('room navigation links documents, the library, the brand hub, reports and the academy', () => {
+  it('room navigation links documents, the library, the brand hub, results, reports and the academy', () => {
     const navigation = buildNavigation({ level: 'room', clientId: 'client-1' });
 
     expect(navigation.back).toEqual({ href: '/', labelKey: 'shell.allClients' });
@@ -18,6 +18,7 @@ describe('buildNavigation', () => {
       '/c/client-1/library',
       '/c/client-1/agenda',
       '/c/client-1/hub',
+      '/c/client-1/results',
       '/c/client-1/reports',
       '/c/client-1/academy',
     ]);

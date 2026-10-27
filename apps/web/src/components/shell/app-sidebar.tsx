@@ -22,6 +22,7 @@ import {
   Search,
   Settings,
   Target,
+  TrendingUp,
 } from 'lucide-react';
 import { BrandSymbol, BrandWordmark } from '@agency-os/ui/brand';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
@@ -102,6 +103,7 @@ const ICONS = {
   calendar: CalendarDays,
   wallet: Wallet,
   chart: BarChart3,
+  trend: TrendingUp,
   gauge: Gauge,
 } as const;
 

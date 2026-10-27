@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import type { ClientProjectView } from '@/modules/rooms';
 import { ActionList, type PortalActionItem } from './action-list';
 import { ProjectStrip } from './project-strip';
+import { ResultsStrip, type StripKpi } from '@/components/results/results-strip';
 import { RetainerSection, type PortalRetainerHome } from './retainer-section';
 
 export type PortalHomeProps = {
@@ -14,6 +15,8 @@ export type PortalHomeProps = {
   now: string;
   actions: PortalActionItem[];
   retainer: PortalRetainerHome | null;
+  /** Visible results indicators; the strip stays hidden without any. */
+  results?: { kpis: readonly StripKpi[]; currentMonth: string };
   project: ClientProjectView | null;
   /** Reference material that asks nothing of the client: presentations, briefing and statuses. */
   children?: ReactNode;
@@ -40,6 +43,7 @@ export function PortalHome({
   actions,
   retainer,
   project,
+  results,
   children,
 }: PortalHomeProps) {
   const t = useTranslations('portal.dashboard');
@@ -61,6 +65,7 @@ export function PortalHome({
       </header>
       <ActionList items={actions} />
       {retainer ? <RetainerSection retainer={retainer} /> : null}
+      {results ? <ResultsStrip kpis={results.kpis} currentMonth={results.currentMonth} /> : null}
       {strip && project ? (
         <section aria-labelledby="portal-project" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">

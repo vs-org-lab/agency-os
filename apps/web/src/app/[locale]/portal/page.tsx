@@ -11,6 +11,8 @@ import { loadPortalProposal } from '@/modules/contracts/server';
 import { loadPortalCore } from '@/modules/diagnosis/server';
 import { isPortalOnboardingPending } from '@/modules/onboarding/server';
 import { findProfileName, findVisibleClient } from '@/modules/organizations';
+import { currentMonth } from '@/modules/results';
+import { loadClientPortalResults } from '@/modules/results/server';
 import { loadClientRequests, loadClientRetainer } from '@/modules/retainers/server';
 import { loadPortalApprovals, loadPortalRoom } from '@/modules/rooms/server';
 import { withUserContext } from '@/platform/db';
@@ -33,21 +35,25 @@ export default async function PortalHomePage({ params }: PageProps) {
   const [clientId, roles = []] = [...session.ctx.clientRoles.entries()][0] ?? [];
   const pays = roles.some((role) => PAYING_ROLES.includes(role));
   const access = portalRoomAccess(session.ctx.clientRoles);
-  const [core, proposal, invoices, room, approvals, retainer, requests, identity] = clientId
-    ? await Promise.all([
-        loadPortalCore(session.claims, clientId),
-        loadPortalProposal(session.claims, clientId),
-        pays ? loadPortalInvoices(session.claims, clientId) : Promise.resolve([]),
-        access.readsRoom ? loadPortalRoom(session.claims, clientId) : Promise.resolve(null),
-        access.readsRoom ? loadPortalApprovals(session.claims, clientId) : Promise.resolve([]),
-        access.readsRoom ? loadClientRetainer(session.claims, clientId) : Promise.resolve(null),
-        access.readsRoom ? loadClientRequests(session.claims, clientId) : Promise.resolve([]),
-        withUserContext(session.claims, async (tx) => ({
-          client: await findVisibleClient(tx, clientId),
-          contactName: await findProfileName(tx, session.actor.userId),
-        })),
-      ])
-    : [null, null, [], null, [], null, [], null];
+  const [core, proposal, invoices, room, approvals, retainer, requests, identity, results] =
+    clientId
+      ? await Promise.all([
+          loadPortalCore(session.claims, clientId),
+          loadPortalProposal(session.claims, clientId),
+          pays ? loadPortalInvoices(session.claims, clientId) : Promise.resolve([]),
+          access.readsRoom ? loadPortalRoom(session.claims, clientId) : Promise.resolve(null),
+          access.readsRoom ? loadPortalApprovals(session.claims, clientId) : Promise.resolve([]),
+          access.readsRoom ? loadClientRetainer(session.claims, clientId) : Promise.resolve(null),
+          access.readsRoom ? loadClientRequests(session.claims, clientId) : Promise.resolve([]),
+          withUserContext(session.claims, async (tx) => ({
+            client: await findVisibleClient(tx, clientId),
+            contactName: await findProfileName(tx, session.actor.userId),
+          })),
+          access.readsRoom
+            ? loadClientPortalResults(session.claims, clientId)
+            : Promise.resolve([]),
+        ])
+      : [null, null, [], null, [], null, [], null, []];
   const onboarding = await isPortalOnboardingPending(session.claims, {
     userId: session.actor.userId,
     organizationId: session.actor.organizationId,
@@ -88,6 +94,7 @@ export default async function PortalHomePage({ params }: PageProps) {
         actions={actions}
         retainer={retainer ? { view: retainer, requests, request: requestWorkAction } : null}
         project={project}
+        results={{ kpis: results, currentMonth: currentMonth() }}
       >
         {statusCard ? <ProposalHomeCard state={statusCard} /> : null}
         {documents.length > 0 ? (

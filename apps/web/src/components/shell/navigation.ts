@@ -17,7 +17,8 @@ export type NavigationIcon =
   | 'calendar'
   | 'wallet'
   | 'gauge'
-  | 'chart';
+  | 'chart'
+  | 'trend';
 
 export type IconMotion = 'lift' | 'spin' | 'swing' | 'grow' | 'draw' | 'pulse' | 'needle';
 
@@ -42,6 +43,7 @@ export const NAVIGATION_ICON_MOTION: Record<NavigationIcon, IconMotion> = {
   wallet: 'lift',
   gauge: 'needle',
   chart: 'grow',
+  trend: 'lift',
 };
 
 export type NavigationLabelKey =
@@ -65,6 +67,7 @@ export type NavigationLabelKey =
   | 'shell.room.retainer'
   | 'shell.room.outcome'
   | 'shell.room.reports'
+  | 'shell.room.results'
   | 'shell.room.academy'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
@@ -179,6 +182,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             href: `/c/${input.clientId}/hub`,
             labelKey: 'shell.room.brandHub',
             icon: 'brand',
+          },
+          {
+            href: `/c/${input.clientId}/results`,
+            labelKey: 'shell.room.results',
+            icon: 'trend',
           },
           {
             href: `/c/${input.clientId}/reports`,

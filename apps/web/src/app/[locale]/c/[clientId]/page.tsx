@@ -10,7 +10,9 @@ import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
 import { phaseTimeline } from '@/modules/rooms';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
+import { loadRoomResults } from '@/modules/results/server';
 import { loadProjectTestimonial } from '@/modules/testimonials/server';
+import { ResultsStrip } from '@/components/results/results-strip';
 import {
   completePhaseAction,
   createProjectAction,
@@ -54,9 +56,10 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
   const { project: projectId } = await searchParams;
-  const [data, health] = await Promise.all([
+  const [data, health, results] = await Promise.all([
     loadStaffRoom(session, { clientId, projectId }),
     loadRoomHealth(session.claims, clientId),
+    loadRoomResults(session.claims, clientId),
   ]);
   if (!data) notFound();
   const { room, writable, editable } = data;
@@ -99,6 +102,15 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
           ) : null
         }
       />
+
+      {results ? (
+        <ResultsStrip
+          kpis={results.kpis}
+          currentMonth={results.currentMonth}
+          href={`/c/${clientId}/results`}
+          emptyHref={writable ? `/c/${clientId}/results` : undefined}
+        />
+      ) : null}
 
       {room.project ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">

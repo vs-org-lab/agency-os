@@ -107,7 +107,8 @@
       "retainer": "Retainer",
       "outcome": "Resultado",
       "reports": "Relatórios",
-      "academy": "Academia"
+      "academy": "Academia",
+      "results": "Resultados"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -3808,5 +3809,109 @@
       "not_found": "Não foi possível concluir. Atualize a página e tente de novo."
     },
     "itemAction": "{action} · {title}"
+  },
+  "results": {
+    "title": "Resultados",
+    "description": "Os números que o cliente vê no portal e que entram no relatório. Registo manual ou importação do CSV exportado de cada fonte.",
+    "strip": {
+      "title": "Resultados · {month}",
+      "compared": "Comparação com {month}",
+      "open": "Abrir resultados",
+      "noValue": "Sem valor este mês",
+      "target": "Objetivo {target}",
+      "met": "atingido",
+      "share": "{share}%",
+      "emptyTeam": "Ainda não há indicadores. Defina os KPIs do cliente para aparecerem aqui e no portal.",
+      "emptyAction": "Definir indicadores"
+    },
+    "change": {
+      "up": "subiu {amount}",
+      "down": "desceu {amount}",
+      "flat": "sem variação",
+      "percent": "{amount}%",
+      "points": "{amount} pp",
+      "value": "{amount}"
+    },
+    "table": {
+      "label": "Indicadores por mês",
+      "kpi": "Indicador",
+      "source": "Fonte",
+      "target": "Objetivo",
+      "hidden": "Só a equipa",
+      "edit": "Editar {name}",
+      "archive": "Arquivar {name}",
+      "cell": "{name} em {month}",
+      "saved": "Valor guardado.",
+      "manual": "Registo manual",
+      "empty": "Sem indicadores. Comece por «+ Indicador».",
+      "archiveShort": "Arquivar"
+    },
+    "aggregationHint": {
+      "sum": "Soma",
+      "average": "Média",
+      "last": "Último valor"
+    },
+    "form": {
+      "create": "+ Indicador",
+      "createTitle": "Novo indicador",
+      "editTitle": "Editar indicador",
+      "name": "Nome",
+      "format": "Formato",
+      "formats": {
+        "number": "Número",
+        "percent": "Percentagem",
+        "currency": "Euros",
+        "ratio": "Rácio (×)"
+      },
+      "aggregation": "Agregação mensal",
+      "source": "Fonte",
+      "sourcePlaceholder": "GA4, Meta Ads, CRM…",
+      "target": "Objetivo mensal (opcional)",
+      "clientVisible": "Mostrar ao cliente no portal",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saved": "Indicador guardado.",
+      "archived": "Indicador arquivado.",
+      "errors": {
+        "duplicate_name": "Já existe um indicador com este nome.",
+        "invalid_input": "Revê os campos: nome até 60 caracteres e objetivo numérico.",
+        "not_found": "Não foi possível guardar. Atualiza a página."
+      }
+    },
+    "import": {
+      "open": "Importar CSV",
+      "title": "Importar CSV",
+      "steps": {
+        "file": "Ficheiro",
+        "columns": "Colunas",
+        "review": "Rever"
+      },
+      "drop": "Escolher ficheiro CSV",
+      "dropHint": "Exporta a tabela do GA4, Search Console, Meta Ads ou Google Ads e escolhe-a aqui. O ficheiro não sai do teu computador: só os totais mensais são guardados.",
+      "detected": "{rows} linhas · fonte detetada: {source}",
+      "change": "Trocar",
+      "dateColumn": "Coluna da data",
+      "mapping": "Ligar colunas aos indicadores",
+      "csvColumn": "Coluna do CSV",
+      "kpi": "Indicador",
+      "ignore": "Ignorar",
+      "total": "Total",
+      "aggregationNote": "As contagens somam-se por mês, as taxas fazem média e os valores de fecho ficam com o último dia, segundo a agregação de cada indicador.",
+      "reviewIntro": "Estes valores vão ser guardados:",
+      "replaces": "substitui {value}",
+      "new": "novo",
+      "back": "← Voltar",
+      "next": "Rever {count, plural, one {# valor} other {# valores}} →",
+      "confirm": "Guardar valores",
+      "done": "{count, plural, one {# valor importado} other {# valores importados}}.",
+      "errors": {
+        "tooLarge": "O ficheiro tem mais de 2 MB ou 20 000 linhas.",
+        "empty": "Não encontrámos uma tabela neste ficheiro.",
+        "noDate": "Escolhe a coluna da data.",
+        "nothing": "Liga pelo menos uma coluna a um indicador.",
+        "failed": "Não foi possível guardar os valores. Tenta de novo."
+      },
+      "stepLabel": "{position} · {name}"
+    }
   }
 }

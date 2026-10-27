@@ -537,3 +537,14 @@ export const academyItemStatusEnum = appSchema.enum('academy_item_status', ['dra
 
 export type AcademyItemKind = (typeof academyItemKindEnum.enumValues)[number];
 export type AcademyItemStatus = (typeof academyItemStatusEnum.enumValues)[number];
+
+export const kpiFormatEnum = appSchema.enum('kpi_format', [
+  'number',
+  'percent',
+  'currency',
+  'ratio',
+]);
+
+export const kpiAggregationEnum = appSchema.enum('kpi_aggregation', ['sum', 'average', 'last']);
+
+export const kpiValueOriginEnum = appSchema.enum('kpi_value_origin', ['manual', 'csv']);

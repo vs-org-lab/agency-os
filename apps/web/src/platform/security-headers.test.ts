@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  allowsCameraCapture,
   allowsMediaCapture,
+  allowsVoiceCapture,
   buildSecurityHeaders,
   embedOriginsForPath,
   generateNonce,
@@ -111,6 +113,41 @@ describe('security headers', () => {
     expect(allowsMediaCapture('/pipeline/2f1c')).toBe(false);
     expect(allowsMediaCapture('/pipeline/2f1c/core/call/extra')).toBe(false);
     expect(allowsMediaCapture('/portal')).toBe(false);
+  });
+
+  it('allows only the microphone where voice capture is enabled', () => {
+    const allowed =
+      buildSecurityHeaders('n', { voiceCapture: true }).get('Permissions-Policy') ?? '';
+
+    expect(allowed).toContain('microphone=(self)');
+    expect(allowed).toContain('camera=()');
+    expect(allowed).toContain('display-capture=()');
+  });
+
+  it('allows the camera and the microphone where camera capture is enabled', () => {
+    const allowed =
+      buildSecurityHeaders('n', { cameraCapture: true }).get('Permissions-Policy') ?? '';
+
+    expect(allowed).toContain('camera=(self)');
+    expect(allowed).toContain('microphone=(self)');
+    expect(allowed).toContain('display-capture=()');
+  });
+
+  it('enables voice capture everywhere except on embeddable routes', () => {
+    expect(allowsVoiceCapture('/portal/proofs/2f1c')).toBe(true);
+    expect(allowsVoiceCapture('/c/2f1c/proofs/3a4b')).toBe(true);
+    expect(allowsVoiceCapture('/')).toBe(true);
+    expect(allowsVoiceCapture('/apply')).toBe(false);
+    expect(allowsVoiceCapture('/en/apply/thanks')).toBe(false);
+  });
+
+  it('enables camera capture across the portal only', () => {
+    expect(allowsCameraCapture('/portal')).toBe(true);
+    expect(allowsCameraCapture('/portal/testimonial/2f1c')).toBe(true);
+    expect(allowsCameraCapture('/pt-PT/portal/testimonial/2f1c')).toBe(true);
+    expect(allowsCameraCapture('/portals')).toBe(false);
+    expect(allowsCameraCapture('/c/2f1c')).toBe(false);
+    expect(allowsCameraCapture('/pipeline/2f1c/core/call')).toBe(false);
   });
 
   it('allows configured embed origins on apply routes', () => {

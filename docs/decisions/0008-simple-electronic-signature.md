@@ -19,4 +19,4 @@ O RF-035 pede contratos enviados para assinatura eletrónica com estado por sign
 - Sem custo nem dependência externa no fluxo de contratos.
 - A revisão por advogado do modelo de contrato e deste método de assinatura, para Portugal e Angola, entra nos critérios de lançamento.
 - Um cliente que exija assinatura qualificada fica fora até se ligar um serviço externo.
-- Spec: [docs/superpowers/specs/2026-10-09-contracts-design.md](../superpowers/specs/2026-10-09-contracts-design.md).
+- Spec: [docs/specs/2026-10-09-contracts-design.md](../specs/2026-10-09-contracts-design.md).

@@ -7,7 +7,7 @@ export type CoreAssistant = {
   draft(request: CoreAssistantRequest): Promise<CoreAssistantDraft>;
 };
 
-/** Until launch the founder runs the prompt in Claude and pastes the result back (ADR 0003). */
+/** Until launch the founder runs the prompt in the external assistant and pastes the result back (ADR 0003). */
 export function createManualAssistant(): CoreAssistant {
   return {
     async draft(request) {

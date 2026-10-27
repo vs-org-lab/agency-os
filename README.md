@@ -64,6 +64,5 @@ pnpm --filter web bootstrap:founder --email <email> --name "<full name>" --organ
 
 ## Guidelines
 
-- Engineering rules: [CLAUDE.md](CLAUDE.md)
 - Project status, deferred items and launch criteria: [docs/STATUS.md](docs/STATUS.md)
 - Architecture decisions: [docs/decisions](docs/decisions)

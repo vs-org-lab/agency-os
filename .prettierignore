@@ -5,11 +5,9 @@ pnpm-lock.yaml
 dist
 out
 coverage
-.superpowers
 supabase/migrations
 assets
 docs/product
 References
 Software
 Documents
-.impeccable

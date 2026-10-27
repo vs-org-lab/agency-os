@@ -21,4 +21,4 @@ A documentação de produto descrevia o M03 como um diagnóstico pago depois da 
 - O 1B não constrói o construtor de workshop (RF-020) nem a aprovação do mapa (RF-026). O guia de perguntas e a grelha do Índice Orbit são modelos editáveis e versionados.
 - A proposta com as três opções Orbit e o contrato passam para o 1C, que usa o roadmap do Core entregue como fonte do âmbito.
 - Se a conversão do Core descer abaixo de 25%, o guião prevê que volte a ser pago; o pipeline e os critérios mantêm-se.
-- Spec: [docs/superpowers/specs/2026-10-08-core-design.md](../superpowers/specs/2026-10-08-core-design.md).
+- Spec: [docs/specs/2026-10-08-core-design.md](../specs/2026-10-08-core-design.md).

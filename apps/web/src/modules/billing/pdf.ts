@@ -92,9 +92,10 @@ export async function buildPaymentRequestPdf(input: PaymentRequestPdfInput): Pro
   const title = `${labels.title} ${input.number}`;
   const { document, fonts, writer } = await createPdf({ title });
 
-  writer.paragraph(title, { size: 16, bold: true });
+  writer.eyebrow(labels.title);
+  writer.title(input.number);
   writer.paragraph(labels.notFiscal, { muted: true });
-  writer.space(12);
+  writer.rule();
 
   writer.paragraph(input.issuer.legalName, { size: 12, bold: true });
   writer.paragraph(`${labels.taxId}: ${input.issuer.taxId}`);
@@ -102,7 +103,7 @@ export async function buildPaymentRequestPdf(input: PaymentRequestPdfInput): Pro
   writer.paragraph(input.issuer.email);
   writer.space(10);
 
-  writer.paragraph(labels.billedTo, { bold: true });
+  writer.eyebrow(labels.billedTo);
   writer.paragraph(input.client.legalName);
   writer.paragraph(`${labels.taxId}: ${input.client.taxId}`);
   writer.paragraph(input.client.address);
@@ -117,9 +118,9 @@ export async function buildPaymentRequestPdf(input: PaymentRequestPdfInput): Pro
   writer.paragraph(
     `${labels.dueOn}: ${longDate(new Date(`${input.dueDate}T12:00:00Z`), input.locale)}`,
   );
-  writer.space(12);
+  writer.rule();
 
-  writer.paragraph(labels.payment, { size: 12, bold: true });
+  writer.eyebrow(labels.payment);
   if (input.issuer.bankName) writer.paragraph(`${labels.bank}: ${input.issuer.bankName}`);
   if (input.issuer.iban) writer.paragraph(`${labels.iban}: ${input.issuer.iban}`);
   if (input.issuer.bic) writer.paragraph(`${labels.bic}: ${input.issuer.bic}`);
@@ -129,7 +130,7 @@ export async function buildPaymentRequestPdf(input: PaymentRequestPdfInput): Pro
   writer.paragraph(`${labels.reference}: ${input.number}`, { bold: true });
   writer.space(BODY_SIZE);
 
-  writer.paragraph(labels.portal, { bold: true });
+  writer.eyebrow(labels.portal);
   writer.paragraph(input.payUrl, { muted: true });
   writer.space(4);
   const qr = await QRCode.toBuffer(input.payUrl, { type: 'png', margin: 1, width: QR_SIZE * 3 });

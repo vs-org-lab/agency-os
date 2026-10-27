@@ -2,6 +2,7 @@ import {
   PDFDocument,
   StandardFonts,
   rgb,
+  setCharacterSpacing,
   type PDFFont,
   type PDFImage,
   type PDFPage,
@@ -14,12 +15,27 @@ export const MARGIN = 56;
 export const BODY_SIZE = 10.5;
 const LINE_GAP = 4;
 export const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
-const TEXT_COLOR = rgb(0.1, 0.1, 0.1);
+/** Aurion Ink and Gold, from the brand templates. */
+const TEXT_COLOR = rgb(11 / 255, 17 / 255, 23 / 255);
 const MUTED_COLOR = rgb(0.4, 0.4, 0.4);
+const RULE_COLOR = rgb(0.85, 0.86, 0.87);
+const GOLD_COLOR = rgb(217 / 255, 164 / 255, 65 / 255);
+const EYEBROW_SIZE = 8;
+const EYEBROW_SPACING = 1.6;
+const TITLE_SIZE = 26;
 const SWATCH_SIZE = 48;
 const SWATCH_GAP = 14;
 
-export type PdfFonts = { regular: PDFFont; bold: PDFFont };
+export type PdfFonts = { regular: PDFFont; bold: PDFFont; serif: PDFFont; mono: PDFFont };
+
+async function embedFonts(document: PDFDocument): Promise<PdfFonts> {
+  return {
+    regular: await document.embedFont(StandardFonts.Helvetica),
+    bold: await document.embedFont(StandardFonts.HelveticaBold),
+    serif: await document.embedFont(StandardFonts.TimesRoman),
+    mono: await document.embedFont(StandardFonts.Courier),
+  };
+}
 
 export type ParagraphOptions = {
   size?: number;
@@ -27,6 +43,7 @@ export type ParagraphOptions = {
   muted?: boolean;
   indent?: number;
   color?: RGB;
+  font?: PDFFont;
 };
 
 /** `#RRGGBB` as pdf-lib colour components. */
@@ -111,7 +128,7 @@ export class PdfWriter {
   }
 
   paragraph(text: string, options: ParagraphOptions = {}): void {
-    const font = options.bold ? this.fonts.bold : this.fonts.regular;
+    const font = options.font ?? (options.bold ? this.fonts.bold : this.fonts.regular);
     const size = options.size ?? BODY_SIZE;
     const indent = options.indent ?? 0;
     for (const line of wrapText(font, encodable(font, text), size, CONTENT_WIDTH - indent)) {
@@ -126,6 +143,42 @@ export class PdfWriter {
       });
       this.y -= LINE_GAP;
     }
+  }
+
+  /** The brand's spaced, gold, upper-case label above a title. */
+  eyebrow(text: string): void {
+    const font = this.fonts.mono;
+    if (this.y - EYEBROW_SIZE < MARGIN) this.newPage();
+    this.y -= EYEBROW_SIZE;
+    this.page.pushOperators(setCharacterSpacing(EYEBROW_SPACING));
+    this.page.drawText(encodable(font, text.toLocaleUpperCase('pt-PT')), {
+      x: MARGIN,
+      y: this.y,
+      size: EYEBROW_SIZE,
+      font,
+      color: GOLD_COLOR,
+    });
+    this.page.pushOperators(setCharacterSpacing(0));
+    this.y -= LINE_GAP * 3;
+  }
+
+  /** A document title in the brand's serif. */
+  title(text: string, size = TITLE_SIZE): void {
+    this.paragraph(text, { size, font: this.fonts.serif });
+    this.y -= LINE_GAP;
+  }
+
+  /** A hairline across the content width. */
+  rule(): void {
+    this.y -= LINE_GAP * 2;
+    if (this.y < MARGIN) this.newPage();
+    this.page.drawLine({
+      start: { x: MARGIN, y: this.y },
+      end: { x: PAGE_WIDTH - MARGIN, y: this.y },
+      thickness: 0.5,
+      color: RULE_COLOR,
+    });
+    this.y -= LINE_GAP * 4;
   }
 
   async image(png: Uint8Array, size: number): Promise<void> {
@@ -183,10 +236,7 @@ export async function createPdf(meta: { title: string; subject?: string }): Prom
   document.setTitle(meta.title);
   if (meta.subject) document.setSubject(meta.subject);
   document.setProducer('Agency OS');
-  const fonts: PdfFonts = {
-    regular: await document.embedFont(StandardFonts.Helvetica),
-    bold: await document.embedFont(StandardFonts.HelveticaBold),
-  };
+  const fonts = await embedFonts(document);
   return { document, fonts, writer: new PdfWriter(document, fonts) };
 }
 
@@ -307,9 +357,6 @@ export async function createDeck(meta: { title: string }): Promise<{
   const document = await PDFDocument.create();
   document.setTitle(meta.title);
   document.setProducer('Agency OS');
-  const fonts: PdfFonts = {
-    regular: await document.embedFont(StandardFonts.Helvetica),
-    bold: await document.embedFont(StandardFonts.HelveticaBold),
-  };
+  const fonts = await embedFonts(document);
   return { document, slides: new SlideWriter(document, fonts) };
 }

@@ -43,7 +43,7 @@ export function InvoiceCard({
   return (
     <article
       aria-labelledby={headingId}
-      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-5 rounded-lg border border-border bg-surface p-5"
     >
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
@@ -63,7 +63,7 @@ export function InvoiceCard({
       </header>
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-title tabular-nums text-text">
+        <span className="text-display font-semibold tracking-[-0.02em] tabular-nums text-text">
           {formatMoney(toMinorUnits(invoice.amount), invoice.currency, locale)}
         </span>
         <span className="text-body-sm text-text-secondary">
@@ -99,7 +99,7 @@ export function InvoiceCard({
 
           <section
             aria-label={t('bankTitle')}
-            className="flex flex-col gap-1 rounded-md bg-surface-muted p-3"
+            className="flex flex-col gap-2 rounded-md border border-border bg-surface-muted p-4"
           >
             <h3 className="text-label text-text">{t('bankTitle')}</h3>
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-body-sm">

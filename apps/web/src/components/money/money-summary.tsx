@@ -20,19 +20,17 @@ function Totals({ title, totals }: { title: string; totals: CurrencyTotals }) {
   const money = useMoneyFormat();
   const lines = CURRENCIES.filter((currency) => totals[currency] !== undefined);
   return (
-    <section
-      aria-label={title}
-      className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4"
-    >
-      <h2 className="text-caption font-medium uppercase tracking-wide text-text-secondary">
-        {title}
-      </h2>
+    <section aria-label={title} className="flex flex-col gap-1.5 px-5 py-4">
+      <h2 className="text-caption font-medium text-text-tertiary">{title}</h2>
       {lines.length === 0 ? (
         <p className="text-body-sm text-text-secondary">{t('none')}</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {lines.map((currency) => (
-            <li key={currency} className="text-title-sm tabular-nums text-text">
+            <li
+              key={currency}
+              className="text-display font-semibold tracking-[-0.02em] text-text tabular-nums"
+            >
               {money(totals[currency] ?? '0', currency)}
             </li>
           ))}
@@ -46,7 +44,7 @@ function Totals({ title, totals }: { title: string; totals: CurrencyTotals }) {
 export function MoneySummary({ summary }: { summary: YearSummary }) {
   const t = useTranslations('money.summary');
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="rd-rise grid divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface sm:grid-cols-3 sm:divide-x sm:divide-y-0">
       <Totals title={t('received')} totals={summary.received} />
       <Totals title={t('open')} totals={summary.open} />
       <Totals title={t('spent')} totals={summary.spent} />

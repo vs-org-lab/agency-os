@@ -73,14 +73,14 @@ describe('design tokens', () => {
     }
   });
 
-  it('light canvas is #FBFBFB and dark canvas is #0A0F15', () => {
-    expect(themes.light.get('canvas')).toBe('#FBFBFB');
-    expect(themes.dark.get('canvas')).toBe('#0A0F15');
+  it('light canvas is #FAFAFA and dark canvas is the ink-tinted #05090E', () => {
+    expect(themes.light.get('canvas')).toBe('#FAFAFA');
+    expect(themes.dark.get('canvas')).toBe('#05090E');
   });
 
-  it('accent is #0A7FD1 light and #4FA8EC dark', () => {
-    expect(themes.light.get('accent')).toBe('#0A7FD1');
-    expect(themes.dark.get('accent')).toBe('#4FA8EC');
+  it('accent is monochrome: ink in light and near-white in dark', () => {
+    expect(themes.light.get('accent')).toBe('#0B1117');
+    expect(themes.dark.get('accent')).toBe('#EDF0F3');
   });
 
   it('text contrast is at least 4.5:1 against surface in both themes', () => {

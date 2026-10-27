@@ -19,6 +19,31 @@ export type NavigationIcon =
   | 'gauge'
   | 'chart';
 
+export type IconMotion = 'lift' | 'spin' | 'swing' | 'grow' | 'draw' | 'pulse' | 'needle';
+
+/** Hover movement of each navigation icon; the keyframes live in the UI package styles. */
+export const NAVIGATION_ICON_MOTION: Record<NavigationIcon, IconMotion> = {
+  home: 'lift',
+  settings: 'spin',
+  dashboard: 'lift',
+  kanban: 'grow',
+  inbox: 'lift',
+  target: 'pulse',
+  receipt: 'lift',
+  feed: 'lift',
+  check: 'draw',
+  tasks: 'draw',
+  users: 'lift',
+  proofs: 'lift',
+  folder: 'lift',
+  documents: 'lift',
+  brand: 'spin',
+  calendar: 'swing',
+  wallet: 'lift',
+  gauge: 'needle',
+  chart: 'grow',
+};
+
 export type NavigationLabelKey =
   | 'shell.studioNav.home'
   | 'shell.studioNav.pipeline'

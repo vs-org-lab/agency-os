@@ -62,6 +62,7 @@
     "signOutDone": "Signed out."
   },
   "shell": {
+    "account": "Account",
     "studio": "Studio",
     "allClients": "All clients",
     "toggleSidebar": "Show or hide menu",
@@ -83,7 +84,6 @@
     "settings": "Settings",
     "clients": "Clients",
     "noClients": "There are no clients yet.",
-    "account": "Account",
     "unseenLabel": "{label}, {count} new",
     "studioNav": {
       "home": "Home",

@@ -62,6 +62,7 @@
     "signOutDone": "Sessão terminada."
   },
   "shell": {
+    "account": "Conta",
     "studio": "Estúdio",
     "allClients": "Todos os clientes",
     "toggleSidebar": "Mostrar ou ocultar menu",
@@ -83,7 +84,6 @@
     "settings": "Definições",
     "clients": "Clientes",
     "noClients": "Ainda não há clientes.",
-    "account": "Conta",
     "unseenLabel": "{label}, {count, plural, one {# nova} other {# novas}}",
     "studioNav": {
       "home": "Início",

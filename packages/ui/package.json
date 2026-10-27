@@ -10,7 +10,7 @@
     "./hooks/*": "./src/hooks/*.ts",
     "./motion": "./src/motion/index.ts",
     "./theme": "./src/theme/theme-provider.tsx",
-    "./brand": "./src/brand/symbol.tsx",
+    "./brand": "./src/brand/index.ts",
     "./theme-toggle": "./src/theme/theme-toggle.tsx"
   },
   "scripts": {

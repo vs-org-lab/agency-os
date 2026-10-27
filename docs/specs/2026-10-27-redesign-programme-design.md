@@ -37,7 +37,7 @@ Referências (pasta `References/`, local, fora do repositório):
 ## Direção visual
 
 - **Escada de superfícies no escuro** (tingida de Ink, nunca preto puro): `canvas` → `surface` → `surface-raised` → `surface-overlay`, com hairlines em dois níveis. A hierarquia vem da elevação por superfície e da hairline, não de sombras.
-- **Um acento cromático por ecrã:** Aurion Blue para foco, seleção, links e progresso; Aurion Gold reservado a momentos de marca e "a sua ação". Botão principal monocromático (branco no escuro, Ink no claro), como nas referências.
+- **Quase monocromático, como as referências** (corrigido a 2026-10-27 depois da primeira maquete): botão principal, anéis, barras, indicadores e foco em branco no escuro e Ink no claro. A cor fica para o estado (feito ou pago, prazo, atraso) e para os logótipos dos clientes. O dourado fica só no ponto do lettering e dentro dos documentos da marca. Detalhe em [RD-0](2026-10-27-rd-0-dark-foundation-design.md).
 - **Tipografia Inter:** títulos 500–600 com tracking negativo (−2% a partir de 24 px), corpo 400, rótulos 500 com tracking positivo; números tabulares em métricas.
 - **Composição:** cabeçalhos de página com avatar ou logótipo, título, contexto e ações à direita; painéis com cabeçalho próprio (título, contagem, ação "abrir" ↗); listas em linhas com hairline; painel lateral de propriedades à direita quando há um objeto em foco.
 - **Movimento:** opção A mantida (morph funcional até ~300 ms); entradas em cascata curta nos painéis, números animados nas métricas, anéis que enchem, indicadores partilhados nos separadores, transições de modal e de painel lateral; tudo respeita "reduzir movimento".

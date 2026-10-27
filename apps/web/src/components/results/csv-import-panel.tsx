@@ -19,8 +19,8 @@ import {
   type MonthlyValue,
   type KpiValuesInput,
   type ResultsActionResult,
+  formatKpi,
 } from '@/modules/results';
-import { formatKpi } from './kpi-format';
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_ROWS = 20_000;

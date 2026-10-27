@@ -2,8 +2,14 @@ import { ArrowUpRight } from 'lucide-react';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
-import { monthsUpTo, type KpiFormat, type KpiPoint } from '@/modules/results';
-import { formatKpi, kpiChange, kpiStanding } from './kpi-format';
+import {
+  formatKpi,
+  kpiChange,
+  kpiStanding,
+  monthsUpTo,
+  type KpiFormat,
+  type KpiPoint,
+} from '@/modules/results';
 import { Sparkline } from './sparkline';
 
 export type StripKpi = {

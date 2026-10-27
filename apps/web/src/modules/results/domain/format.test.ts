@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatKpi, kpiChange, kpiStanding } from './kpi-format';
+import { formatKpi, kpiChange, kpiStanding } from './format';
 
 describe('formatKpi', () => {
   it('formats numbers, percentages, currency and ratios for the reader', () => {

@@ -251,4 +251,51 @@ describe('client report data', () => {
     },
     SLOW,
   );
+
+  it(
+    'compares the client-visible indicators with the period before',
+    async () => {
+      await withTestTransaction(async (sql) => {
+        const world = await createFixtureWorld(sql);
+        const kpi = async (name: string, clientVisible: boolean) => {
+          const [row] = await sql<{ id: string }[]>`
+            insert into public.client_kpis (organization_id, client_id, name, source, target,
+                                             client_visible)
+            values (${world.organizationId}, ${world.clients.a}, ${name}, 'GA4', 40,
+                    ${clientVisible})
+            returning id
+          `;
+          return row?.id ?? '';
+        };
+        const leads = await kpi('Leads', true);
+        const internal = await kpi('Margem', false);
+        for (const [id, month, value] of [
+          [leads, '2026-08-01', 20],
+          [leads, '2026-09-01', 30],
+          [internal, '2026-09-01', 12],
+        ] as const) {
+          await sql`
+            insert into public.client_kpi_values (organization_id, client_id, kpi_id, month, value)
+            values (${world.organizationId}, ${world.clients.a}, ${id}, ${month}, ${value})
+          `;
+        }
+
+        const data = await system(sql)((tx) =>
+          collectReportData(tx, { clientId: world.clients.a, period: SEPTEMBER }),
+        );
+
+        expect(data.indicators).toEqual([
+          {
+            name: 'Leads',
+            format: 'number',
+            source: 'GA4',
+            target: 40,
+            current: 30,
+            previous: 20,
+          },
+        ]);
+      });
+    },
+    SLOW,
+  );
 });

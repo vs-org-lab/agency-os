@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import type { DbTransaction } from '@agency-os/db';
 import { limitMonths } from '@/modules/retainers/server';
 import { updateTitle, type ReportData } from './domain/content';
+import { reportIndicators } from './domain/indicators';
 import type { ReportPeriod } from './domain/periods';
 
 const lisbonDay = (column: string) => sql.raw(`(${column} at time zone 'Europe/Lisbon')::date`);
@@ -81,6 +82,45 @@ async function outcome(tx: DbTransaction, clientId: string, period: ReportPeriod
   };
 }
 
+const MONTHS_IN_PERIOD = { monthly: 1, qbr: 3 } as const;
+
+/** The client-visible indicators over the period and the period of the same length before it. */
+async function indicators(tx: DbTransaction, clientId: string, period: ReportPeriod) {
+  const definitions = await tx.execute<{
+    id: string;
+    name: string;
+    format: 'number' | 'percent' | 'currency' | 'ratio';
+    aggregation: 'sum' | 'average' | 'last';
+    source: string;
+    target: string | null;
+  }>(sql`
+    select id, name, format::text, aggregation::text, source, target::text
+    from public.client_kpis
+    where client_id = ${clientId}::uuid and client_visible and archived_at is null
+    order by position, created_at
+  `);
+  if (definitions.length === 0) return [];
+  const values = await tx.execute<{ kpi_id: string; month: string; value: string }>(sql`
+    select v.kpi_id, v.month::text, v.value::text
+    from public.client_kpi_values v
+    where v.client_id = ${clientId}::uuid
+      and v.month >= ${period.start}::date - make_interval(months => ${MONTHS_IN_PERIOD[period.kind]}::int)
+      and v.month <= ${period.end}::date
+  `);
+  return reportIndicators(
+    definitions.map((row) => ({
+      id: row.id,
+      name: row.name,
+      format: row.format,
+      aggregation: row.aggregation,
+      source: row.source,
+      target: row.target === null ? null : Number(row.target),
+    })),
+    values.map((row) => ({ kpiId: row.kpi_id, month: row.month, value: Number(row.value) })),
+    period,
+  );
+}
+
 /**
  * What happened for the client in the period (RF-130), read in the system context after the
  * caller's authorisation. Only what the client already sees enters: steps shown to the client,
@@ -123,5 +163,6 @@ export async function collectReportData(
     approvals: approvals.map((item) => ({ title: item.title, on: item.on })),
     retainer: await retainerUsage(tx, clientId, period),
     outcome: await outcome(tx, clientId, period),
+    indicators: await indicators(tx, clientId, period),
   };
 }

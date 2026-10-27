@@ -1,6 +1,8 @@
+import { formatKpi, kpiChange } from '@/modules/results';
 import type { RetainerLimitKind } from '@/modules/retainers';
 import { createDeck, createPdf } from '@/platform/pdf';
 import type { ReportData, ReportTexts } from './domain/content';
+import type { ReportIndicator } from './domain/indicators';
 import type { ReportPeriod } from './domain/periods';
 import { periodLabel, pdfTitle } from './domain/titles';
 
@@ -66,10 +68,47 @@ function outcome(data: ReportData): Block[] {
   ];
 }
 
+const LOCALE = 'pt-PT';
+const CHANGE_UNIT = { percent: '%', points: ' p.p.', value: '×' } as const;
+
+const figure = (indicator: ReportIndicator, value: number | null) =>
+  value === null ? 'sem valor' : formatKpi(value, indicator.format, LOCALE);
+
+/** "+50%", "-0,2 p.p." or "" when there is nothing to compare. */
+function changeOf(indicator: ReportIndicator): string {
+  if (indicator.current === null) return '';
+  const change = kpiChange(indicator.current, indicator.previous, indicator.format);
+  if (!change) return '';
+  const sign = change.direction === 'up' ? '+' : change.direction === 'down' ? '-' : '';
+  return `${sign}${NUMBER.format(change.amount)}${CHANGE_UNIT[change.unit]}`;
+}
+
+function indicatorLine(indicator: ReportIndicator): string {
+  return [
+    `${indicator.name}: ${figure(indicator, indicator.current)}`,
+    indicator.previous === null ? '' : `anterior ${figure(indicator, indicator.previous)}`,
+    changeOf(indicator),
+    indicator.target === null
+      ? ''
+      : `meta ${formatKpi(indicator.target, indicator.format, LOCALE)}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+const indicatorsOf = (data: ReportData) => data.indicators ?? [];
+
 /** The template's sections in order (RF-130); the QBR adds next quarter's priorities. */
 function sections({ period, data, texts }: ReportPdfInput): Section[] {
   const all: Section[] = [
     { title: 'Resumo', blocks: text(texts.summary) },
+    {
+      title: 'Indicadores',
+      blocks: indicatorsOf(data).map((indicator) => ({
+        type: 'item' as const,
+        text: indicatorLine(indicator),
+      })),
+    },
     { title: 'Trabalho feito', blocks: work(data) },
     { title: 'Retainer', blocks: retainer(data) },
     { title: 'Resultado', blocks: outcome(data) },
@@ -85,11 +124,12 @@ function sections({ period, data, texts }: ReportPdfInput): Section[] {
 /** The monthly report: A4 portrait, the sections one after another. */
 export async function monthlyReportPdf(input: ReportPdfInput): Promise<Uint8Array> {
   const title = pdfTitle(input.period, input.clientName);
-  const { document, writer } = await createPdf({ title });
-  writer.paragraph(title, { size: 18, bold: true });
-  writer.space(16);
+  const { document, fonts, writer } = await createPdf({ title });
+  writer.eyebrow('Relatório mensal');
+  writer.title(title, 20);
+  writer.rule();
   for (const section of sections(input)) {
-    writer.paragraph(section.title, { size: 13, bold: true });
+    writer.paragraph(section.title, { size: 15, font: fonts.serif });
     writer.space(4);
     for (const block of section.blocks) {
       if (block.type === 'heading') writer.paragraph(block.text, { bold: true });
@@ -101,12 +141,49 @@ export async function monthlyReportPdf(input: ReportPdfInput): Promise<Uint8Arra
   return document.save();
 }
 
-/** The QBR: A4 landscape slides, a cover and one slide per section. */
+/**
+ * The QBR as a 16:9 performance report in the brand template: Ink cover, executive summary with
+ * the four headline indicators, the comparison with the previous quarter, the sections and a close.
+ */
 export async function qbrDeckPdf(input: ReportPdfInput): Promise<Uint8Array> {
   const title = pdfTitle(input.period, input.clientName);
   const { document, slides } = await createDeck({ title });
-  slides.cover(title, 'Revisão trimestral do negócio');
+  const indicators = indicatorsOf(input.data);
+  slides.cover('Relatório de performance', input.clientName, periodLabel(input.period));
+
+  if (indicators.length > 0 || input.texts.summary) {
+    slides.slide('Sumário executivo', 'Os indicadores que mais importam no período.');
+    slides.metrics(
+      indicators
+        .filter((indicator) => indicator.current !== null)
+        .map((indicator) => ({
+          value: figure(indicator, indicator.current),
+          label: indicator.name,
+          note: changeOf(indicator)
+            ? `${changeOf(indicator)} vs período anterior`
+            : indicator.source,
+        })),
+    );
+    if (input.texts.summary) slides.paragraph(input.texts.summary);
+  }
+
+  if (indicators.length > 0) {
+    slides.slide('Indicadores', 'Comparação com o período anterior.');
+    slides.comparison(
+      indicators.map((indicator) => ({
+        label: indicator.name,
+        previous: indicator.previous,
+        current: indicator.current,
+        previousText: figure(indicator, indicator.previous),
+        currentText: figure(indicator, indicator.current),
+        change: changeOf(indicator),
+      })),
+      { previous: 'Período anterior', current: periodLabel(input.period) },
+    );
+  }
+
   for (const section of sections(input)) {
+    if (section.title === 'Resumo' || section.title === 'Indicadores') continue;
     slides.slide(section.title);
     for (const block of section.blocks) {
       if (block.type === 'heading') slides.heading(block.text);
@@ -114,5 +191,6 @@ export async function qbrDeckPdf(input: ReportPdfInput): Promise<Uint8Array> {
       else slides.paragraph(block.text);
     }
   }
+  slides.closing('Obrigado.', '');
   return document.save();
 }

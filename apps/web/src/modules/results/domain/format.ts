@@ -1,4 +1,4 @@
-import type { KpiFormat } from '@/modules/results';
+import type { KpiFormat } from '../readers';
 
 const round = (value: number, places: number) => Math.round(value * 10 ** places) / 10 ** places;
 

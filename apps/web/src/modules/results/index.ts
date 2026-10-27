@@ -9,6 +9,7 @@ export {
   type KpiAggregation,
   type MonthlyValue,
 } from './domain/csv';
+export { formatKpi, kpiChange, kpiStanding, type KpiChange } from './domain/format';
 export { currentMonth, isMonth, monthsUpTo } from './domain/months';
 export type {
   ClientKpiView,

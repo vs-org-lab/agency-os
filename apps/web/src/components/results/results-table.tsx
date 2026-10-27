@@ -14,10 +14,10 @@ import {
   type ClientResultsView,
   type KpiValuesInput,
   type ResultsActionResult,
+  formatKpi,
 } from '@/modules/results';
 import { CsvImportPanel } from './csv-import-panel';
 import { EMPTY_KPI, KpiFormDialog, type KpiDraft } from './kpi-form-dialog';
-import { formatKpi } from './kpi-format';
 
 export type ResultsActions = {
   saveKpi: Parameters<typeof KpiFormDialog>[0]['save'];

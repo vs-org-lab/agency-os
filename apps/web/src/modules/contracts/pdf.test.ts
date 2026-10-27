@@ -70,4 +70,19 @@ describe('buildContractPdf', () => {
 
     expect(containsText(pdf, 'Valor: 12 000,00')).toBe(true);
   });
+
+  it('writes module headings without their markdown marks', async () => {
+    const pdf = await buildContractPdf({
+      ...INPUT,
+      body: [
+        '## 2. Âmbito',
+        '',
+        '### Módulo A — Vídeo e motion graphics',
+        '',
+        '- Edição de vídeo',
+      ].join('\n'),
+    });
+    expect(containsText(pdf, 'Módulo A')).toBe(true);
+    expect(containsText(pdf, '###')).toBe(false);
+  });
 });

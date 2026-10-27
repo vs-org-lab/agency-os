@@ -1,5 +1,6 @@
 import type { CountryCode, PaymentStep } from '@agency-os/db';
 import { formatMoney, type Currency, type Locale } from '@agency-os/i18n';
+import { moduleClauses, type ContractModule } from './modules';
 import { splitAmount, toMinorUnits } from './payments';
 import { FIELD_PATTERN, isTemplateField, type TemplateField } from './template';
 
@@ -27,6 +28,7 @@ export type ContractValues = {
     paymentPlan: PaymentStep[];
     retainerMonthly: string | null;
     retainerMonths: number | null;
+    modules: ContractModule[];
   };
   proposal: { guarantee: string; currency: Currency };
   contractDate: Date;
@@ -86,6 +88,8 @@ function fieldValue(field: TemplateField, values: ContractValues, locale: Locale
       return option.summary;
     case 'opcao.ambito':
       return option.scope.map((line) => `- ${line}`).join('\n');
+    case 'opcao.modulos':
+      return moduleClauses(option.modules, locale, values.proposal.currency);
     case 'opcao.valor':
       return money(toMinorUnits(option.oneOffAmount));
     case 'opcao.pagamentos': {

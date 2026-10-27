@@ -34,6 +34,9 @@ export async function buildContractPdf(input: ContractPdfInput): Promise<Uint8Ar
     const line = rawLine.trimEnd();
     if (line === '') {
       writer.space(BODY_SIZE / 2);
+    } else if (line.startsWith('### ')) {
+      writer.space(4);
+      writer.paragraph(line.slice(4), { size: 11, bold: true });
     } else if (line.startsWith('## ')) {
       writer.space(6);
       writer.paragraph(line.slice(3), { size: 14, font: fonts.serif });

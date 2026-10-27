@@ -20,6 +20,7 @@ import type {
   ProposalWorkspace,
 } from '@/modules/contracts/server';
 import type { ContractActionResult, SaveProposalResult } from './contract-actions';
+import { ModuleBuilder, PaymentPresets } from './module-builder';
 
 export type ProposalActions = {
   save(input: ProposalDraftInput): Promise<SaveProposalResult>;
@@ -70,6 +71,7 @@ function blankOption(name: string, signature: string, delivery: string): Proposa
     ],
     retainerMonthly: null,
     retainerMonths: null,
+    modules: [],
   };
 }
 
@@ -83,6 +85,7 @@ function editableOptions(proposal: ProposalView | null): ProposalOptionInput[] |
     paymentPlan: option.paymentPlan,
     retainerMonthly: option.retainerMonthly,
     retainerMonths: option.retainerMonths,
+    modules: option.modules,
   }));
 }
 
@@ -312,6 +315,8 @@ function ProposalEditor({
               index={index}
               option={option}
               findings={findings}
+              locale={locale}
+              currency={currency}
               canRemove={options.length > 1}
               onChange={(change) => update(index, change)}
               onRemove={() => setOptions((current) => current.filter((_, at) => at !== index))}
@@ -370,6 +375,8 @@ function OptionEditor({
   index,
   option,
   findings,
+  locale,
+  currency,
   canRemove,
   onChange,
   onRemove,
@@ -377,6 +384,8 @@ function OptionEditor({
   index: number;
   option: ProposalOptionInput;
   findings: ProposalWorkspace['findings'];
+  locale: Locale;
+  currency: Currency;
   canRemove: boolean;
   onChange: (change: (option: ProposalOptionInput) => ProposalOptionInput) => void;
   onRemove: () => void;
@@ -513,8 +522,17 @@ function OptionEditor({
         </div>
       </div>
 
+      <ModuleBuilder
+        prefix={prefix}
+        modules={option.modules ?? []}
+        locale={locale}
+        currency={currency}
+        onChange={(modules) => onChange((current) => ({ ...current, modules }))}
+      />
+
       <div className="flex flex-col gap-2">
         <span className="text-label text-text">{t('payments')}</span>
+        <PaymentPresets locale={locale} onApply={onChange} />
         {option.paymentPlan.map((step, stepIndex) => (
           <div key={stepIndex} className="flex items-center gap-2">
             <Input

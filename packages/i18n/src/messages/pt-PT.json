@@ -1867,6 +1867,50 @@
       "removePayment": "Remover pagamento {position}",
       "paymentsTotal": "Total: {total}%",
       "retainerToggle": "Inclui acompanhamento mensal",
+      "modules": {
+        "title": "Módulos do contrato",
+        "hint": "Escolha os serviços desta opção; o contrato inclui só as cláusulas dos módulos escolhidos.",
+        "preview": "Cláusulas no contrato",
+        "otherTool": "Outras",
+        "titles": {
+          "A": "Vídeo e motion graphics",
+          "B": "Gestão de redes sociais",
+          "C": "Tráfego pago",
+          "D": "Web, software e apps",
+          "E": "Automação e IA"
+        },
+        "fields": {
+          "videosPerMonth": "Vídeos por mês",
+          "revisions": "Rondas de revisão",
+          "platforms": "Plataformas",
+          "feedPosts": "Publicações no feed por mês",
+          "storiesPerWeek": "Stories por semana",
+          "mediaBudget": "Orçamento de media mensal",
+          "managementFee": "Fee de gestão mensal",
+          "solution": "Tipo de solução",
+          "technologies": "Tecnologias",
+          "hosting": "Hosting e domínio incluídos",
+          "sourceCode": "Código fonte entregue",
+          "tools": "Ferramentas",
+          "maintenanceMonths": "Meses de manutenção"
+        },
+        "solutions": {
+          "website": "Website institucional",
+          "landing": "Landing page",
+          "ecommerce": "E-commerce",
+          "webapp": "Web app",
+          "mobile": "App mobile",
+          "custom": "Software à medida"
+        }
+      },
+      "presets": {
+        "label": "Modalidade:",
+        "options": {
+          "A": "A · 50/50",
+          "B": "B · Três parcelas",
+          "C": "C · Retainer mensal"
+        }
+      },
       "retainerMonthly": "Valor mensal",
       "retainerMonths": "Meses",
       "retainerSummary": "{amount} por mês, durante {months} meses",

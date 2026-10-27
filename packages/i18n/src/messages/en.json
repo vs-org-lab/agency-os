@@ -1867,6 +1867,50 @@
       "removePayment": "Remove payment {position}",
       "paymentsTotal": "Total: {total}%",
       "retainerToggle": "Includes monthly support",
+      "modules": {
+        "title": "Contract modules",
+        "hint": "Choose this option's services; the contract only includes the chosen modules' clauses.",
+        "preview": "Clauses in the contract",
+        "otherTool": "Other",
+        "titles": {
+          "A": "Video and motion graphics",
+          "B": "Social media management",
+          "C": "Paid media",
+          "D": "Web, software and apps",
+          "E": "Automation and AI"
+        },
+        "fields": {
+          "videosPerMonth": "Videos per month",
+          "revisions": "Revision rounds",
+          "platforms": "Platforms",
+          "feedPosts": "Feed posts per month",
+          "storiesPerWeek": "Stories per week",
+          "mediaBudget": "Monthly media budget",
+          "managementFee": "Monthly management fee",
+          "solution": "Solution",
+          "technologies": "Technologies",
+          "hosting": "Hosting and domain included",
+          "sourceCode": "Source code delivered",
+          "tools": "Tools",
+          "maintenanceMonths": "Maintenance months"
+        },
+        "solutions": {
+          "website": "Corporate website",
+          "landing": "Landing page",
+          "ecommerce": "E-commerce",
+          "webapp": "Web app",
+          "mobile": "Mobile app",
+          "custom": "Custom software"
+        }
+      },
+      "presets": {
+        "label": "Payment option:",
+        "options": {
+          "A": "A · 50/50",
+          "B": "B · Three instalments",
+          "C": "C · Monthly retainer"
+        }
+      },
       "retainerMonthly": "Monthly amount",
       "retainerMonths": "Months",
       "retainerSummary": "{amount} per month, for {months} months",

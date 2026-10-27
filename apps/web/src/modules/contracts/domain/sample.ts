@@ -28,6 +28,16 @@ export const SAMPLE_CONTRACT_VALUES: ContractValues = {
     ],
     retainerMonthly: '1500.00',
     retainerMonths: 12,
+    modules: [
+      {
+        code: 'B',
+        params: { platforms: ['instagram', 'linkedin'], feedPosts: 12, storiesPerWeek: 5 },
+      },
+      {
+        code: 'D',
+        params: { solution: 'website', technologies: '', hosting: true, sourceCode: true },
+      },
+    ],
   },
   proposal: { guarantee: 'Garantia de 30 dias sobre o trabalho entregue.', currency: 'EUR' },
   contractDate: new Date('2026-10-09T10:00:00Z'),

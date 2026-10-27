@@ -547,6 +547,13 @@
       "when": 1793115708383,
       "tag": "20261027154148_client_results_access",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1793128299853,
+      "tag": "20261027191139_proposal_option_modules",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ import {
 } from '@agency-os/ui/components/collapsible';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
+import { ContractText } from '@/components/contracts/contract-text';
 import { FormMessage } from '@/components/forms/form-message';
 import { renderContract, SAMPLE_CONTRACT_VALUES, TEMPLATE_FIELDS } from '@/modules/contracts';
 import type { PublishContractTemplateResult } from '@/modules/contracts/server';
@@ -114,9 +115,9 @@ export function ContractTemplateEditor({
         <div
           aria-label={t('previewLabel')}
           tabIndex={0}
-          className="max-h-120 overflow-y-auto rounded-md border border-border bg-surface p-4 text-body-sm whitespace-pre-wrap text-text"
+          className="max-h-120 overflow-y-auto rounded-md border border-border bg-surface p-4"
         >
-          {renderContract(value, SAMPLE_CONTRACT_VALUES, locale)}
+          <ContractText body={renderContract(value, SAMPLE_CONTRACT_VALUES, locale)} />
         </div>
       ) : null}
     </form>

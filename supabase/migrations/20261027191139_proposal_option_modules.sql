@@ -1,0 +1,1 @@
+ALTER TABLE "proposal_options" ADD COLUMN "modules" jsonb DEFAULT '[]'::jsonb NOT NULL;

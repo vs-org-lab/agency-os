@@ -7,3 +7,15 @@ export {
   validatePaymentPlan,
 } from './domain/payments';
 export { SAMPLE_CONTRACT_VALUES } from './domain/sample';
+export {
+  AD_PLATFORMS,
+  AUTOMATION_TOOLS,
+  MODULE_CODES,
+  moduleClauses,
+  parseModules,
+  PAYMENT_PRESETS,
+  SOCIAL_PLATFORMS,
+  SOLUTIONS,
+  type ContractModule,
+  type ModuleCode,
+} from './domain/modules';

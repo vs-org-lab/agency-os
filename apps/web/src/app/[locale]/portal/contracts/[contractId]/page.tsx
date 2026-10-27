@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { z } from 'zod';
+import { ContractText } from '@/components/contracts/contract-text';
 import { SignatureForm } from '@/components/contracts/signature-form';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
@@ -54,9 +55,9 @@ export default async function PortalContractPage({ params }: PageProps) {
       <article
         aria-label={t('title')}
         tabIndex={0}
-        className="max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-surface p-5 text-body-sm whitespace-pre-wrap text-text"
+        className="max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-surface p-6 md:p-8"
       >
-        {contract.body}
+        <ContractText body={contract.body} />
       </article>
 
       {canSign && contract.expectedSigner ? (

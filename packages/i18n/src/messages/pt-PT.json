@@ -2084,7 +2084,10 @@
       "people": "Pessoas",
       "nobody": "Ninguém atribuído",
       "healthLine": "Saúde: {score} de 100, {level}",
-      "healthEmpty": "Saúde: ainda sem dados suficientes"
+      "healthEmpty": "Saúde: ainda sem dados suficientes",
+      "progress": "Progresso",
+      "dates": "Datas",
+      "peopleCount": "{count, plural, =0 {Ninguém} one {# pessoa} other {# pessoas}}"
     },
     "phases": "Fases",
     "phaseDue": "Data prevista da fase",
@@ -2205,7 +2208,9 @@
         "approval_required": "Esta fase só termina com a aprovação do cliente.",
         "deal_has_project": "Este negócio já tem um projeto."
       }
-    }
+    },
+    "phaseNumber": "Fase {position}",
+    "phaseProgress": "{done} de {total} feitos"
   },
   "tasks": {
     "title": "Tarefas",

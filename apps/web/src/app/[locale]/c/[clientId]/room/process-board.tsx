@@ -91,7 +91,7 @@ export function ProcessBoard({
     });
 
   return (
-    <div className="grid gap-4 md:grid-cols-[16rem_1fr]">
+    <div className="flex flex-col gap-4">
       <PhaseStepper
         phases={project.phases}
         selectedId={selectedId}
@@ -103,8 +103,12 @@ export function ProcessBoard({
       />
 
       {selected ? (
-        <section aria-labelledby="phase-title" className="flex flex-col gap-4">
-          <header className="flex flex-col gap-2">
+        <section
+          aria-labelledby="phase-title"
+          className="rd-rise flex flex-col overflow-hidden rounded-lg border border-border bg-surface"
+          style={{ animationDelay: '40ms' }}
+        >
+          <header className="flex flex-col gap-2 border-b border-border px-4 py-3.5">
             <div className="flex flex-wrap items-center gap-2">
               <h2 id="phase-title" className="text-title-sm text-text">
                 {selected.name}
@@ -214,7 +218,7 @@ export function ProcessBoard({
             ) : null}
           </header>
 
-          <ol aria-label={t('stepsOf', { name: selected.name })} className="flex flex-col gap-2">
+          <ol aria-label={t('stepsOf', { name: selected.name })} className="flex flex-col">
             {selected.steps.map((step) => (
               <StepRow
                 key={step.id}

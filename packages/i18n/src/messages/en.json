@@ -2084,7 +2084,10 @@
       "people": "People",
       "nobody": "Nobody assigned",
       "healthLine": "Health: {score} of 100, {level}",
-      "healthEmpty": "Health: not enough data yet"
+      "healthEmpty": "Health: not enough data yet",
+      "progress": "Progress",
+      "dates": "Dates",
+      "peopleCount": "{count, plural, =0 {Nobody} one {# person} other {# people}}"
     },
     "phases": "Phases",
     "phaseDue": "Phase due date",
@@ -2205,7 +2208,9 @@
         "approval_required": "This phase only ends with the client approval.",
         "deal_has_project": "This deal already has a project."
       }
-    }
+    },
+    "phaseNumber": "Phase {position}",
+    "phaseProgress": "{done} of {total} done"
   },
   "tasks": {
     "title": "Tasks",

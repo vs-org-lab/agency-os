@@ -60,7 +60,7 @@ export function StepRow({
     <m.li
       layout
       transition={transitions.base}
-      className="flex items-center gap-3 rounded-md border border-border px-3 py-2"
+      className="flex items-center gap-3 border-t border-border px-4 py-2.5 transition-colors duration-(--duration-fast) first:border-t-0 hover:bg-surface-muted/50"
     >
       <button
         type="button"
@@ -68,16 +68,16 @@ export function StepRow({
         disabled={!canEdit || pending}
         onClick={toggle}
         className={cn(
-          'inline-flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors',
+          'inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,transform] duration-(--duration-base) active:scale-90',
           step.status === 'done'
-            ? 'border-success bg-success-bg text-success'
+            ? 'border-text bg-text text-canvas'
             : step.status === 'in_progress'
-              ? 'border-info bg-info-bg text-info'
-              : 'border-border-strong text-text-tertiary',
+              ? 'border-dashed border-text text-text'
+              : 'border-dashed border-border-strong text-text-tertiary',
           canEdit && !pending ? 'hover:border-text' : 'cursor-default opacity-70',
         )}
       >
-        <Icon aria-hidden className="size-3.5" />
+        {step.status === 'done' ? <Icon aria-hidden className="size-3" strokeWidth={3} /> : null}
       </button>
 
       <button
@@ -109,9 +109,16 @@ export function StepRow({
           ? format.dateTime(new Date(`${step.dueOn}T12:00:00Z`), { dateStyle: 'short' })
           : t('step.noDate')}
       </span>
-      <Badge variant={step.status === 'done' ? 'secondary' : 'outline'}>
+      <span
+        className={cn(
+          'inline-flex h-5 shrink-0 items-center rounded-full px-2 text-caption font-medium',
+          step.status === 'in_progress'
+            ? 'bg-border-strong text-text'
+            : 'bg-neutral-bg text-text-secondary',
+        )}
+      >
         {t(`stepStatus.${step.status as StepStatus}`)}
-      </Badge>
+      </span>
 
       <Dialog open={confirming} onOpenChange={setConfirming}>
         <DialogContent

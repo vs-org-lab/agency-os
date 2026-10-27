@@ -59,7 +59,8 @@ function splitRecords(text: string, delimiter: string): string[][] {
  * delimiter is `,` or `;`, quoted fields may hold delimiters, quotes and line breaks.
  */
 export function parseCsv(text: string): CsvTable {
-  const lines = text.replace(/^﻿/, '').split(/\r?\n/);
+  const unmarked = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  const lines = unmarked.split(/\r?\n/);
   const start = lines.findIndex((line) => line.trim() !== '' && !line.trimStart().startsWith('#'));
   if (start === -1) return { headers: [], rows: [] };
   const body = lines.slice(start).join('\n');

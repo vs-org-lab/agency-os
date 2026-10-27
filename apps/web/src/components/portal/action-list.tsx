@@ -38,19 +38,26 @@ export function ActionList({ items }: { items: PortalActionItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section aria-labelledby="portal-action" className="flex flex-col gap-3">
-      <h2 id="portal-action" className="text-title-sm text-text">
-        {t('title')}
-      </h2>
-      <ul className="flex flex-col gap-2">
+    <section
+      aria-labelledby="portal-action"
+      className="rd-rise overflow-hidden rounded-lg border border-border bg-surface"
+    >
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <span aria-hidden className="size-1.5 rounded-full bg-text" />
+        <h2 id="portal-action" className="text-body-sm font-semibold text-text">
+          {t('title')}
+        </h2>
+        <span className="text-caption text-text-tertiary tabular-nums">{items.length}</span>
+      </div>
+      <ul className="flex flex-col divide-y divide-border">
         {byUrgency(items).map((item, index) => (
           <li
             key={`${item.kind}:${item.href}:${item.title}`}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5"
           >
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="text-caption text-text-secondary">{t(`kinds.${item.kind}`)}</span>
-              <span className="truncate text-body font-medium text-text">{item.title}</span>
+              <span className="truncate text-body-sm font-medium text-text">{item.title}</span>
               {item.dueOn ? (
                 <span className="text-caption text-text-tertiary">
                   {t('due', {

@@ -51,25 +51,28 @@ export function PortalHome({
   const strip = project && project.phases.length > 0 ? projectStrip(project) : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
       <header className="flex items-center gap-4">
         {client ? <ClientAvatar id={client.id} name={client.name} size="lg" /> : null}
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-caption font-medium text-text-tertiary first-letter:uppercase">
+            {format.dateTime(new Date(now), { dateStyle: 'full' })}
+          </p>
           <h1 className="font-display text-brand-display text-text">
             {contactName ? t('greeting', { name: contactName }) : t('greetingAnonymous')}
           </h1>
-          <p className="text-body-sm text-text-secondary">
-            {format.dateTime(new Date(now), { dateStyle: 'full' })}
-          </p>
         </div>
       </header>
       <ActionList items={actions} />
       {retainer ? <RetainerSection retainer={retainer} /> : null}
       {results ? <ResultsStrip kpis={results.kpis} currentMonth={results.currentMonth} /> : null}
       {strip && project ? (
-        <section aria-labelledby="portal-project" className="flex flex-col gap-3">
+        <section
+          aria-labelledby="portal-project"
+          className="rd-rise flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="portal-project" className="text-title-sm text-text">
+            <h2 id="portal-project" className="text-body-sm font-semibold text-text">
               {t('project.title', { name: project.name })}
             </h2>
             <Link href="/portal/updates" className="text-body-sm text-link hover:underline">

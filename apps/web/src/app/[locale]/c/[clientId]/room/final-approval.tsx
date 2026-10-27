@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { FormMessage } from '@/components/forms/form-message';
@@ -28,7 +27,6 @@ export function FinalApprovalCard({
 }) {
   const t = useTranslations('rooms.delivery');
   const format = useFormatter();
-  const router = useRouter();
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -41,7 +39,6 @@ export function FinalApprovalCard({
       setFeedback(
         result.ok ? { tone: 'success', key } : { tone: 'danger', error: roomError(result.code) },
       );
-      if (result.ok) router.refresh();
     });
 
   const approval = project.finalApproval;

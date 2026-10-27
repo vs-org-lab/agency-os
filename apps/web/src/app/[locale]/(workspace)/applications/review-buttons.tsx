@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import {
@@ -23,7 +22,6 @@ export function ReviewButtons({
   companyName: string;
 }) {
   const t = useTranslations('commercial.applications');
-  const router = useRouter();
   const [decision, setDecision] = useState<'a' | 'c' | null>(null);
   const [state, setState] = useState<ReviewActionState>({ status: 'idle' });
   const [pending, startTransition] = useTransition();
@@ -35,7 +33,6 @@ export function ReviewButtons({
     startTransition(async () => {
       const result = await reviewApplicationAction(applicationId, chosen);
       setState(result);
-      if (result.status !== 'error') router.refresh();
     });
   };
 

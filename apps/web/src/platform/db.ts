@@ -28,19 +28,20 @@ export function createDbContexts(db: Database): DbContexts {
       const parsed = verifiedClaimsSchema.safeParse(claims);
       if (!parsed.success) throw new Error('Invalid claims for user database context');
 
+      // One statement per context switch: every round trip to the pooler adds to page latency.
       return db.transaction(async (tx) => {
         await tx.execute(
-          sql`select set_config('request.jwt.claims', ${JSON.stringify(parsed.data)}, true)`,
+          sql`select set_config('request.jwt.claims', ${JSON.stringify(parsed.data)}, true), set_config('role', 'authenticated', true)`,
         );
-        await tx.execute(sql`set local role authenticated`);
         return fn(tx);
       });
     },
 
     async withSystemContext(fn) {
       return db.transaction(async (tx) => {
-        await tx.execute(sql`reset role`);
-        await tx.execute(sql`select set_config('request.jwt.claims', '', true)`);
+        await tx.execute(
+          sql`select set_config('request.jwt.claims', '', true), set_config('role', 'none', true)`,
+        );
         return fn(tx);
       });
     },

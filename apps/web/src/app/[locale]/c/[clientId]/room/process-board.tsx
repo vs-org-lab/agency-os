@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { Button } from '@agency-os/ui/components/button';
@@ -63,7 +62,6 @@ export function ProcessBoard({
 }) {
   const t = useTranslations('rooms');
   const format = useFormatter();
-  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(defaultPhase(project.phases));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [openStepId, setOpenStepId] = useState<string | null>(null);
@@ -85,13 +83,11 @@ export function ProcessBoard({
       if (panel) {
         // The panel is modal, so its outcome is reported inside it rather than behind it.
         setPanelError(result.ok ? null : roomError(result.code));
-        if (result.ok) router.refresh();
         return;
       }
       setFeedback(
         result.ok ? { tone: 'success', key } : { tone: 'danger', error: roomError(result.code) },
       );
-      if (result.ok) router.refresh();
     });
 
   return (

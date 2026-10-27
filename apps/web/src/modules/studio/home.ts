@@ -7,6 +7,7 @@ import { canScheduleInStudio } from '@/modules/agenda';
 import { canSeePipeline, isFounderActor } from '@/modules/commercial';
 import { toMinorUnits } from '@/modules/contracts';
 import { listTodayItems } from '@/modules/commercial/server';
+import { findProfileName } from '@/modules/organizations';
 import { canCreateTasks, sortByUrgency } from '@/modules/tasks';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { isStudioStaff } from './access';
@@ -67,6 +68,10 @@ export type HomeView = {
   pipeline: boolean;
   /** The creation flows the reader may start from the home menu. */
   create: { task: boolean; target: boolean; event: boolean };
+  /** First name of whoever reads the home, for the greeting. */
+  readerFirstName: string | null;
+  /** Today in the organisation time zone (YYYY-MM-DD), for grouping what comes next. */
+  localDate: string;
 };
 
 /** How long a change request stays in "Hoje" after the client sends it. */
@@ -382,7 +387,7 @@ export async function loadHome(
       const timeZone = settings?.timeZone ?? DEFAULT_TIME_ZONE;
       const today = localDate(now, timeZone);
 
-      const [commercial, rooms, billing, clientsView, activeCount] = await Promise.all([
+      const [commercial, rooms, billing, clientsView, activeCount, readerName] = await Promise.all([
         commercialItems(tx, actor, now, timeZone),
         roomItems(tx, actor, now, today),
         billingFigures(tx, actor, today),
@@ -396,6 +401,7 @@ export async function loadHome(
           .where(
             and(eq(projects.organizationId, actor.organizationId), eq(projects.status, 'active')),
           ),
+        findProfileName(tx, actor.userId),
       ]);
 
       const todayItems = sortByUrgency([...commercial, ...rooms, ...billing.items]);
@@ -414,6 +420,8 @@ export async function loadHome(
           target: isFounderActor(actor),
           event: actor.mfaVerifiedAt !== null && canScheduleInStudio(actor.roles),
         },
+        readerFirstName: readerName?.trim().split(/\s+/)[0] || null,
+        localDate: today,
       };
     },
     null,

@@ -201,6 +201,12 @@
           "step_due": "Prazo do passo",
           "task_due": "Tarefa",
           "delivery": "Entrega"
+        },
+        "groups": {
+          "today": "Hoje",
+          "tomorrow": "Amanhã",
+          "week": "Esta semana",
+          "later": "Mais tarde"
         }
       },
       "clients": {
@@ -211,7 +217,9 @@
         "lastActivity": "Última atividade {date}",
         "noActivity": "Sem atividade",
         "retainer": "Retainer"
-      }
+      },
+      "greeting": "Olá, {name}",
+      "openToday": "Abrir tarefas"
     },
     "today": {
       "title": "Hoje",

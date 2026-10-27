@@ -201,6 +201,12 @@
           "step_due": "Step due",
           "task_due": "Task",
           "delivery": "Delivery"
+        },
+        "groups": {
+          "today": "Today",
+          "tomorrow": "Tomorrow",
+          "week": "This week",
+          "later": "Later"
         }
       },
       "clients": {
@@ -211,7 +217,9 @@
         "lastActivity": "Last activity {date}",
         "noActivity": "No activity",
         "retainer": "Retainer"
-      }
+      },
+      "greeting": "Hello, {name}",
+      "openToday": "Open tasks"
     },
     "today": {
       "title": "Today",

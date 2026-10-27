@@ -18,6 +18,7 @@ import {
 } from '@/modules/money';
 import { ExpenseForm, type ExpenseFormActions, type MoneyResult } from './expense-form';
 import { ExpensesTable, type ExpenseRowActions } from './expenses-table';
+import { MoneyBreakdown } from './money-breakdown';
 import { MoneySummary } from './money-summary';
 import { RequestsTable } from './requests-table';
 import {
@@ -153,6 +154,8 @@ export function MoneyScreen({
       </section>
 
       <MoneySummary summary={view.summary} />
+
+      <MoneyBreakdown requests={view.requests} today={lisbonToday()} />
 
       <DateRangeField
         locale={locale}

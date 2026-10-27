@@ -114,14 +114,19 @@ export function CallMode({
                 />
               ))}
             </div>
-            <span className="text-caption text-text-secondary">
-              {t('call.progress', { current: index + 1, total: guide.blocks.length })}
-            </span>
           </div>
 
-          <div key={block.id} className="flex flex-col gap-5">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-title text-text">{block.title[locale]}</h1>
+          <div key={block.id} className="rd-rise flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <span
+                aria-hidden
+                className="font-mono text-[11px] tracking-[0.14em] text-text-tertiary uppercase tabular-nums"
+              >
+                {t('call.progress', { current: index + 1, total: guide.blocks.length })}
+              </span>
+              <h1 className="text-[clamp(1.75rem,3vw,2.25rem)] leading-tight font-semibold tracking-[-0.025em] text-text">
+                {block.title[locale]}
+              </h1>
               <p className="text-body text-text-secondary">
                 {t('call.blockMeta', { goal: block.goal[locale], minutes: block.minutes })}
               </p>

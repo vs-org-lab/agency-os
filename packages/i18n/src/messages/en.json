@@ -1571,6 +1571,8 @@
       "noCode": "None",
       "stepName": "Step name",
       "visibleToClient": "Visible to the client",
+      "laneClient": "What the client sees",
+      "laneTeam": "What the team does",
       "chained": "Sent when the previous one ends",
       "addStep": "Add step",
       "removeStep": "Remove step",
@@ -3334,6 +3336,19 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "breakdown": {
+      "ageTitle": "Open requests by age",
+      "ageEmpty": "No open requests.",
+      "ages": {
+        "current": "Up to 30 days",
+        "late": "31 to 60 days",
+        "overdue": "61 to 90 days",
+        "stale": "Over 90 days"
+      },
+      "count": "{count, plural, one {# request} other {# requests}}",
+      "clientsTitle": "Received by client",
+      "clientsEmpty": "No payments this year yet."
+    },
     "chart": {
       "title": "Received and expenses by month",
       "summary": "Paid requests and expenses of {year} in euros, by month.",

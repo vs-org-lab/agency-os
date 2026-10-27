@@ -1571,6 +1571,8 @@
       "noCode": "Nenhuma",
       "stepName": "Nome do passo",
       "visibleToClient": "Visível ao cliente",
+      "laneClient": "O que o cliente vê",
+      "laneTeam": "O que a equipa faz",
       "chained": "Enviado quando o anterior termina",
       "addStep": "Adicionar passo",
       "removeStep": "Remover passo",
@@ -3334,6 +3336,19 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "breakdown": {
+      "ageTitle": "Pedidos em aberto por idade",
+      "ageEmpty": "Nenhum pedido em aberto.",
+      "ages": {
+        "current": "Até 30 dias",
+        "late": "31 a 60 dias",
+        "overdue": "61 a 90 dias",
+        "stale": "Mais de 90 dias"
+      },
+      "count": "{count, plural, one {# pedido} other {# pedidos}}",
+      "clientsTitle": "Recebido por cliente",
+      "clientsEmpty": "Ainda não há pagamentos este ano."
+    },
     "chart": {
       "title": "Recebido e despesas por mês",
       "summary": "Pedidos pagos e despesas de {year} em euros, por mês.",

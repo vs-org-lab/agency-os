@@ -188,8 +188,7 @@
         "clients": "Active clients",
         "activeProjects": "Active projects",
         "waiting": "Waiting on you",
-        "receivable": "Receivable",
-        "none": "Nothing receivable"
+        "receivable": "Receivable"
       },
       "upcoming": {
         "title": "Upcoming events",

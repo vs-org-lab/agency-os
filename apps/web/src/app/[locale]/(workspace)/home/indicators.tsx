@@ -42,7 +42,7 @@ export function HomeIndicators({ indicators }: { indicators: HomeView['indicator
           label={t('receivable')}
           value={
             indicators.receivable.length === 0
-              ? t('none')
+              ? formatMoney(0n, 'EUR', locale)
               : indicators.receivable
                   .map((total) => formatMoney(total.amountMinor, total.currency, locale))
                   .join(' · ')

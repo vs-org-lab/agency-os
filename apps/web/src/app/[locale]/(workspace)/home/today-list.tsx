@@ -22,7 +22,9 @@ export function TodayList({ items }: { items: HomeItem[] }) {
         <li key={`${item.kind}-${item.id}`}>
           <Link
             href={item.href}
-            className="flex items-center justify-between gap-4 rounded-md border-l-2 border-border-strong bg-surface-muted px-3 py-2.5 transition-colors duration-(--duration-fast) hover:border-text-tertiary hover:bg-border/40"
+            className={`flex items-center justify-between gap-4 rounded-md border-l-2 bg-surface-muted px-3 py-2.5 transition-colors duration-(--duration-fast) hover:bg-border/40 ${
+              item.overdue ? 'border-danger' : 'border-warning'
+            }`}
           >
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="truncate text-body-sm font-medium text-text">

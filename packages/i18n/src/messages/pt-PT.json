@@ -188,8 +188,7 @@
         "clients": "Clientes ativos",
         "activeProjects": "Projetos ativos",
         "waiting": "À espera de si",
-        "receivable": "Por receber",
-        "none": "Nada por receber"
+        "receivable": "Por receber"
       },
       "upcoming": {
         "title": "Próximos eventos",

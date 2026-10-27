@@ -54,27 +54,31 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
   const { project: projectId } = await searchParams;
-  const data = await loadStaffRoom(session, { clientId, projectId });
+  const [data, health] = await Promise.all([
+    loadStaffRoom(session, { clientId, projectId }),
+    loadRoomHealth(session.claims, clientId),
+  ]);
   if (!data) notFound();
   const { room, writable, editable } = data;
-  const health = await loadRoomHealth(session.claims, clientId);
-  const templates = writable
-    ? await loadProcessTemplates({
-        claims: session.claims,
-        organizationId: session.actor.organizationId,
-      })
-    : [];
+  const [templates, [proofs, rounds, testimonial]] = await Promise.all([
+    writable
+      ? loadProcessTemplates({
+          claims: session.claims,
+          organizationId: session.actor.organizationId,
+        })
+      : [],
+    room.project
+      ? Promise.all([
+          loadProjectProofs(session.claims, clientId, room.project.id),
+          loadProjectRounds(session.claims, room.project.id),
+          loadProjectTestimonial(session.claims, room.project.id),
+        ])
+      : ([null, null, null] as const),
+  ]);
   const t = await getTranslations('rooms');
   const timeline = room.project ? phaseTimeline(room.project.phases, room.project.startsOn) : null;
   const tp = await getTranslations('proofing.section');
   const tt = await getTranslations('testimonials.team');
-  const [proofs, rounds, testimonial] = room.project
-    ? await Promise.all([
-        loadProjectProofs(session.claims, clientId, room.project.id),
-        loadProjectRounds(session.claims, room.project.id),
-        loadProjectTestimonial(session.claims, room.project.id),
-      ])
-    : [null, null, null];
 
   return (
     <div className="flex flex-col gap-6">

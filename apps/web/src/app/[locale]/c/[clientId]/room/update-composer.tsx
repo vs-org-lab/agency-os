@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
@@ -34,7 +33,6 @@ export function UpdateComposer({
 }) {
   const t = useTranslations('rooms.updates');
   const te = useTranslations('rooms.errors');
-  const router = useRouter();
   const [body, setBody] = useState('');
   const [milestone, setMilestone] = useState('');
   const [visibility, setVisibility] = useState<'internal' | 'client'>('internal');
@@ -64,7 +62,6 @@ export function UpdateComposer({
             setVisibility('internal');
             setFileIds([]);
             setResult({ ok: true });
-            router.refresh();
           } else {
             setResult({
               ok: false,

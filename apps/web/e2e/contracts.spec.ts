@@ -79,7 +79,9 @@ test.describe('Proposal and contract', () => {
     expect(download.headers()['content-type']).toContain('application/pdf');
 
     await client.reload();
-    await expect(client.getByText('Contrato assinado por ambas as partes')).toBeVisible();
+    await expect(
+      client.locator('#main').getByText('Contrato assinado por ambas as partes'),
+    ).toBeVisible();
     await expect(
       client.getByRole('link', { name: 'Descarregar o contrato assinado (PDF)' }),
     ).toBeVisible();

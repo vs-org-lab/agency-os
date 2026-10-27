@@ -2818,6 +2818,7 @@
     "kind": "Tipo",
     "url": "Link",
     "file": "Ficheiro",
+    "figmaCanvasHint": "Este link abre o ficheiro inteiro do Figma. Para o mostrar como slides, abra o protótipo (Present) e copie o link em Share prototype.",
     "create": "Criar documento",
     "creating": "A criar…",
     "created": "Documento criado.",

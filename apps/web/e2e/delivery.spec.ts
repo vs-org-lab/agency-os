@@ -32,7 +32,7 @@ test.describe('Delivery', () => {
     });
     await expectAccessible(page);
 
-    const clientContext = await browser.newContext();
+    const clientContext = await browser.newContext({ permissions: ['microphone', 'camera'] });
     const client = await clientContext.newPage();
     await client.goto(await magicLinkPath(seeded.decisionMakerEmail));
     await client.goto('/portal/approvals');

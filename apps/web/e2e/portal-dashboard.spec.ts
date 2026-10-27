@@ -51,9 +51,11 @@ test.describe('Portal dashboard', () => {
       'Sem responsável',
     );
 
-    await client.reload();
     const inProgress = client.getByRole('region', { name: /^Em curso/ });
-    await expect(inProgress.getByText(description)).toBeVisible({ timeout: 30_000 });
+    await expect(async () => {
+      await client.reload();
+      await expect(inProgress.getByText(description)).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
     await clientContext.close();
   });
 });

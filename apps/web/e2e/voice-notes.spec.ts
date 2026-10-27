@@ -44,7 +44,7 @@ test.describe('Voice notes', () => {
       timeout: 30_000,
     });
 
-    const clientContext = await browser.newContext();
+    const clientContext = await browser.newContext({ permissions: ['microphone'] });
     const client = await clientContext.newPage();
     await client.goto(await magicLinkPath(seeded.decisionMakerEmail));
     await client.goto('/portal/approvals');

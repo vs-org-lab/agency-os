@@ -23,6 +23,8 @@ test.describe('Proposal and contract', () => {
 
     await signInWithPassword(page, credentials.founder);
     await page.goto(`/pipeline/${seeded.dealId}`);
+    // Values typed before hydration are reset by the controlled inputs.
+    await page.waitForLoadState('networkidle');
     const proposal = page.locator('section', {
       has: page.getByRole('heading', { name: 'Proposta' }),
     });
@@ -30,6 +32,9 @@ test.describe('Proposal and contract', () => {
     for (const [index, field] of amounts.entries()) await field.fill(String((index + 1) * 6000));
     for (const line of await proposal.getByLabel('Linha do âmbito 1').all()) {
       await line.fill('Novo site institucional');
+    }
+    for (const [index, field] of amounts.entries()) {
+      await expect(field).toHaveValue(String((index + 1) * 6000));
     }
     await proposal.getByRole('button', { name: 'Enviar ao cliente' }).click();
     await expect(proposal.getByText('Enviada ao cliente')).toBeVisible({ timeout: 60_000 });

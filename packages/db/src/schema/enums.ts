@@ -366,7 +366,11 @@ export const proofVersionStatusEnum = appSchema.enum('proof_version_status', [
 
 export const taskSourceEnum = appSchema.enum('task_source', ['manual', 'kickoff', 'welcome_kit']);
 
-export const seenAreaEnum = appSchema.enum('seen_area', ['applications', 'portal_onboarding']);
+export const seenAreaEnum = appSchema.enum('seen_area', [
+  'applications',
+  'portal_onboarding',
+  'portal_getting_started',
+]);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
   'application_ip',

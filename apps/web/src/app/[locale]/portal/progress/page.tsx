@@ -35,7 +35,7 @@ export default async function PortalProgressPage({ params }: PageProps) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-10">
+    <div className="mx-auto flex w-full max-w-240 flex-col gap-10">
       <h1 className="text-title text-text">{t('title')}</h1>
       {outcome ? <PortalOutcome view={outcome} /> : null}
       {retainer ? (

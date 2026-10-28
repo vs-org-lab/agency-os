@@ -1,7 +1,6 @@
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
-import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { portalActionItems } from '@/components/portal/action-items';
-import { OnboardingDialog } from '@/components/portal/onboarding-dialog';
+import { gettingStartedSteps } from '@/components/portal/getting-started';
 import { PortalHome } from '@/components/portal/portal-home';
 import { requireArea } from '@/components/shell/session-guard';
 import { Link } from '@/i18n/navigation';
@@ -14,10 +13,12 @@ import { findProfileName, findVisibleClient } from '@/modules/organizations';
 import { currentMonth } from '@/modules/results';
 import { loadClientPortalResults } from '@/modules/results/server';
 import { loadClientRequests, loadClientRetainer } from '@/modules/retainers/server';
+import { loadClientPortalDocuments } from '@/modules/project-documents/server';
 import { loadPortalApprovals, loadPortalRoom } from '@/modules/rooms/server';
+import { loadColleagues } from '@/modules/team/server';
 import { withUserContext } from '@/platform/db';
 import { requestWorkAction } from '../retainer-actions';
-import { dismissPortalOnboardingAction } from './onboarding-actions';
+import { dismissPortalOnboardingAction, hideGettingStartedAction } from './onboarding-actions';
 import { ProposalHomeCard, proposalCardState } from './portal-cards';
 import { portalRoomAccess } from './room-session';
 import { pageMetadata } from '@/i18n/page-title';
@@ -54,12 +55,17 @@ export default async function PortalHomePage({ params }: PageProps) {
             : Promise.resolve([]),
         ])
       : [null, null, [], null, [], null, [], null, []];
-  const onboarding = session.preview
-    ? false
-    : await isPortalOnboardingPending(session.claims, {
-        userId: session.actor.userId,
-        organizationId: session.actor.organizationId,
-      });
+  const viewer = { userId: session.actor.userId, organizationId: session.actor.organizationId };
+  const [tourPending, gettingStartedPending, sharedDocuments, colleagues] = await Promise.all([
+    session.preview ? false : isPortalOnboardingPending(session.claims, viewer),
+    session.preview
+      ? true
+      : isPortalOnboardingPending(session.claims, viewer, 'portal_getting_started'),
+    clientId && access.readsRoom
+      ? loadClientPortalDocuments(session.claims, clientId)
+      : Promise.resolve([]),
+    clientId && access.decides ? loadColleagues(session.claims, clientId) : Promise.resolve(null),
+  ]);
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
@@ -75,20 +81,19 @@ export default async function PortalHomePage({ params }: PageProps) {
   const documents = core?.documents ?? [];
   const briefing = core?.briefing ?? null;
 
-  if (
-    actions.length === 0 &&
-    !statusCard &&
-    !retainer &&
-    !project &&
-    documents.length === 0 &&
-    !briefing
-  ) {
-    return <EmptyState title={t('home.title')} description={t('home.description')} />;
-  }
+  const steps = gettingStartedSteps({
+    toured: !tourPending && !session.preview,
+    decides: access.decides,
+    pays,
+    proposal,
+    invoices,
+    colleagues: colleagues
+      ? colleagues.filter((colleague) => colleague.status !== 'revoked').length
+      : null,
+  });
 
   return (
     <>
-      {onboarding ? <OnboardingDialog onSeen={dismissPortalOnboardingAction} /> : null}
       <PortalHome
         client={identity?.client ?? null}
         contactName={session.preview ? null : (identity?.contactName ?? null)}
@@ -97,6 +102,9 @@ export default async function PortalHomePage({ params }: PageProps) {
         retainer={retainer ? { view: retainer, requests, request: requestWorkAction } : null}
         project={project}
         results={{ kpis: results, currentMonth: currentMonth() }}
+        documents={sharedDocuments}
+        gettingStarted={gettingStartedPending ? { steps, hide: hideGettingStartedAction } : null}
+        tour={{ autoStart: tourPending, onFinish: dismissPortalOnboardingAction }}
       >
         {statusCard ? <ProposalHomeCard state={statusCard} /> : null}
         {documents.length > 0 ? (

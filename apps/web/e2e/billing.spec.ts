@@ -42,7 +42,7 @@ test.describe('Billing', () => {
     await client.goto(await magicLinkPath(seeded.signerEmail));
     await client.goto('/portal');
     await dismissPortalWelcome(client);
-    await expect(client.getByRole('heading', { name: 'A sua ação' })).toBeVisible();
+    await expect(client.getByRole('heading', { name: 'A sua vez' })).toBeVisible();
     await client.getByRole('link', { name: 'Pagar' }).click();
     await expect(client.getByRole('heading', { name: 'Faturas e pagamentos' })).toBeVisible();
     await expect(client.getByText('Por pagar')).toBeVisible();

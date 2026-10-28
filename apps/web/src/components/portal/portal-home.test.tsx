@@ -113,13 +113,13 @@ describe('PortalHome', () => {
     expect(screen.getByRole('button', { name: /Pedir trabalho/ })).toBeTruthy();
   });
 
-  it('client without room access sees no board and no rings', () => {
+  it('client without room access sees no board, no rings and nothing waiting', () => {
     home();
 
     expect(screen.queryByRole('group', { name: 'Peças de conteúdo' })).toBeNull();
     expect(screen.queryByRole('region', { name: /^Recebido/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /Pedir trabalho/ })).toBeNull();
-    expect(screen.queryByText('A sua ação')).toBeNull();
+    expect(screen.getByText('Está tudo em dia. Avisamos quando precisarmos de si.')).toBeTruthy();
   });
 
   it('pending approval appears in a sua ação with its link', () => {
@@ -144,7 +144,7 @@ describe('PortalHome', () => {
 
     home({ actions });
 
-    expect(screen.getByText('A sua ação')).toBeTruthy();
+    expect(screen.getByText('A sua vez')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Decidir' }).getAttribute('href')).toBe(
       '/portal/approvals',
     );

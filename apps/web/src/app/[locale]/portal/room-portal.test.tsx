@@ -142,7 +142,7 @@ describe('portal room', () => {
   });
 
   it('operational sees updates and approvals but no approve button', () => {
-    withIntl(<ClientRoom project={PROJECT} />);
+    withIntl(<ClientRoom project={PROJECT} today="2026-10-20" />);
 
     expect(screen.getByText('Mapa pronto para revisão')).toBeDefined();
     expect(screen.getAllByText('Descoberta e arquitetura').length).toBeGreaterThan(0);
@@ -151,7 +151,7 @@ describe('portal room', () => {
   });
 
   it('opens on the phase in motion and switches phase on click', () => {
-    withIntl(<ClientRoom project={PROJECT} />);
+    withIntl(<ClientRoom project={PROJECT} today="2026-10-20" />);
 
     expect(screen.getByText('Arquitetura e mapa de conteúdos')).toBeDefined();
     expect(screen.queryByText('Ainda não há passos para mostrar nesta fase.')).toBeNull();
@@ -163,7 +163,7 @@ describe('portal room', () => {
   });
 
   it('puts the pending decision ahead of the phases', () => {
-    withIntl(<ClientRoom project={PROJECT} />);
+    withIntl(<ClientRoom project={PROJECT} today="2026-10-20" />);
 
     const decision = screen.getByRole('heading', { name: 'À espera da sua decisão' });
     const phases = screen.getByRole('button', { name: /Produção/ });

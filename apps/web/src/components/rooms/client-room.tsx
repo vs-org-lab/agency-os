@@ -4,8 +4,14 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@agency-os/ui/lib/utils';
-import type { ClientApprovalView, ClientPhaseView, ClientProjectView } from '@/modules/rooms';
+import {
+  phaseTimeline,
+  type ClientApprovalView,
+  type ClientPhaseView,
+  type ClientProjectView,
+} from '@/modules/rooms';
 import { ApprovalDecision, type DecideApproval } from './approval-decision';
+import { TimelineView } from './timeline-view';
 import { UpdateFeed } from './update-feed';
 
 const VISIBLE_UPDATES = 4;
@@ -50,8 +56,14 @@ function StepMark({ status }: { status: ClientPhaseView['steps'][number]['status
 export function ClientRoom({
   project,
   decide,
+  initialView = 'steps',
+  today,
 }: {
   project: ClientProjectView;
+  /** The phases as steps or as a calendar timeline. */
+  initialView?: 'steps' | 'timeline';
+  /** The current date (YYYY-MM-DD) for the timeline marker. */
+  today: string;
   /** The decision action; only the client's decision maker gets one. */
   decide?: DecideApproval;
 }) {
@@ -60,6 +72,8 @@ export function ClientRoom({
   const day = (value: string) => format.dateTime(new Date(value), { dateStyle: 'medium' });
   const [selectedId, setSelectedId] = useState(() => initialPhase(project.phases));
   const [showAllUpdates, setShowAllUpdates] = useState(false);
+  const [view, setView] = useState(initialView);
+  const timeline = phaseTimeline(project.phases, project.startsOn);
 
   const selected = project.phases.find((phase) => phase.id === selectedId) ?? null;
   const doneCount = project.phases.filter((phase) => phase.status === 'done').length;
@@ -129,85 +143,121 @@ export function ClientRoom({
 
       {project.phases.length > 0 ? (
         <section aria-labelledby="client-room-process" className="flex flex-col gap-4">
-          <h3 id="client-room-process" className="sr-only">
-            {t('room.phases')}
-          </h3>
-          <ol className="grid auto-cols-fr grid-flow-col overflow-x-auto rounded-lg border border-border bg-surface">
-            {project.phases.map((phase) => {
-              const active = phase.id === selectedId;
-              return (
-                <li key={phase.id} className="min-w-36 border-r border-border last:border-r-0">
-                  <button
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setSelectedId(phase.id)}
-                    className={cn(
-                      'flex w-full items-center gap-2.5 border-b-2 px-4 py-3 text-left text-body-sm transition-colors duration-(--duration-fast)',
-                      active
-                        ? 'border-text font-medium text-text'
-                        : 'border-transparent text-text-secondary hover:bg-surface-muted',
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        'flex size-5 shrink-0 items-center justify-center rounded-full text-[10px]',
-                        phase.status === 'done'
-                          ? 'bg-success-bg text-success'
-                          : phase.status === 'pending'
-                            ? 'border border-border-strong'
-                            : 'bg-brand text-white',
-                      )}
-                    >
-                      {phase.status === 'done' ? <Check className="size-3" /> : phase.position}
-                    </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate">{phase.name}</span>
-                      <span className="truncate text-caption font-normal text-text-tertiary">
-                        {t(`phaseStatus.${phase.status}`)}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-
-          {selected ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 id="client-room-process" className="text-title-sm text-text">
+              {t('room.phases')}
+            </h3>
             <div
-              aria-label={t('room.stepsOfPhase', { name: selected.name })}
               role="group"
-              className="flex flex-col rounded-lg border border-border bg-surface"
+              aria-label={t('room.view')}
+              className="flex rounded-md border border-border p-0.5"
             >
-              {selected.steps.length === 0 ? (
-                <p className="p-4 text-body-sm text-text-secondary">{t('room.noSteps')}</p>
-              ) : (
-                <ul className="divide-y divide-border">
-                  {selected.steps.map((step) => (
-                    <li key={step.id} className="flex items-center gap-3 px-4 py-3">
-                      <StepMark status={step.status} />
-                      <span
+              {(['steps', 'timeline'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={view === option}
+                  onClick={() => setView(option)}
+                  className={cn(
+                    'rounded-sm px-3 py-1 text-body-sm transition-colors duration-(--duration-fast)',
+                    view === option
+                      ? 'bg-surface-muted font-medium text-text'
+                      : 'text-text-secondary hover:text-text',
+                  )}
+                >
+                  {t(`room.views.${option}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {view === 'timeline' ? (
+            <TimelineView
+              rows={timeline.rows}
+              undated={timeline.undated.map(
+                (id) => project.phases.find((phase) => phase.id === id)?.name ?? id,
+              )}
+              today={today}
+            />
+          ) : (
+            <>
+              <ol className="grid auto-cols-fr grid-flow-col overflow-x-auto rounded-lg border border-border bg-surface">
+                {project.phases.map((phase) => {
+                  const active = phase.id === selectedId;
+                  return (
+                    <li key={phase.id} className="min-w-36 border-r border-border last:border-r-0">
+                      <button
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setSelectedId(phase.id)}
                         className={cn(
-                          'min-w-0 flex-1 text-body-sm',
-                          step.status === 'done' ? 'text-text-secondary' : 'text-text',
+                          'flex w-full items-center gap-2.5 border-b-2 px-4 py-3 text-left text-body-sm transition-colors duration-(--duration-fast)',
+                          active
+                            ? 'border-text font-medium text-text'
+                            : 'border-transparent text-text-secondary hover:bg-surface-muted',
                         )}
                       >
-                        {step.name}
-                      </span>
-                      {step.dueOn && step.status !== 'done' ? (
-                        <span className="text-caption text-text-tertiary">
-                          {t('room.due', { date: day(`${step.dueOn}T12:00:00Z`) })}
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'flex size-5 shrink-0 items-center justify-center rounded-full text-[10px]',
+                            phase.status === 'done'
+                              ? 'bg-success-bg text-success'
+                              : phase.status === 'pending'
+                                ? 'border border-border-strong'
+                                : 'bg-brand text-white',
+                          )}
+                        >
+                          {phase.status === 'done' ? <Check className="size-3" /> : phase.position}
                         </span>
-                      ) : null}
-                      <span className="rounded-full bg-surface-muted px-2 py-0.5 text-caption text-text-secondary">
-                        {t(`stepStatus.${step.status}`)}
-                      </span>
+                        <span className="flex min-w-0 flex-col">
+                          <span className="truncate">{phase.name}</span>
+                          <span className="truncate text-caption font-normal text-text-tertiary">
+                            {t(`phaseStatus.${phase.status}`)}
+                          </span>
+                        </span>
+                      </button>
                     </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : null}
+                  );
+                })}
+              </ol>
+
+              {selected ? (
+                <div
+                  aria-label={t('room.stepsOfPhase', { name: selected.name })}
+                  role="group"
+                  className="flex flex-col rounded-lg border border-border bg-surface"
+                >
+                  {selected.steps.length === 0 ? (
+                    <p className="p-4 text-body-sm text-text-secondary">{t('room.noSteps')}</p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {selected.steps.map((step) => (
+                        <li key={step.id} className="flex items-center gap-3 px-4 py-3">
+                          <StepMark status={step.status} />
+                          <span
+                            className={cn(
+                              'min-w-0 flex-1 text-body-sm',
+                              step.status === 'done' ? 'text-text-secondary' : 'text-text',
+                            )}
+                          >
+                            {step.name}
+                          </span>
+                          {step.dueOn && step.status !== 'done' ? (
+                            <span className="text-caption text-text-tertiary">
+                              {t('room.due', { date: day(`${step.dueOn}T12:00:00Z`) })}
+                            </span>
+                          ) : null}
+                          <span className="rounded-full bg-surface-muted px-2 py-0.5 text-caption text-text-secondary">
+                            {t(`stepStatus.${step.status}`)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
+            </>
+          )}
         </section>
       ) : null}
 

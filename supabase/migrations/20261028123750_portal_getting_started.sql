@@ -1,0 +1,1 @@
+ALTER TYPE "app"."seen_area" ADD VALUE 'portal_getting_started';

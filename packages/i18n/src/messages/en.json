@@ -401,7 +401,7 @@
       "greeting": "Hello, {name}",
       "greetingAnonymous": "Hello",
       "action": {
-        "title": "Needs your action",
+        "title": "Your turn",
         "due": "By {date}",
         "kinds": {
           "approval": "Approval",
@@ -416,7 +416,8 @@
           "proposal": "View the proposal",
           "contract": "Sign",
           "payment": "Pay"
-        }
+        },
+        "empty": "You are all caught up. We will let you know when we need you."
       },
       "plan": {
         "title": "Your plan",
@@ -456,36 +457,110 @@
         }
       },
       "project": {
-        "title": "Your project: {name}",
         "phases": "Project phases",
         "current": "Current phase",
-        "nextStep": "Next step: {name}",
         "dueOn": "Expected by {date}",
-        "open": "Open the room"
+        "open": "See the project",
+        "eyebrow": "Project",
+        "percent": "{value}% done",
+        "progress": "{done} of {total} phases done",
+        "timeline": "Timeline",
+        "waiting": "Waiting for your approval",
+        "inProgress": "In progress",
+        "completed": "Completed",
+        "noProjectTitle": "Your project starts soon",
+        "noProjectBody": "Once the proposal is accepted and the contract signed, the project phases appear here, with what is done and what comes next.",
+        "next": "Next step"
       },
       "documents": {
-        "title": "Recent documents"
+        "title": "Recent documents",
+        "seeAll": "See all",
+        "meta": "{project} · Updated on {date}"
+      },
+      "summary": {
+        "active": "Your project {project} is in the {phase} phase.",
+        "waiting": "The {phase} phase of {project} is waiting for your approval.",
+        "done": "Every phase of {project} is done.",
+        "none": "Welcome. Everything that needs you and your project lives here."
+      },
+      "gettingStarted": {
+        "title": "Getting started",
+        "progress": "{done} of {total} done",
+        "hide": "Hide",
+        "start": "Start",
+        "open": "Open",
+        "steps": {
+          "tour": {
+            "title": "Get to know the portal",
+            "body": "A one-minute tour of what you will use."
+          },
+          "proposal": {
+            "title": "Review and accept the proposal",
+            "body": "Choose the option that fits you."
+          },
+          "contract": {
+            "title": "Sign the contract",
+            "body": "You sign it here, in the portal."
+          },
+          "payment": {
+            "title": "Pay the first request",
+            "body": "Once the payment is confirmed, the work starts."
+          },
+          "team": {
+            "title": "Invite your team",
+            "body": "Whoever follows the project with you sees what you see."
+          }
+        }
+      },
+      "updates": {
+        "title": "Latest updates",
+        "seeAll": "See all",
+        "empty": "No updates yet."
       }
     },
-    "onboarding": {
-      "label": "Welcome to the portal",
-      "step": "Step {current} of {total}",
-      "next": "Next",
-      "previous": "Back",
+    "tour": {
+      "label": "Portal tour",
+      "counter": "Portal tour · {current} of {total}",
       "skip": "Skip",
-      "start": "Get started",
+      "previous": "Previous",
+      "next": "Next",
+      "finish": "Finish",
       "steps": {
-        "work": {
-          "title": "Where you see your work",
-          "body": "Home shows what needs you, what is left of your plan and where each request stands."
+        "welcome": {
+          "title": "Welcome to your portal",
+          "body": "Here you follow the project, decide what needs you and find everything we deliver. We will show you the essentials in under a minute."
         },
-        "approve": {
-          "title": "How you approve",
-          "body": "Approvals and proofs appear under \"Needs your action\". Open, review and decide; the team is told right away."
+        "project": {
+          "title": "Your project",
+          "body": "The current phase, how much is done and the next step, with its date. The timeline shows the whole calendar."
         },
-        "request": {
-          "title": "How you request work",
-          "body": "Use \"Request work\" and tell us what you need. If it fits this month's plan, the team starts right away."
+        "actions": {
+          "title": "Your turn",
+          "body": "When we need a decision, a signature or a payment, it shows up here first. When it is empty, you are all caught up."
+        },
+        "approvals": {
+          "title": "Approvals",
+          "body": "Everything waiting for your decision: phases, files and documents. Approve or ask for changes with a comment."
+        },
+        "documents": {
+          "title": "Documents",
+          "body": "Proposals, presentations and reports shared with you, with their versions and comments."
+        },
+        "hub": {
+          "title": "Brand Hub",
+          "body": "Your brand guidelines: colours, typography, logos and files to download."
+        },
+        "updates": {
+          "title": "Updates",
+          "body": "The phases with their steps, the timeline and everything the team shares."
+        },
+        "progress": {
+          "title": "Plan and outcome",
+          "body": "The agreed outcome and, with a retainer, how much you used this month and how much is left."
+        },
+        "done": {
+          "title": "You are all set",
+          "body": "You can take this tour again any time from Getting started on the home page."
         }
       }
     }
@@ -2238,7 +2313,12 @@
       "due": "Due {date}",
       "decisions": "Decisions",
       "showAll": "Show all {count} updates",
-      "showLess": "Show fewer updates"
+      "showLess": "Show fewer updates",
+      "view": "View",
+      "views": {
+        "steps": "Steps",
+        "timeline": "Timeline"
+      }
     },
     "phaseLabel": "{position}. {name}",
     "approvals": "Approvals",
@@ -2980,7 +3060,16 @@
     "portal": {
       "title": "Documents",
       "empty": "No documents have been shared with you yet.",
-      "decideHint": "The team asked for your approval of this version."
+      "decideHint": "The team asked for your approval of this version.",
+      "description": "Proposals, presentations and reports we shared with you. Open a document to see its versions, comment or give your approval.",
+      "detail": "{project} · {date}",
+      "toReview": "To review ({count})",
+      "others": "Everything else",
+      "status": {
+        "draft": "Draft",
+        "with_client": "To review",
+        "approved": "Approved"
+      }
     },
     "errors": {
       "not_found": "Not found or not allowed.",

@@ -141,6 +141,7 @@ function NavigationItemLink({
       >
         <Link
           href={item.href}
+          data-nav={item.href}
           aria-current={active ? 'page' : undefined}
           aria-label={display ? t('unseenLabel', { label: item.label, count }) : undefined}
         >

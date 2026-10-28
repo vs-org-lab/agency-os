@@ -7,7 +7,7 @@ import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ClientRetainerRequest } from '@/modules/retainers';
 import { ActionList, type PortalActionItem } from './action-list';
 import { PlanPanel } from './plan-panel';
-import { ProjectStrip } from './project-strip';
+import { ProjectOverview } from './home-cards';
 import { RequestBoard } from './request-board';
 
 vi.mock('@/i18n/navigation', () => ({
@@ -52,10 +52,12 @@ function intl(node: React.ReactNode) {
 }
 
 describe('ActionList', () => {
-  it('action list hides without items', () => {
-    const { container } = intl(<ActionList items={[]} />);
+  it('action list says the client is all caught up without items', () => {
+    intl(<ActionList items={[]} />);
 
-    expect(container.textContent).toBe('');
+    expect(screen.getByRole('heading', { name: 'A sua vez' })).toBeTruthy();
+    expect(screen.getByText('Está tudo em dia. Avisamos quando precisarmos de si.')).toBeTruthy();
+    expect(screen.queryByRole('link')).toBeNull();
   });
 
   it('action list orders by due date and links each item', () => {
@@ -170,24 +172,79 @@ describe('PlanPanel', () => {
   });
 });
 
-describe('ProjectStrip', () => {
-  it('project strip marks the current phase', () => {
+describe('ProjectOverview', () => {
+  it('marks the current phase and shows the next step and the way into the timeline', () => {
     intl(
-      <ProjectStrip
-        phases={[
-          { id: '1', name: 'Descoberta', status: 'done' },
-          { id: '2', name: 'Design', status: 'in_progress' },
-          { id: '3', name: 'Entrega', status: 'pending' },
-        ]}
-        current="2"
-        nextMilestone={{ name: 'Revisão do layout', dueOn: '2026-11-10' }}
+      <ProjectOverview
+        project={{
+          id: 'p1',
+          name: 'Website',
+          status: 'active',
+          startsOn: '2026-10-01',
+          endsOn: null,
+          approvals: [],
+          updates: [],
+          phases: [
+            {
+              id: '1',
+              position: 1,
+              name: 'Descoberta',
+              status: 'done',
+              requiresApproval: false,
+              dueOn: null,
+              startedAt: null,
+              completedAt: null,
+              steps: [],
+            },
+            {
+              id: '2',
+              position: 2,
+              name: 'Design',
+              status: 'in_progress',
+              requiresApproval: true,
+              dueOn: null,
+              startedAt: null,
+              completedAt: null,
+              steps: [
+                {
+                  id: 's1',
+                  position: 1,
+                  name: 'Revisão do layout',
+                  status: 'todo',
+                  dueOn: '2026-11-10',
+                  reopened: false,
+                },
+              ],
+            },
+            {
+              id: '3',
+              position: 3,
+              name: 'Entrega',
+              status: 'pending',
+              requiresApproval: false,
+              dueOn: null,
+              startedAt: null,
+              completedAt: null,
+              steps: [],
+            },
+          ],
+        }}
       />,
     );
 
-    const steps = screen.getAllByRole('listitem');
-    expect(steps).toHaveLength(3);
-    expect(steps[1]?.getAttribute('aria-current')).toBe('step');
-    expect(steps[0]?.getAttribute('aria-current')).toBeNull();
-    expect(screen.getByText(/Revisão do layout/)).toBeTruthy();
+    const phases = screen.getAllByRole('listitem');
+    expect(phases).toHaveLength(3);
+    expect(phases[1]?.getAttribute('aria-current')).toBe('step');
+    expect(screen.getByText('33% concluído')).toBeTruthy();
+    expect(screen.getByText('Revisão do layout')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Linha temporal' }).getAttribute('href')).toBe(
+      '/portal/updates?view=timeline',
+    );
+  });
+
+  it('tells the client the project starts soon before there is one', () => {
+    intl(<ProjectOverview project={null} />);
+
+    expect(screen.getByRole('heading', { name: 'O seu projeto começa em breve' })).toBeTruthy();
   });
 });

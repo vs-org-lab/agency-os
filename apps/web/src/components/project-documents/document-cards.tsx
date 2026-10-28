@@ -8,7 +8,7 @@ import {
   Receipt,
   type LucideIcon,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { cn } from '@agency-os/ui/lib/utils';
@@ -96,10 +96,13 @@ function DocumentCard({
   href,
   document,
   detail,
+  status,
 }: {
   href: string;
   document: Pick<DocumentCardView, 'title' | 'kind' | 'status'>;
   detail: string;
+  /** The status as its reader names it; the team's wording by default. */
+  status?: { label: string; tone: Tone };
 }) {
   const t = useTranslations('projectDocuments');
   const { icon, name } = KIND_ICONS[document.kind];
@@ -115,8 +118,8 @@ function DocumentCard({
           {KIND_COVER[document.kind]}
         </span>
         <span className="absolute top-2.5 right-2.5">
-          <StatusBadge tone={DOCUMENT_TONE[document.status]}>
-            {t(`status.${document.status}`)}
+          <StatusBadge tone={status?.tone ?? DOCUMENT_TONE[document.status]}>
+            {status?.label ?? t(`status.${document.status}`)}
           </StatusBadge>
         </span>
       </span>
@@ -259,19 +262,61 @@ export function RoomDocumentCards({
   );
 }
 
-/** P-03 list: the documents shared with the client. */
+const PORTAL_TONE: Record<PortalDocumentCardView['status'], Tone> = {
+  draft: 'neutral',
+  with_client: 'warning',
+  approved: 'success',
+};
+
+/**
+ * P-03 list: the documents shared with the client, newest first, with those still waiting for
+ * the client's review ahead of the approved ones.
+ */
 export function PortalDocumentCards({ documents }: { documents: PortalDocumentCardView[] }) {
-  return (
-    <ul className="grid gap-3 sm:grid-cols-2">
-      {documents.map((document) => (
+  const t = useTranslations('projectDocuments.portal');
+  const format = useFormatter();
+  const sorted = [...documents].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const toReview = sorted.filter((document) => document.status === 'with_client');
+  const rest = sorted.filter((document) => document.status !== 'with_client');
+
+  const grid = (items: PortalDocumentCardView[]) => (
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((document) => (
         <li key={document.id}>
           <DocumentCard
             href={`/portal/docs/${document.id}`}
             document={document}
-            detail={document.projectName}
+            detail={t('detail', {
+              project: document.projectName,
+              date: format.dateTime(new Date(document.updatedAt), { dateStyle: 'medium' }),
+            })}
+            status={{
+              label: t(`status.${document.status}`),
+              tone: PORTAL_TONE[document.status],
+            }}
           />
         </li>
       ))}
     </ul>
+  );
+
+  if (toReview.length === 0) return grid(sorted);
+  return (
+    <div className="flex flex-col gap-8">
+      <section aria-labelledby="portal-documents-review" className="flex flex-col gap-3">
+        <h2 id="portal-documents-review" className="text-title-sm text-text">
+          {t('toReview', { count: toReview.length })}
+        </h2>
+        {grid(toReview)}
+      </section>
+      {rest.length > 0 ? (
+        <section aria-labelledby="portal-documents-rest" className="flex flex-col gap-3">
+          <h2 id="portal-documents-rest" className="text-title-sm text-text">
+            {t('others')}
+          </h2>
+          {grid(rest)}
+        </section>
+      ) : null}
+    </div>
   );
 }

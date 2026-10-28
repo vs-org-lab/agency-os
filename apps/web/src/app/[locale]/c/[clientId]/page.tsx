@@ -40,7 +40,7 @@ import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
-import { TimelineView } from './room/timeline-view';
+import { TimelineView } from '@/components/rooms/timeline-view';
 import { TestimonialSection } from './room/testimonial-section';
 import { pageMetadata } from '@/i18n/page-title';
 

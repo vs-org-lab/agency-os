@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
-import { Link } from '@/i18n/navigation';
+import type { PortalDocumentCardView } from '@/modules/project-documents';
 import type { ClientProjectView } from '@/modules/rooms';
-import { ActionList, type PortalActionItem } from './action-list';
-import { ProjectStrip } from './project-strip';
 import { ResultsStrip, type StripKpi } from '@/components/results/results-strip';
+import { ActionList, type PortalActionItem } from './action-list';
+import type { GettingStartedStep } from './getting-started';
+import { GettingStarted, ProjectOverview, RecentDocuments, RecentUpdates } from './home-cards';
+import { PortalTour } from './portal-tour';
 import { RetainerSection, type PortalRetainerHome } from './retainer-section';
 
 export type PortalHomeProps = {
@@ -18,24 +20,38 @@ export type PortalHomeProps = {
   /** Visible results indicators; the strip stays hidden without any. */
   results?: { kpis: readonly StripKpi[]; currentMonth: string };
   project: ClientProjectView | null;
+  /** Documents shared with the client, for the "recent" list. */
+  documents?: readonly PortalDocumentCardView[];
+  /** The first steps, unless the client hid them. */
+  gettingStarted?: { steps: readonly GettingStartedStep[]; hide: () => Promise<void> } | null;
+  /** The guided tour, opened on the first visit. */
+  tour?: { autoStart: boolean; onFinish: () => Promise<void> };
   /** Reference material that asks nothing of the client: presentations, briefing and statuses. */
   children?: ReactNode;
 };
 
-function projectStrip(project: ClientProjectView) {
-  const current =
-    project.phases.find(
-      (phase) => phase.status === 'in_progress' || phase.status === 'awaiting_approval',
-    ) ?? null;
-  const next = current?.steps.find((step) => step.status !== 'done') ?? null;
-  return {
-    phases: project.phases.map(({ id, name, status }) => ({ id, name, status })),
-    current: current?.id ?? null,
-    nextMilestone: next ? { name: next.name, dueOn: next.dueOn } : null,
-  };
+function summaryKey(project: ClientProjectView | null) {
+  if (!project || project.phases.length === 0) return { key: 'none' as const, phase: '' };
+  const current = project.phases.find(
+    (phase) => phase.status === 'in_progress' || phase.status === 'awaiting_approval',
+  );
+  if (current) {
+    return {
+      key: current.status === 'awaiting_approval' ? ('waiting' as const) : ('active' as const),
+      phase: current.name,
+    };
+  }
+  const pending = project.phases.find((phase) => phase.status === 'pending');
+  return pending
+    ? { key: 'active' as const, phase: pending.name }
+    : { key: 'done' as const, phase: '' };
 }
 
-/** The portal's start: what to do, how much of the plan is left and where the work stands. */
+/**
+ * The portal's start, ordered by what a client opens it for: where the project stands and what
+ * waits on them, then the first steps while they last, then what changed. The retainer and the
+ * results follow for the clients who have them.
+ */
 export function PortalHome({
   client,
   contactName,
@@ -44,11 +60,14 @@ export function PortalHome({
   retainer,
   project,
   results,
+  documents = [],
+  gettingStarted,
+  tour,
   children,
 }: PortalHomeProps) {
   const t = useTranslations('portal.dashboard');
   const format = useFormatter();
-  const strip = project && project.phases.length > 0 ? projectStrip(project) : null;
+  const summary = summaryKey(project);
 
   return (
     <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
@@ -61,28 +80,32 @@ export function PortalHome({
           <h1 className="font-display text-brand-display text-text">
             {contactName ? t('greeting', { name: contactName }) : t('greetingAnonymous')}
           </h1>
+          <p className="text-body-sm text-text-secondary">
+            {t(`summary.${summary.key}`, { project: project?.name ?? '', phase: summary.phase })}
+          </p>
         </div>
       </header>
-      <ActionList items={actions} />
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+        <ProjectOverview project={project} />
+        <ActionList items={actions} />
+      </div>
+
+      {gettingStarted ? (
+        <GettingStarted steps={gettingStarted.steps} onHide={gettingStarted.hide} />
+      ) : null}
+
+      {project || documents.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {project ? <RecentUpdates updates={project.updates} /> : null}
+          {documents.length > 0 ? <RecentDocuments documents={documents} /> : null}
+        </div>
+      ) : null}
+
       {retainer ? <RetainerSection retainer={retainer} /> : null}
       {results ? <ResultsStrip kpis={results.kpis} currentMonth={results.currentMonth} /> : null}
-      {strip && project ? (
-        <section
-          aria-labelledby="portal-project"
-          className="rd-rise flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="portal-project" className="text-body-sm font-semibold text-text">
-              {t('project.title', { name: project.name })}
-            </h2>
-            <Link href="/portal/updates" className="text-body-sm text-link hover:underline">
-              {t('project.open')}
-            </Link>
-          </div>
-          <ProjectStrip {...strip} />
-        </section>
-      ) : null}
       {children}
+      {tour ? <PortalTour autoStart={tour.autoStart} onFinish={tour.onFinish} /> : null}
     </div>
   );
 }

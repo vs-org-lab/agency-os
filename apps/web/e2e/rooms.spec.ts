@@ -65,7 +65,9 @@ test.describe('Rooms', () => {
     await page.getByRole('link', { name: 'Ver como cliente' }).click();
     await expect(page).toHaveURL(/\/portal\/updates/);
     await expect(page.getByText(/Está a ver o portal como/)).toBeVisible();
-    await expect(page.getByText('A arquitetura está pronta para a sua revisão.')).toBeVisible();
+    await expect(
+      page.locator('#main').getByText('A arquitetura está pronta para a sua revisão.'),
+    ).toBeVisible();
     await expect(page.getByText('Análise técnica')).toHaveCount(0);
     await expectAccessible(page);
     await page.getByRole('link', { name: 'Sair da pré-visualização' }).click();
@@ -87,8 +89,11 @@ test.describe('Rooms', () => {
     });
 
     await client.goto('/portal/updates');
-    await expect(client.getByText('Novo passo: Arquitetura e mapa de conteúdos')).toBeVisible();
-    await expect(client.getByText('A arquitetura está pronta para a sua revisão.')).toBeVisible();
+    const clientMain = client.locator('#main');
+    await expect(clientMain.getByText('Novo passo: Arquitetura e mapa de conteúdos')).toBeVisible();
+    await expect(
+      clientMain.getByText('A arquitetura está pronta para a sua revisão.'),
+    ).toBeVisible();
     await expectAccessible(client);
     await clientContext.close();
 

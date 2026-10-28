@@ -161,7 +161,10 @@ describe('C-11 outcome', () => {
       note: 'Duas aprovações com uma semana de atraso',
     });
 
-    fireEvent.click(within(approvals).getByRole('button', { name: 'Cumprida' }));
+    const met = within(approvals).getByRole('button', { name: 'Cumprida' });
+    await waitFor(() => expect(met.hasAttribute('disabled')).toBe(false));
+    fireEvent.click(met);
+    await waitFor(() => expect(run.recordCondition).toHaveBeenCalledTimes(2));
     expect(run.recordCondition).toHaveBeenLastCalledWith({
       conditionId: 'condition-approvals',
       status: 'met',

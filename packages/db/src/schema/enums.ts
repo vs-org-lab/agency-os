@@ -366,7 +366,11 @@ export const proofVersionStatusEnum = appSchema.enum('proof_version_status', [
 
 export const taskSourceEnum = appSchema.enum('task_source', ['manual', 'kickoff', 'welcome_kit']);
 
-export const seenAreaEnum = appSchema.enum('seen_area', ['applications', 'portal_onboarding']);
+export const seenAreaEnum = appSchema.enum('seen_area', [
+  'applications',
+  'portal_onboarding',
+  'portal_getting_started',
+]);
 
 export const throttleKindEnum = appSchema.enum('throttle_kind', [
   'application_ip',
@@ -537,3 +541,14 @@ export const academyItemStatusEnum = appSchema.enum('academy_item_status', ['dra
 
 export type AcademyItemKind = (typeof academyItemKindEnum.enumValues)[number];
 export type AcademyItemStatus = (typeof academyItemStatusEnum.enumValues)[number];
+
+export const kpiFormatEnum = appSchema.enum('kpi_format', [
+  'number',
+  'percent',
+  'currency',
+  'ratio',
+]);
+
+export const kpiAggregationEnum = appSchema.enum('kpi_aggregation', ['sum', 'average', 'last']);
+
+export const kpiValueOriginEnum = appSchema.enum('kpi_value_origin', ['manual', 'csv']);

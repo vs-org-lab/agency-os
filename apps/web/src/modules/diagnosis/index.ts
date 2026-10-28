@@ -1,13 +1,26 @@
 export { DEFAULT_BRIEFING_GUIDE, DEFAULT_ORBIT_GRID } from './templates/defaults';
 export {
+  SUGGESTED_ONBOARDING_REQUESTS,
+  VISUAL_IDENTITY_QUESTION_ID,
+  withSuggestedRequests,
+} from './templates/onboarding-suggestions';
+export {
   BRIEFING_BLOCK_COUNT,
   briefingGuideSchema,
   ORBIT_FRONT_MAX_POINTS,
   ORBIT_FRONTS,
   orbitGridSchema,
+  answerValues,
+  MAX_ONBOARDING_REQUESTS,
+  ONBOARDING_MODULE_CODES,
+  ONBOARDING_REQUEST_KINDS,
+  type BriefingAnswer,
   type BriefingBlock,
   type BriefingGuide,
   type Localized,
+  type OnboardingCondition,
+  type OnboardingRequest,
+  type OnboardingRequestKind,
   type OrbitCriterion,
   type OrbitGrid,
 } from './templates/definitions';
@@ -38,3 +51,4 @@ export {
   RECORDING_EXTENSIONS,
   type RecordingContentType,
 } from './transcription/storage';
+export type { CoreOnboarding } from './onboarding-source';

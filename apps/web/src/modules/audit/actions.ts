@@ -155,6 +155,11 @@ export const AUDIT_ACTIONS = [
   'document.withdrawn',
   'document.removed',
   'portal.access.granted',
+  'results.kpi_saved',
+  'results.kpi_archived',
+  'results.values_recorded',
+  'onboarding.responded',
+  'onboarding.reopened',
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

@@ -1,17 +1,16 @@
 import { useFormatter, useTranslations } from 'next-intl';
-import { Badge } from '@agency-os/ui/components/badge';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 import type { HomeClient } from '@/modules/studio';
 
-const LEVEL_VARIANT = {
-  healthy: 'secondary',
-  attention: 'outline',
-  at_risk: 'destructive',
+const LEVEL_TONE = {
+  healthy: 'bg-success-bg text-success',
+  attention: 'bg-warning-bg text-warning',
+  at_risk: 'bg-danger-bg text-danger',
 } as const;
 
-/** One segment per phase, filled for the phases already done. */
+/** One segment per phase: done phases solid, the current one half-tone. */
 function PhaseSegments({ name, done, total }: { name: string; done: number; total: number }) {
   return (
     <span
@@ -28,8 +27,8 @@ function PhaseSegments({ name, done, total }: { name: string; done: number; tota
           role="presentation"
           data-done={index < done}
           className={cn(
-            'h-1.5 flex-1 rounded-full',
-            index < done ? 'bg-primary' : 'bg-surface-muted',
+            'h-[3px] flex-1 rounded-full',
+            index < done ? 'bg-primary' : index === done ? 'bg-primary/45' : 'bg-border',
           )}
         />
       ))}
@@ -38,9 +37,8 @@ function PhaseSegments({ name, done, total }: { name: string; done: number; tota
 }
 
 /**
- * Clients with an active project, one full-width row each: avatar, retainer label, phase
- * segments, the current phase and the latest room activity, plus the latest health level for
- * those who see it.
+ * Clients with an active project as cards: avatar, plan and health tags, the current phase,
+ * phase segments and the latest room activity.
  */
 export function ClientProgress({ clients }: { clients: HomeClient[] }) {
   const t = useTranslations('studio.home.clients');
@@ -48,52 +46,69 @@ export function ClientProgress({ clients }: { clients: HomeClient[] }) {
   const format = useFormatter();
 
   if (clients.length === 0) {
-    return <p className="text-body-sm text-text-secondary">{t('empty')}</p>;
+    return (
+      <p className="rounded-lg border border-border bg-surface px-4 py-3 text-body-sm text-text-secondary">
+        {t('empty')}
+      </p>
+    );
   }
 
   return (
-    <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
-      {clients.map((client) => {
+    <ul className="grid gap-2.5 md:grid-cols-2">
+      {clients.map((client, index) => {
         const progress = client.progress;
         return (
-          <li key={client.id}>
+          <li
+            key={client.id}
+            className="rd-rise"
+            style={{ animationDelay: `${120 + index * 30}ms` }}
+          >
             <Link
               href={`/c/${client.id}`}
-              className="grid items-center gap-x-4 gap-y-2 px-4 py-3 transition-colors duration-150 hover:bg-surface-muted md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_auto]"
+              className="rd-lift flex h-full items-center gap-3.5 rounded-lg border border-border bg-surface px-4 py-3.5"
             >
-              <span className="flex min-w-0 items-center gap-3">
-                <ClientAvatar id={client.id} name={client.name} size="md" />
-                <span className="flex min-w-0 flex-col items-start gap-1">
-                  <span className="max-w-full truncate text-body font-medium text-text">
-                    {client.name}
-                  </span>
-                  <span className="flex flex-wrap gap-1">
-                    {client.retainer ? <Badge variant="outline">{t('retainer')}</Badge> : null}
+              <ClientAvatar id={client.id} name={client.name} size="md" />
+              <span className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-body-sm font-medium text-text">
+                      {client.name}
+                    </span>
+                    {client.retainer ? (
+                      <span className="shrink-0 rounded-full border border-border-strong px-1.5 text-caption text-text-secondary">
+                        {t('retainer')}
+                      </span>
+                    ) : null}
                     {client.healthLevel ? (
-                      <Badge variant={LEVEL_VARIANT[client.healthLevel]}>
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full px-1.5 text-caption font-medium',
+                          LEVEL_TONE[client.healthLevel],
+                        )}
+                      >
                         {tHealth(`levels.${client.healthLevel}`)}
-                      </Badge>
+                      </span>
                     ) : null}
                   </span>
-                </span>
-              </span>
-              {progress ? (
-                <span className="flex min-w-0 flex-col gap-1.5">
-                  <PhaseSegments name={client.name} done={progress.done} total={progress.total} />
-                  <span className="flex items-baseline justify-between gap-3 text-caption text-text-secondary">
-                    <span className="truncate text-text">{client.currentPhase}</span>
-                    <span className="shrink-0 tabular-nums">
-                      {t('progress', { done: progress.done, total: progress.total })}
-                    </span>
+                  <span className="shrink-0 text-caption text-text">
+                    {client.currentPhase ?? t('noProject')}
                   </span>
                 </span>
-              ) : (
-                <span className="text-caption text-text-secondary">{t('noProject')}</span>
-              )}
-              <span className="text-caption text-text-secondary md:text-right">
-                {client.lastActivityAt
-                  ? t('lastActivity', { date: format.relativeTime(client.lastActivityAt) })
-                  : t('noActivity')}
+                {progress ? (
+                  <PhaseSegments name={client.name} done={progress.done} total={progress.total} />
+                ) : null}
+                <span className="flex items-baseline justify-between gap-3 text-caption text-text-tertiary">
+                  <span className="tabular-nums">
+                    {progress
+                      ? t('progress', { done: progress.done, total: progress.total })
+                      : null}
+                  </span>
+                  <span>
+                    {client.lastActivityAt
+                      ? t('lastActivity', { date: format.relativeTime(client.lastActivityAt) })
+                      : t('noActivity')}
+                  </span>
+                </span>
               </span>
             </Link>
           </li>

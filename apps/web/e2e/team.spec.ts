@@ -62,7 +62,7 @@ test.describe('Team and invitations', () => {
     await expect(freelancer).toHaveURL(/\/mfa\/enroll/);
     const secret = (await freelancer.locator('code').innerText()).trim();
     await submitTotp(freelancer, secret);
-    await expect(freelancer.getByRole('heading', { name: 'Início', level: 1 })).toBeVisible();
+    await expect(freelancer.getByRole('heading', { name: /^Olá, /, level: 1 })).toBeVisible();
 
     await freelancer.goto(`/c/${room.clientId}`);
     await expect(freelancer.getByRole('heading', { name: room.company, level: 1 })).toBeVisible();

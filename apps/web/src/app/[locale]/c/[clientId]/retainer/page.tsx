@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RetainerBilling } from '@/components/retainers/retainer-billing';
 import { RetainerScreen } from '@/components/retainers/retainer-screen';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { findVisibleClient } from '@/modules/organizations';
@@ -51,7 +52,7 @@ export default async function RoomRetainerPage({ params }: PageProps) {
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/retainer`}
       />
       <RetainerScreen

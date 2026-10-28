@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AgendaCalendar } from '@/components/agenda/agenda-calendar';
 import { agendaPeriod } from '@/components/agenda/agenda-period';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { lisbonDay } from '@/modules/agenda';
@@ -49,7 +50,7 @@ export default async function RoomAgendaPage({ params, searchParams }: PageProps
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={basePath}
       />
       <AgendaCalendar

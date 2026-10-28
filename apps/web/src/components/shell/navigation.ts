@@ -17,7 +17,8 @@ export type NavigationIcon =
   | 'calendar'
   | 'wallet'
   | 'gauge'
-  | 'chart';
+  | 'chart'
+  | 'trend';
 
 export type IconMotion = 'lift' | 'spin' | 'swing' | 'grow' | 'draw' | 'pulse' | 'needle';
 
@@ -42,6 +43,7 @@ export const NAVIGATION_ICON_MOTION: Record<NavigationIcon, IconMotion> = {
   wallet: 'lift',
   gauge: 'needle',
   chart: 'grow',
+  trend: 'lift',
 };
 
 export type NavigationLabelKey =
@@ -65,6 +67,7 @@ export type NavigationLabelKey =
   | 'shell.room.retainer'
   | 'shell.room.outcome'
   | 'shell.room.reports'
+  | 'shell.room.results'
   | 'shell.room.academy'
   | 'shell.allClients'
   | 'shell.portalNav.invoices'
@@ -76,6 +79,7 @@ export type NavigationLabelKey =
   | 'shell.portalNav.brandHub'
   | 'shell.portalNav.progress'
   | 'shell.portalNav.academy'
+  | 'shell.portalNav.onboarding'
   | 'shell.portalNav.team';
 
 export type NavigationCounter = 'unseenApplications';
@@ -181,6 +185,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
             icon: 'brand',
           },
           {
+            href: `/c/${input.clientId}/results`,
+            labelKey: 'shell.room.results',
+            icon: 'trend',
+          },
+          {
             href: `/c/${input.clientId}/reports`,
             labelKey: 'shell.room.reports',
             icon: 'chart',
@@ -218,6 +227,11 @@ export function buildNavigation(input: NavigationLevel): Navigation {
           { href: '/portal', labelKey: 'shell.studioNav.home', icon: 'home' },
           ...(input.permissions.room
             ? ([
+                {
+                  href: '/portal/onboarding',
+                  labelKey: 'shell.portalNav.onboarding',
+                  icon: 'tasks',
+                },
                 { href: '/portal/approvals', labelKey: 'shell.portalNav.approvals', icon: 'check' },
                 { href: '/portal/proofs', labelKey: 'shell.portalNav.proofs', icon: 'proofs' },
                 { href: '/portal/updates', labelKey: 'shell.portalNav.updates', icon: 'feed' },

@@ -24,6 +24,11 @@ const DATA: ReportData = {
   },
 };
 
+const INDICATORS: NonNullable<ReportData['indicators']> = [
+  { name: 'Leads', format: 'number', source: 'GA4', target: 40, current: 30, previous: 20 },
+  { name: 'Conversão', format: 'percent', source: 'GA4', target: null, current: 3.8, previous: 4 },
+];
+
 async function pages(pdf: Uint8Array) {
   return (await PDFDocument.load(pdf)).getPages().map((page) => page.getSize());
 }
@@ -54,8 +59,25 @@ describe('client report pdfs', () => {
     }
     expect(pdfContainsText(pdf, 'Destaques')).toBe(false);
     expect(pdfContainsText(pdf, 'Próximos passos')).toBe(false);
+    expect(pdfContainsText(pdf, 'Indicadores')).toBe(false);
     const [size] = await pages(pdf);
     expect(size && size.height > size.width).toBe(true);
+  });
+
+  it('monthly report compares each indicator with the month before', async () => {
+    const pdf = await monthlyReportPdf({
+      clientName: 'Bloom',
+      period: periodOf('monthly', '2026-09-10'),
+      data: { ...EMPTY, indicators: INDICATORS },
+      texts: NO_TEXTS,
+    });
+    for (const text of [
+      'Indicadores',
+      'Leads: 30 · anterior 20 · +50% · meta 40',
+      'Conversão: 3,8% · anterior 4% · -0,2 p.p.',
+    ]) {
+      expect(pdfContainsText(pdf, text), text).toBe(true);
+    }
   });
 
   it('monthly report of an empty month still has its title', async () => {
@@ -78,11 +100,14 @@ describe('client report pdfs', () => {
     });
 
     const sizes = await pages(pdf);
-    // cover, summary, work, retainer, outcome, priorities
-    expect(sizes).toHaveLength(6);
-    expect(sizes.every((size) => size.width > size.height)).toBe(true);
+    // cover, summary, work, retainer, outcome, priorities, closing
+    expect(sizes).toHaveLength(7);
+    expect(sizes.every((size) => Math.abs(size.width / size.height - 16 / 9) < 0.01)).toBe(true);
     for (const text of [
-      'QBR · Bloom · T3 2026',
+      'RELATÓRIO DE PERFORMANCE',
+      'Bloom',
+      'T3 2026',
+      'Obrigado.',
       'Prioridades do próximo trimestre',
       'Crescer no orgânico.',
     ]) {
@@ -107,5 +132,26 @@ describe('client report pdfs', () => {
     expect(sizes.length).toBeGreaterThan(2);
     expect(pdfContainsText(pdf, 'Trabalho feito (cont.)')).toBe(true);
     expect(pdfContainsText(pdf, '01/08/2026 · Passo 40')).toBe(true);
+  });
+
+  it('qbr deck opens with the four headline indicators and the comparison', async () => {
+    const pdf = await qbrDeckPdf({
+      clientName: 'Bloom',
+      period: periodOf('qbr', '2026-09-10'),
+      data: { ...EMPTY, indicators: INDICATORS },
+      texts: { ...NO_TEXTS, summary: 'Trimestre de base.' },
+    });
+
+    for (const text of [
+      'Sumário executivo',
+      'Trimestre de base.',
+      'LEADS',
+      '+50%',
+      'Comparação com o período anterior',
+      'Conversão',
+      '-0,2 p.p.',
+    ]) {
+      expect(pdfContainsText(pdf, text), text).toBe(true);
+    }
   });
 });

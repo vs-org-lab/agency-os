@@ -166,6 +166,7 @@ export function HubEditor({
             clientName={clientName}
             updatedAt={hub.lastPublishedAt}
             assetUrl={(assetId) => `/api/brand-hub/assets/${assetId}`}
+            showEmpty
           />
         ) : null
       ) : (

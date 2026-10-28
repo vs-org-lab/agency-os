@@ -166,6 +166,55 @@ describe('brand hub', () => {
     expect(screen.getByText('Brand Hub · Atualizado em 12/10/2026')).toBeTruthy();
   });
 
+  it('hub view copies a colour by clicking it and its values', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    withIntl(
+      <HubView
+        snapshot={SNAPSHOT}
+        clientName="Bloom"
+        updatedAt="2026-10-12T09:00:00.000Z"
+        assetUrl={assetUrl}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Copiar Azul #0A2540' }));
+    expect(writeText).toHaveBeenLastCalledWith('#0A2540');
+    expect(await screen.findByText('Copiado')).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Copiar RGB 10 37 64' }));
+    expect(writeText).toHaveBeenLastCalledWith('10 37 64');
+    expect(screen.getByRole('button', { name: 'Copiar CMYK 84 42 0 75' })).toBeTruthy();
+  });
+
+  it('the published hub leaves out pages without content; the preview marks them', () => {
+    const withEmpty: HubSnapshot = {
+      ...SNAPSHOT,
+      pages: [
+        ...SNAPSHOT.pages,
+        { id: 'page-photo', number: '09', title: 'Fotografia', standardKey: null, blocks: [] },
+      ],
+    };
+    withIntl(
+      <HubView snapshot={withEmpty} clientName="Bloom" updatedAt={null} assetUrl={assetUrl} />,
+    );
+    expect(screen.queryByRole('link', { name: '09 Fotografia' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: '09 Fotografia' })).toBeNull();
+
+    cleanup();
+    withIntl(
+      <HubView
+        snapshot={withEmpty}
+        clientName="Bloom"
+        updatedAt={null}
+        assetUrl={assetUrl}
+        showEmpty
+      />,
+    );
+    expect(screen.getByRole('heading', { name: '09 Fotografia' })).toBeTruthy();
+    expect(screen.getByText('Esta secção ainda não tem conteúdo.')).toBeTruthy();
+  });
+
   it('hub view renders text as text', () => {
     const hostile: HubSnapshot = {
       ...SNAPSHOT,

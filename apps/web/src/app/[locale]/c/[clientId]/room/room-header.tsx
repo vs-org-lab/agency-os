@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { Eye } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { PageHeader } from '@agency-os/ui/components/page-header';
 import { cn } from '@agency-os/ui/lib/utils';
+import { localizedPath } from '@/components/shell/portal-preview-path';
 import { Link } from '@/i18n/navigation';
 import type { ProjectSummary } from '@/modules/rooms';
 
@@ -33,9 +35,13 @@ export function RoomHeader({
   actions?: ReactNode;
 }) {
   const t = useTranslations('rooms');
-  const previewHref = selectedId
-    ? `/c/${client.id}/preview?project=${selectedId}`
-    : `/c/${client.id}/preview`;
+  const locale = useLocale() as Locale;
+  const section = basePath.split('/')[3] ?? '';
+  const previewQuery = new URLSearchParams({
+    section,
+    ...(selectedId ? { project: selectedId } : {}),
+  });
+  const previewHref = localizedPath(locale, `/c/${client.id}/preview?${previewQuery.toString()}`);
   const hasActions = showPreviewLink || Boolean(actions);
 
   return (
@@ -58,10 +64,10 @@ export function RoomHeader({
             <>
               {showPreviewLink ? (
                 <Button asChild variant="outline">
-                  <Link href={previewHref}>
+                  <a href={previewHref}>
                     <Eye aria-hidden="true" />
                     {t('previewAsClient')}
-                  </Link>
+                  </a>
                 </Button>
               ) : null}
               {actions}

@@ -1,4 +1,5 @@
 import 'server-only';
+import { listPortalMeetings } from './portal';
 import { hostCalendar } from '@/modules/commercial/server';
 import { withSystemContext, withUserContext, type VerifiedClaims } from '@/platform/db';
 import { agendaWriter, type AgendaDeps } from './access';
@@ -40,3 +41,7 @@ export const cancelAgendaMeeting = (claims: VerifiedClaims, eventId: string) =>
   cancelMeeting(claims, { eventId }, deps());
 
 export { AGENDA_FUNCTIONS } from './automations';
+
+export const loadPortalMeetings = (claims: VerifiedClaims, clientId: string) =>
+  listPortalMeetings(claims, clientId, { contexts: { withUserContext } });
+export type { PortalMeeting } from './portal';

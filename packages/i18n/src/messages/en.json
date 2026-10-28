@@ -66,6 +66,17 @@
     "studio": "Studio",
     "allClients": "All clients",
     "toggleSidebar": "Show or hide menu",
+    "clientPreview": {
+      "label": "Client preview",
+      "notice": "You are seeing the portal as {client} sees it. Read only: the client actions do nothing here.",
+      "exit": "Exit preview",
+      "roleLabel": "View as",
+      "roles": {
+        "decision_maker": "Decision maker",
+        "operational": "Operational",
+        "client_finance": "Finance"
+      }
+    },
     "skipToContent": "Skip to content",
     "navigation": "Navigation",
     "navigationDescription": "Main application menu.",
@@ -107,7 +118,8 @@
       "retainer": "Retainer",
       "outcome": "Outcome",
       "reports": "Reports",
-      "academy": "Academy"
+      "academy": "Academy",
+      "results": "Results"
     },
     "breadcrumb": "Breadcrumb",
     "portalNav": {
@@ -120,7 +132,8 @@
       "documents": "Documents",
       "brandHub": "Brand Hub",
       "progress": "Plan and results",
-      "academy": "Academy"
+      "academy": "Academy",
+      "onboarding": "Onboarding"
     }
   },
   "states": {
@@ -187,8 +200,7 @@
         "clients": "Active clients",
         "activeProjects": "Active projects",
         "waiting": "Waiting on you",
-        "receivable": "Receivable",
-        "none": "Nothing receivable"
+        "receivable": "Receivable"
       },
       "upcoming": {
         "title": "Upcoming events",
@@ -201,6 +213,12 @@
           "step_due": "Step due",
           "task_due": "Task",
           "delivery": "Delivery"
+        },
+        "groups": {
+          "today": "Today",
+          "tomorrow": "Tomorrow",
+          "week": "This week",
+          "later": "Later"
         }
       },
       "clients": {
@@ -211,7 +229,9 @@
         "lastActivity": "Last activity {date}",
         "noActivity": "No activity",
         "retainer": "Retainer"
-      }
+      },
+      "greeting": "Hello, {name}",
+      "openToday": "Open tasks"
     },
     "today": {
       "title": "Today",
@@ -388,22 +408,25 @@
       "greeting": "Hello, {name}",
       "greetingAnonymous": "Hello",
       "action": {
-        "title": "Needs your action",
+        "title": "Your turn",
         "due": "By {date}",
         "kinds": {
           "approval": "Approval",
           "proof": "Proof",
           "proposal": "Proposal",
           "contract": "Contract",
-          "payment": "Payment"
+          "payment": "Payment",
+          "onboarding": "Onboarding"
         },
         "cta": {
           "approval": "Decide",
           "proof": "Review",
           "proposal": "View the proposal",
           "contract": "Sign",
-          "payment": "Pay"
-        }
+          "payment": "Pay",
+          "onboarding": "Answer"
+        },
+        "empty": "You are all caught up. We will let you know when we need you."
       },
       "plan": {
         "title": "Your plan",
@@ -443,38 +466,147 @@
         }
       },
       "project": {
-        "title": "Your project: {name}",
         "phases": "Project phases",
         "current": "Current phase",
-        "nextStep": "Next step: {name}",
         "dueOn": "Expected by {date}",
-        "open": "Open the room"
+        "open": "See the project",
+        "eyebrow": "Project",
+        "percent": "{value}% done",
+        "progress": "{done} of {total} phases done",
+        "timeline": "Timeline",
+        "waiting": "Waiting for your approval",
+        "inProgress": "In progress",
+        "completed": "Completed",
+        "noProjectTitle": "Your project starts soon",
+        "noProjectBody": "Once the proposal is accepted and the contract signed, the project phases appear here, with what is done and what comes next.",
+        "next": "Next step"
       },
       "documents": {
-        "title": "Recent documents"
+        "title": "Recent documents",
+        "seeAll": "See all",
+        "meta": "{project} · Updated on {date}"
+      },
+      "summary": {
+        "active": "Your project {project} is in the {phase} phase.",
+        "waiting": "The {phase} phase of {project} is waiting for your approval.",
+        "done": "Every phase of {project} is done.",
+        "none": "Welcome. Everything that needs you and your project lives here."
+      },
+      "gettingStarted": {
+        "title": "Getting started",
+        "progress": "{done} of {total} done",
+        "hide": "Hide",
+        "start": "Start",
+        "open": "Open",
+        "steps": {
+          "tour": {
+            "title": "Get to know the portal",
+            "body": "A one-minute tour of what you will use."
+          },
+          "proposal": {
+            "title": "Review and accept the proposal",
+            "body": "Choose the option that fits you."
+          },
+          "contract": {
+            "title": "Sign the contract",
+            "body": "You sign it here, in the portal."
+          },
+          "payment": {
+            "title": "Pay the first request",
+            "body": "Once the payment is confirmed, the work starts."
+          },
+          "team": {
+            "title": "Invite your team",
+            "body": "Whoever follows the project with you sees what you see."
+          },
+          "onboarding": {
+            "title": "Answer the onboarding",
+            "body": "The files, access and answers we need to start."
+          }
+        }
+      },
+      "updates": {
+        "title": "Latest updates",
+        "seeAll": "See all",
+        "empty": "No updates yet."
+      },
+      "team": {
+        "title": "Your team",
+        "roles": {
+          "founder": "Leadership",
+          "project_manager": "Project management"
+        },
+        "email": "Email {name}"
+      },
+      "meeting": {
+        "title": "Next meeting",
+        "join": "Join the call",
+        "empty": "No meetings scheduled.",
+        "more": "{count, plural, one {and # more meeting} other {and # more meetings}}"
       }
     },
-    "onboarding": {
-      "label": "Welcome to the portal",
-      "step": "Step {current} of {total}",
-      "next": "Next",
-      "previous": "Back",
+    "tour": {
+      "label": "Portal tour",
+      "counter": "Portal tour · {current} of {total}",
       "skip": "Skip",
-      "start": "Get started",
+      "previous": "Previous",
+      "next": "Next",
+      "finish": "Finish",
       "steps": {
-        "work": {
-          "title": "Where you see your work",
-          "body": "Home shows what needs you, what is left of your plan and where each request stands."
+        "welcome": {
+          "title": "Welcome to your portal",
+          "body": "Here you follow the project, decide what needs you and find everything we deliver. We will show you the essentials in under a minute."
         },
-        "approve": {
-          "title": "How you approve",
-          "body": "Approvals and proofs appear under \"Needs your action\". Open, review and decide; the team is told right away."
+        "project": {
+          "title": "Your project",
+          "body": "The current phase, how much is done and the next step, with its date. The timeline shows the whole calendar."
         },
-        "request": {
-          "title": "How you request work",
-          "body": "Use \"Request work\" and tell us what you need. If it fits this month's plan, the team starts right away."
+        "actions": {
+          "title": "Your turn",
+          "body": "When we need a decision, a signature or a payment, it shows up here first. When it is empty, you are all caught up."
+        },
+        "approvals": {
+          "title": "Approvals",
+          "body": "Everything waiting for your decision: phases, files and documents. Approve or ask for changes with a comment."
+        },
+        "documents": {
+          "title": "Documents",
+          "body": "Proposals, presentations and reports shared with you, with their versions and comments."
+        },
+        "hub": {
+          "title": "Brand Hub",
+          "body": "Your brand guidelines: colours, typography, logos and files to download."
+        },
+        "updates": {
+          "title": "Updates",
+          "body": "The phases with their steps, the timeline and everything the team shares."
+        },
+        "progress": {
+          "title": "Plan and outcome",
+          "body": "The agreed outcome and, with a retainer, how much you used this month and how much is left."
+        },
+        "done": {
+          "title": "You are all set",
+          "body": "You can take this tour again any time from Getting started on the home page."
+        },
+        "onboarding": {
+          "title": "Onboarding",
+          "body": "What we need from you to start: files, access and answers, shaped by your project. Answer at your own pace."
         }
       }
+    },
+    "progress": {
+      "description": "Where the outcome we agreed stands and what is left of your plan this month.",
+      "outcome": "Agreed outcome",
+      "percent": "{value}%",
+      "ofTarget": "of the way to the target",
+      "range": "From {baseline} to {target} {unit}; now at {current}.",
+      "deadline": "Deadline: {date}",
+      "month": "This month",
+      "tier": "{tier} plan",
+      "left": "{remaining} of {available} left",
+      "renews": "{days, plural, one {# day until next month.} other {# days until next month.}}",
+      "retainerTitle": "Your plan"
     }
   },
   "commercial": {
@@ -1562,6 +1694,8 @@
       "noCode": "None",
       "stepName": "Step name",
       "visibleToClient": "Visible to the client",
+      "laneClient": "What the client sees",
+      "laneTeam": "What the team does",
       "chained": "Sent when the previous one ends",
       "addStep": "Add step",
       "removeStep": "Remove step",
@@ -1617,7 +1751,8 @@
         "label": "Call mode sections",
         "briefing": "Briefing",
         "observations": "Observations",
-        "transcript": "Transcript"
+        "transcript": "Transcript",
+        "onboarding": "Onboarding"
       },
       "back": "Back",
       "next": "Next",
@@ -1858,6 +1993,50 @@
       "removePayment": "Remove payment {position}",
       "paymentsTotal": "Total: {total}%",
       "retainerToggle": "Includes monthly support",
+      "modules": {
+        "title": "Contract modules",
+        "hint": "Choose this option's services; the contract only includes the chosen modules' clauses.",
+        "preview": "Clauses in the contract",
+        "otherTool": "Other",
+        "titles": {
+          "A": "Video and motion graphics",
+          "B": "Social media management",
+          "C": "Paid media",
+          "D": "Web, software and apps",
+          "E": "Automation and AI"
+        },
+        "fields": {
+          "videosPerMonth": "Videos per month",
+          "revisions": "Revision rounds",
+          "platforms": "Platforms",
+          "feedPosts": "Feed posts per month",
+          "storiesPerWeek": "Stories per week",
+          "mediaBudget": "Monthly media budget",
+          "managementFee": "Monthly management fee",
+          "solution": "Solution",
+          "technologies": "Technologies",
+          "hosting": "Hosting and domain included",
+          "sourceCode": "Source code delivered",
+          "tools": "Tools",
+          "maintenanceMonths": "Maintenance months"
+        },
+        "solutions": {
+          "website": "Corporate website",
+          "landing": "Landing page",
+          "ecommerce": "E-commerce",
+          "webapp": "Web app",
+          "mobile": "Mobile app",
+          "custom": "Custom software"
+        }
+      },
+      "presets": {
+        "label": "Payment option:",
+        "options": {
+          "A": "A · 50/50",
+          "B": "B · Three instalments",
+          "C": "C · Monthly retainer"
+        }
+      },
       "retainerMonthly": "Monthly amount",
       "retainerMonths": "Months",
       "retainerSummary": "{amount} per month, for {months} months",
@@ -2036,8 +2215,6 @@
     "noProjectHint": "The project is created on its own when the first payment takes the deal to 2.2, or you can create it here.",
     "projectSelector": "Project",
     "previewAsClient": "View as client",
-    "previewNotice": "Preview: this is what the client sees. Nothing internal appears here.",
-    "backToRoom": "Back to the room",
     "newProject": "New project",
     "projectName": "Project name",
     "template": "Process template",
@@ -2076,7 +2253,10 @@
       "people": "People",
       "nobody": "Nobody assigned",
       "healthLine": "Health: {score} of 100, {level}",
-      "healthEmpty": "Health: not enough data yet"
+      "healthEmpty": "Health: not enough data yet",
+      "progress": "Progress",
+      "dates": "Dates",
+      "peopleCount": "{count, plural, =0 {Nobody} one {# person} other {# people}}"
     },
     "phases": "Phases",
     "phaseDue": "Phase due date",
@@ -2169,6 +2349,22 @@
       "attachment_hidden": "Some attachments come from internal folders. A client-visible update only carries files from visible folders."
     },
     "stepsOf": "Steps of {name}",
+    "room": {
+      "progress": "{done} of {total} phases done",
+      "phases": "Phases",
+      "needsDecision": "Waiting for your decision",
+      "stepsOfPhase": "Steps of {name}",
+      "noSteps": "No steps to show in this phase yet.",
+      "due": "Due {date}",
+      "decisions": "Decisions",
+      "showAll": "Show all {count} updates",
+      "showLess": "Show fewer updates",
+      "view": "View",
+      "views": {
+        "steps": "Steps",
+        "timeline": "Timeline"
+      }
+    },
     "phaseLabel": "{position}. {name}",
     "approvals": "Approvals",
     "clientApproval": {
@@ -2197,7 +2393,9 @@
         "approval_required": "This phase only ends with the client approval.",
         "deal_has_project": "This deal already has a project."
       }
-    }
+    },
+    "phaseNumber": "Phase {position}",
+    "phaseProgress": "{done} of {total} done"
   },
   "tasks": {
     "title": "Tasks",
@@ -2804,6 +3002,7 @@
     "kind": "Type",
     "url": "Link",
     "file": "File",
+    "figmaCanvasHint": "This link opens the whole Figma file. To show it as slides, open the prototype (Present) and copy the link from Share prototype.",
     "create": "Create document",
     "creating": "Creating…",
     "created": "Document created.",
@@ -2906,7 +3105,16 @@
     "portal": {
       "title": "Documents",
       "empty": "No documents have been shared with you yet.",
-      "decideHint": "The team asked for your approval of this version."
+      "decideHint": "The team asked for your approval of this version.",
+      "description": "Proposals, presentations and reports we shared with you. Open a document to see its versions, comment or give your approval.",
+      "detail": "{project} · {date}",
+      "toReview": "To review ({count})",
+      "others": "Everything else",
+      "status": {
+        "draft": "Draft",
+        "with_client": "To review",
+        "approved": "Approved"
+      }
     },
     "errors": {
       "not_found": "Not found or not allowed.",
@@ -3084,7 +3292,10 @@
     },
     "view": {
       "contents": "Brand Hub sections",
-      "empty": "This section has no content yet."
+      "empty": "This section has no content yet.",
+      "copy": "Copy {label} {value}",
+      "copied": "Copied",
+      "copyHint": "Click to copy"
     },
     "portal": {
       "decideHint": "The team asked for your approval of this Brand Hub.",
@@ -3272,6 +3483,19 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "breakdown": {
+      "ageTitle": "Open requests by age",
+      "ageEmpty": "No open requests.",
+      "ages": {
+        "current": "Up to 30 days",
+        "late": "31 to 60 days",
+        "overdue": "61 to 90 days",
+        "stale": "Over 90 days"
+      },
+      "count": "{count, plural, one {# request} other {# requests}}",
+      "clientsTitle": "Received by client",
+      "clientsEmpty": "No payments this year yet."
+    },
     "chart": {
       "title": "Received and expenses by month",
       "summary": "Paid requests and expenses of {year} in euros, by month.",
@@ -3795,5 +4019,209 @@
       "not_found": "This could not be completed. Refresh the page and try again."
     },
     "itemAction": "{action} · {title}"
+  },
+  "results": {
+    "title": "Results",
+    "description": "The figures the client sees in the portal and that go into the report. Enter them by hand or import the CSV each source exports.",
+    "strip": {
+      "title": "Results · {month}",
+      "compared": "Compared with {month}",
+      "open": "Open results",
+      "noValue": "No value this month",
+      "target": "Target {target}",
+      "met": "met",
+      "share": "{share}%",
+      "emptyTeam": "No indicators yet. Define the client KPIs to show them here and in the portal.",
+      "emptyAction": "Define indicators"
+    },
+    "change": {
+      "up": "up {amount}",
+      "down": "down {amount}",
+      "flat": "no change",
+      "percent": "{amount}%",
+      "points": "{amount} pp",
+      "value": "{amount}"
+    },
+    "table": {
+      "label": "Indicators by month",
+      "kpi": "Indicator",
+      "source": "Source",
+      "target": "Target",
+      "hidden": "Team only",
+      "edit": "Edit {name}",
+      "archive": "Archive {name}",
+      "cell": "{name} in {month}",
+      "saved": "Value saved.",
+      "manual": "Entered by hand",
+      "empty": "No indicators. Start with «+ Indicator».",
+      "archiveShort": "Archive"
+    },
+    "aggregationHint": {
+      "sum": "Sum",
+      "average": "Average",
+      "last": "Last value"
+    },
+    "form": {
+      "create": "+ Indicator",
+      "createTitle": "New indicator",
+      "editTitle": "Edit indicator",
+      "name": "Name",
+      "format": "Format",
+      "formats": {
+        "number": "Number",
+        "percent": "Percentage",
+        "currency": "Euros",
+        "ratio": "Ratio (×)"
+      },
+      "aggregation": "Monthly aggregation",
+      "source": "Source",
+      "sourcePlaceholder": "GA4, Meta Ads, CRM…",
+      "target": "Monthly target (optional)",
+      "clientVisible": "Show to the client in the portal",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Indicator saved.",
+      "archived": "Indicator archived.",
+      "errors": {
+        "duplicate_name": "There is already an indicator with this name.",
+        "invalid_input": "Check the fields: name up to 60 characters and a numeric target.",
+        "not_found": "It could not be saved. Refresh the page."
+      }
+    },
+    "import": {
+      "open": "Import CSV",
+      "title": "Import CSV",
+      "steps": {
+        "file": "File",
+        "columns": "Columns",
+        "review": "Review"
+      },
+      "drop": "Choose a CSV file",
+      "dropHint": "Export the table from GA4, Search Console, Meta Ads or Google Ads and choose it here. The file stays on your computer: only the monthly totals are saved.",
+      "detected": "{rows} rows · detected source: {source}",
+      "change": "Change",
+      "dateColumn": "Date column",
+      "mapping": "Link columns to indicators",
+      "csvColumn": "CSV column",
+      "kpi": "Indicator",
+      "ignore": "Ignore",
+      "total": "Total",
+      "aggregationNote": "Counts add up per month, rates are averaged and closing values keep the last day, following each indicator aggregation.",
+      "reviewIntro": "These values will be saved:",
+      "replaces": "replaces {value}",
+      "new": "new",
+      "back": "← Back",
+      "next": "Review {count, plural, one {# value} other {# values}} →",
+      "confirm": "Save values",
+      "done": "{count, plural, one {# value imported} other {# values imported}}.",
+      "errors": {
+        "tooLarge": "The file is over 2 MB or 20,000 rows.",
+        "empty": "No table was found in this file.",
+        "noDate": "Choose the date column.",
+        "nothing": "Link at least one column to an indicator.",
+        "failed": "The values could not be saved. Try again."
+      },
+      "stepLabel": "{position} · {name}"
+    }
+  },
+  "clientOnboarding": {
+    "kinds": {
+      "upload": "Send files",
+      "text": "Answer",
+      "access": "Give access",
+      "confirm": "Confirm"
+    },
+    "modules": {
+      "A": "Video",
+      "B": "Social media",
+      "C": "Ads",
+      "D": "Web",
+      "E": "Automations"
+    },
+    "yesNo": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "plan": {
+      "title": "Client onboarding",
+      "description": "What the portal will ask the client, from the answers and the contracted scope.",
+      "answers": "Answers that shape the requests",
+      "requests": "Requests to the client",
+      "clear": "Clear",
+      "empty": "The briefing template has no onboarding requests yet. Add them in Settings › Templates.",
+      "status": {
+        "asked": "Will be asked",
+        "module": "If the contract includes {module}",
+        "answer": "Depends on the answer",
+        "notAsked": "Not asked"
+      },
+      "saveFailed": "The answer could not be saved."
+    },
+    "editor": {
+      "title": "Client onboarding",
+      "description": "What the portal asks the client after the briefing. Each request shows only when its condition holds. Never ask for passwords: ask them to invite the agency email.",
+      "answer": "Structured answer",
+      "answerNone": "Free note only",
+      "answerYesNo": "Yes or No",
+      "answerChoice": "Choice",
+      "option": "Option {number}",
+      "addOption": "Add option",
+      "removeOption": "Remove option",
+      "request": "Request {number}",
+      "requestTitle": "Title",
+      "requestBody": "Explanation",
+      "kind": "Type",
+      "when": "When to ask",
+      "whenAlways": "Always",
+      "whenAnswer": "By an answer",
+      "whenModule": "By the contracted scope",
+      "question": "Question",
+      "equals": "When the answer is",
+      "module": "Contract module",
+      "noStructured": "Give a question a structured answer to use it as a condition.",
+      "addRequest": "Add request",
+      "removeRequest": "Remove request",
+      "suggested": "Use suggested requests",
+      "moduleOption": "{code} · {name}"
+    },
+    "portal": {
+      "title": "Onboarding",
+      "description": "What we need from you to start well. Answer at your own pace: each answer reaches the team right away.",
+      "progress": "{done} of {total} done",
+      "done": "Done",
+      "doneOn": "Done on {date}",
+      "doneBy": "by {name}",
+      "respond": "Send answer",
+      "confirm": "Mark as done",
+      "update": "Update answer",
+      "answerLabel": "Your answer",
+      "files": "Choose files",
+      "uploading": "Sending…",
+      "uploaded": "Files sent. The team has them.",
+      "uploadWaits": "You can send files once the project starts.",
+      "sent": "Answer sent. Thank you.",
+      "errors": {
+        "response_required": "Write your answer before sending.",
+        "invalid_file": "One of the files could not be accepted. Check its format and size.",
+        "storage_full": "The file space is full. Let the team know.",
+        "failed": "It could not be sent. Try again."
+      },
+      "empty": "Nothing to prepare for now.",
+      "accessHint": "Never share passwords: invite the agency email."
+    },
+    "room": {
+      "title": "Client onboarding",
+      "progress": "{done} of {total} done",
+      "open": "Waiting",
+      "reopen": "Ask again",
+      "reopened": "Request reopened for the client.",
+      "folder": "The files are in the library, under \"Enviado pelo cliente\".",
+      "empty": "No onboarding requests for this client."
+    },
+    "action": {
+      "kind": "Onboarding",
+      "title": "{count, plural, one {# request to answer} other {# requests to answer}}",
+      "cta": "Answer"
+    }
   }
 }

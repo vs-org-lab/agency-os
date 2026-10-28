@@ -11,6 +11,7 @@ import type { Currency, Locale } from '@agency-os/i18n';
 import { recordAudit } from '@/modules/audit';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import { storedModules } from './domain/modules';
 import { renderContract } from './domain/render';
 import { contractHash } from './domain/signature';
 import { activeContractTemplate } from './templates/service';
@@ -310,6 +311,7 @@ export async function acceptProposal(
             paymentPlan: option.paymentPlan,
             retainerMonthly: option.retainerMonthly,
             retainerMonths: option.retainerMonths,
+            modules: storedModules(option.modules),
           },
           proposal: { guarantee: proposal.guarantee, currency: proposal.currency },
           contractDate: now,

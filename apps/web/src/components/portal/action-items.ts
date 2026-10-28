@@ -9,6 +9,8 @@ export type ActionItemSources = {
   approvals: ClientPendingApproval[];
   proposal: PortalProposal | null;
   invoices: Pick<PortalInvoice, 'id' | 'number' | 'label' | 'dueDate' | 'status'>[];
+  /** Open onboarding requests, with the line that names them. */
+  onboarding?: { open: number; title: string } | null;
 };
 
 /** What the existing portal reads ask of the client, as the items of "A sua ação". */
@@ -65,6 +67,15 @@ export function portalActionItems(sources: ActionItemSources): PortalActionItem[
       title: `${invoice.number} · ${invoice.label}`,
       dueOn: invoice.dueDate,
       href: '/portal/invoices',
+    });
+  }
+
+  if (sources.onboarding && sources.onboarding.open > 0) {
+    items.push({
+      kind: 'onboarding',
+      title: sources.onboarding.title,
+      dueOn: null,
+      href: '/portal/onboarding',
     });
   }
 

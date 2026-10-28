@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
+import { cn } from '@agency-os/ui/lib/utils';
 import { FormMessage } from '@/components/forms/form-message';
 import { CreateSheet } from '@/components/ui/create-sheet';
 import { PIPELINE_STAGES, pipelineCodeMessageKey, type PipelineCode } from '@/modules/commercial';
@@ -153,7 +154,7 @@ export function ProcessTemplateEditor({
         return (
           <fieldset
             key={phaseId}
-            className="flex flex-col gap-3 rounded-md border border-border p-3"
+            className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5"
           >
             <legend className="px-1 text-label text-text">
               {tp('phase', { number: phaseIndex + 1 })}
@@ -221,6 +222,17 @@ export function ProcessTemplateEditor({
               </div>
             </div>
 
+            <div
+              aria-hidden
+              className="hidden grid-cols-2 gap-4 border-b border-border pb-2 md:grid"
+            >
+              <span className="font-mono text-[11px] tracking-[0.12em] text-text-tertiary uppercase">
+                {tp('laneClient')}
+              </span>
+              <span className="font-mono text-[11px] tracking-[0.12em] text-text-tertiary uppercase">
+                {tp('laneTeam')}
+              </span>
+            </div>
             <ol className="flex flex-col gap-2">
               {phase.steps.map((step, stepIndex) => {
                 const stepId = `${phaseId}-step-${stepIndex}`;
@@ -232,62 +244,71 @@ export function ProcessTemplateEditor({
                     ),
                   }));
                 return (
-                  <li
-                    key={stepId}
-                    className="flex flex-col gap-2 rounded-md bg-surface-muted p-2 md:flex-row md:items-end"
-                  >
-                    <div className="flex flex-1 flex-col gap-1">
-                      <Label htmlFor={`${stepId}-name`}>{tp('stepName')}</Label>
-                      <Input
-                        id={`${stepId}-name`}
-                        value={step.name}
-                        maxLength={120}
-                        onChange={(event) => updateStep({ name: event.target.value })}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        id={`${stepId}-visible`}
-                        type="checkbox"
-                        className="size-4"
-                        checked={step.visibleToClient}
-                        onChange={(event) => updateStep({ visibleToClient: event.target.checked })}
-                      />
-                      <Label htmlFor={`${stepId}-visible`} className="text-body-sm text-text">
-                        {tp('visibleToClient')}
-                      </Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        id={`${stepId}-chained`}
-                        type="checkbox"
-                        className="size-4"
-                        checked={stepIndex > 0 && step.chained}
-                        disabled={stepIndex === 0}
-                        onChange={(event) => updateStep({ chained: event.target.checked })}
-                      />
-                      <Label htmlFor={`${stepId}-chained`} className="text-body-sm text-text">
-                        {tp('chained')}
-                      </Label>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={phase.steps.length === 1}
-                      onClick={() =>
-                        updatePhase(phaseIndex, (current) => ({
-                          ...current,
-                          steps: current.steps
-                            .filter((_, position) => position !== stepIndex)
-                            .map((entry, position) =>
-                              position === 0 ? { ...entry, chained: false } : entry,
-                            ),
-                        }))
-                      }
+                  <li key={stepId} className="grid gap-4 md:grid-cols-2">
+                    <div
+                      className={cn(
+                        'relative flex flex-col gap-2 rounded-md border bg-surface p-3 transition-colors duration-150',
+                        step.visibleToClient
+                          ? 'border-border-strong md:col-start-1'
+                          : 'border-border bg-surface-muted md:col-start-2',
+                        stepIndex > 0 && step.chained && 'border-l-2 border-l-text',
+                      )}
                     >
-                      {tp('removeStep')}
-                    </Button>
+                      <div className="flex flex-1 flex-col gap-1">
+                        <Label htmlFor={`${stepId}-name`}>{tp('stepName')}</Label>
+                        <Input
+                          id={`${stepId}-name`}
+                          value={step.name}
+                          maxLength={120}
+                          onChange={(event) => updateStep({ name: event.target.value })}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={`${stepId}-visible`}
+                          type="checkbox"
+                          className="size-4"
+                          checked={step.visibleToClient}
+                          onChange={(event) =>
+                            updateStep({ visibleToClient: event.target.checked })
+                          }
+                        />
+                        <Label htmlFor={`${stepId}-visible`} className="text-body-sm text-text">
+                          {tp('visibleToClient')}
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={`${stepId}-chained`}
+                          type="checkbox"
+                          className="size-4"
+                          checked={stepIndex > 0 && step.chained}
+                          disabled={stepIndex === 0}
+                          onChange={(event) => updateStep({ chained: event.target.checked })}
+                        />
+                        <Label htmlFor={`${stepId}-chained`} className="text-body-sm text-text">
+                          {tp('chained')}
+                        </Label>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={phase.steps.length === 1}
+                        onClick={() =>
+                          updatePhase(phaseIndex, (current) => ({
+                            ...current,
+                            steps: current.steps
+                              .filter((_, position) => position !== stepIndex)
+                              .map((entry, position) =>
+                                position === 0 ? { ...entry, chained: false } : entry,
+                              ),
+                          }))
+                        }
+                      >
+                        {tp('removeStep')}
+                      </Button>
+                    </div>
                   </li>
                 );
               })}

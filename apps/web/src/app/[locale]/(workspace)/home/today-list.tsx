@@ -1,5 +1,4 @@
 import { useFormatter, useTranslations } from 'next-intl';
-import { Badge } from '@agency-os/ui/components/badge';
 import { Link } from '@/i18n/navigation';
 import type { HomeItem } from '@/modules/studio';
 
@@ -10,7 +9,7 @@ export function TodayList({ items }: { items: HomeItem[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col gap-0.5 rounded-lg border border-dashed border-border px-4 py-3">
+      <div className="flex flex-col gap-0.5 rounded-md bg-surface-muted px-3 py-3">
         <p className="text-body-sm font-medium text-text">{t('empty.title')}</p>
         <p className="text-caption text-text-secondary">{t('empty.description')}</p>
       </div>
@@ -18,15 +17,17 @@ export function TodayList({ items }: { items: HomeItem[] }) {
   }
 
   return (
-    <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+    <ul className="flex flex-col gap-1.5">
       {items.map((item) => (
         <li key={`${item.kind}-${item.id}`}>
           <Link
             href={item.href}
-            className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-surface-muted"
+            className={`flex items-center justify-between gap-4 rounded-md border-l-2 bg-surface-muted px-3 py-2.5 transition-colors duration-(--duration-fast) hover:bg-border/40 ${
+              item.overdue ? 'border-danger' : 'border-warning'
+            }`}
           >
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-body font-medium text-text">
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="truncate text-body-sm font-medium text-text">
                 {t(`kinds.${item.kind}`, {
                   title: item.title,
                   day: item.sequenceDay ?? 0,
@@ -38,9 +39,10 @@ export function TodayList({ items }: { items: HomeItem[] }) {
               ) : null}
             </span>
             {item.overdue ? (
-              <Badge variant="secondary" className="bg-danger-bg text-danger">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-danger-bg px-2 py-0.5 text-caption font-medium text-danger">
+                <span aria-hidden className="size-1.5 rounded-full bg-danger" />
                 {t('overdue')}
-              </Badge>
+              </span>
             ) : null}
           </Link>
         </li>

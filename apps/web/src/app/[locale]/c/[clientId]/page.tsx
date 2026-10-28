@@ -1,16 +1,22 @@
 import { notFound } from 'next/navigation';
+import { OnboardingProgress } from '@/components/client-onboarding/onboarding-progress';
+import { loadOnboarding } from '@/modules/client-onboarding/server';
+import { reopenOnboardingAction } from '../../onboarding-actions';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { HealthCard } from '@/components/health/health-card';
 import { hasHealthData } from '@/components/health/has-health-data';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomHealth } from '@/modules/health/server';
 import { loadProjectProofs, loadProjectRounds } from '@/modules/proofing/server';
 import { phaseTimeline } from '@/modules/rooms';
 import { loadProcessTemplates, loadStaffRoom } from '@/modules/rooms/server';
+import { loadRoomResults } from '@/modules/results/server';
 import { loadProjectTestimonial } from '@/modules/testimonials/server';
+import { ResultsStrip } from '@/components/results/results-strip';
 import {
   completePhaseAction,
   createProjectAction,
@@ -37,7 +43,7 @@ import { ProcessBoard } from './room/process-board';
 import { ProjectCard } from './room/project-card';
 import { ProofsSection } from './room/proofs-section';
 import { RoomHeader } from './room/room-header';
-import { TimelineView } from './room/timeline-view';
+import { TimelineView } from '@/components/rooms/timeline-view';
 import { TestimonialSection } from './room/testimonial-section';
 import { pageMetadata } from '@/i18n/page-title';
 
@@ -54,9 +60,11 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
   const { project: projectId } = await searchParams;
-  const [data, health] = await Promise.all([
+  const [data, health, results, onboarding] = await Promise.all([
     loadStaffRoom(session, { clientId, projectId }),
     loadRoomHealth(session.claims, clientId),
+    loadRoomResults(session.claims, clientId),
+    loadOnboarding(session.claims, clientId),
   ]);
   if (!data) notFound();
   const { room, writable, editable } = data;
@@ -87,7 +95,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
         client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
-        showPreviewLink={room.project !== null}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}`}
         actions={
           writable && templates.length > 0 ? (
@@ -99,6 +107,22 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
           ) : null
         }
       />
+
+      {results ? (
+        <ResultsStrip
+          kpis={results.kpis}
+          currentMonth={results.currentMonth}
+          href={`/c/${clientId}/results`}
+          emptyHref={writable ? `/c/${clientId}/results` : undefined}
+        />
+      ) : null}
+
+      {onboarding ? (
+        <OnboardingProgress
+          view={onboarding}
+          reopen={writable ? reopenOnboardingAction.bind(null, clientId) : null}
+        />
+      ) : null}
 
       {room.project ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">

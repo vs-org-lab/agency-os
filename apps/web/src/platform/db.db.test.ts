@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   closeTestSql,
   createFixtureWorld,
+  createRoomFixture,
   testDatabase,
   withTestTransaction,
 } from '@agency-os/db/testing';
@@ -88,6 +89,38 @@ describe('database contexts', () => {
       await expect(
         withUserContext({ ...claimsFor(randomUUID()), sub: 'not-a-uuid' }, async () => undefined),
       ).rejects.toThrow(/Invalid claims/);
+    });
+  });
+
+  it('a preview context reads the client portal read-only and keeps the staff identity', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const rooms = await createRoomFixture(sql, world);
+      const { withUserContext } = createDbContexts(testDatabase(sql));
+      await sql`savepoint preview_context`;
+
+      const preview = { ...claimsFor(world.users.founder), preview_client: world.clients.a };
+      const seen = await withUserContext(preview, async (tx) => {
+        const projects = await tx.execute<{ id: string }>(
+          dsql`select id from public.portal_projects`,
+        );
+        const [identity] = await tx.execute<{ uid: string; readOnly: string }>(
+          dsql`select auth.uid()::text as uid, current_setting('transaction_read_only') as "readOnly"`,
+        );
+        return { projectIds: projects.map((row) => row.id), ...identity };
+      });
+      expect(seen).toEqual({
+        projectIds: [rooms.a.projectId],
+        uid: world.users.founder,
+        readOnly: 'on',
+      });
+
+      await expect(
+        withUserContext(preview, (tx) =>
+          tx.execute(dsql`update public.clients set name = name where id = ${world.clients.a}`),
+        ),
+      ).rejects.toThrow();
+      await sql`rollback to savepoint preview_context`;
     });
   });
 });

@@ -45,6 +45,22 @@ describe('portal onboarding marker', () => {
     });
   });
 
+  it('the tour and the getting-started list are recorded apart', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const deps = { contexts: createDbContexts(testDatabase(sql)) };
+      const viewer = { userId: world.users.decisionMakerA, organizationId: world.organizationId };
+      const claims = claimsFor(world.users.decisionMakerA, 'client');
+
+      await markPortalOnboardingSeen(claims, viewer, deps, 'portal_getting_started');
+
+      expect(await portalOnboardingPending(claims, viewer, deps, 'portal_getting_started')).toBe(
+        false,
+      );
+      expect(await portalOnboardingPending(claims, viewer, deps)).toBe(true);
+    });
+  });
+
   it('marker is per user', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

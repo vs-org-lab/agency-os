@@ -88,6 +88,7 @@ export type { WeeklyHours } from './schema/commercial';
 export type {
   ContractStudioDetails,
   PaymentStep,
+  ProposalModule,
   ProposalClientDetails,
   ProposalScopeLine,
 } from './schema/contracts';

@@ -7,6 +7,7 @@ import type { CommercialSession } from '@/modules/commercial/server';
 import { loadDealContract, loadProposalWorkspace } from '@/modules/contracts/server';
 import { AssistantSection } from './assistant-section';
 import { BriefingSection } from './briefing-section';
+import { OnboardingSection } from './onboarding-section';
 import { FindingsSection } from './findings-section';
 import { OrbitSection } from './orbit-section';
 import { PortalAccess } from './portal-access';
@@ -97,6 +98,12 @@ export async function CoreTab({
         writable={writable}
         locale={locale}
       />
+      {workspace.onboarding && writable ? (
+        <OnboardingSection
+          engagementId={workspace.engagementId}
+          onboarding={workspace.onboarding}
+        />
+      ) : null}
       <FindingsSection
         engagementId={workspace.engagementId}
         dealId={workspace.dealId}

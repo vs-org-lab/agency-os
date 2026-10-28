@@ -8,6 +8,7 @@ export const RESOURCES = [
   'commercial_values',
   'invoices',
   'library',
+  'onboarding',
   'brand_hub',
   'vault',
   'users',

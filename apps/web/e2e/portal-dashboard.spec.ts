@@ -7,7 +7,7 @@ import { seedRetainerClient } from './support/retainers';
 const credentials = readCredentials();
 
 test.describe('Portal dashboard', () => {
-  test('the client sees the welcome once, asks for work and follows it until the team takes it', async ({
+  test('the client takes the guided tour once, asks for work and follows it until the team takes it', async ({
     page,
     browser,
   }) => {
@@ -20,12 +20,14 @@ test.describe('Portal dashboard', () => {
     await client.goto(await magicLinkPath(seeded.decisionMakerEmail));
     await client.goto('/portal');
 
-    const welcome = client.getByRole('dialog');
-    await expect(welcome.getByText('Onde vê o seu trabalho')).toBeVisible();
-    await welcome.getByRole('button', { name: 'Seguinte' }).click();
-    await welcome.getByRole('button', { name: 'Seguinte' }).click();
-    await welcome.getByRole('button', { name: 'Começar' }).click();
-    await expect(welcome).toBeHidden();
+    const tour = client.getByRole('dialog');
+    await expect(tour.getByRole('heading', { name: 'Bem-vindo ao seu portal' })).toBeVisible();
+    const finish = tour.getByRole('button', { name: 'Concluir' });
+    while (!(await finish.isVisible())) {
+      await tour.getByRole('button', { name: 'Seguinte' }).click();
+    }
+    await finish.click();
+    await expect(tour).toBeHidden();
     await client.reload();
     await expect(client.getByRole('heading', { name: /^Olá/ })).toBeVisible();
     await expect(client.getByRole('dialog')).toHaveCount(0);

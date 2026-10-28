@@ -30,7 +30,8 @@ L = ler, E = escrever, A = aprovar ou assinar, — = sem acesso. "Próprio" limi
 | Salas e processo | L E | L E (próprio) | L E (próprio, sem valores) | L | L, rascunho | L A (própria) | L E (própria) | — |
 | Valores, propostas, contratos | L E A | L E (próprio) | — | L | L | L A (própria) | — | L (própria) |
 | Faturas e pagamentos | L E | L | — | L E | L, rascunho de lembrete | L (própria), pagar | — | L (própria), pagar |
-| Biblioteca e documentos | L E | L E (próprio) | L E (próprio) | L | L | L (visíveis) | L E (visíveis) | — |
+| Biblioteca e documentos | L E | L E (próprio) | L E (próprio) | L | L | L (visíveis), E (só "Enviado pelo cliente", ADR 0009) | L E (visíveis) | — |
+| Onboarding do cliente | L E | L E (próprio) | — | — | — | L E (própria) | L E (própria) | — |
 | Brand Hub: editar e publicar | L E | L E (próprio) | L E (próprio), sem publicar | — | Rascunho | L A (próprio) | L | — |
 | Cofre de credenciais | L E (MFA, motivo) | L (próprio, MFA, motivo) | Acesso temporário concedido | — | — | E (própria) | E (própria) | — |
 | Permissões e utilizadores | L E | — | — | — | — | Convidar colegas (própria) | — | — |

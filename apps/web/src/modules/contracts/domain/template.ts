@@ -13,6 +13,7 @@ export const TEMPLATE_FIELDS = [
   'opcao.nome',
   'opcao.resumo',
   'opcao.ambito',
+  'opcao.modulos',
   'opcao.valor',
   'opcao.pagamentos',
   'opcao.retainer',

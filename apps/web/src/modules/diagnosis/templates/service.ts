@@ -58,6 +58,15 @@ async function selectActive<K extends CoreTemplateKind>(
     : null;
 }
 
+/** The active template, without creating the default when there is none (read-only callers). */
+export function findActiveTemplate<K extends CoreTemplateKind>(
+  tx: DbTransaction,
+  organizationId: string,
+  kind: K,
+): Promise<ActiveTemplate<K> | null> {
+  return selectActive(tx, organizationId, kind);
+}
+
 export async function getActiveTemplate<K extends CoreTemplateKind>(
   tx: DbTransaction,
   organizationId: string,

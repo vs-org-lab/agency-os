@@ -7,8 +7,8 @@ import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 import { parseBriefingDraft } from './assistant/parse';
 import { scopedEngagement } from './authorization';
-import type { BriefingGuide } from './templates/definitions';
-import { getTemplateById } from './templates/service';
+import { answerValues, type BriefingGuide } from './templates/definitions';
+import { findActiveTemplate, getTemplateById } from './templates/service';
 
 const { coreBriefingNotes, coreEngagements } = schema;
 
@@ -24,6 +24,8 @@ export type BriefingNote = {
   blockId: string;
   questionId: string | null;
   body: string;
+  /** The structured answer, for a question that has one. */
+  answer: string | null;
   authorId: string | null;
   updatedAt: Date;
 };
@@ -89,6 +91,73 @@ export function saveBriefingNote(
           set: { body, authorId: actor.userId, updatedAt: savedAt },
         });
       return { ok: true as const, savedAt };
+    },
+    { ok: false as const, rule: 'not_found' as const },
+  );
+}
+
+const answerInputSchema = z.object({
+  engagementId: z.uuid(),
+  blockId: z.string().min(1).max(40),
+  questionId: z.string().min(1).max(40),
+  answer: z.string().min(1).max(40).nullable(),
+});
+
+/**
+ * Records the structured answer of a question (yes or no, or an option), or clears it with null.
+ * Only questions whose template defines an answer take one, and only one of its values.
+ */
+export function saveBriefingAnswer(
+  claims: VerifiedClaims,
+  input: { engagementId: string; blockId: string; questionId: string; answer: string | null },
+  deps: DiagnosisDeps,
+): Promise<{ ok: true } | { ok: false; rule: 'not_found' | 'invalid_input' }> {
+  const parsed = answerInputSchema.safeParse(input);
+  if (!parsed.success) return Promise.resolve({ ok: false, rule: 'invalid_input' });
+  const { engagementId, blockId, questionId, answer } = parsed.data;
+
+  return withActor(
+    deps.contexts,
+    claims,
+    async (tx, actor) => {
+      const scope = await scopedEngagement(tx, actor, engagementId, 'write');
+      if (!scope) return { ok: false as const, rule: 'not_found' as const };
+      // The engagement's own version, or the active one whose onboarding questions it may lack.
+      const guides = [
+        await getTemplateById(tx, scope.briefingTemplateId, 'briefing'),
+        (await findActiveTemplate(tx, scope.organizationId, 'briefing'))?.definition,
+      ];
+      const question = guides
+        .flatMap((guide) => guide?.blocks.filter((block) => block.id === blockId) ?? [])
+        .flatMap((block) => block.questions)
+        .find((entry) => entry.id === questionId && entry.answer);
+      if (!question?.answer) return { ok: false as const, rule: 'invalid_input' as const };
+      if (answer !== null && !answerValues(question.answer).includes(answer)) {
+        return { ok: false as const, rule: 'invalid_input' as const };
+      }
+
+      const savedAt = new Date();
+      await tx
+        .insert(coreBriefingNotes)
+        .values({
+          organizationId: scope.organizationId,
+          clientId: scope.clientId,
+          engagementId,
+          blockId,
+          questionId,
+          body: '',
+          answer,
+          authorId: actor.userId,
+        })
+        .onConflictDoUpdate({
+          target: [
+            coreBriefingNotes.engagementId,
+            coreBriefingNotes.blockId,
+            coreBriefingNotes.questionId,
+          ],
+          set: { answer, authorId: actor.userId, updatedAt: savedAt },
+        });
+      return { ok: true as const };
     },
     { ok: false as const, rule: 'not_found' as const },
   );
@@ -197,6 +266,7 @@ export async function getBriefing(
       blockId: coreBriefingNotes.blockId,
       questionId: coreBriefingNotes.questionId,
       body: coreBriefingNotes.body,
+      answer: coreBriefingNotes.answer,
       authorId: coreBriefingNotes.authorId,
       updatedAt: coreBriefingNotes.updatedAt,
     })

@@ -16,3 +16,4 @@ export {
 } from './domain/meeting';
 export type { AgendaItem, AgendaItemKind, AgendaMeeting, AgendaView } from './views';
 export { canScheduleInStudio } from './schedulers';
+export type { PortalMeeting } from './portal';

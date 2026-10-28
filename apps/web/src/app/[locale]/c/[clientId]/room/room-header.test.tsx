@@ -58,11 +58,13 @@ describe('RoomHeader', () => {
     ).toBeTruthy();
   });
 
-  it('renders the preview link as an outline button', () => {
+  it('opens the preview on the portal section of the room screen', () => {
     renderHeader({ selectedId: 'project-1' });
 
     const link = screen.getByRole('link', { name: 'Ver como cliente' });
-    expect(link.getAttribute('href')).toBe(`/c/${CLIENT.id}/preview?project=project-1`);
+    expect(link.getAttribute('href')).toBe(
+      `/c/${CLIENT.id}/preview?section=docs&project=project-1`,
+    );
     expect(link.getAttribute('data-variant')).toBe('outline');
   });
 

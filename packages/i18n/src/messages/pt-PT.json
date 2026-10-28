@@ -66,6 +66,17 @@
     "studio": "Estúdio",
     "allClients": "Todos os clientes",
     "toggleSidebar": "Mostrar ou ocultar menu",
+    "clientPreview": {
+      "label": "Pré-visualização do cliente",
+      "notice": "Está a ver o portal como {client} o vê. Só leitura: as ações do cliente não fazem nada aqui.",
+      "exit": "Sair da pré-visualização",
+      "roleLabel": "Ver como",
+      "roles": {
+        "decision_maker": "Decisor",
+        "operational": "Operacional",
+        "client_finance": "Financeiro"
+      }
+    },
     "skipToContent": "Saltar para o conteúdo",
     "navigation": "Navegação",
     "navigationDescription": "Menu principal da aplicação.",
@@ -107,7 +118,8 @@
       "retainer": "Retainer",
       "outcome": "Resultado",
       "reports": "Relatórios",
-      "academy": "Academia"
+      "academy": "Academia",
+      "results": "Resultados"
     },
     "breadcrumb": "Caminho",
     "portalNav": {
@@ -120,7 +132,8 @@
       "documents": "Documentos",
       "brandHub": "Brand Hub",
       "progress": "Plano e resultado",
-      "academy": "Academia"
+      "academy": "Academia",
+      "onboarding": "Onboarding"
     }
   },
   "states": {
@@ -187,8 +200,7 @@
         "clients": "Clientes ativos",
         "activeProjects": "Projetos ativos",
         "waiting": "À espera de si",
-        "receivable": "Por receber",
-        "none": "Nada por receber"
+        "receivable": "Por receber"
       },
       "upcoming": {
         "title": "Próximos eventos",
@@ -201,6 +213,12 @@
           "step_due": "Prazo do passo",
           "task_due": "Tarefa",
           "delivery": "Entrega"
+        },
+        "groups": {
+          "today": "Hoje",
+          "tomorrow": "Amanhã",
+          "week": "Esta semana",
+          "later": "Mais tarde"
         }
       },
       "clients": {
@@ -211,7 +229,9 @@
         "lastActivity": "Última atividade {date}",
         "noActivity": "Sem atividade",
         "retainer": "Retainer"
-      }
+      },
+      "greeting": "Olá, {name}",
+      "openToday": "Abrir tarefas"
     },
     "today": {
       "title": "Hoje",
@@ -388,22 +408,25 @@
       "greeting": "Olá, {name}",
       "greetingAnonymous": "Olá",
       "action": {
-        "title": "A sua ação",
+        "title": "A sua vez",
         "due": "Até {date}",
         "kinds": {
           "approval": "Aprovação",
           "proof": "Prova",
           "proposal": "Proposta",
           "contract": "Contrato",
-          "payment": "Pagamento"
+          "payment": "Pagamento",
+          "onboarding": "Onboarding"
         },
         "cta": {
           "approval": "Decidir",
           "proof": "Rever",
           "proposal": "Ver a proposta",
           "contract": "Assinar",
-          "payment": "Pagar"
-        }
+          "payment": "Pagar",
+          "onboarding": "Responder"
+        },
+        "empty": "Está tudo em dia. Avisamos quando precisarmos de si."
       },
       "plan": {
         "title": "O seu plano",
@@ -443,38 +466,147 @@
         }
       },
       "project": {
-        "title": "O seu projeto: {name}",
         "phases": "Fases do projeto",
         "current": "Fase atual",
-        "nextStep": "Próximo passo: {name}",
         "dueOn": "Previsto para {date}",
-        "open": "Abrir a sala"
+        "open": "Ver o projeto",
+        "eyebrow": "Projeto",
+        "percent": "{value}% concluído",
+        "progress": "{done} de {total} fases concluídas",
+        "timeline": "Linha temporal",
+        "waiting": "À espera da sua aprovação",
+        "inProgress": "Em curso",
+        "completed": "Concluído",
+        "noProjectTitle": "O seu projeto começa em breve",
+        "noProjectBody": "Assim que a proposta for aceite e o contrato assinado, as fases do projeto aparecem aqui, com o que já está feito e o que vem a seguir.",
+        "next": "Próximo passo"
       },
       "documents": {
-        "title": "Documentos recentes"
+        "title": "Documentos recentes",
+        "seeAll": "Ver todos",
+        "meta": "{project} · Atualizado a {date}"
+      },
+      "summary": {
+        "active": "O seu projeto {project} está na fase {phase}.",
+        "waiting": "A fase {phase} de {project} espera pela sua aprovação.",
+        "done": "O projeto {project} tem todas as fases concluídas.",
+        "none": "Bem-vindo. Tudo o que precisa de si e do seu projeto está aqui."
+      },
+      "gettingStarted": {
+        "title": "Primeiros passos",
+        "progress": "{done} de {total} feitos",
+        "hide": "Esconder",
+        "start": "Começar",
+        "open": "Abrir",
+        "steps": {
+          "tour": {
+            "title": "Conhecer o portal",
+            "body": "Uma visita de um minuto ao que vai usar."
+          },
+          "proposal": {
+            "title": "Rever e aceitar a proposta",
+            "body": "Escolha a opção que faz sentido para si."
+          },
+          "contract": {
+            "title": "Assinar o contrato",
+            "body": "A assinatura é feita aqui, no portal."
+          },
+          "payment": {
+            "title": "Pagar o primeiro pedido",
+            "body": "Com o pagamento confirmado, o trabalho começa."
+          },
+          "team": {
+            "title": "Convidar a sua equipa",
+            "body": "Quem acompanha o projeto consigo vê o mesmo que vê."
+          },
+          "onboarding": {
+            "title": "Responder ao onboarding",
+            "body": "Os ficheiros, acessos e respostas de que precisamos para começar."
+          }
+        }
+      },
+      "updates": {
+        "title": "Últimas atualizações",
+        "seeAll": "Ver todas",
+        "empty": "Ainda não há atualizações."
+      },
+      "team": {
+        "title": "A sua equipa",
+        "roles": {
+          "founder": "Direção",
+          "project_manager": "Gestão do projeto"
+        },
+        "email": "Enviar email a {name}"
+      },
+      "meeting": {
+        "title": "Próxima reunião",
+        "join": "Entrar na chamada",
+        "empty": "Sem reuniões marcadas.",
+        "more": "{count, plural, one {e mais # reunião} other {e mais # reuniões}}"
       }
     },
-    "onboarding": {
-      "label": "Boas-vindas ao portal",
-      "step": "Passo {current} de {total}",
-      "next": "Seguinte",
-      "previous": "Anterior",
+    "tour": {
+      "label": "Visita guiada ao portal",
+      "counter": "Visita guiada · {current} de {total}",
       "skip": "Saltar",
-      "start": "Começar",
+      "previous": "Anterior",
+      "next": "Seguinte",
+      "finish": "Concluir",
       "steps": {
-        "work": {
-          "title": "Onde vê o seu trabalho",
-          "body": "O Início mostra o que precisa de si, o que resta do seu plano e em que ponto está cada pedido."
+        "welcome": {
+          "title": "Bem-vindo ao seu portal",
+          "body": "Aqui acompanha o projeto, decide o que precisa de si e encontra tudo o que entregamos. Mostramos-lhe o essencial em menos de um minuto."
         },
-        "approve": {
-          "title": "Como aprova",
-          "body": "Aprovações e provas aparecem em \"A sua ação\". Abra, reveja e decida; a equipa é avisada logo."
+        "project": {
+          "title": "O seu projeto",
+          "body": "A fase em curso, quanto já está feito e o próximo passo, com data. Na linha temporal vê o calendário inteiro."
         },
-        "request": {
-          "title": "Como pede trabalho",
-          "body": "Use \"Pedir trabalho\" e diga o que precisa. Se couber no plano deste mês, a equipa começa de imediato."
+        "actions": {
+          "title": "A sua vez",
+          "body": "Quando precisamos de uma decisão, de uma assinatura ou de um pagamento, aparece aqui primeiro. Se estiver vazio, está tudo em dia."
+        },
+        "approvals": {
+          "title": "Aprovações",
+          "body": "Tudo o que espera pela sua decisão: fases, ficheiros e documentos. Aprove ou peça alterações com um comentário."
+        },
+        "documents": {
+          "title": "Documentos",
+          "body": "Propostas, apresentações e relatórios partilhados consigo, com as versões e os comentários."
+        },
+        "hub": {
+          "title": "Brand Hub",
+          "body": "O manual vivo da sua marca: cores, tipografia, logótipos e ficheiros para descarregar."
+        },
+        "updates": {
+          "title": "Atualizações",
+          "body": "As fases com os passos, a linha temporal e tudo o que a equipa vai partilhando."
+        },
+        "progress": {
+          "title": "Plano e resultado",
+          "body": "O resultado acordado e, se tiver um retainer, quanto já usou este mês e quanto ainda tem."
+        },
+        "done": {
+          "title": "Está pronto",
+          "body": "Pode repetir esta visita quando quiser, nos Primeiros passos do início."
+        },
+        "onboarding": {
+          "title": "Onboarding",
+          "body": "O que precisamos de si para começar: ficheiros, acessos e respostas, conforme o seu projeto. Responde ao seu ritmo."
         }
       }
+    },
+    "progress": {
+      "description": "Onde está o resultado que combinámos e o que ainda tem do seu plano este mês.",
+      "outcome": "Resultado acordado",
+      "percent": "{value}%",
+      "ofTarget": "do caminho até à meta",
+      "range": "De {baseline} para {target} {unit}; agora em {current}.",
+      "deadline": "Prazo: {date}",
+      "month": "Este mês",
+      "tier": "Plano {tier}",
+      "left": "{remaining} de {available} por usar",
+      "renews": "{days, plural, one {Falta # dia para o mês seguinte.} other {Faltam # dias para o mês seguinte.}}",
+      "retainerTitle": "O seu plano"
     }
   },
   "commercial": {
@@ -1562,6 +1694,8 @@
       "noCode": "Nenhuma",
       "stepName": "Nome do passo",
       "visibleToClient": "Visível ao cliente",
+      "laneClient": "O que o cliente vê",
+      "laneTeam": "O que a equipa faz",
       "chained": "Enviado quando o anterior termina",
       "addStep": "Adicionar passo",
       "removeStep": "Remover passo",
@@ -1617,7 +1751,8 @@
         "label": "Secções do modo call",
         "briefing": "Briefing",
         "observations": "Observações",
-        "transcript": "Transcrição"
+        "transcript": "Transcrição",
+        "onboarding": "Onboarding"
       },
       "back": "Voltar",
       "next": "Seguinte",
@@ -1858,6 +1993,50 @@
       "removePayment": "Remover pagamento {position}",
       "paymentsTotal": "Total: {total}%",
       "retainerToggle": "Inclui acompanhamento mensal",
+      "modules": {
+        "title": "Módulos do contrato",
+        "hint": "Escolha os serviços desta opção; o contrato inclui só as cláusulas dos módulos escolhidos.",
+        "preview": "Cláusulas no contrato",
+        "otherTool": "Outras",
+        "titles": {
+          "A": "Vídeo e motion graphics",
+          "B": "Gestão de redes sociais",
+          "C": "Tráfego pago",
+          "D": "Web, software e apps",
+          "E": "Automação e IA"
+        },
+        "fields": {
+          "videosPerMonth": "Vídeos por mês",
+          "revisions": "Rondas de revisão",
+          "platforms": "Plataformas",
+          "feedPosts": "Publicações no feed por mês",
+          "storiesPerWeek": "Stories por semana",
+          "mediaBudget": "Orçamento de media mensal",
+          "managementFee": "Fee de gestão mensal",
+          "solution": "Tipo de solução",
+          "technologies": "Tecnologias",
+          "hosting": "Hosting e domínio incluídos",
+          "sourceCode": "Código fonte entregue",
+          "tools": "Ferramentas",
+          "maintenanceMonths": "Meses de manutenção"
+        },
+        "solutions": {
+          "website": "Website institucional",
+          "landing": "Landing page",
+          "ecommerce": "E-commerce",
+          "webapp": "Web app",
+          "mobile": "App mobile",
+          "custom": "Software à medida"
+        }
+      },
+      "presets": {
+        "label": "Modalidade:",
+        "options": {
+          "A": "A · 50/50",
+          "B": "B · Três parcelas",
+          "C": "C · Retainer mensal"
+        }
+      },
       "retainerMonthly": "Valor mensal",
       "retainerMonths": "Meses",
       "retainerSummary": "{amount} por mês, durante {months} meses",
@@ -2036,8 +2215,6 @@
     "noProjectHint": "O projeto é criado sozinho quando o primeiro pagamento leva o negócio a 2.2, ou pode criá-lo aqui.",
     "projectSelector": "Projeto",
     "previewAsClient": "Ver como cliente",
-    "previewNotice": "Pré-visualização: é isto que o cliente vê. Nada interno aparece aqui.",
-    "backToRoom": "Voltar à sala",
     "newProject": "Novo projeto",
     "projectName": "Nome do projeto",
     "template": "Modelo de processo",
@@ -2076,7 +2253,10 @@
       "people": "Pessoas",
       "nobody": "Ninguém atribuído",
       "healthLine": "Saúde: {score} de 100, {level}",
-      "healthEmpty": "Saúde: ainda sem dados suficientes"
+      "healthEmpty": "Saúde: ainda sem dados suficientes",
+      "progress": "Progresso",
+      "dates": "Datas",
+      "peopleCount": "{count, plural, =0 {Ninguém} one {# pessoa} other {# pessoas}}"
     },
     "phases": "Fases",
     "phaseDue": "Data prevista da fase",
@@ -2169,6 +2349,22 @@
       "attachment_hidden": "Há anexos de pastas internas. Uma atualização visível ao cliente só leva ficheiros de pastas visíveis."
     },
     "stepsOf": "Passos de {name}",
+    "room": {
+      "progress": "{done} de {total} fases concluídas",
+      "phases": "Fases",
+      "needsDecision": "À espera da sua decisão",
+      "stepsOfPhase": "Passos de {name}",
+      "noSteps": "Ainda não há passos para mostrar nesta fase.",
+      "due": "Até {date}",
+      "decisions": "Decisões",
+      "showAll": "Ver as {count} atualizações",
+      "showLess": "Ver menos atualizações",
+      "view": "Vista",
+      "views": {
+        "steps": "Passos",
+        "timeline": "Linha temporal"
+      }
+    },
     "phaseLabel": "{position}. {name}",
     "approvals": "Aprovações",
     "clientApproval": {
@@ -2197,7 +2393,9 @@
         "approval_required": "Esta fase só termina com a aprovação do cliente.",
         "deal_has_project": "Este negócio já tem um projeto."
       }
-    }
+    },
+    "phaseNumber": "Fase {position}",
+    "phaseProgress": "{done} de {total} feitos"
   },
   "tasks": {
     "title": "Tarefas",
@@ -2804,6 +3002,7 @@
     "kind": "Tipo",
     "url": "Link",
     "file": "Ficheiro",
+    "figmaCanvasHint": "Este link abre o ficheiro inteiro do Figma. Para o mostrar como slides, abra o protótipo (Present) e copie o link em Share prototype.",
     "create": "Criar documento",
     "creating": "A criar…",
     "created": "Documento criado.",
@@ -2906,7 +3105,16 @@
     "portal": {
       "title": "Documentos",
       "empty": "Ainda não há documentos partilhados consigo.",
-      "decideHint": "A equipa pediu a sua aprovação desta versão."
+      "decideHint": "A equipa pediu a sua aprovação desta versão.",
+      "description": "Propostas, apresentações e relatórios que partilhámos consigo. Abra um documento para ver as versões, comentar ou dar a sua aprovação.",
+      "detail": "{project} · {date}",
+      "toReview": "Para rever ({count})",
+      "others": "Os restantes",
+      "status": {
+        "draft": "Rascunho",
+        "with_client": "Para rever",
+        "approved": "Aprovado"
+      }
     },
     "errors": {
       "not_found": "Não encontrado ou sem permissão.",
@@ -3084,7 +3292,10 @@
     },
     "view": {
       "contents": "Secções do Brand Hub",
-      "empty": "Esta secção ainda não tem conteúdo."
+      "empty": "Esta secção ainda não tem conteúdo.",
+      "copy": "Copiar {label} {value}",
+      "copied": "Copiado",
+      "copyHint": "Clicar para copiar"
     },
     "portal": {
       "decideHint": "A equipa pediu a sua aprovação deste Brand Hub.",
@@ -3272,6 +3483,19 @@
     "periodRange": "{start} – {end}"
   },
   "money": {
+    "breakdown": {
+      "ageTitle": "Pedidos em aberto por idade",
+      "ageEmpty": "Nenhum pedido em aberto.",
+      "ages": {
+        "current": "Até 30 dias",
+        "late": "31 a 60 dias",
+        "overdue": "61 a 90 dias",
+        "stale": "Mais de 90 dias"
+      },
+      "count": "{count, plural, one {# pedido} other {# pedidos}}",
+      "clientsTitle": "Recebido por cliente",
+      "clientsEmpty": "Ainda não há pagamentos este ano."
+    },
     "chart": {
       "title": "Recebido e despesas por mês",
       "summary": "Pedidos pagos e despesas de {year} em euros, por mês.",
@@ -3795,5 +4019,209 @@
       "not_found": "Não foi possível concluir. Atualize a página e tente de novo."
     },
     "itemAction": "{action} · {title}"
+  },
+  "results": {
+    "title": "Resultados",
+    "description": "Os números que o cliente vê no portal e que entram no relatório. Registo manual ou importação do CSV exportado de cada fonte.",
+    "strip": {
+      "title": "Resultados · {month}",
+      "compared": "Comparação com {month}",
+      "open": "Abrir resultados",
+      "noValue": "Sem valor este mês",
+      "target": "Objetivo {target}",
+      "met": "atingido",
+      "share": "{share}%",
+      "emptyTeam": "Ainda não há indicadores. Defina os KPIs do cliente para aparecerem aqui e no portal.",
+      "emptyAction": "Definir indicadores"
+    },
+    "change": {
+      "up": "subiu {amount}",
+      "down": "desceu {amount}",
+      "flat": "sem variação",
+      "percent": "{amount}%",
+      "points": "{amount} pp",
+      "value": "{amount}"
+    },
+    "table": {
+      "label": "Indicadores por mês",
+      "kpi": "Indicador",
+      "source": "Fonte",
+      "target": "Objetivo",
+      "hidden": "Só a equipa",
+      "edit": "Editar {name}",
+      "archive": "Arquivar {name}",
+      "cell": "{name} em {month}",
+      "saved": "Valor guardado.",
+      "manual": "Registo manual",
+      "empty": "Sem indicadores. Comece por «+ Indicador».",
+      "archiveShort": "Arquivar"
+    },
+    "aggregationHint": {
+      "sum": "Soma",
+      "average": "Média",
+      "last": "Último valor"
+    },
+    "form": {
+      "create": "+ Indicador",
+      "createTitle": "Novo indicador",
+      "editTitle": "Editar indicador",
+      "name": "Nome",
+      "format": "Formato",
+      "formats": {
+        "number": "Número",
+        "percent": "Percentagem",
+        "currency": "Euros",
+        "ratio": "Rácio (×)"
+      },
+      "aggregation": "Agregação mensal",
+      "source": "Fonte",
+      "sourcePlaceholder": "GA4, Meta Ads, CRM…",
+      "target": "Objetivo mensal (opcional)",
+      "clientVisible": "Mostrar ao cliente no portal",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saved": "Indicador guardado.",
+      "archived": "Indicador arquivado.",
+      "errors": {
+        "duplicate_name": "Já existe um indicador com este nome.",
+        "invalid_input": "Revê os campos: nome até 60 caracteres e objetivo numérico.",
+        "not_found": "Não foi possível guardar. Atualiza a página."
+      }
+    },
+    "import": {
+      "open": "Importar CSV",
+      "title": "Importar CSV",
+      "steps": {
+        "file": "Ficheiro",
+        "columns": "Colunas",
+        "review": "Rever"
+      },
+      "drop": "Escolher ficheiro CSV",
+      "dropHint": "Exporta a tabela do GA4, Search Console, Meta Ads ou Google Ads e escolhe-a aqui. O ficheiro não sai do teu computador: só os totais mensais são guardados.",
+      "detected": "{rows} linhas · fonte detetada: {source}",
+      "change": "Trocar",
+      "dateColumn": "Coluna da data",
+      "mapping": "Ligar colunas aos indicadores",
+      "csvColumn": "Coluna do CSV",
+      "kpi": "Indicador",
+      "ignore": "Ignorar",
+      "total": "Total",
+      "aggregationNote": "As contagens somam-se por mês, as taxas fazem média e os valores de fecho ficam com o último dia, segundo a agregação de cada indicador.",
+      "reviewIntro": "Estes valores vão ser guardados:",
+      "replaces": "substitui {value}",
+      "new": "novo",
+      "back": "← Voltar",
+      "next": "Rever {count, plural, one {# valor} other {# valores}} →",
+      "confirm": "Guardar valores",
+      "done": "{count, plural, one {# valor importado} other {# valores importados}}.",
+      "errors": {
+        "tooLarge": "O ficheiro tem mais de 2 MB ou 20 000 linhas.",
+        "empty": "Não encontrámos uma tabela neste ficheiro.",
+        "noDate": "Escolhe a coluna da data.",
+        "nothing": "Liga pelo menos uma coluna a um indicador.",
+        "failed": "Não foi possível guardar os valores. Tenta de novo."
+      },
+      "stepLabel": "{position} · {name}"
+    }
+  },
+  "clientOnboarding": {
+    "kinds": {
+      "upload": "Enviar ficheiros",
+      "text": "Responder",
+      "access": "Dar acesso",
+      "confirm": "Confirmar"
+    },
+    "modules": {
+      "A": "Vídeo",
+      "B": "Redes sociais",
+      "C": "Anúncios",
+      "D": "Web",
+      "E": "Automações"
+    },
+    "yesNo": {
+      "yes": "Sim",
+      "no": "Não"
+    },
+    "plan": {
+      "title": "Onboarding do cliente",
+      "description": "O que o portal vai pedir ao cliente, conforme as respostas e o âmbito contratado.",
+      "answers": "Respostas que definem os pedidos",
+      "requests": "Pedidos ao cliente",
+      "clear": "Limpar",
+      "empty": "O modelo de briefing ainda não tem pedidos de onboarding. Acrescente-os em Definições › Modelos.",
+      "status": {
+        "asked": "Vai ser pedido",
+        "module": "Se o contrato incluir {module}",
+        "answer": "Depende da resposta",
+        "notAsked": "Não se aplica"
+      },
+      "saveFailed": "Não foi possível guardar a resposta."
+    },
+    "editor": {
+      "title": "Onboarding do cliente",
+      "description": "Os pedidos que o portal faz ao cliente depois do briefing. Cada pedido aparece só quando a condição se cumpre. Nunca peça palavras-passe: peça que convidem o email da agência.",
+      "answer": "Resposta estruturada",
+      "answerNone": "Só nota livre",
+      "answerYesNo": "Sim ou Não",
+      "answerChoice": "Escolha",
+      "option": "Opção {number}",
+      "addOption": "Acrescentar opção",
+      "removeOption": "Remover opção",
+      "request": "Pedido {number}",
+      "requestTitle": "Título",
+      "requestBody": "Explicação",
+      "kind": "Tipo",
+      "when": "Quando pedir",
+      "whenAlways": "Sempre",
+      "whenAnswer": "Conforme uma resposta",
+      "whenModule": "Conforme o âmbito contratado",
+      "question": "Pergunta",
+      "equals": "Quando a resposta é",
+      "module": "Módulo do contrato",
+      "noStructured": "Dê a uma pergunta uma resposta estruturada para a usar como condição.",
+      "addRequest": "Acrescentar pedido",
+      "removeRequest": "Remover pedido",
+      "suggested": "Usar pedidos sugeridos",
+      "moduleOption": "{code} · {name}"
+    },
+    "portal": {
+      "title": "Onboarding",
+      "description": "O que precisamos de si para começar bem. Responda ao seu ritmo: cada resposta chega logo à equipa.",
+      "progress": "{done} de {total} feitos",
+      "done": "Feito",
+      "doneOn": "Feito a {date}",
+      "doneBy": "por {name}",
+      "respond": "Enviar resposta",
+      "confirm": "Marcar como feito",
+      "update": "Atualizar resposta",
+      "answerLabel": "A sua resposta",
+      "files": "Escolher ficheiros",
+      "uploading": "A enviar…",
+      "uploaded": "Ficheiros enviados. A equipa já os recebeu.",
+      "uploadWaits": "Poderá enviar ficheiros assim que o projeto começar.",
+      "sent": "Resposta enviada. Obrigado.",
+      "errors": {
+        "response_required": "Escreva a sua resposta antes de enviar.",
+        "invalid_file": "Um dos ficheiros não pôde ser aceite. Confirme o formato e o tamanho.",
+        "storage_full": "O espaço de ficheiros está cheio. Avise a equipa.",
+        "failed": "Não foi possível enviar. Tente de novo."
+      },
+      "empty": "Não há nada a preparar por agora.",
+      "accessHint": "Nunca partilhe palavras-passe: convide o email da agência."
+    },
+    "room": {
+      "title": "Onboarding do cliente",
+      "progress": "{done} de {total} feitos",
+      "open": "Por responder",
+      "reopen": "Pedir de novo",
+      "reopened": "Pedido reaberto para o cliente.",
+      "folder": "Os ficheiros estão na biblioteca, em \"Enviado pelo cliente\".",
+      "empty": "Sem pedidos de onboarding para este cliente."
+    },
+    "action": {
+      "kind": "Onboarding",
+      "title": "{count, plural, one {# pedido por responder} other {# pedidos por responder}}",
+      "cta": "Responder"
+    }
   }
 }

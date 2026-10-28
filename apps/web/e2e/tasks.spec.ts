@@ -34,7 +34,7 @@ test.describe('Tasks, home and updates', () => {
     const payment = await seedReceivedPayment(credentials.organizationId);
 
     await signInWithPassword(page, credentials.founder);
-    await expect(page.getByRole('heading', { name: 'Início', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Olá, /, level: 1 })).toBeVisible();
     await expectAccessible(page);
 
     await page.getByRole('button', { name: 'Novo', exact: true }).click();

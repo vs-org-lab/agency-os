@@ -63,6 +63,8 @@ describe('studio home', () => {
       expect(home?.clients).toEqual([]);
       expect(home?.indicators.activeProjects).toBe(0);
       expect(home?.indicators.receivable).toEqual([]);
+      expect(home?.readerFirstName).toBe('Founder');
+      expect(home?.localDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
   });
 

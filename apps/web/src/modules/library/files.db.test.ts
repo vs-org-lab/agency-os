@@ -320,4 +320,41 @@ describe('library files', () => {
       ).toBeNull();
     });
   });
+
+  it('the decision maker sends files only into the client uploads root', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const library = await createLibraryFixture(sql, world);
+      const { deps, storage } = libraryDeps(sql);
+      const decisionMaker = libraryClaims(world.users.decisionMakerA, 'client');
+      const uploadsRoot = crypto.randomUUID();
+      await sql`
+        insert into public.library_folders (id, organization_id, client_id, project_id, root_id,
+                                            name, visibility, client_uploads)
+        values (${uploadsRoot}, ${world.organizationId}, ${world.clients.a}, ${library.a.projectId},
+                ${uploadsRoot}, 'Enviado pelo cliente', 'client', true)
+      `;
+
+      expect(
+        await requestUploads(
+          decisionMaker,
+          { folderId: library.a.rootId, files: [{ path: 'x.png', sizeBytes: 16 }] },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'not_found' });
+      const requested = await requestUploads(
+        decisionMaker,
+        { folderId: uploadsRoot, files: [{ path: 'logo.png', sizeBytes: 16 }] },
+        deps,
+      );
+      if (!requested.ok) throw new Error('Upload was not requested');
+      const [upload] = requested.uploads;
+      if (!upload) throw new Error('Upload link is missing');
+      storage.files.set(storagePathOf(upload.uploadUrl), PNG_BYTES);
+      expect(await confirmUpload(decisionMaker, { fileId: upload.fileId }, deps)).toEqual({
+        ok: true,
+        kind: 'image',
+      });
+    });
+  });
 });

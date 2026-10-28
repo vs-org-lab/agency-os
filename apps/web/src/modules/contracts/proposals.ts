@@ -14,6 +14,7 @@ import { recordAudit } from '@/modules/audit';
 import { isFounderActor } from '@/modules/commercial';
 import { emit, requestFlush } from '@/modules/events';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
+import { modulesSchema, storedModules, type ContractModule } from './domain/modules';
 import { validatePaymentPlan } from './domain/payments';
 
 const {
@@ -38,6 +39,7 @@ export type ProposalOptionInput = {
   paymentPlan: PaymentStep[];
   retainerMonthly: string | null;
   retainerMonths: number | null;
+  modules?: ContractModule[];
 };
 
 export type ProposalDraftInput = {
@@ -99,6 +101,7 @@ const optionSchema = z
     paymentPlan: z.array(z.object({ label: z.string(), percent: z.number() })),
     retainerMonthly: money.nullable(),
     retainerMonths: z.number().int().min(1).max(36).nullable(),
+    modules: modulesSchema.default([]),
   })
   .refine((option) => validatePaymentPlan(option.paymentPlan))
   .refine((option) => (option.retainerMonthly === null) === (option.retainerMonths === null));
@@ -208,6 +211,7 @@ export async function getDealProposal(
       paymentPlan: proposalOptions.paymentPlan,
       retainerMonthly: proposalOptions.retainerMonthly,
       retainerMonths: proposalOptions.retainerMonths,
+      modules: proposalOptions.modules,
     })
     .from(proposalOptions)
     .where(eq(proposalOptions.proposalId, proposal.id))
@@ -222,7 +226,11 @@ export async function getDealProposal(
     .where(eq(proposalRequests.proposalId, proposal.id))
     .orderBy(desc(proposalRequests.createdAt));
 
-  return { ...proposal, options, requests };
+  return {
+    ...proposal,
+    options: options.map((option) => ({ ...option, modules: storedModules(option.modules) })),
+    requests,
+  };
 }
 
 export function saveProposalDraft(
@@ -299,6 +307,7 @@ export function saveProposalDraft(
           })),
           retainerMonthly: option.retainerMonthly,
           retainerMonths: option.retainerMonths,
+          modules: option.modules,
         })),
       );
       await recordAudit(tx, {

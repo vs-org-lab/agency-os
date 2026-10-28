@@ -8,6 +8,7 @@ import { loadStudioHome } from '@/modules/studio/server';
 import { getVerifiedClaims } from '@/platform/session';
 import { ClientProgress } from './home/client-progress';
 import { HomeCreateMenu } from './home/create-menu';
+import { HomePanel } from './home/home-panel';
 import { HomeIndicators } from './home/indicators';
 import { TodayList } from './home/today-list';
 import { UpcomingEvents } from './home/upcoming-events';
@@ -28,13 +29,15 @@ export default async function StudioHomePage({ params }: PageProps) {
   const format = await getFormatter();
 
   return (
-    <div className="mx-auto flex w-full max-w-[960px] flex-col gap-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-title text-text">{t('title')}</h1>
-          <p className="text-body text-text-secondary">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-4 pb-2">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-caption font-medium text-text-tertiary first-letter:uppercase">
             {t('date', { date: format.dateTime(now, { dateStyle: 'full' }) })}
           </p>
+          <h1 className="text-display tracking-[-0.025em] text-text">
+            {home.readerFirstName ? t('greeting', { name: home.readerFirstName }) : t('title')}
+          </h1>
         </div>
         <nav aria-label={t('actions.label')} className="flex flex-wrap gap-2">
           <HomeCreateMenu create={home.create} />
@@ -51,28 +54,22 @@ export default async function StudioHomePage({ params }: PageProps) {
 
       <HomeIndicators indicators={home.indicators} />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <section aria-labelledby="home-today" className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 id="home-today" className="text-heading text-text">
-              {today('title')}
-            </h2>
-            <p className="text-body-sm text-text-secondary">{today('description')}</p>
-          </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <HomePanel
+          id="home-today"
+          title={today('title')}
+          action={{ href: '/tasks', label: t('openToday') }}
+          style={{ animationDelay: '40ms' }}
+        >
           <TodayList items={home.today} />
-        </section>
-
-        <section aria-labelledby="home-upcoming" className="flex flex-col gap-3">
-          <h2 id="home-upcoming" className="text-heading text-text">
-            {t('upcoming.title')}
-          </h2>
-          <UpcomingEvents items={upcoming} />
-        </section>
+        </HomePanel>
+        <UpcomingEvents items={upcoming} today={home.localDate} />
       </div>
 
-      <section aria-labelledby="home-clients" className="flex flex-col gap-3">
-        <h2 id="home-clients" className="text-heading text-text">
-          {t('clients.title')}
+      <section aria-labelledby="home-clients" className="flex flex-col gap-2.5 pt-3">
+        <h2 id="home-clients" className="text-body-sm font-semibold text-text">
+          {t('clients.title')}{' '}
+          <span className="font-medium text-text-tertiary tabular-nums">{home.clients.length}</span>
         </h2>
         <ClientProgress clients={home.clients} />
       </section>

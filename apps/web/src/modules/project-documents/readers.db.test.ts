@@ -12,6 +12,7 @@ import {
   loadRoomDocuments,
   loadStaffDocument,
 } from './readers';
+import type { VerifiedClaims } from '@/platform/db';
 import { documentClaims, documentsDeps } from './testing';
 
 afterAll(async () => {
@@ -156,6 +157,62 @@ describe('document readers', () => {
           documentClaims(world.users.clientFinanceB, 'client'),
           world.clients.b,
           deps,
+        ),
+      ).toEqual([]);
+    });
+  });
+  it('the team preview reads what the decision maker reads, and nothing for other clients', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const documents = await createDocumentFixture(sql, world);
+      const { deps } = documentsDeps(sql);
+      const preview = (userId: string, clientId: string): VerifiedClaims => ({
+        ...documentClaims(userId),
+        user_kind: 'client',
+        preview_client: clientId,
+      });
+
+      // Each read runs in its own savepoint, so the preview's read-only mode ends with it.
+      const read = async <T>(fn: () => Promise<T>) => {
+        await sql`savepoint preview_read`;
+        try {
+          return await fn();
+        } finally {
+          await sql`rollback to savepoint preview_read`;
+        }
+      };
+
+      expect(
+        await read(async () =>
+          (
+            await loadPortalDocuments(
+              preview(world.users.founder, world.clients.a),
+              world.clients.a,
+              deps,
+            )
+          ).map((document) => document.title),
+        ),
+      ).toEqual(['Apresentação', 'Estratégia']);
+      const document = await read(() =>
+        loadPortalDocument(
+          preview(world.users.manager, world.clients.a),
+          documents.a.sharedId,
+          deps,
+        ),
+      );
+      expect(document?.versions.map((version) => version.id)).toEqual([documents.a.sharedV1Id]);
+      expect(
+        await read(() =>
+          loadPortalDocuments(preview(world.users.manager, world.clients.b), world.clients.b, deps),
+        ),
+      ).toEqual([]);
+      expect(
+        await read(() =>
+          loadPortalDocuments(
+            preview(world.users.freelancer, world.clients.a),
+            world.clients.a,
+            deps,
+          ),
         ),
       ).toEqual([]);
     });

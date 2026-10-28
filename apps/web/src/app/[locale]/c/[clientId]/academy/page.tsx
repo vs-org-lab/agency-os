@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoomAcademy } from '@/components/academy/room-academy';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadClientRoomAcademy } from '@/modules/academy/server';
@@ -42,7 +43,7 @@ export default async function RoomAcademyPage({ params }: PageProps) {
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/academy`}
       />
       <RoomAcademy

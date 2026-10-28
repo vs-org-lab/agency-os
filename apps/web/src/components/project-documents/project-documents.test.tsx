@@ -1,14 +1,16 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@agency-os/i18n/messages/pt-PT';
 import { ApprovalsList } from '@/components/proofing/approvals-list';
 import type { DocumentVersionView, RoomDocumentsView } from '@/modules/project-documents';
 import { DocumentActionsBar } from './document-actions';
-import { RoomDocumentCards } from './document-cards';
+import { PortalDocumentCards, RoomDocumentCards } from './document-cards';
 import { DocumentComments } from './document-comments';
 import { DocumentViewer } from './document-viewer';
+import { NewDocumentForm } from './new-document-form';
 
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -259,5 +261,54 @@ describe('room documents', () => {
     expect(screen.getByRole('link', { name: 'Abrir Estratégia' }).getAttribute('href')).toBe(
       '/portal/docs/doc-1',
     );
+  });
+});
+
+describe('NewDocumentForm', () => {
+  it('warns when a Figma link opens the whole canvas instead of a presentation', async () => {
+    withIntl(
+      <NewDocumentForm projectId="project-1" basePath="/c/client-1/documents" create={vi.fn()} />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Novo documento' }));
+    await userEvent.click(screen.getByRole('radio', { name: 'Figma' }));
+    const link = screen.getByLabelText('Link');
+
+    await userEvent.type(link, 'https://www.figma.com/design/AbC123/Core');
+    expect(screen.getByText(/Este link abre o ficheiro inteiro/)).toBeTruthy();
+
+    await userEvent.clear(link);
+    await userEvent.type(link, 'https://www.figma.com/proto/AbC123/Core');
+    expect(screen.queryByText(/Este link abre o ficheiro inteiro/)).toBeNull();
+  });
+  it('the client sees what waits for their review first, in their own words', () => {
+    withIntl(
+      <PortalDocumentCards
+        documents={[
+          {
+            id: 'd1',
+            title: 'Relatório de outubro',
+            kind: 'pdf',
+            status: 'approved',
+            projectName: 'Website',
+            updatedAt: '2026-10-20T10:00:00.000Z',
+          },
+          {
+            id: 'd2',
+            title: 'Estratégia',
+            kind: 'pdf',
+            status: 'with_client',
+            projectName: 'Website',
+            updatedAt: '2026-10-10T10:00:00.000Z',
+          },
+        ]}
+      />,
+    );
+
+    const review = screen.getByRole('heading', { name: 'Para rever (1)' });
+    const rest = screen.getByRole('heading', { name: 'Os restantes' });
+    expect(review.compareDocumentPosition(rest) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const strategy = screen.getByRole('link', { name: /Estratégia/ });
+    expect(within(strategy).getByText('Para rever')).toBeTruthy();
+    expect(screen.queryByText('Com o cliente')).toBeNull();
   });
 });

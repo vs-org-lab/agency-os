@@ -8,7 +8,7 @@ import {
   Receipt,
   type LucideIcon,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Badge } from '@agency-os/ui/components/badge';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { cn } from '@agency-os/ui/lib/utils';
@@ -51,7 +51,10 @@ const CONTRACT_TONE = { awaiting_signatures: 'info', signed: 'success', void: 'n
 const INVOICES_TONE = { none: 'neutral', open: 'warning', paid: 'success' } as const;
 
 const CARD =
-  'flex h-full flex-col gap-3 rounded-lg border border-border bg-surface p-4 transition-colors duration-[120ms] hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2';
+  'rd-lift group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-[120ms] hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2';
+
+/** The cover's mono label: the format a client would recognise. */
+const KIND_COVER = { figma: 'FIG', pdf: 'PDF', file: 'FILE', link: 'URL' } as const;
 
 function StatusBadge({ tone, children }: { tone: Tone; children: ReactNode }) {
   return (
@@ -73,26 +76,55 @@ function CardIcon({ icon: Icon, name }: { icon: LucideIcon; name: string }) {
   );
 }
 
+/** A page sketch behind the kind icon, standing in for a thumbnail. */
+function DocumentCover({ icon: Icon, name }: { icon: LucideIcon; name: string }) {
+  return (
+    <span className="relative flex h-[62%] aspect-[3/4] flex-col gap-1.5 rounded-sm border border-border bg-surface p-3 shadow-sm transition-transform duration-300 ease-out group-hover:-translate-y-1">
+      <span aria-hidden="true" className="h-1 w-2/3 rounded-full bg-border-strong" />
+      <span aria-hidden="true" className="h-1 w-full rounded-full bg-border" />
+      <span aria-hidden="true" className="h-1 w-5/6 rounded-full bg-border" />
+      <Icon
+        aria-hidden="true"
+        data-icon={name}
+        className="absolute right-2.5 bottom-2.5 size-4 text-text-secondary"
+      />
+    </span>
+  );
+}
+
 function DocumentCard({
   href,
   document,
   detail,
+  status,
 }: {
   href: string;
   document: Pick<DocumentCardView, 'title' | 'kind' | 'status'>;
   detail: string;
+  /** The status as its reader names it; the team's wording by default. */
+  status?: { label: string; tone: Tone };
 }) {
   const t = useTranslations('projectDocuments');
   const { icon, name } = KIND_ICONS[document.kind];
   const source = [t(`kinds.${document.kind}`), detail].join(' · ');
   return (
     <Link href={href} className={CARD}>
-      <CardIcon icon={icon} name={name} />
-      <span className="text-label text-text">{document.title}</span>
-      <span className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={DOCUMENT_TONE[document.status]}>
-          {t(`status.${document.status}`)}
-        </StatusBadge>
+      <span className="relative flex aspect-[16/10] items-center justify-center border-b border-border bg-surface-muted">
+        <DocumentCover icon={icon} name={name} />
+        <span
+          aria-hidden="true"
+          className="absolute top-3 left-3 font-mono text-[10px] font-medium tracking-[0.14em] text-text-muted"
+        >
+          {KIND_COVER[document.kind]}
+        </span>
+        <span className="absolute top-2.5 right-2.5">
+          <StatusBadge tone={status?.tone ?? DOCUMENT_TONE[document.status]}>
+            {status?.label ?? t(`status.${document.status}`)}
+          </StatusBadge>
+        </span>
+      </span>
+      <span className="flex flex-col gap-1 p-4">
+        <span className="truncate text-label text-text">{document.title}</span>
         <span className="text-caption text-text-secondary">{source}</span>
       </span>
     </Link>
@@ -115,16 +147,13 @@ function CommercialCard({
   source: string;
 }) {
   return (
-    <li
-      aria-label={label}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface-muted p-4"
-    >
+    <li aria-label={label} className="flex items-center gap-3 px-4 py-3.5">
       <CardIcon icon={icon} name={iconName} />
-      <span className="text-label text-text">{label}</span>
-      <span className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={tone}>{status}</StatusBadge>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-label text-text">{label}</span>
         <span className="text-caption text-text-secondary">{source}</span>
       </span>
+      <StatusBadge tone={tone}>{status}</StatusBadge>
     </li>
   );
 }
@@ -149,7 +178,7 @@ export function RoomDocumentCards({
           <h3 id="commercial-documents-title" className="text-title-sm text-text">
             {t('cards.commercial')}
           </h3>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
             {view.presentations.map((presentation) => (
               <CommercialCard
                 key={presentation.id}
@@ -233,19 +262,61 @@ export function RoomDocumentCards({
   );
 }
 
-/** P-03 list: the documents shared with the client. */
+const PORTAL_TONE: Record<PortalDocumentCardView['status'], Tone> = {
+  draft: 'neutral',
+  with_client: 'warning',
+  approved: 'success',
+};
+
+/**
+ * P-03 list: the documents shared with the client, newest first, with those still waiting for
+ * the client's review ahead of the approved ones.
+ */
 export function PortalDocumentCards({ documents }: { documents: PortalDocumentCardView[] }) {
-  return (
-    <ul className="grid gap-3 sm:grid-cols-2">
-      {documents.map((document) => (
+  const t = useTranslations('projectDocuments.portal');
+  const format = useFormatter();
+  const sorted = [...documents].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const toReview = sorted.filter((document) => document.status === 'with_client');
+  const rest = sorted.filter((document) => document.status !== 'with_client');
+
+  const grid = (items: PortalDocumentCardView[]) => (
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((document) => (
         <li key={document.id}>
           <DocumentCard
             href={`/portal/docs/${document.id}`}
             document={document}
-            detail={document.projectName}
+            detail={t('detail', {
+              project: document.projectName,
+              date: format.dateTime(new Date(document.updatedAt), { dateStyle: 'medium' }),
+            })}
+            status={{
+              label: t(`status.${document.status}`),
+              tone: PORTAL_TONE[document.status],
+            }}
           />
         </li>
       ))}
     </ul>
+  );
+
+  if (toReview.length === 0) return grid(sorted);
+  return (
+    <div className="flex flex-col gap-8">
+      <section aria-labelledby="portal-documents-review" className="flex flex-col gap-3">
+        <h2 id="portal-documents-review" className="text-title-sm text-text">
+          {t('toReview', { count: toReview.length })}
+        </h2>
+        {grid(toReview)}
+      </section>
+      {rest.length > 0 ? (
+        <section aria-labelledby="portal-documents-rest" className="flex flex-col gap-3">
+          <h2 id="portal-documents-rest" className="text-title-sm text-text">
+            {t('others')}
+          </h2>
+          {grid(rest)}
+        </section>
+      ) : null}
+    </div>
   );
 }

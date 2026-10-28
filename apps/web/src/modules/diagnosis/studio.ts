@@ -8,6 +8,7 @@ import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import { buildPrompt } from './assistant/prompts';
 import {
   applyBriefingDraft,
+  saveBriefingAnswer,
   saveBriefingNote,
   saveEngagementDetails,
   saveTranscript,
@@ -77,6 +78,13 @@ export function saveCoreNote(
   input: { engagementId: string; blockId: string; questionId: string | null; body: string },
 ) {
   return saveBriefingNote(session.claims, input, { contexts });
+}
+
+export function saveCoreAnswer(
+  session: StudioSession,
+  input: { engagementId: string; blockId: string; questionId: string; answer: string | null },
+) {
+  return saveBriefingAnswer(session.claims, input, { contexts });
 }
 
 export function saveCoreTranscript(

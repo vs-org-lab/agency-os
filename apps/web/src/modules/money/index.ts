@@ -7,6 +7,12 @@ export {
   type CurrencyTotals,
   type YearSummary,
 } from './domain/summary';
+export {
+  openByAge,
+  receivedByClient,
+  type AgeBucket,
+  type ClientReceipts,
+} from './domain/breakdown';
 export { MAX_RECEIPT_BYTES } from './domain/limits';
 export type {
   MoneyClientOption,

@@ -279,4 +279,35 @@ describe('home components', () => {
     renderWithIntl(<UpcomingEvents items={[]} />);
     expect(screen.getByText('Sem eventos nos próximos 7 dias.')).toBeTruthy();
   });
+
+  it('groups what comes next by day relative to the organisation date', () => {
+    const at = (id: string, day: string): AgendaItem => ({
+      kind: 'meeting',
+      id,
+      title: `Reunião ${id}`,
+      clientId: null,
+      clientName: null,
+      projectId: null,
+      allDay: false,
+      day,
+      startsAt: `${day}T09:00:00.000Z`,
+      endsAt: `${day}T10:00:00.000Z`,
+      href: null,
+    });
+    renderWithIntl(
+      <UpcomingEvents
+        today="2026-10-12"
+        items={[at('a', '2026-10-12'), at('b', '2026-10-13'), at('c', '2026-10-15')]}
+      />,
+    );
+
+    const groups = screen.getAllByRole('group');
+    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
+      'Hoje',
+      'Amanhã',
+      'Esta semana',
+    ]);
+    expect(within(groups[0] as HTMLElement).getByText('Reunião a')).toBeTruthy();
+    expect(within(groups[2] as HTMLElement).getByText('15')).toBeTruthy();
+  });
 });

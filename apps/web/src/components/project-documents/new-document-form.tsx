@@ -7,6 +7,7 @@ import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
 import { FormMessage } from '@/components/forms/form-message';
 import { useRouter } from '@/i18n/navigation';
+import { isFigmaCanvasLink } from '@/modules/documents';
 import { documentError, type ActionResult, type DocumentError } from './document-errors';
 
 type Kind = 'figma' | 'pdf' | 'file' | 'link';
@@ -109,7 +110,15 @@ export function NewDocumentForm({
             required
             value={url}
             onChange={(event) => setUrl(event.target.value)}
+            aria-describedby={
+              kind === 'figma' && isFigmaCanvasLink(url) ? `${id}-canvas` : undefined
+            }
           />
+          {kind === 'figma' && isFigmaCanvasLink(url) ? (
+            <p id={`${id}-canvas`} className="text-caption text-warning">
+              {t('figmaCanvasHint')}
+            </p>
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-col gap-1 md:w-96">

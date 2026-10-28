@@ -5,48 +5,111 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
 import { Input } from '@agency-os/ui/components/input';
 import { Label } from '@agency-os/ui/components/label';
-import { Textarea } from '@agency-os/ui/components/textarea';
 import { FormMessage } from '@/components/forms/form-message';
-import type { BriefingBlock, BriefingGuide, Localized } from '@/modules/diagnosis';
+import type { BriefingAnswer, BriefingBlock, BriefingGuide, Localized } from '@/modules/diagnosis';
+import { OnboardingRequestsEditor } from './onboarding-requests-editor';
+import { LocalizedFields, newIdentifier, SELECT } from './template-fields';
 import type { PublishResult } from './orbit-grid-editor';
 
-function newQuestionId(): string {
-  return `question_${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`;
-}
+type AnswerKind = 'none' | BriefingAnswer['kind'];
 
-function LocalizedFields({
+const EMPTY_TEXT: Localized = { 'pt-PT': '', en: '' };
+
+function AnswerEditor({
   id,
-  label,
-  value,
-  multiline,
+  answer,
   onChange,
 }: {
   id: string;
-  label: string;
-  value: Localized;
-  multiline?: boolean;
-  onChange: (value: Localized) => void;
+  answer: BriefingAnswer | undefined;
+  onChange: (answer: BriefingAnswer | undefined) => void;
 }) {
-  const t = useTranslations('settings.coreTemplates');
-  const Field = multiline ? Textarea : Input;
+  const t = useTranslations('clientOnboarding.editor');
+  const kind: AnswerKind = answer?.kind ?? 'none';
+
   return (
-    <div className="grid gap-2 md:grid-cols-2">
+    <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={`${id}-pt`}>{label}</Label>
-        <Field
-          id={`${id}-pt`}
-          value={value['pt-PT']}
-          onChange={(event) => onChange({ ...value, 'pt-PT': event.target.value })}
-        />
+        <Label htmlFor={`${id}-answer`}>{t('answer')}</Label>
+        <select
+          id={`${id}-answer`}
+          className={`${SELECT} w-56`}
+          value={kind}
+          onChange={(event) => {
+            const next = event.target.value as AnswerKind;
+            if (next === 'none') onChange(undefined);
+            else if (next === 'yes_no') onChange({ kind: 'yes_no' });
+            else
+              onChange({
+                kind: 'choice',
+                options: [
+                  { id: newIdentifier('option'), label: { ...EMPTY_TEXT } },
+                  { id: newIdentifier('option'), label: { ...EMPTY_TEXT } },
+                ],
+              });
+          }}
+        >
+          <option value="none">{t('answerNone')}</option>
+          <option value="yes_no">{t('answerYesNo')}</option>
+          <option value="choice">{t('answerChoice')}</option>
+        </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor={`${id}-en`}>{t('english')}</Label>
-        <Field
-          id={`${id}-en`}
-          value={value.en}
-          onChange={(event) => onChange({ ...value, en: event.target.value })}
-        />
-      </div>
+      {answer?.kind === 'choice' ? (
+        <div className="flex flex-col gap-2 border-l-2 border-border pl-3">
+          {answer.options.map((option, index) => (
+            <div key={option.id} className="flex flex-col gap-1">
+              <LocalizedFields
+                id={`${id}-${option.id}`}
+                label={t('option', { number: index + 1 })}
+                value={option.label}
+                onChange={(label) =>
+                  onChange({
+                    ...answer,
+                    options: answer.options.map((entry) =>
+                      entry.id === option.id ? { ...entry, label } : entry,
+                    ),
+                  })
+                }
+              />
+              <div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={answer.options.length <= 2}
+                  onClick={() =>
+                    onChange({
+                      ...answer,
+                      options: answer.options.filter((entry) => entry.id !== option.id),
+                    })
+                  }
+                >
+                  {t('removeOption')}
+                </Button>
+              </div>
+            </div>
+          ))}
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={answer.options.length >= 8}
+              onClick={() =>
+                onChange({
+                  ...answer,
+                  options: [
+                    ...answer.options,
+                    { id: newIdentifier('option'), label: { ...EMPTY_TEXT } },
+                  ],
+                })
+              }
+            >
+              {t('addOption')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -67,7 +130,20 @@ export function BriefingGuideEditor({
 
   const updateBlock = (blockIndex: number, change: (block: BriefingBlock) => BriefingBlock) =>
     setDraft((current) => ({
+      ...current,
       blocks: current.blocks.map((block, index) => (index === blockIndex ? change(block) : block)),
+    }));
+
+  const updateQuestion = (
+    blockIndex: number,
+    questionIndex: number,
+    change: (question: BriefingBlock['questions'][number]) => BriefingBlock['questions'][number],
+  ) =>
+    updateBlock(blockIndex, (current) => ({
+      ...current,
+      questions: current.questions.map((entry, position) =>
+        position === questionIndex ? change(entry) : entry,
+      ),
     }));
 
   return (
@@ -110,7 +186,7 @@ export function BriefingGuideEditor({
           {block.questions.map((question, questionIndex) => (
             <div
               key={question.id}
-              className="flex flex-col gap-2 rounded-md border border-border p-3"
+              className="flex flex-col gap-3 rounded-md border border-border p-3"
             >
               <LocalizedFields
                 id={`${block.id}-${question.id}`}
@@ -118,12 +194,16 @@ export function BriefingGuideEditor({
                 value={question.text}
                 multiline
                 onChange={(text) =>
-                  updateBlock(blockIndex, (current) => ({
-                    ...current,
-                    questions: current.questions.map((entry, position) =>
-                      position === questionIndex ? { ...entry, text } : entry,
-                    ),
-                  }))
+                  updateQuestion(blockIndex, questionIndex, (entry) => ({ ...entry, text }))
+                }
+              />
+              <AnswerEditor
+                id={`${block.id}-${question.id}`}
+                answer={question.answer}
+                onChange={(answer) =>
+                  updateQuestion(blockIndex, questionIndex, ({ answer: _previous, ...entry }) =>
+                    answer ? { ...entry, answer } : entry,
+                  )
                 }
               />
               <div>
@@ -156,7 +236,7 @@ export function BriefingGuideEditor({
                   ...current,
                   questions: [
                     ...current.questions,
-                    { id: newQuestionId(), text: { 'pt-PT': '', en: '' } },
+                    { id: newIdentifier('question'), text: { ...EMPTY_TEXT } },
                   ],
                 }))
               }
@@ -166,6 +246,7 @@ export function BriefingGuideEditor({
           </div>
         </fieldset>
       ))}
+      <OnboardingRequestsEditor guide={draft} onChange={setDraft} />
       {message ? <FormMessage tone={message.tone}>{message.text}</FormMessage> : null}
       <div>
         <Button

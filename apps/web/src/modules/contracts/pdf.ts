@@ -34,12 +34,15 @@ export async function buildContractPdf(input: ContractPdfInput): Promise<Uint8Ar
     const line = rawLine.trimEnd();
     if (line === '') {
       writer.space(BODY_SIZE / 2);
+    } else if (line.startsWith('### ')) {
+      writer.space(4);
+      writer.paragraph(line.slice(4), { size: 11, bold: true });
     } else if (line.startsWith('## ')) {
       writer.space(6);
-      writer.paragraph(line.slice(3), { size: 12, bold: true });
+      writer.paragraph(line.slice(3), { size: 14, font: fonts.serif });
     } else if (line.startsWith('# ')) {
-      writer.paragraph(line.slice(2), { size: 16, bold: true });
-      writer.space(6);
+      writer.title(line.slice(2));
+      writer.rule();
     } else if (line.startsWith('- ')) {
       writer.paragraph(`- ${line.slice(2)}`, { indent: 12 });
     } else {
@@ -48,9 +51,9 @@ export async function buildContractPdf(input: ContractPdfInput): Promise<Uint8Ar
   }
 
   writer.newPage();
-  writer.paragraph(input.labels.signatures, { size: 16, bold: true });
-  writer.space(8);
-  writer.paragraph(input.labels.fingerprint, { bold: true });
+  writer.title(input.labels.signatures);
+  writer.rule();
+  writer.eyebrow(input.labels.fingerprint);
   writer.paragraph(input.hash, { muted: true });
   writer.space(12);
   for (const signature of input.signatures) {

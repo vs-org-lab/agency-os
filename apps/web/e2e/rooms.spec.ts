@@ -61,10 +61,15 @@ test.describe('Rooms', () => {
     await page.getByRole('button', { name: 'Publicar' }).click();
     await expect(page.getByText('Atualização publicada.')).toBeVisible({ timeout: 30_000 });
 
-    await page.goto(`/c/${seeded.clientId}/preview`);
+    await page.goto(`/c/${seeded.clientId}/updates`);
+    await page.getByRole('link', { name: 'Ver como cliente' }).click();
+    await expect(page).toHaveURL(/\/portal\/updates/);
+    await expect(page.getByText(/Está a ver o portal como/)).toBeVisible();
     await expect(page.getByText('A arquitetura está pronta para a sua revisão.')).toBeVisible();
     await expect(page.getByText('Análise técnica')).toHaveCount(0);
     await expectAccessible(page);
+    await page.getByRole('link', { name: 'Sair da pré-visualização' }).click();
+    await expect(page).toHaveURL(new RegExp(`/c/${seeded.clientId}$`));
 
     const clientContext = await browser.newContext();
     const client = await clientContext.newPage();

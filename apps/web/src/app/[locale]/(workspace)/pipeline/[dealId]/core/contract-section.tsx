@@ -13,6 +13,7 @@ import {
 } from '@agency-os/ui/components/collapsible';
 import { Label } from '@agency-os/ui/components/label';
 import { Textarea } from '@agency-os/ui/components/textarea';
+import { ContractText } from '@/components/contracts/contract-text';
 import { SignatureForm, type SignActionResult } from '@/components/contracts/signature-form';
 import { FormMessage } from '@/components/forms/form-message';
 import { CreateDialog } from '@/components/ui/create-dialog';
@@ -151,12 +152,8 @@ export function ContractSection({
       <Collapsible className="rounded-md border border-border p-3">
         <CollapsibleTrigger className="text-link">{t('read')}</CollapsibleTrigger>
         <CollapsibleContent>
-          <div
-            tabIndex={0}
-            aria-label={t('title')}
-            className="mt-3 max-h-120 overflow-y-auto text-body-sm whitespace-pre-wrap text-text"
-          >
-            {contract.body}
+          <div tabIndex={0} aria-label={t('title')} className="mt-3 max-h-120 overflow-y-auto">
+            <ContractText body={contract.body} />
           </div>
           <p className="mt-2 text-caption break-all text-text-tertiary">
             {t('fingerprint', { hash: contract.bodyHash })}

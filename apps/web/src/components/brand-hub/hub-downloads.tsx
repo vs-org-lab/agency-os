@@ -13,6 +13,10 @@ export type RequestHubZip = (
   pageId: string | null,
 ) => Promise<ZipManifest | { ok: false; code: string }>;
 
+/** The hub keeps its own colours inside the OS theme, so its buttons read on either surface. */
+const HUB_BUTTON =
+  'border-[var(--hub-divider)] bg-[var(--hub-surface)] text-[var(--hub-text)] hover:bg-[var(--hub-panel)] hover:text-[var(--hub-text)] dark:border-[var(--hub-divider)] dark:bg-[var(--hub-surface)] dark:hover:bg-[var(--hub-panel)]';
+
 /**
  * RF-093: one page's files, or every asset of the publication, built into a ZIP in the browser
  * from links that expire (SEC-32).
@@ -51,7 +55,14 @@ export function HubDownloads({
 
   return (
     <div className="flex flex-col gap-1">
-      <Button type="button" variant="outline" size="sm" disabled={pending} onClick={download}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={download}
+        className={HUB_BUTTON}
+      >
         <Download aria-hidden="true" />
         {pending
           ? t('downloads.preparing')
@@ -91,7 +102,14 @@ export function HubManualDownload({
 
   return (
     <div className="flex flex-col gap-1">
-      <Button type="button" variant="outline" size="sm" disabled={pending} onClick={download}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={download}
+        className={HUB_BUTTON}
+      >
         <FileText aria-hidden="true" />
         {pending ? t('downloads.preparingManual') : t('downloads.manual')}
       </Button>

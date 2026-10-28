@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { RetainerLimitKind } from '@/modules/retainers';
+import type { ReportIndicator } from './indicators';
 import type { ReportKind } from './periods';
 
 export const TEXT_MAX = 2000;
@@ -20,6 +21,8 @@ export type ReportData = {
     deadline: string;
     measurements: { on: string; value: string }[];
   } | null;
+  /** Absent from reports frozen before results indicators existed. */
+  indicators?: ReportIndicator[];
 };
 
 export type ReportTexts = {

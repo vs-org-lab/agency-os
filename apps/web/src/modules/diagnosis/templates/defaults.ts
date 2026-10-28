@@ -1,4 +1,8 @@
 import type { BriefingGuide, OrbitGrid } from './definitions';
+import {
+  SUGGESTED_ONBOARDING_REQUESTS,
+  VISUAL_IDENTITY_QUESTION_ID,
+} from './onboarding-suggestions';
 
 /** The "Guia de perguntas" of the Aurion Core script: the four call blocks. */
 export const DEFAULT_BRIEFING_GUIDE: BriefingGuide = {
@@ -12,6 +16,14 @@ export const DEFAULT_BRIEFING_GUIDE: BriefingGuide = {
         en: 'What the company is, how it describes itself, what truly sets it apart',
       },
       questions: [
+        {
+          id: VISUAL_IDENTITY_QUESTION_ID,
+          text: {
+            'pt-PT': 'Já têm uma identidade visual (logótipo, cores, tipografia)?',
+            en: 'Do you already have a visual identity (logo, colours, typography)?',
+          },
+          answer: { kind: 'yes_no' },
+        },
         {
           id: 'first_description',
           text: {
@@ -184,6 +196,7 @@ export const DEFAULT_BRIEFING_GUIDE: BriefingGuide = {
       ],
     },
   ],
+  onboarding: [...SUGGESTED_ONBOARDING_REQUESTS],
 };
 
 type CriterionSeed = [

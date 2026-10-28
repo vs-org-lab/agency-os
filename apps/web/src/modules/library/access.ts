@@ -22,10 +22,14 @@ export type ProjectScope = { organizationId: string; clientId: string; projectId
 
 /**
  * Who writes in a project's library: the team (room writers and the project's freelancer, as
- * `projectEditor` resolves them) or the client's operational user, who works only under roots
- * visible to the client.
+ * `projectEditor` resolves them), the client's operational user, who works only under roots
+ * visible to the client, or the client's decision maker, who writes only under the root that
+ * receives their onboarding files (ADR 0007).
  */
-export type LibraryWriter = ProjectScope & { actorId: string; role: 'team' | 'operational' };
+export type LibraryWriter = ProjectScope & {
+  actorId: string;
+  role: 'team' | 'operational' | 'decision_maker';
+};
 
 export async function libraryWriter(
   claims: VerifiedClaims,
@@ -47,14 +51,18 @@ export async function libraryWriter(
   const scope = { organizationId: project.organizationId, clientId: project.clientId, projectId };
 
   if (claims.user_kind === 'client') {
-    const operational = await deps.contexts.withUserContext(claims, async (tx) => {
-      const rows = await tx.execute<{ allowed: boolean }>(sql`
+    const member = await deps.contexts.withUserContext(claims, async (tx) => {
+      const rows = await tx.execute<{ operational: boolean; decides: boolean }>(sql`
         select app.is_client_member(${project.clientId}::uuid,
-                                    array['operational']::app.client_role[]) as allowed
+                                    array['operational']::app.client_role[]) as operational,
+               app.is_client_member(${project.clientId}::uuid,
+                                    array['decision_maker']::app.client_role[]) as decides
       `);
-      return rows[0]?.allowed === true;
+      return rows[0];
     });
-    return operational ? { ...scope, actorId: claims.sub, role: 'operational' } : null;
+    if (member?.operational) return { ...scope, actorId: claims.sub, role: 'operational' };
+    if (member?.decides) return { ...scope, actorId: claims.sub, role: 'decision_maker' };
+    return null;
   }
 
   const editor = await projectEditor(deps.contexts, claims, project.clientId, projectId);
@@ -69,6 +77,8 @@ export type FolderRecord = ProjectScope & {
   depth: number;
   name: string;
   rootVisibility: UpdateVisibility;
+  /** The root receives the client's onboarding files. */
+  rootClientUploads: boolean;
 };
 
 export async function loadFolder(
@@ -87,9 +97,10 @@ export async function loadFolder(
       depth: number;
       name: string;
       root_visibility: UpdateVisibility;
+      root_client_uploads: boolean;
     }>(sql`
       select f.id, f.organization_id, f.client_id, f.project_id, f.parent_id, f.root_id, f.depth,
-             f.name, r.visibility as root_visibility
+             f.name, r.visibility as root_visibility, r.client_uploads as root_client_uploads
       from ${libraryFolders} f
       join ${libraryFolders} r on r.id = f.root_id
       where f.id = ${folderId}::uuid
@@ -107,6 +118,7 @@ export async function loadFolder(
     depth: Number(row.depth),
     name: row.name,
     rootVisibility: row.root_visibility,
+    rootClientUploads: row.root_client_uploads,
   };
 }
 

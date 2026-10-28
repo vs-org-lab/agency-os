@@ -44,9 +44,12 @@ export function RetainerSection({ retainer }: { retainer: PortalRetainerHome }) 
 
   return (
     <>
-      <section aria-labelledby={`${planId}-title`} className="flex flex-col gap-4">
+      <section
+        aria-labelledby={`${planId}-title`}
+        className="rd-rise flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id={`${planId}-title`} className="text-title-sm text-text">
+          <h2 id={`${planId}-title`} className="text-body-sm font-semibold text-text">
             {t('plan.title')}
           </h2>
           {canRequest ? (

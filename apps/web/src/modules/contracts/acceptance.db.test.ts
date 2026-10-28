@@ -193,6 +193,41 @@ describe('proposal acceptance', () => {
     });
   });
 
+  it("the contract includes the clauses of the chosen option's modules", async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const setup = await sentProposal(sql, world);
+      const chosen = setup.optionIds[0] ?? '';
+      await sql`
+        update public.contract_templates set body = '{{opcao.nome}}' || chr(10) || '{{opcao.modulos}}'
+        where organization_id = ${world.organizationId}
+      `;
+      const modules = JSON.stringify([
+        { code: 'A', params: { videosPerMonth: 8, revisions: 2 } },
+        { code: 'E', params: { tools: ['n8n'], maintenanceMonths: 3 } },
+      ]);
+      await sql`
+        update public.proposal_options set modules = ${modules}::jsonb where id = ${chosen}
+      `;
+
+      const result = await acceptProposal(
+        claimsFor(world.users.decisionMakerA),
+        { proposalId: setup.proposalId, optionId: chosen, company: COMPANY, signer: SIGNER },
+        depsFor(sql),
+      );
+
+      if (!result.ok) throw new Error(`Acceptance failed: ${result.rule}`);
+      await sql`reset role`;
+      const [contract] = await sql<{ body: string }[]>`
+        select body from public.contracts where id = ${result.contractId}
+      `;
+      expect(contract?.body).toContain('### Módulo A — Vídeo e motion graphics');
+      expect(contract?.body).toContain('Volume contratado: 8 vídeos por mês.');
+      expect(contract?.body).toContain('### Módulo E — Automação e inteligência artificial');
+      expect(contract?.body).toContain('### Solução integrada');
+    });
+  });
+
   it('accepting twice creates one contract', async () => {
     await withTestTransaction(async (sql) => {
       const world = await createFixtureWorld(sql);

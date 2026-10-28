@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   bigint,
   check,
   foreignKey,
@@ -34,6 +35,8 @@ export const libraryFolders = pgTable(
     depth: smallint('depth').notNull().default(0),
     name: text('name').notNull(),
     visibility: updateVisibilityEnum('visibility'),
+    /** The root where the client's onboarding files land; the decision maker writes only here. */
+    clientUploads: boolean('client_uploads').notNull().default(false),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
     ...timestamps,
   },

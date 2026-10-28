@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { CreateHub } from '@/components/brand-hub/create-hub';
 import { HubEditor } from '@/components/brand-hub/hub-editor';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import {
@@ -67,7 +68,7 @@ export default async function RoomBrandHubPage({ params }: PageProps) {
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/hub`}
       />
       {!view ? (

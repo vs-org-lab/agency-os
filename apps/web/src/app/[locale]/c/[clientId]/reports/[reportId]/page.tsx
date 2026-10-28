@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ReportEditor } from '@/components/client-reports/report-editor';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomClientReport } from '@/modules/client-reports/server';
@@ -34,7 +35,7 @@ export default async function RoomReportPage({ params }: PageProps) {
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/reports`}
       />
       <ReportEditor

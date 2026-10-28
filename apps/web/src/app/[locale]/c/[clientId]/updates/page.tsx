@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { UpdateFeed } from '@/components/rooms/update-feed';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadAttachableFiles } from '@/modules/library/server';
@@ -38,7 +39,7 @@ export default async function RoomUpdatesPage({ params, searchParams }: PageProp
         client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
-        showPreviewLink={room.project !== null}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/updates`}
       />
       {room.project ? (

@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ project?: string }>;
+  searchParams: Promise<{ project?: string; view?: string }>;
 };
 
 /** P-05: the project process and feed as the client sees them. */
@@ -22,7 +22,7 @@ export default async function PortalUpdatesPage({ params, searchParams }: PagePr
   setRequestLocale(locale);
   const session = await requireArea('/portal', locale);
   const access = portalRoomAccess(session.ctx.clientRoles);
-  const { project: projectId } = await searchParams;
+  const { project: projectId, view } = await searchParams;
   const room =
     access.clientId && access.readsRoom
       ? await loadPortalRoom(session.claims, access.clientId, projectId)
@@ -34,7 +34,7 @@ export default async function PortalUpdatesPage({ params, searchParams }: PagePr
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-240 flex-col gap-6">
       <h1 className="text-title text-text">{t('updatesTitle')}</h1>
       {room.projects.length > 1 ? (
         <nav aria-label={t('projectSelector')}>
@@ -55,6 +55,8 @@ export default async function PortalUpdatesPage({ params, searchParams }: PagePr
       ) : null}
       <ClientRoom
         project={room.project}
+        initialView={view === 'timeline' ? 'timeline' : 'steps'}
+        today={new Date().toISOString().slice(0, 10)}
         {...(access.decides ? { decide: decideApprovalAction } : {})}
       />
     </div>

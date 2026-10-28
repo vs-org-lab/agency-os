@@ -27,8 +27,11 @@ export default async function PortalDocumentsPage({ params }: PageProps) {
     return <EmptyState title={t('title')} description={t('empty')} />;
   }
   return (
-    <div className="mx-auto flex w-full max-w-180 flex-col gap-6">
-      <h1 className="text-title text-text">{t('title')}</h1>
+    <div className="mx-auto flex w-full max-w-240 flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-title text-text">{t('title')}</h1>
+        <p className="max-w-[64ch] text-body-sm text-text-secondary">{t('description')}</p>
+      </header>
       <PortalDocumentCards documents={documents} />
     </div>
   );

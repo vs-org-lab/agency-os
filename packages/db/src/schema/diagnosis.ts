@@ -98,6 +98,8 @@ export const coreBriefingNotes = pgTable(
     blockId: text('block_id').notNull(),
     questionId: text('question_id').notNull().default(''),
     body: text('body').notNull(),
+    /** The structured answer of a question that has one: 'yes', 'no' or an option id. */
+    answer: text('answer'),
     authorId: uuid('author_id').references(() => profiles.id, { onDelete: 'restrict' }),
     ...timestamps,
   },

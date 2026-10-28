@@ -36,6 +36,7 @@ const values: ContractValues = {
     ],
     retainerMonthly: '1500.00',
     retainerMonths: 12,
+    modules: [{ code: 'A', params: { videosPerMonth: 8, revisions: 2 } }],
   },
   proposal: { guarantee: 'Garantia de 30 dias', currency: 'EUR' },
   contractDate: new Date('2026-10-09T10:00:00Z'),
@@ -83,6 +84,7 @@ describe('renderContract', () => {
     expect(rendered).toContain('opcao.retainer=1500,00 € por mês, durante 12 meses');
     expect(rendered).toContain('proposta.moeda=EUR');
     expect(rendered).toContain('contrato.data=9 de outubro de 2026');
+    expect(rendered).toContain('opcao.modulos=### Módulo A — Vídeo e motion graphics');
     expect(rendered).not.toContain('{{');
   });
 

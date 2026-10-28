@@ -34,6 +34,9 @@ export type ProposalScopeLine = { text: string; findingId: string | null };
 
 export type PaymentStep = { label: string; percent: number };
 
+/** A contract module chosen in a proposal option; its parameters are validated by the web module. */
+export type ProposalModule = { code: 'A' | 'B' | 'C' | 'D' | 'E'; params: Record<string, unknown> };
+
 export type ProposalClientDetails = {
   legalName: string;
   taxId: string;
@@ -163,6 +166,7 @@ export const proposalOptions = pgTable(
     paymentPlan: jsonb('payment_plan').$type<PaymentStep[]>().notNull(),
     retainerMonthly: numeric('retainer_monthly', { precision: 12, scale: 2 }),
     retainerMonths: integer('retainer_months'),
+    modules: jsonb('modules').$type<ProposalModule[]>().notNull().default([]),
     ...timestamps,
   },
   (table) => [

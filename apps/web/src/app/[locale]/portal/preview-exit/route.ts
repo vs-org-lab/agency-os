@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { defaultLocale, isLocale } from '@agency-os/i18n';
 import { readPortalPreview } from '@/components/shell/portal-preview';
-import { PORTAL_PREVIEW_COOKIE, portalCookiePaths } from '@/components/shell/portal-preview-path';
+import { previewCookieHeaders } from '@/components/shell/portal-preview-path';
+import { isSecureRequest } from '@/platform/request';
 
 /** Ends the client preview and returns the team to the client's room. */
 export async function GET(
@@ -16,8 +17,11 @@ export async function GET(
     status: 303,
     headers: { 'cache-control': 'no-store' },
   });
-  for (const path of portalCookiePaths()) {
-    response.cookies.set(PORTAL_PREVIEW_COOKIE, '', { path, maxAge: 0 });
+  for (const cookie of previewCookieHeaders('', {
+    secure: isSecureRequest(request.headers, request.nextUrl.protocol),
+    maxAgeSeconds: 0,
+  })) {
+    response.headers.append('set-cookie', cookie);
   }
   return response;
 }

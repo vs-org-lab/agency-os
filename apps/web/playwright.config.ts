@@ -16,6 +16,8 @@ export default defineConfig({
   use: {
     baseURL,
     locale: 'pt-PT',
+    // Entrance animations fade content in; accessibility checks must read the settled colours.
+    contextOptions: { reducedMotion: 'reduce' },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     extraHTTPHeaders: bypass

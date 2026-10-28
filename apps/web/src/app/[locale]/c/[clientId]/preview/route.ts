@@ -2,10 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isLocale } from '@agency-os/i18n';
 import { canPreviewClient } from '@/components/shell/portal-preview';
 import {
-  localizedPortalPath,
-  PORTAL_PREVIEW_COOKIE,
-  portalCookiePaths,
+  localizedPath,
   portalPathForRoom,
+  previewCookieHeaders,
 } from '@/components/shell/portal-preview-path';
 import { getVerifiedClaims } from '@/platform/session';
 import { isSecureRequest } from '@/platform/request';
@@ -28,7 +27,7 @@ export async function GET(
 
   const section = request.nextUrl.searchParams.get('section') ?? '';
   const project = request.nextUrl.searchParams.get('project');
-  const target = localizedPortalPath(
+  const target = localizedPath(
     locale,
     portalPathForRoom(`/c/${clientId}/${section.replace(/[^a-z-]/g, '')}`, project),
   );
@@ -36,15 +35,11 @@ export async function GET(
     status: 303,
     headers: { 'cache-control': 'no-store' },
   });
-  const secure = isSecureRequest(request.headers, request.nextUrl.protocol);
-  for (const path of portalCookiePaths()) {
-    response.cookies.set(PORTAL_PREVIEW_COOKIE, clientId, {
-      httpOnly: true,
-      secure,
-      sameSite: 'lax',
-      path,
-      maxAge: PREVIEW_HOURS * 60 * 60,
-    });
+  for (const cookie of previewCookieHeaders(clientId, {
+    secure: isSecureRequest(request.headers, request.nextUrl.protocol),
+    maxAgeSeconds: PREVIEW_HOURS * 60 * 60,
+  })) {
+    response.headers.append('set-cookie', cookie);
   }
   return response;
 }

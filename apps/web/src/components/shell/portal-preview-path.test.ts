@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { localizedPortalPath, portalCookiePaths, portalPathForRoom } from './portal-preview-path';
+import {
+  localizedPath,
+  portalCookiePaths,
+  portalPathForRoom,
+  previewCookieHeaders,
+} from './portal-preview-path';
 
 const CLIENT = '4e7518a6-60e8-4017-85c7-7c3e0222c07a';
 
@@ -28,6 +33,16 @@ describe('portal preview paths', () => {
 
   it('scopes the cookie to the portal under every locale prefix', () => {
     expect(portalCookiePaths()).toEqual(['/portal', '/en/portal']);
-    expect(localizedPortalPath('en', '/portal/docs')).toBe('/en/portal/docs');
+    expect(localizedPath('en', '/portal/docs')).toBe('/en/portal/docs');
+  });
+
+  it('writes one cookie per portal path, so no locale loses the preview', () => {
+    expect(previewCookieHeaders(CLIENT, { secure: true, maxAgeSeconds: 7200 })).toEqual([
+      `portal_preview=${CLIENT}; Path=/portal; Max-Age=7200; HttpOnly; SameSite=Lax; Secure`,
+      `portal_preview=${CLIENT}; Path=/en/portal; Max-Age=7200; HttpOnly; SameSite=Lax; Secure`,
+    ]);
+    expect(previewCookieHeaders('', { secure: false, maxAgeSeconds: 0 })[0]).toBe(
+      'portal_preview=; Path=/portal; Max-Age=0; HttpOnly; SameSite=Lax',
+    );
   });
 });

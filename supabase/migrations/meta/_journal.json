@@ -554,6 +554,13 @@
       "when": 1793128299853,
       "tag": "20261027191139_proposal_option_modules",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1793185973055,
+      "tag": "20261028111253_client_preview",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { LibraryBrowser } from '@/components/library/library-browser';
 import { parseLibraryParams } from '@/components/library/library-params';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadStaffLibrary } from '@/modules/library/server';
@@ -48,7 +49,7 @@ export default async function RoomLibraryPage({ params, searchParams }: PageProp
         client={{ id: clientId, name: client.name }}
         projects={view?.projects ?? []}
         selectedId={view?.projectId ?? null}
-        showPreviewLink={Boolean(view?.projectId)}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={basePath}
       />
       {view?.projectId ? (

@@ -33,9 +33,12 @@ export function RoomHeader({
   actions?: ReactNode;
 }) {
   const t = useTranslations('rooms');
-  const previewHref = selectedId
-    ? `/c/${client.id}/preview?project=${selectedId}`
-    : `/c/${client.id}/preview`;
+  const section = basePath.split('/')[3] ?? '';
+  const previewQuery = new URLSearchParams({
+    section,
+    ...(selectedId ? { project: selectedId } : {}),
+  });
+  const previewHref = `/c/${client.id}/preview?${previewQuery.toString()}`;
   const hasActions = showPreviewLink || Boolean(actions);
 
   return (
@@ -58,7 +61,7 @@ export function RoomHeader({
             <>
               {showPreviewLink ? (
                 <Button asChild variant="outline">
-                  <Link href={previewHref}>
+                  <Link href={previewHref} prefetch={false}>
                     <Eye aria-hidden="true" />
                     {t('previewAsClient')}
                   </Link>

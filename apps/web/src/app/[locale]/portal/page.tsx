@@ -54,10 +54,12 @@ export default async function PortalHomePage({ params }: PageProps) {
             : Promise.resolve([]),
         ])
       : [null, null, [], null, [], null, [], null, []];
-  const onboarding = await isPortalOnboardingPending(session.claims, {
-    userId: session.actor.userId,
-    organizationId: session.actor.organizationId,
-  });
+  const onboarding = session.preview
+    ? false
+    : await isPortalOnboardingPending(session.claims, {
+        userId: session.actor.userId,
+        organizationId: session.actor.organizationId,
+      });
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
@@ -89,7 +91,7 @@ export default async function PortalHomePage({ params }: PageProps) {
       {onboarding ? <OnboardingDialog onSeen={dismissPortalOnboardingAction} /> : null}
       <PortalHome
         client={identity?.client ?? null}
-        contactName={identity?.contactName ?? null}
+        contactName={session.preview ? null : (identity?.contactName ?? null)}
         now={new Date().toISOString()}
         actions={actions}
         retainer={retainer ? { view: retainer, requests, request: requestWorkAction } : null}

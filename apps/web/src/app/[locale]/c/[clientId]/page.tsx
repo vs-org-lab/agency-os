@@ -4,6 +4,7 @@ import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { HealthCard } from '@/components/health/health-card';
 import { hasHealthData } from '@/components/health/has-health-data';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { loadRoomHealth } from '@/modules/health/server';
@@ -90,7 +91,7 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
         client={{ id: clientId, name: room.clientName }}
         projects={room.projects}
         selectedId={room.project?.id ?? null}
-        showPreviewLink={room.project !== null}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}`}
         actions={
           writable && templates.length > 0 ? (

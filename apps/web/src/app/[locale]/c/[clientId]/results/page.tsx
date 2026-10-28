@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ResultsTable } from '@/components/results/results-table';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { pageMetadata } from '@/i18n/page-title';
 import { requireLocale } from '@/i18n/require-locale';
@@ -36,7 +37,7 @@ export default async function RoomResultsPage({ params }: PageProps) {
         client={{ id: clientId, name: client.name }}
         projects={[]}
         selectedId={null}
-        showPreviewLink={false}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={`/c/${clientId}/results`}
       />
       <ResultsTable

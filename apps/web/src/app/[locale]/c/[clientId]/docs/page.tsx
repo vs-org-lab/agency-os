@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { RoomDocumentCards } from '@/components/project-documents/document-cards';
 import { NewRoomDocument } from '@/components/project-documents/room-document-controls';
+import { offersClientPreview } from '@/components/shell/portal-preview-path';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
 import { findVisibleClient } from '@/modules/organizations';
@@ -50,7 +51,7 @@ export default async function RoomDocumentsPage({ params, searchParams }: PagePr
         client={{ id: clientId, name: client.name }}
         projects={view?.projects ?? []}
         selectedId={view?.projectId ?? null}
-        showPreviewLink={Boolean(view?.projectId)}
+        showPreviewLink={offersClientPreview(session.actor)}
         basePath={basePath}
         actions={view && view.documents.length > 0 ? createControl : null}
       />

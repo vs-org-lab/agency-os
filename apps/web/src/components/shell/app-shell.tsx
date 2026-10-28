@@ -21,6 +21,7 @@ export async function AppShell({
   level,
   counters,
   commandPalette,
+  banner,
   children,
 }: {
   session: AreaSession;
@@ -28,6 +29,8 @@ export async function AppShell({
   counters?: Partial<Record<NavigationCounter, CounterSource>>;
   /** Mounts the command palette; only the internal workspace and rooms pass it. */
   commandPalette?: { createActions: CreateAction[] };
+  /** A notice above every screen of the area, such as the client preview. */
+  banner?: ReactNode;
   children: ReactNode;
 }) {
   const t = await getTranslations();
@@ -98,6 +101,7 @@ export async function AppShell({
           toggleLabel={t('shell.toggleSidebar')}
           breadcrumbLabel={t('shell.breadcrumb')}
         />
+        {banner}
         <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 md:px-6 xl:px-8">
           {children}
         </main>

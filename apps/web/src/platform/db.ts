@@ -15,7 +15,13 @@ export const verifiedClaimsSchema = z.object({
   email: z.string().optional(),
 });
 
-export type VerifiedClaims = z.infer<typeof verifiedClaimsSchema>;
+/**
+ * Claims as the server code carries them. `preview_client` never comes from a token: the client
+ * preview adds it after authorising the reader, and the database honours it only read-only.
+ */
+const contextClaimsSchema = verifiedClaimsSchema.extend({ preview_client: z.uuid().optional() });
+
+export type VerifiedClaims = z.infer<typeof contextClaimsSchema>;
 
 export type DbContexts = {
   withUserContext<T>(claims: VerifiedClaims, fn: (tx: DbTransaction) => Promise<T>): Promise<T>;
@@ -25,14 +31,22 @@ export type DbContexts = {
 export function createDbContexts(db: Database): DbContexts {
   return {
     async withUserContext(claims, fn) {
-      const parsed = verifiedClaimsSchema.safeParse(claims);
+      const parsed = contextClaimsSchema.safeParse(claims);
       if (!parsed.success) throw new Error('Invalid claims for user database context');
+      const { preview_client: previewClient, ...tokenClaims } = parsed.data;
 
       // One statement per context switch: every round trip to the pooler adds to page latency.
       return db.transaction(async (tx) => {
-        await tx.execute(
-          sql`select set_config('request.jwt.claims', ${JSON.stringify(parsed.data)}, true), set_config('role', 'authenticated', true)`,
-        );
+        if (previewClient) {
+          // The previewing staff member keeps their own identity in the token claims.
+          await tx.execute(
+            sql`select set_config('request.jwt.claims', ${JSON.stringify({ ...tokenClaims, user_kind: 'internal' })}, true), set_config('role', 'authenticated', true), set_config('app.preview_client', ${previewClient}, true), set_config('transaction_read_only', 'on', true)`,
+          );
+        } else {
+          await tx.execute(
+            sql`select set_config('request.jwt.claims', ${JSON.stringify(tokenClaims)}, true), set_config('role', 'authenticated', true)`,
+          );
+        }
         return fn(tx);
       });
     },

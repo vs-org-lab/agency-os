@@ -66,6 +66,11 @@
     "studio": "Studio",
     "allClients": "All clients",
     "toggleSidebar": "Show or hide menu",
+    "clientPreview": {
+      "label": "Client preview",
+      "notice": "You are seeing the portal as {client} sees it. Read only: the client actions do nothing here.",
+      "exit": "Exit preview"
+    },
     "skipToContent": "Skip to content",
     "navigation": "Navigation",
     "navigationDescription": "Main application menu.",
@@ -2090,8 +2095,6 @@
     "noProjectHint": "The project is created on its own when the first payment takes the deal to 2.2, or you can create it here.",
     "projectSelector": "Project",
     "previewAsClient": "View as client",
-    "previewNotice": "Preview: this is what the client sees. Nothing internal appears here.",
-    "backToRoom": "Back to the room",
     "newProject": "New project",
     "projectName": "Project name",
     "template": "Process template",

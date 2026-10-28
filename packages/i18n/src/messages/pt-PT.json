@@ -66,6 +66,11 @@
     "studio": "Estúdio",
     "allClients": "Todos os clientes",
     "toggleSidebar": "Mostrar ou ocultar menu",
+    "clientPreview": {
+      "label": "Pré-visualização do cliente",
+      "notice": "Está a ver o portal como {client} o vê. Só leitura: as ações do cliente não fazem nada aqui.",
+      "exit": "Sair da pré-visualização"
+    },
     "skipToContent": "Saltar para o conteúdo",
     "navigation": "Navegação",
     "navigationDescription": "Menu principal da aplicação.",
@@ -2090,8 +2095,6 @@
     "noProjectHint": "O projeto é criado sozinho quando o primeiro pagamento leva o negócio a 2.2, ou pode criá-lo aqui.",
     "projectSelector": "Projeto",
     "previewAsClient": "Ver como cliente",
-    "previewNotice": "Pré-visualização: é isto que o cliente vê. Nada interno aparece aqui.",
-    "backToRoom": "Voltar à sala",
     "newProject": "Novo projeto",
     "projectName": "Nome do projeto",
     "template": "Modelo de processo",

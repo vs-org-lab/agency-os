@@ -36,6 +36,7 @@ export default async function CallModePage({ params }: PageProps) {
       observations={core.findings.filter((finding) => finding.bringToCall)}
       transcript={core.briefing.transcript}
       latestRecording={core.latestRecording}
+      onboarding={core.onboarding}
       locale={locale}
     />
   );

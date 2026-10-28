@@ -5,6 +5,9 @@ import {
   localizedPath,
   portalPathForRoom,
   previewCookieHeaders,
+  previewCookieValue,
+  previewRoleOf,
+  safePortalPath,
 } from '@/components/shell/portal-preview-path';
 import { getVerifiedClaims } from '@/platform/session';
 import { isSecureRequest } from '@/platform/request';
@@ -25,17 +28,19 @@ export async function GET(
     return new NextResponse(null, { status: 404 });
   }
 
-  const section = request.nextUrl.searchParams.get('section') ?? '';
-  const project = request.nextUrl.searchParams.get('project');
+  const params = request.nextUrl.searchParams;
+  const section = params.get('section') ?? '';
+  const role = previewRoleOf(params.get('role'));
   const target = localizedPath(
     locale,
-    portalPathForRoom(`/c/${clientId}/${section.replace(/[^a-z-]/g, '')}`, project),
+    safePortalPath(params.get('to')) ??
+      portalPathForRoom(`/c/${clientId}/${section.replace(/[^a-z-]/g, '')}`, params.get('project')),
   );
   const response = NextResponse.redirect(new URL(target, request.url), {
     status: 303,
     headers: { 'cache-control': 'no-store' },
   });
-  for (const cookie of previewCookieHeaders(clientId, {
+  for (const cookie of previewCookieHeaders(previewCookieValue(clientId, role), {
     secure: isSecureRequest(request.headers, request.nextUrl.protocol),
     maxAgeSeconds: PREVIEW_HOURS * 60 * 60,
   })) {

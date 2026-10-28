@@ -32,3 +32,4 @@ export * from './academy';
 export * from './client-reports';
 export * from './health';
 export * from './results';
+export * from './client-onboarding';

@@ -2,13 +2,14 @@ import 'server-only';
 import { sql } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { withUserContext, type VerifiedClaims } from '@/platform/db';
-import { PORTAL_PREVIEW_COOKIE } from './portal-preview-path';
+import { withUserContext, type PreviewRole, type VerifiedClaims } from '@/platform/db';
+import { parsePreviewCookie, PORTAL_PREVIEW_COOKIE } from './portal-preview-path';
 
-/** The client named by the preview cookie, which the browser sends to portal paths only. */
-export async function readPortalPreview(): Promise<string | null> {
-  const value = (await cookies()).get(PORTAL_PREVIEW_COOKIE)?.value;
-  return value && z.uuid().safeParse(value).success ? value : null;
+export type PortalPreview = { clientId: string; role: PreviewRole };
+
+/** The client and role named by the preview cookie, which the browser sends to portal paths only. */
+export async function readPortalPreview(): Promise<PortalPreview | null> {
+  return parsePreviewCookie((await cookies()).get(PORTAL_PREVIEW_COOKIE)?.value);
 }
 
 /** The founder, or the project manager assigned to the client (app.can_preview_client). */
@@ -22,7 +23,12 @@ export async function canPreviewClient(claims: VerifiedClaims, clientId: string)
   return row?.allowed === true;
 }
 
-/** The staff claims read as the client's decision maker: read-only in the database. */
-export function previewClaims(claims: VerifiedClaims, clientId: string): VerifiedClaims {
-  return { ...claims, user_kind: 'client', preview_client: clientId };
+/** The staff claims read as the chosen client role: read-only in the database. */
+export function previewClaims(claims: VerifiedClaims, preview: PortalPreview): VerifiedClaims {
+  return {
+    ...claims,
+    user_kind: 'client',
+    preview_client: preview.clientId,
+    preview_role: preview.role,
+  };
 }

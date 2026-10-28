@@ -6,7 +6,8 @@ import { Button } from '@agency-os/ui/components/button';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
 
-export type PortalActionKind = 'approval' | 'proof' | 'proposal' | 'contract' | 'payment';
+export type PortalActionKind =
+  'approval' | 'proof' | 'proposal' | 'contract' | 'payment' | 'onboarding';
 
 export type PortalActionItem = {
   kind: PortalActionKind;

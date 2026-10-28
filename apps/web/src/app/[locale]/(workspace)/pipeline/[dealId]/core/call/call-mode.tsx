@@ -6,9 +6,14 @@ import type { Locale } from '@agency-os/i18n';
 import { Button } from '@agency-os/ui/components/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
 import { Link } from '@/i18n/navigation';
-import type { BriefingGuide } from '@/modules/diagnosis';
+import {
+  AnswerChips,
+  OnboardingPlan,
+  useOnboardingAnswers,
+} from '@/components/client-onboarding/onboarding-plan';
+import type { BriefingGuide, CoreOnboarding } from '@/modules/diagnosis';
 import type { RecordingView } from '@/modules/diagnosis/server';
-import { saveNoteAction, saveTranscriptAction } from '../actions';
+import { saveAnswerAction, saveNoteAction, saveTranscriptAction } from '../actions';
 import {
   confirmRecordingAction,
   retryRecordingAction,
@@ -43,6 +48,7 @@ export function CallMode({
   observations,
   transcript,
   latestRecording,
+  onboarding,
   locale,
 }: {
   engagementId: string;
@@ -53,11 +59,15 @@ export function CallMode({
   observations: Observation[];
   transcript: string | null;
   latestRecording: RecordingView | null;
+  onboarding: CoreOnboarding | null;
   locale: Locale;
 }) {
   const t = useTranslations('diagnosis');
   const [index, setIndex] = useState(0);
   const { value, remember } = useNoteValues(notes);
+  const answers = useOnboardingAnswers(onboarding?.answers ?? {}, (blockId, questionId, answer) =>
+    saveAnswerAction(engagementId, blockId, questionId, answer),
+  );
   const block = guide.blocks[index];
   if (!block) return null;
   const save = (blockId: string, questionId: string | null) => (body: string) =>
@@ -88,6 +98,9 @@ export function CallMode({
           <TabsTrigger value="briefing">{t('call.tabs.briefing')}</TabsTrigger>
           <TabsTrigger value="observations">{t('call.tabs.observations')}</TabsTrigger>
           <TabsTrigger value="transcript">{t('call.tabs.transcript')}</TabsTrigger>
+          {onboarding ? (
+            <TabsTrigger value="onboarding">{t('call.tabs.onboarding')}</TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="briefing" className="flex flex-col gap-6 pt-6">
@@ -131,17 +144,31 @@ export function CallMode({
                 {t('call.blockMeta', { goal: block.goal[locale], minutes: block.minutes })}
               </p>
             </div>
-            {block.questions.map((question) => (
-              <NoteField
-                key={question.id}
-                id={`call-${question.id}`}
-                label={question.text[locale]}
-                initialValue={value(block.id, question.id)}
-                onSaved={(body) => remember(block.id, question.id, body)}
-                save={save(block.id, question.id)}
-                rows={3}
-              />
-            ))}
+            {block.questions.map((question) => {
+              const structured = onboarding?.questions.find(
+                (entry) => entry.question.id === question.id,
+              )?.question.answer;
+              return (
+                <div key={question.id} className="flex flex-col gap-2">
+                  {structured ? (
+                    <AnswerChips
+                      label={question.text[locale]}
+                      answer={structured}
+                      value={answers.answers[question.id] ?? null}
+                      onChange={(next) => answers.change(block.id, question.id, next)}
+                    />
+                  ) : null}
+                  <NoteField
+                    id={`call-${question.id}`}
+                    label={question.text[locale]}
+                    initialValue={value(block.id, question.id)}
+                    onSaved={(body) => remember(block.id, question.id, body)}
+                    save={save(block.id, question.id)}
+                    rows={3}
+                  />
+                </div>
+              );
+            })}
             <NoteField
               id={`call-${block.id}`}
               label={t('briefing.blockNotes')}
@@ -170,6 +197,12 @@ export function CallMode({
             </Button>
           </nav>
         </TabsContent>
+
+        {onboarding ? (
+          <TabsContent value="onboarding" className="pt-6">
+            <OnboardingPlan onboarding={onboarding} state={answers} />
+          </TabsContent>
+        ) : null}
 
         <TabsContent value="observations" className="flex flex-col gap-3 pt-6">
           {observations.length === 0 ? (

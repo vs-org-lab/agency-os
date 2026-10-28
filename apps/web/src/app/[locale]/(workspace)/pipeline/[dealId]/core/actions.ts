@@ -12,6 +12,7 @@ import {
   removeCoreFinding,
   saveCoreDetails,
   saveCoreFinding,
+  saveCoreAnswer,
   saveCoreNote,
   saveCoreScores,
   saveCoreTranscript,
@@ -59,6 +60,18 @@ export async function saveNoteAction(
   const current = await session();
   if (!current) return false;
   const result = await saveCoreNote(current, { engagementId, blockId, questionId, body });
+  return result.ok;
+}
+
+export async function saveAnswerAction(
+  engagementId: string,
+  blockId: string,
+  questionId: string,
+  answer: string | null,
+): Promise<boolean> {
+  const current = await session();
+  if (!current) return false;
+  const result = await saveCoreAnswer(current, { engagementId, blockId, questionId, answer });
   return result.ok;
 }
 

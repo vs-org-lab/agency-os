@@ -1,4 +1,5 @@
 import 'server-only';
+import { listPortalTeam } from './portal-team';
 import type { ClientRole, OrgRole } from '@agency-os/db';
 import type { Currency, Locale } from '@agency-os/i18n';
 import { createInvitationDeps } from '@/modules/identity';
@@ -92,3 +93,7 @@ export function revokeClientColleague(claims: VerifiedClaims, membershipId: stri
   return revokeColleague(claims, { membershipId }, deps());
 }
 export { listTeam, type TeamDeps } from './service';
+
+export const loadPortalTeam = (claims: VerifiedClaims, clientId: string) =>
+  listPortalTeam(claims, clientId, { contexts: { withUserContext } });
+export type { PortalTeamMember } from './portal-team';

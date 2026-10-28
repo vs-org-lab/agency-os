@@ -170,6 +170,7 @@ describe('buildNavigation', () => {
 
     expect(navigation.items.map((item) => item.href)).toEqual([
       '/portal',
+      '/portal/onboarding',
       '/portal/approvals',
       '/portal/proofs',
       '/portal/updates',

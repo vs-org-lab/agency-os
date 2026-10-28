@@ -12,6 +12,7 @@ type TourStepId =
   | 'welcome'
   | 'project'
   | 'actions'
+  | 'onboarding'
   | 'approvals'
   | 'documents'
   | 'hub'
@@ -24,6 +25,7 @@ const STEPS: ReadonlyArray<{ id: TourStepId; target: string | null }> = [
   { id: 'welcome', target: null },
   { id: 'project', target: '[data-tour="project"]' },
   { id: 'actions', target: '[data-tour="actions"]' },
+  { id: 'onboarding', target: '[data-nav="/portal/onboarding"]' },
   { id: 'approvals', target: '[data-nav="/portal/approvals"]' },
   { id: 'documents', target: '[data-nav="/portal/docs"]' },
   { id: 'hub', target: '[data-nav="/portal/hub"]' },

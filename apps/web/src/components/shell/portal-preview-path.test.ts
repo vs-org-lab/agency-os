@@ -3,7 +3,11 @@ import {
   localizedPath,
   portalCookiePaths,
   portalPathForRoom,
+  parsePreviewCookie,
   previewCookieHeaders,
+  previewCookieValue,
+  previewRoleOf,
+  safePortalPath,
 } from './portal-preview-path';
 
 const CLIENT = '4e7518a6-60e8-4017-85c7-7c3e0222c07a';
@@ -44,5 +48,23 @@ describe('portal preview paths', () => {
     expect(previewCookieHeaders('', { secure: false, maxAgeSeconds: 0 })[0]).toBe(
       'portal_preview=; Path=/portal; Max-Age=0; HttpOnly; SameSite=Lax',
     );
+  });
+
+  it('keeps the role in the cookie and falls back to the decision maker', () => {
+    expect(parsePreviewCookie(previewCookieValue(CLIENT, 'client_finance'))).toEqual({
+      clientId: CLIENT,
+      role: 'client_finance',
+    });
+    expect(parsePreviewCookie(CLIENT)).toEqual({ clientId: CLIENT, role: 'decision_maker' });
+    expect(parsePreviewCookie('not-a-client.operational')).toBeNull();
+    expect(previewRoleOf('founder')).toBe('decision_maker');
+  });
+
+  it('opens only portal paths', () => {
+    expect(safePortalPath('/portal/docs')).toBe('/portal/docs');
+    expect(safePortalPath('/portal')).toBe('/portal');
+    for (const path of ['/c/x', '//evil.com', '/portal/../c', 'https://x/portal', null]) {
+      expect(safePortalPath(path)).toBeNull();
+    }
   });
 });

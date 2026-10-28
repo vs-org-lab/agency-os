@@ -10,7 +10,9 @@ const PROTOTYPE_PARAMS = [
   ['hotspot-hints', '0'],
 ] as const;
 
-function figmaPath(input: string): { kind: string; fileKey: string; rest: string[]; url: URL } | null {
+function figmaPath(
+  input: string,
+): { kind: string; fileKey: string; rest: string[]; url: URL } | null {
   let url: URL;
   try {
     url = new URL(input.trim());

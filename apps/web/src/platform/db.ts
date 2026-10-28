@@ -15,11 +15,17 @@ export const verifiedClaimsSchema = z.object({
   email: z.string().optional(),
 });
 
+export const PREVIEW_ROLES = ['decision_maker', 'operational', 'client_finance'] as const;
+export type PreviewRole = (typeof PREVIEW_ROLES)[number];
+
 /**
- * Claims as the server code carries them. `preview_client` never comes from a token: the client
- * preview adds it after authorising the reader, and the database honours it only read-only.
+ * Claims as the server code carries them. The preview fields never come from a token: the client
+ * preview adds them after authorising the reader, and the database honours them only read-only.
  */
-const contextClaimsSchema = verifiedClaimsSchema.extend({ preview_client: z.uuid().optional() });
+const contextClaimsSchema = verifiedClaimsSchema.extend({
+  preview_client: z.uuid().optional(),
+  preview_role: z.enum(PREVIEW_ROLES).optional(),
+});
 
 export type VerifiedClaims = z.infer<typeof contextClaimsSchema>;
 
@@ -33,14 +39,18 @@ export function createDbContexts(db: Database): DbContexts {
     async withUserContext(claims, fn) {
       const parsed = contextClaimsSchema.safeParse(claims);
       if (!parsed.success) throw new Error('Invalid claims for user database context');
-      const { preview_client: previewClient, ...tokenClaims } = parsed.data;
+      const {
+        preview_client: previewClient,
+        preview_role: previewRole = 'decision_maker',
+        ...tokenClaims
+      } = parsed.data;
 
       // One statement per context switch: every round trip to the pooler adds to page latency.
       return db.transaction(async (tx) => {
         if (previewClient) {
           // The previewing staff member keeps their own identity in the token claims.
           await tx.execute(
-            sql`select set_config('request.jwt.claims', ${JSON.stringify({ ...tokenClaims, user_kind: 'internal' })}, true), set_config('role', 'authenticated', true), set_config('app.preview_client', ${previewClient}, true), set_config('transaction_read_only', 'on', true)`,
+            sql`select set_config('request.jwt.claims', ${JSON.stringify({ ...tokenClaims, user_kind: 'internal' })}, true), set_config('role', 'authenticated', true), set_config('app.preview_client', ${previewClient}, true), set_config('app.preview_role', ${previewRole}, true), set_config('transaction_read_only', 'on', true)`,
           );
         } else {
           await tx.execute(

@@ -15,13 +15,15 @@ import { loadClientPortalResults } from '@/modules/results/server';
 import { loadClientRequests, loadClientRetainer } from '@/modules/retainers/server';
 import { loadClientPortalDocuments } from '@/modules/project-documents/server';
 import { loadPortalApprovals, loadPortalRoom } from '@/modules/rooms/server';
-import { loadColleagues } from '@/modules/team/server';
+import { loadColleagues, loadPortalTeam } from '@/modules/team/server';
 import { withUserContext } from '@/platform/db';
 import { requestWorkAction } from '../retainer-actions';
 import { dismissPortalOnboardingAction, hideGettingStartedAction } from './onboarding-actions';
 import { ProposalHomeCard, proposalCardState } from './portal-cards';
 import { portalRoomAccess } from './room-session';
 import { pageMetadata } from '@/i18n/page-title';
+import { loadPortalMeetings } from '@/modules/agenda/server';
+import { loadOnboarding } from '@/modules/client-onboarding/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +58,15 @@ export default async function PortalHomePage({ params }: PageProps) {
         ])
       : [null, null, [], null, [], null, [], null, []];
   const viewer = { userId: session.actor.userId, organizationId: session.actor.organizationId };
-  const [tourPending, gettingStartedPending, sharedDocuments, colleagues] = await Promise.all([
+  const [
+    tourPending,
+    gettingStartedPending,
+    sharedDocuments,
+    colleagues,
+    onboarding,
+    team,
+    meetings,
+  ] = await Promise.all([
     session.preview ? false : isPortalOnboardingPending(session.claims, viewer),
     session.preview
       ? true
@@ -65,11 +75,26 @@ export default async function PortalHomePage({ params }: PageProps) {
       ? loadClientPortalDocuments(session.claims, clientId)
       : Promise.resolve([]),
     clientId && access.decides ? loadColleagues(session.claims, clientId) : Promise.resolve(null),
+    clientId && access.readsRoom ? loadOnboarding(session.claims, clientId) : Promise.resolve(null),
+    clientId ? loadPortalTeam(session.claims, clientId) : Promise.resolve([]),
+    clientId ? loadPortalMeetings(session.claims, clientId) : Promise.resolve([]),
   ]);
+  const onboardingDone = onboarding?.items.filter((item) => item.done).length ?? 0;
+  const onboardingOpen = (onboarding?.items.length ?? 0) - onboardingDone;
+  const tOnboarding = await getTranslations('clientOnboarding');
   const t = await getTranslations('portal');
   const format = await getFormatter();
 
-  const actions = portalActionItems({ decides: access.decides, approvals, proposal, invoices });
+  const actions = portalActionItems({
+    decides: access.decides,
+    approvals,
+    proposal,
+    invoices,
+    onboarding: {
+      open: onboardingOpen,
+      title: tOnboarding('action.title', { count: onboardingOpen }),
+    },
+  });
   const proposalCard = proposalCardState(proposal);
   const statusCard =
     proposalCard &&
@@ -90,6 +115,7 @@ export default async function PortalHomePage({ params }: PageProps) {
     colleagues: colleagues
       ? colleagues.filter((colleague) => colleague.status !== 'revoked').length
       : null,
+    onboarding: onboarding ? { done: onboardingDone, total: onboarding.items.length } : null,
   });
 
   return (
@@ -103,6 +129,8 @@ export default async function PortalHomePage({ params }: PageProps) {
         project={project}
         results={{ kpis: results, currentMonth: currentMonth() }}
         documents={sharedDocuments}
+        team={team}
+        meetings={meetings}
         gettingStarted={gettingStartedPending ? { steps, hide: hideGettingStartedAction } : null}
         tour={{ autoStart: tourPending, onFinish: dismissPortalOnboardingAction }}
       >

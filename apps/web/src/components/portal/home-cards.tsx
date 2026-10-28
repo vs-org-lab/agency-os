@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Check, FileText } from 'lucide-react';
+import { ArrowRight, Check, FileText, Mail, Video } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@agency-os/ui/components/button';
+import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
 import { cn } from '@agency-os/ui/lib/utils';
 import { Link } from '@/i18n/navigation';
+import type { PortalMeeting } from '@/modules/agenda';
 import type { PortalDocumentCardView } from '@/modules/project-documents';
+import type { PortalTeamMember } from '@/modules/team';
 import type { ClientProjectView, ClientUpdateView } from '@/modules/rooms';
 import type { GettingStartedStep } from './getting-started';
 import { startPortalTour } from './portal-tour';
@@ -375,6 +378,107 @@ export function RecentDocuments({ documents }: { documents: readonly PortalDocum
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/** The agency people on the client's account, so the client knows who to talk to. */
+export function TeamCard({ team }: { team: readonly PortalTeamMember[] }) {
+  const t = useTranslations('portal.dashboard.team');
+  if (team.length === 0) return null;
+
+  return (
+    <section
+      aria-labelledby="portal-team"
+      className="rd-rise flex flex-col rounded-lg border border-border bg-surface"
+    >
+      <h2
+        id="portal-team"
+        className="border-b border-border px-4 py-3 text-body-sm font-semibold text-text"
+      >
+        {t('title')}
+      </h2>
+      <ul className="flex flex-col divide-y divide-border">
+        {team.map((member) => (
+          <li key={member.userId} className="flex items-center gap-3 px-4 py-3">
+            <ClientAvatar id={member.userId} name={member.name} tone="neutral" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-body-sm font-medium text-text">{member.name}</span>
+              <span className="text-caption text-text-tertiary">
+                {t(`roles.${member.role === 'founder' ? 'founder' : 'project_manager'}`)}
+              </span>
+            </span>
+            <a
+              href={`mailto:${member.email}`}
+              aria-label={t('email', { name: member.name })}
+              className="flex size-8 items-center justify-center rounded-md text-text-secondary transition-colors duration-(--duration-fast) hover:bg-surface-muted hover:text-text"
+            >
+              <Mail aria-hidden="true" className="size-4" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** The next meeting the client is invited to, with the way into the call. */
+export function NextMeeting({ meetings }: { meetings: readonly PortalMeeting[] }) {
+  const t = useTranslations('portal.dashboard.meeting');
+  const format = useFormatter();
+  const [next, ...rest] = meetings;
+
+  return (
+    <section
+      aria-labelledby="portal-meeting"
+      className="rd-rise flex flex-col rounded-lg border border-border bg-surface"
+    >
+      <h2
+        id="portal-meeting"
+        className="border-b border-border px-4 py-3 text-body-sm font-semibold text-text"
+      >
+        {t('title')}
+      </h2>
+      {next ? (
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <div className="flex items-start gap-3">
+            <span className="flex w-12 shrink-0 flex-col items-center rounded-md border border-border py-1">
+              <span className="text-body font-semibold text-text tabular-nums">
+                {format.dateTime(new Date(next.startsAt), { day: 'numeric' })}
+              </span>
+              <span className="text-[10px] leading-3 text-text-tertiary uppercase">
+                {format.dateTime(new Date(next.startsAt), { month: 'short' })}
+              </span>
+            </span>
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-body-sm font-medium text-text">{next.title}</span>
+              <span className="text-caption text-text-secondary">
+                {format.dateTimeRange(new Date(next.startsAt), new Date(next.endsAt), {
+                  weekday: 'long',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+              {next.location ? (
+                <span className="text-caption text-text-tertiary">{next.location}</span>
+              ) : null}
+            </span>
+          </div>
+          {next.meetUrl ? (
+            <Button asChild size="sm" className="self-start">
+              <a href={next.meetUrl} target="_blank" rel="noreferrer noopener">
+                <Video aria-hidden="true" />
+                {t('join')}
+              </a>
+            </Button>
+          ) : null}
+          {rest.length > 0 ? (
+            <p className="text-caption text-text-tertiary">{t('more', { count: rest.length })}</p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="px-4 py-6 text-body-sm text-text-secondary">{t('empty')}</p>
+      )}
     </section>
   );
 }

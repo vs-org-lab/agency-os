@@ -15,6 +15,7 @@ export {
   recordCoreCrossReview,
   removeCoreFinding,
   saveCoreDetails,
+  saveCoreAnswer,
   saveCoreFinding,
   saveCoreNote,
   saveCoreScores,
@@ -46,3 +47,8 @@ export {
 } from './transcribe';
 export { stepFailure } from './transcription/step-errors';
 export { TranscriptionError } from './transcription/port';
+export {
+  latestOnboardingSource,
+  type CoreOnboarding,
+  type OnboardingSource,
+} from './onboarding-source';

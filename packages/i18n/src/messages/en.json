@@ -69,7 +69,13 @@
     "clientPreview": {
       "label": "Client preview",
       "notice": "You are seeing the portal as {client} sees it. Read only: the client actions do nothing here.",
-      "exit": "Exit preview"
+      "exit": "Exit preview",
+      "roleLabel": "View as",
+      "roles": {
+        "decision_maker": "Decision maker",
+        "operational": "Operational",
+        "client_finance": "Finance"
+      }
     },
     "skipToContent": "Skip to content",
     "navigation": "Navigation",
@@ -126,7 +132,8 @@
       "documents": "Documents",
       "brandHub": "Brand Hub",
       "progress": "Plan and results",
-      "academy": "Academy"
+      "academy": "Academy",
+      "onboarding": "Onboarding"
     }
   },
   "states": {
@@ -408,14 +415,16 @@
           "proof": "Proof",
           "proposal": "Proposal",
           "contract": "Contract",
-          "payment": "Payment"
+          "payment": "Payment",
+          "onboarding": "Onboarding"
         },
         "cta": {
           "approval": "Decide",
           "proof": "Review",
           "proposal": "View the proposal",
           "contract": "Sign",
-          "payment": "Pay"
+          "payment": "Pay",
+          "onboarding": "Answer"
         },
         "empty": "You are all caught up. We will let you know when we need you."
       },
@@ -509,6 +518,10 @@
           "team": {
             "title": "Invite your team",
             "body": "Whoever follows the project with you sees what you see."
+          },
+          "onboarding": {
+            "title": "Answer the onboarding",
+            "body": "The files, access and answers we need to start."
           }
         }
       },
@@ -516,6 +529,20 @@
         "title": "Latest updates",
         "seeAll": "See all",
         "empty": "No updates yet."
+      },
+      "team": {
+        "title": "Your team",
+        "roles": {
+          "founder": "Leadership",
+          "project_manager": "Project management"
+        },
+        "email": "Email {name}"
+      },
+      "meeting": {
+        "title": "Next meeting",
+        "join": "Join the call",
+        "empty": "No meetings scheduled.",
+        "more": "{count, plural, one {and # more meeting} other {and # more meetings}}"
       }
     },
     "tour": {
@@ -561,8 +588,25 @@
         "done": {
           "title": "You are all set",
           "body": "You can take this tour again any time from Getting started on the home page."
+        },
+        "onboarding": {
+          "title": "Onboarding",
+          "body": "What we need from you to start: files, access and answers, shaped by your project. Answer at your own pace."
         }
       }
+    },
+    "progress": {
+      "description": "Where the outcome we agreed stands and what is left of your plan this month.",
+      "outcome": "Agreed outcome",
+      "percent": "{value}%",
+      "ofTarget": "of the way to the target",
+      "range": "From {baseline} to {target} {unit}; now at {current}.",
+      "deadline": "Deadline: {date}",
+      "month": "This month",
+      "tier": "{tier} plan",
+      "left": "{remaining} of {available} left",
+      "renews": "{days, plural, one {# day until next month.} other {# days until next month.}}",
+      "retainerTitle": "Your plan"
     }
   },
   "commercial": {
@@ -1707,7 +1751,8 @@
         "label": "Call mode sections",
         "briefing": "Briefing",
         "observations": "Observations",
-        "transcript": "Transcript"
+        "transcript": "Transcript",
+        "onboarding": "Onboarding"
       },
       "back": "Back",
       "next": "Next",
@@ -4077,6 +4122,106 @@
         "failed": "The values could not be saved. Try again."
       },
       "stepLabel": "{position} · {name}"
+    }
+  },
+  "clientOnboarding": {
+    "kinds": {
+      "upload": "Send files",
+      "text": "Answer",
+      "access": "Give access",
+      "confirm": "Confirm"
+    },
+    "modules": {
+      "A": "Video",
+      "B": "Social media",
+      "C": "Ads",
+      "D": "Web",
+      "E": "Automations"
+    },
+    "yesNo": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "plan": {
+      "title": "Client onboarding",
+      "description": "What the portal will ask the client, from the answers and the contracted scope.",
+      "answers": "Answers that shape the requests",
+      "requests": "Requests to the client",
+      "clear": "Clear",
+      "empty": "The briefing template has no onboarding requests yet. Add them in Settings › Templates.",
+      "status": {
+        "asked": "Will be asked",
+        "module": "If the contract includes {module}",
+        "answer": "Depends on the answer",
+        "notAsked": "Not asked"
+      },
+      "saveFailed": "The answer could not be saved."
+    },
+    "editor": {
+      "title": "Client onboarding",
+      "description": "What the portal asks the client after the briefing. Each request shows only when its condition holds. Never ask for passwords: ask them to invite the agency email.",
+      "answer": "Structured answer",
+      "answerNone": "Free note only",
+      "answerYesNo": "Yes or No",
+      "answerChoice": "Choice",
+      "option": "Option {number}",
+      "addOption": "Add option",
+      "removeOption": "Remove option",
+      "request": "Request {number}",
+      "requestTitle": "Title",
+      "requestBody": "Explanation",
+      "kind": "Type",
+      "when": "When to ask",
+      "whenAlways": "Always",
+      "whenAnswer": "By an answer",
+      "whenModule": "By the contracted scope",
+      "question": "Question",
+      "equals": "When the answer is",
+      "module": "Contract module",
+      "noStructured": "Give a question a structured answer to use it as a condition.",
+      "addRequest": "Add request",
+      "removeRequest": "Remove request",
+      "suggested": "Use suggested requests",
+      "moduleOption": "{code} · {name}"
+    },
+    "portal": {
+      "title": "Onboarding",
+      "description": "What we need from you to start well. Answer at your own pace: each answer reaches the team right away.",
+      "progress": "{done} of {total} done",
+      "done": "Done",
+      "doneOn": "Done on {date}",
+      "doneBy": "by {name}",
+      "respond": "Send answer",
+      "confirm": "Mark as done",
+      "update": "Update answer",
+      "answerLabel": "Your answer",
+      "files": "Choose files",
+      "uploading": "Sending…",
+      "uploaded": "Files sent. The team has them.",
+      "uploadWaits": "You can send files once the project starts.",
+      "sent": "Answer sent. Thank you.",
+      "errors": {
+        "response_required": "Write your answer before sending.",
+        "invalid_file": "One of the files could not be accepted. Check its format and size.",
+        "storage_full": "The file space is full. Let the team know.",
+        "failed": "It could not be sent. Try again."
+      },
+      "empty": "Nothing to prepare for now.",
+      "accessHint": "Never share passwords: invite the agency email."
+    },
+    "room": {
+      "title": "Client onboarding",
+      "progress": "{done} of {total} done",
+      "open": "Waiting",
+      "reopen": "Ask again",
+      "reopened": "Request reopened for the client.",
+      "folder": "The files are in the library, under \"Enviado pelo cliente\".",
+      "empty": "No onboarding requests for this client."
+    },
+    "action": {
+      "kind": "Onboarding",
+      "title": "{count, plural, one {# request to answer} other {# requests to answer}}",
+      "cta": "Answer"
     }
   }
 }

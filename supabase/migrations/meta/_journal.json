@@ -568,6 +568,20 @@
       "when": 1793191070230,
       "tag": "20261028123750_portal_getting_started",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1793193619261,
+      "tag": "20261028132019_client_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1793193633718,
+      "tag": "20261028132033_client_onboarding_access",
+      "breakpoints": true
     }
   ]
 }

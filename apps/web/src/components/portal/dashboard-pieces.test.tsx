@@ -7,7 +7,7 @@ import messages from '@agency-os/i18n/messages/pt-PT';
 import type { ClientRetainerRequest } from '@/modules/retainers';
 import { ActionList, type PortalActionItem } from './action-list';
 import { PlanPanel } from './plan-panel';
-import { ProjectOverview } from './home-cards';
+import { NextMeeting, ProjectOverview, TeamCard } from './home-cards';
 import { RequestBoard } from './request-board';
 
 vi.mock('@/i18n/navigation', () => ({
@@ -246,5 +246,55 @@ describe('ProjectOverview', () => {
     intl(<ProjectOverview project={null} />);
 
     expect(screen.getByRole('heading', { name: 'O seu projeto começa em breve' })).toBeTruthy();
+  });
+});
+
+describe('team and meeting cards', () => {
+  it('lists the agency people with a way to email them', () => {
+    intl(
+      <TeamCard
+        team={[
+          { userId: 'u1', name: 'Ana Costa', role: 'project_manager', email: 'ana@aurion.pt' },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText('Gestão do projeto')).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: 'Enviar email a Ana Costa' }).getAttribute('href'),
+    ).toBe('mailto:ana@aurion.pt');
+  });
+
+  it('shows the next meeting with the call link and how many follow', () => {
+    intl(
+      <NextMeeting
+        meetings={[
+          {
+            id: 'm1',
+            kind: 'kickoff',
+            title: 'Kickoff',
+            location: '',
+            startsAt: '2026-11-03T10:00:00.000Z',
+            endsAt: '2026-11-03T11:00:00.000Z',
+            meetUrl: 'https://meet.google.com/abc',
+          },
+          {
+            id: 'm2',
+            kind: 'review',
+            title: 'Revisão',
+            location: '',
+            startsAt: '2026-11-10T10:00:00.000Z',
+            endsAt: '2026-11-10T11:00:00.000Z',
+            meetUrl: null,
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText('Kickoff')).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Entrar na chamada/ }).getAttribute('href')).toBe(
+      'https://meet.google.com/abc',
+    );
+    expect(screen.getByText('e mais 1 reunião')).toBeTruthy();
   });
 });

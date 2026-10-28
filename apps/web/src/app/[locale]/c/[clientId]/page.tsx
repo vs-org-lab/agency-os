@@ -1,4 +1,7 @@
 import { notFound } from 'next/navigation';
+import { OnboardingProgress } from '@/components/client-onboarding/onboarding-progress';
+import { loadOnboarding } from '@/modules/client-onboarding/server';
+import { reopenOnboardingAction } from '../../onboarding-actions';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EmptyState } from '@agency-os/ui/components/states/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@agency-os/ui/components/tabs';
@@ -57,10 +60,11 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
   setRequestLocale(locale);
   const session = await requireArea('/', locale);
   const { project: projectId } = await searchParams;
-  const [data, health, results] = await Promise.all([
+  const [data, health, results, onboarding] = await Promise.all([
     loadStaffRoom(session, { clientId, projectId }),
     loadRoomHealth(session.claims, clientId),
     loadRoomResults(session.claims, clientId),
+    loadOnboarding(session.claims, clientId),
   ]);
   if (!data) notFound();
   const { room, writable, editable } = data;
@@ -110,6 +114,13 @@ export default async function RoomDashboardPage({ params, searchParams }: PagePr
           currentMonth={results.currentMonth}
           href={`/c/${clientId}/results`}
           emptyHref={writable ? `/c/${clientId}/results` : undefined}
+        />
+      ) : null}
+
+      {onboarding ? (
+        <OnboardingProgress
+          view={onboarding}
+          reopen={writable ? reopenOnboardingAction.bind(null, clientId) : null}
         />
       ) : null}
 

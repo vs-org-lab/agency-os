@@ -18,11 +18,12 @@ async function inPreview<T>(
   sql: TransactionSql,
   clientId: string,
   fn: () => Promise<T>,
-  options: { readOnly?: boolean } = {},
+  options: { readOnly?: boolean; role?: string } = {},
 ): Promise<T> {
   await sql`savepoint preview`;
   try {
     await sql`select set_config('app.preview_client', ${clientId}, true)`;
+    if (options.role) await sql`select set_config('app.preview_role', ${options.role}, true)`;
     if (options.readOnly !== false) {
       await sql`select set_config('transaction_read_only', 'on', true)`;
     }
@@ -130,6 +131,41 @@ describe('client preview', () => {
 
       await asUser(sql, world.users.decisionMakerA);
       expect(await portalProjectIds(sql)).toEqual([rooms.a.projectId]);
+    });
+  });
+
+  it('previews as the role the team chose', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const roles = (role: string) =>
+        inPreview(
+          sql,
+          world.clients.a,
+          () => sql<{ decides: boolean; finance: boolean; operational: boolean }[]>`
+            select
+              app.is_client_member(${world.clients.a}::uuid, array['decision_maker']::app.client_role[]) as decides,
+              app.is_client_member(${world.clients.a}::uuid, array['client_finance']::app.client_role[]) as finance,
+              app.is_client_member(${world.clients.a}::uuid, array['operational']::app.client_role[]) as operational
+          `,
+          { role },
+        );
+
+      await asUser(sql, world.users.founder);
+      expect((await roles('operational'))[0]).toEqual({
+        decides: false,
+        finance: false,
+        operational: true,
+      });
+      expect((await roles('client_finance'))[0]).toEqual({
+        decides: false,
+        finance: true,
+        operational: false,
+      });
+      expect((await roles('unknown'))[0]).toEqual({
+        decides: false,
+        finance: false,
+        operational: false,
+      });
     });
   });
 });

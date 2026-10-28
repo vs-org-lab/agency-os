@@ -1,12 +1,21 @@
 import type { ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ClientAvatar } from '@agency-os/ui/components/client-avatar';
+import type { PortalMeeting } from '@/modules/agenda';
 import type { PortalDocumentCardView } from '@/modules/project-documents';
 import type { ClientProjectView } from '@/modules/rooms';
+import type { PortalTeamMember } from '@/modules/team';
 import { ResultsStrip, type StripKpi } from '@/components/results/results-strip';
 import { ActionList, type PortalActionItem } from './action-list';
 import type { GettingStartedStep } from './getting-started';
-import { GettingStarted, ProjectOverview, RecentDocuments, RecentUpdates } from './home-cards';
+import {
+  GettingStarted,
+  NextMeeting,
+  ProjectOverview,
+  RecentDocuments,
+  RecentUpdates,
+  TeamCard,
+} from './home-cards';
 import { PortalTour } from './portal-tour';
 import { RetainerSection, type PortalRetainerHome } from './retainer-section';
 
@@ -24,6 +33,9 @@ export type PortalHomeProps = {
   documents?: readonly PortalDocumentCardView[];
   /** The first steps, unless the client hid them. */
   gettingStarted?: { steps: readonly GettingStartedStep[]; hide: () => Promise<void> } | null;
+  /** The agency people on the account and the next meetings the client is invited to. */
+  team?: readonly PortalTeamMember[];
+  meetings?: readonly PortalMeeting[];
   /** The guided tour, opened on the first visit. */
   tour?: { autoStart: boolean; onFinish: () => Promise<void> };
   /** Reference material that asks nothing of the client: presentations, briefing and statuses. */
@@ -62,6 +74,8 @@ export function PortalHome({
   results,
   documents = [],
   gettingStarted,
+  team = [],
+  meetings = [],
   tour,
   children,
 }: PortalHomeProps) {
@@ -93,6 +107,13 @@ export function PortalHome({
 
       {gettingStarted ? (
         <GettingStarted steps={gettingStarted.steps} onHide={gettingStarted.hide} />
+      ) : null}
+
+      {meetings.length > 0 || team.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <NextMeeting meetings={meetings} />
+          <TeamCard team={team} />
+        </div>
       ) : null}
 
       {project || documents.length > 0 ? (

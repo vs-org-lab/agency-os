@@ -52,7 +52,14 @@ export const ACCESS_MATRIX: Readonly<
     freelancer: own('read', 'write'),
     finance: all('read'),
     agent: all('read'),
+    // The decision maker also writes in the root that receives onboarding files (ADR 0009).
     decision_maker: ownRoom('read'),
+    operational: ownRoom('read', 'write'),
+  },
+  onboarding: {
+    founder: all('read', 'write'),
+    project_manager: own('read', 'write'),
+    decision_maker: ownRoom('read', 'write'),
     operational: ownRoom('read', 'write'),
   },
   brand_hub: {

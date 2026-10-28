@@ -77,4 +77,14 @@ describe('getting started', () => {
     }).find((step) => step.id === 'contract');
     expect(contract?.href).toBe('/portal/contracts/c1');
   });
+
+  it('asks for the onboarding until every request is done', () => {
+    expect(ids({ ...BASE, onboarding: { done: 1, total: 3 } })).toEqual([
+      'tour:todo',
+      'onboarding:todo',
+      'team:todo',
+    ]);
+    expect(ids({ ...BASE, onboarding: { done: 3, total: 3 } })).toContain('onboarding:done');
+    expect(ids({ ...BASE, onboarding: { done: 0, total: 0 } })).not.toContain('onboarding:todo');
+  });
 });

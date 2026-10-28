@@ -74,7 +74,9 @@ export async function childFolder(
 /** Whether the writer may add content under this folder. */
 export function writesUnder(writer: LibraryWriter, folder: FolderRecord): boolean {
   if (folder.projectId !== writer.projectId) return false;
-  return writer.role === 'team' || folder.rootVisibility === 'client';
+  if (writer.role === 'team') return true;
+  if (folder.rootVisibility !== 'client') return false;
+  return writer.role === 'operational' || folder.rootClientUploads;
 }
 
 /** The folder and its writer when the caller is on the team of the folder's project. */

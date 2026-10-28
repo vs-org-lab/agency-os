@@ -10,7 +10,7 @@ export async function GET(
   context: { params: Promise<{ locale: string }> },
 ): Promise<Response> {
   const { locale } = await context.params;
-  const clientId = await readPortalPreview();
+  const clientId = (await readPortalPreview())?.clientId;
   const prefix = isLocale(locale) && locale !== defaultLocale ? `/${locale}` : '';
   const target = clientId ? `${prefix}/c/${clientId}` : `${prefix}/`;
   const response = NextResponse.redirect(new URL(target, request.url), {

@@ -24,7 +24,15 @@ export default async function PortalLayout({ children, params }: LayoutProps) {
     <AppShell
       session={session}
       level={{ level: 'portal', permissions: { invoices, room, team } }}
-      banner={previewClient ? <PreviewBanner clientName={previewClient.name} /> : null}
+      banner={
+        preview && previewClient ? (
+          <PreviewBanner
+            clientId={preview.clientId}
+            clientName={previewClient.name}
+            role={preview.role}
+          />
+        ) : null
+      }
     >
       {children}
       <Toaster />

@@ -69,7 +69,13 @@
     "clientPreview": {
       "label": "Pré-visualização do cliente",
       "notice": "Está a ver o portal como {client} o vê. Só leitura: as ações do cliente não fazem nada aqui.",
-      "exit": "Sair da pré-visualização"
+      "exit": "Sair da pré-visualização",
+      "roleLabel": "Ver como",
+      "roles": {
+        "decision_maker": "Decisor",
+        "operational": "Operacional",
+        "client_finance": "Financeiro"
+      }
     },
     "skipToContent": "Saltar para o conteúdo",
     "navigation": "Navegação",
@@ -126,7 +132,8 @@
       "documents": "Documentos",
       "brandHub": "Brand Hub",
       "progress": "Plano e resultado",
-      "academy": "Academia"
+      "academy": "Academia",
+      "onboarding": "Onboarding"
     }
   },
   "states": {
@@ -408,14 +415,16 @@
           "proof": "Prova",
           "proposal": "Proposta",
           "contract": "Contrato",
-          "payment": "Pagamento"
+          "payment": "Pagamento",
+          "onboarding": "Onboarding"
         },
         "cta": {
           "approval": "Decidir",
           "proof": "Rever",
           "proposal": "Ver a proposta",
           "contract": "Assinar",
-          "payment": "Pagar"
+          "payment": "Pagar",
+          "onboarding": "Responder"
         },
         "empty": "Está tudo em dia. Avisamos quando precisarmos de si."
       },
@@ -509,6 +518,10 @@
           "team": {
             "title": "Convidar a sua equipa",
             "body": "Quem acompanha o projeto consigo vê o mesmo que vê."
+          },
+          "onboarding": {
+            "title": "Responder ao onboarding",
+            "body": "Os ficheiros, acessos e respostas de que precisamos para começar."
           }
         }
       },
@@ -516,6 +529,20 @@
         "title": "Últimas atualizações",
         "seeAll": "Ver todas",
         "empty": "Ainda não há atualizações."
+      },
+      "team": {
+        "title": "A sua equipa",
+        "roles": {
+          "founder": "Direção",
+          "project_manager": "Gestão do projeto"
+        },
+        "email": "Enviar email a {name}"
+      },
+      "meeting": {
+        "title": "Próxima reunião",
+        "join": "Entrar na chamada",
+        "empty": "Sem reuniões marcadas.",
+        "more": "{count, plural, one {e mais # reunião} other {e mais # reuniões}}"
       }
     },
     "tour": {
@@ -561,8 +588,25 @@
         "done": {
           "title": "Está pronto",
           "body": "Pode repetir esta visita quando quiser, nos Primeiros passos do início."
+        },
+        "onboarding": {
+          "title": "Onboarding",
+          "body": "O que precisamos de si para começar: ficheiros, acessos e respostas, conforme o seu projeto. Responde ao seu ritmo."
         }
       }
+    },
+    "progress": {
+      "description": "Onde está o resultado que combinámos e o que ainda tem do seu plano este mês.",
+      "outcome": "Resultado acordado",
+      "percent": "{value}%",
+      "ofTarget": "do caminho até à meta",
+      "range": "De {baseline} para {target} {unit}; agora em {current}.",
+      "deadline": "Prazo: {date}",
+      "month": "Este mês",
+      "tier": "Plano {tier}",
+      "left": "{remaining} de {available} por usar",
+      "renews": "{days, plural, one {Falta # dia para o mês seguinte.} other {Faltam # dias para o mês seguinte.}}",
+      "retainerTitle": "O seu plano"
     }
   },
   "commercial": {
@@ -1707,7 +1751,8 @@
         "label": "Secções do modo call",
         "briefing": "Briefing",
         "observations": "Observações",
-        "transcript": "Transcrição"
+        "transcript": "Transcrição",
+        "onboarding": "Onboarding"
       },
       "back": "Voltar",
       "next": "Seguinte",
@@ -4077,6 +4122,106 @@
         "failed": "Não foi possível guardar os valores. Tenta de novo."
       },
       "stepLabel": "{position} · {name}"
+    }
+  },
+  "clientOnboarding": {
+    "kinds": {
+      "upload": "Enviar ficheiros",
+      "text": "Responder",
+      "access": "Dar acesso",
+      "confirm": "Confirmar"
+    },
+    "modules": {
+      "A": "Vídeo",
+      "B": "Redes sociais",
+      "C": "Anúncios",
+      "D": "Web",
+      "E": "Automações"
+    },
+    "yesNo": {
+      "yes": "Sim",
+      "no": "Não"
+    },
+    "plan": {
+      "title": "Onboarding do cliente",
+      "description": "O que o portal vai pedir ao cliente, conforme as respostas e o âmbito contratado.",
+      "answers": "Respostas que definem os pedidos",
+      "requests": "Pedidos ao cliente",
+      "clear": "Limpar",
+      "empty": "O modelo de briefing ainda não tem pedidos de onboarding. Acrescente-os em Definições › Modelos.",
+      "status": {
+        "asked": "Vai ser pedido",
+        "module": "Se o contrato incluir {module}",
+        "answer": "Depende da resposta",
+        "notAsked": "Não se aplica"
+      },
+      "saveFailed": "Não foi possível guardar a resposta."
+    },
+    "editor": {
+      "title": "Onboarding do cliente",
+      "description": "Os pedidos que o portal faz ao cliente depois do briefing. Cada pedido aparece só quando a condição se cumpre. Nunca peça palavras-passe: peça que convidem o email da agência.",
+      "answer": "Resposta estruturada",
+      "answerNone": "Só nota livre",
+      "answerYesNo": "Sim ou Não",
+      "answerChoice": "Escolha",
+      "option": "Opção {number}",
+      "addOption": "Acrescentar opção",
+      "removeOption": "Remover opção",
+      "request": "Pedido {number}",
+      "requestTitle": "Título",
+      "requestBody": "Explicação",
+      "kind": "Tipo",
+      "when": "Quando pedir",
+      "whenAlways": "Sempre",
+      "whenAnswer": "Conforme uma resposta",
+      "whenModule": "Conforme o âmbito contratado",
+      "question": "Pergunta",
+      "equals": "Quando a resposta é",
+      "module": "Módulo do contrato",
+      "noStructured": "Dê a uma pergunta uma resposta estruturada para a usar como condição.",
+      "addRequest": "Acrescentar pedido",
+      "removeRequest": "Remover pedido",
+      "suggested": "Usar pedidos sugeridos",
+      "moduleOption": "{code} · {name}"
+    },
+    "portal": {
+      "title": "Onboarding",
+      "description": "O que precisamos de si para começar bem. Responda ao seu ritmo: cada resposta chega logo à equipa.",
+      "progress": "{done} de {total} feitos",
+      "done": "Feito",
+      "doneOn": "Feito a {date}",
+      "doneBy": "por {name}",
+      "respond": "Enviar resposta",
+      "confirm": "Marcar como feito",
+      "update": "Atualizar resposta",
+      "answerLabel": "A sua resposta",
+      "files": "Escolher ficheiros",
+      "uploading": "A enviar…",
+      "uploaded": "Ficheiros enviados. A equipa já os recebeu.",
+      "uploadWaits": "Poderá enviar ficheiros assim que o projeto começar.",
+      "sent": "Resposta enviada. Obrigado.",
+      "errors": {
+        "response_required": "Escreva a sua resposta antes de enviar.",
+        "invalid_file": "Um dos ficheiros não pôde ser aceite. Confirme o formato e o tamanho.",
+        "storage_full": "O espaço de ficheiros está cheio. Avise a equipa.",
+        "failed": "Não foi possível enviar. Tente de novo."
+      },
+      "empty": "Não há nada a preparar por agora.",
+      "accessHint": "Nunca partilhe palavras-passe: convide o email da agência."
+    },
+    "room": {
+      "title": "Onboarding do cliente",
+      "progress": "{done} de {total} feitos",
+      "open": "Por responder",
+      "reopen": "Pedir de novo",
+      "reopened": "Pedido reaberto para o cliente.",
+      "folder": "Os ficheiros estão na biblioteca, em \"Enviado pelo cliente\".",
+      "empty": "Sem pedidos de onboarding para este cliente."
+    },
+    "action": {
+      "kind": "Onboarding",
+      "title": "{count, plural, one {# pedido por responder} other {# pedidos por responder}}",
+      "cta": "Responder"
     }
   }
 }

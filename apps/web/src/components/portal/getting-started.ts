@@ -1,6 +1,6 @@
 import type { PortalProposal } from '@/modules/contracts/server';
 
-export type GettingStartedId = 'tour' | 'proposal' | 'contract' | 'payment' | 'team';
+export type GettingStartedId = 'tour' | 'proposal' | 'contract' | 'payment' | 'onboarding' | 'team';
 
 export type GettingStartedStep = {
   id: GettingStartedId;
@@ -18,6 +18,8 @@ export type GettingStartedSources = {
     'status' | 'contractId' | 'contractStatus' | 'contractClientSigned'
   > | null;
   invoices: ReadonlyArray<{ status: 'sent' | 'paid' }>;
+  /** The onboarding requests of the briefing and how many are done; null without any. */
+  onboarding?: { done: number; total: number } | null;
   /** Client users with access, the reader included; null when the reader cannot list them. */
   colleagues: number | null;
 };
@@ -46,6 +48,13 @@ export function gettingStartedSteps(sources: GettingStartedSources): GettingStar
       id: 'payment',
       done: sources.invoices.some((invoice) => invoice.status === 'paid'),
       href: '/portal/invoices',
+    });
+  }
+  if (sources.onboarding && sources.onboarding.total > 0) {
+    steps.push({
+      id: 'onboarding',
+      done: sources.onboarding.done >= sources.onboarding.total,
+      href: '/portal/onboarding',
     });
   }
   if (sources.decides && sources.colleagues !== null) {

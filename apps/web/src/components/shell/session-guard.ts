@@ -5,15 +5,20 @@ import { redirect } from '@/i18n/navigation';
 import { loadAccessContext, resolveActor, type AccessContext, type Actor } from '@/modules/access';
 import { withUserContext, type VerifiedClaims } from '@/platform/db';
 import { getSessionClaims } from '@/platform/session';
-import { canPreviewClient, previewClaims, readPortalPreview } from './portal-preview';
+import {
+  canPreviewClient,
+  previewClaims,
+  readPortalPreview,
+  type PortalPreview,
+} from './portal-preview';
 import { resolveHome, type HomePath } from './routing';
 
 export type AreaSession = {
   claims: VerifiedClaims;
   actor: Actor;
   ctx: AccessContext;
-  /** Set while the team previews the portal as the client's decision maker. */
-  preview?: { clientId: string };
+  /** Set while the team previews the portal as one of the client's roles. */
+  preview?: PortalPreview;
 };
 
 // Layouts and pages of one request share the result instead of validating the session again.
@@ -31,16 +36,16 @@ export const requireArea = cache(async function requireArea(
 
   const home: HomePath = resolveHome(session?.actor ?? null);
   if (claims && session && area === '/portal' && home === '/') {
-    const clientId = await readPortalPreview();
-    if (clientId && (await canPreviewClient(claims, clientId))) {
+    const preview = await readPortalPreview();
+    if (preview && (await canPreviewClient(claims, preview.clientId))) {
       return {
-        claims: previewClaims(claims, clientId),
+        claims: previewClaims(claims, preview),
         actor: session.actor,
         ctx: {
           assignedClientIds: new Set(),
-          clientRoles: new Map([[clientId, ['decision_maker'] as const]]),
+          clientRoles: new Map([[preview.clientId, [preview.role]]]),
         },
-        preview: { clientId },
+        preview,
       };
     }
   }

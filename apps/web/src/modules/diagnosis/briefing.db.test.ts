@@ -11,6 +11,7 @@ import {
 import { createDbContexts, type VerifiedClaims } from '@/platform/db';
 import {
   applyBriefingDraft,
+  saveBriefingAnswer,
   saveBriefingNote,
   saveEngagementDetails,
   shareBriefing,
@@ -245,6 +246,70 @@ describe('briefing', () => {
         { block: 'block_1', question: '', body: 'Resumo novo do bloco 1.' },
         { block: 'block_2', question: '', body: 'Resumo do bloco 2.' },
       ]);
+    });
+  });
+  it('a structured answer is kept for a question of the active template, with its own values only', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const core = await createCoreFixture(sql, world);
+      const deps = depsFor(sql);
+      const founder = claimsFor(world.users.founder);
+      const [current] = await sql<{ definition: { blocks: { questions: unknown[] }[] } }[]>`
+        select definition from public.core_templates
+        where organization_id = ${world.organizationId} and kind = 'briefing' and is_active
+      `;
+      if (!current) throw new Error('Active briefing template missing');
+      const definition = structuredClone(current.definition);
+      definition.blocks[0]?.questions.push({
+        id: 'has_visual_identity',
+        text: { 'pt-PT': 'Tem identidade?', en: 'Has identity?' },
+        answer: { kind: 'yes_no' },
+      });
+      await sql`
+        update public.core_templates set is_active = false
+        where organization_id = ${world.organizationId} and kind = 'briefing'
+      `;
+      await sql`
+        insert into public.core_templates (organization_id, kind, version, definition, is_active)
+        values (${world.organizationId}, 'briefing', 2, ${JSON.stringify(definition)}::jsonb, true)
+      `;
+      const input = {
+        engagementId: core.a.engagementId,
+        blockId: 'block_1',
+        questionId: 'has_visual_identity',
+      };
+
+      expect(await saveBriefingAnswer(founder, { ...input, answer: 'maybe' }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+      expect(
+        await saveBriefingAnswer(
+          founder,
+          { ...input, questionId: 'block_1_q1', answer: 'yes' },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'invalid_input' });
+      expect(
+        await saveBriefingAnswer(
+          claimsFor(world.users.decisionMakerA),
+          { ...input, answer: 'yes' },
+          deps,
+        ),
+      ).toEqual({ ok: false, rule: 'not_found' });
+      expect(await saveBriefingAnswer(founder, { ...input, answer: 'yes' }, deps)).toEqual({
+        ok: true,
+      });
+
+      await sql`reset role`;
+      const [saved] = await sql<{ answer: string | null; body: string }[]>`
+        select answer, body from public.core_briefing_notes
+        where engagement_id = ${core.a.engagementId} and question_id = 'has_visual_identity'
+      `;
+      expect(saved).toEqual({ answer: 'yes', body: '' });
+      expect(await saveBriefingAnswer(founder, { ...input, answer: null }, deps)).toEqual({
+        ok: true,
+      });
     });
   });
 });

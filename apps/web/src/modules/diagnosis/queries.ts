@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, isNotNull } from 'drizzle-orm';
+import { coreOnboarding, type CoreOnboarding } from './onboarding-source';
 import {
   schema,
   type CoreLevel,
@@ -79,6 +80,8 @@ export type CoreWorkspace = {
   portalAccess: boolean;
   latestRecording: RecordingView | null;
   readiness: CoreReadiness;
+  /** The onboarding the briefing generates for the client, as it stands. */
+  onboarding: CoreOnboarding | null;
 };
 
 export async function getCoreWorkspace(
@@ -100,7 +103,10 @@ export async function getCoreWorkspace(
     .where(eq(coreEngagements.dealId, dealId));
   if (!engagement) return null;
 
-  const briefing = await getBriefing(tx, engagement.id);
+  const [briefing, onboarding] = await Promise.all([
+    getBriefing(tx, engagement.id),
+    coreOnboarding(tx, engagement.id),
+  ]);
   const grid = await getTemplateById(tx, engagement.gridTemplateId, 'orbit_grid');
   const readiness = await loadCoreReadiness(tx, dealId);
   if (!briefing || !readiness) return null;
@@ -168,6 +174,7 @@ export async function getCoreWorkspace(
   for (const finding of findings) roadmap[finding.lane].push(finding);
 
   return {
+    onboarding,
     engagementId: engagement.id,
     dealId,
     briefing,

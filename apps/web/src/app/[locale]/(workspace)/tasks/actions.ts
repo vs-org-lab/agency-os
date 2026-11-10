@@ -9,9 +9,11 @@ import {
   createStudioTask,
   deleteStudioTask,
   setStudioTaskItem,
+  setStudioTaskStage,
   setStudioTaskStatus,
   updateStudioTask,
 } from '@/modules/tasks/server';
+import type { TaskStage } from '@/modules/tasks';
 import { getVerifiedClaims } from '@/platform/session';
 
 async function run(
@@ -44,6 +46,10 @@ export async function deleteTaskAction(taskId: string) {
 
 export async function setTaskStatusAction(taskId: string, status: 'open' | 'done') {
   return run((session) => setStudioTaskStatus(session, taskId, status));
+}
+
+export async function setTaskStageAction(taskId: string, stage: TaskStage) {
+  return run((session) => setStudioTaskStage(session, taskId, stage));
 }
 
 export async function setTaskItemAction(itemId: string, done: boolean) {

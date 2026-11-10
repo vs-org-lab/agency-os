@@ -2414,7 +2414,7 @@
       "assignee": "Assignee",
       "status": "Status",
       "all": "All",
-      "open": "To do",
+      "open": "Open",
       "done": "Done",
       "allTasks": "All",
       "mine": "Mine"
@@ -2537,6 +2537,35 @@
       "not_found": "You are not allowed to do this.",
       "invalid_input": "Check the fields and try again.",
       "forbidden": "You do not have access to this task."
+    },
+    "inProgress": "In progress",
+    "views": {
+      "label": "View",
+      "list": "List",
+      "board": "Board"
+    },
+    "board": {
+      "columns": {
+        "todo": "To do",
+        "doing": "In progress",
+        "done": "Done"
+      },
+      "doneWindow": "Last 14 days",
+      "allDone": "See all done tasks",
+      "emptyColumn": "No tasks in this column.",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "move": "Move {title}",
+      "moveTo": "Move to",
+      "drag": "Drag {title}",
+      "instructions": "To move a task, press Space or Enter, use the arrow keys to choose a column and press Space or Enter again. Escape cancels.",
+      "announce": {
+        "start": "Moving {title}.",
+        "over": "{title} over {column}.",
+        "outside": "{title} outside the columns.",
+        "end": "{title} dropped in {column}.",
+        "cancel": "Moving {title} cancelled."
+      }
     }
   },
   "team": {

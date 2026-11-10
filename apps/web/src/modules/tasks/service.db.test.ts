@@ -15,6 +15,7 @@ import {
   createTask,
   listTasks,
   setTaskItem,
+  setTaskStage,
   setTaskStatus,
   updateTask,
 } from './service';
@@ -117,6 +118,95 @@ describe('tasks', () => {
         where id = ${created.taskId}
       `;
       expect(row).toEqual({ status: 'done', completed: true });
+    });
+  });
+
+  it('moves a task across the board stages, by whoever may complete it', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const { deps } = taskDeps(sql);
+      const created = await createTask(
+        taskClaims(world.users.founder),
+        { title: 'Rever o manual', clientId: world.clients.a, assigneeId: world.users.freelancer },
+        deps,
+      );
+      if (!created.ok) throw new Error('Task was not created');
+      const freelancer = taskClaims(world.users.freelancer);
+      const taskId = created.taskId;
+      const stored = async () => {
+        const [row] = await sql<{ status: string; started: string | null; completed: boolean }[]>`
+          select status::text, to_char(started_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI') as started,
+                 completed_at is not null as completed
+          from public.tasks where id = ${taskId}
+        `;
+        return row;
+      };
+      const later = taskDeps(sql, { now: () => new Date('2026-10-13T09:00:00Z') }).deps;
+
+      expect(await setTaskStage(freelancer, { taskId, stage: 'doing' }, deps)).toEqual({
+        ok: true,
+      });
+      expect(await stored()).toEqual({
+        status: 'open',
+        started: '2026-10-12T09:00',
+        completed: false,
+      });
+
+      expect(await setTaskStage(freelancer, { taskId, stage: 'done' }, later)).toEqual({
+        ok: true,
+      });
+      expect(await stored()).toEqual({
+        status: 'done',
+        started: '2026-10-12T09:00',
+        completed: true,
+      });
+
+      // Reopening from the list sends the task back to where it was on the board.
+      expect(await setTaskStatus(freelancer, { taskId, status: 'open' }, deps)).toEqual({
+        ok: true,
+      });
+      const [view] = await deps.contexts.withUserContext(freelancer, (tx) =>
+        listTasks(tx, { taskId }),
+      );
+      expect(view?.startedAt).toBe('2026-10-12T09:00:00.000Z');
+
+      expect(await setTaskStage(freelancer, { taskId, stage: 'todo' }, deps)).toEqual({
+        ok: true,
+      });
+      expect(await stored()).toEqual({ status: 'open', started: null, completed: false });
+
+      expect(
+        await setTaskStage(taskClaims(world.users.finance), { taskId, stage: 'doing' }, deps),
+      ).toEqual({ ok: false, rule: 'not_found' });
+      expect(await setTaskStage(freelancer, { taskId, stage: 'paused' as never }, deps)).toEqual({
+        ok: false,
+        rule: 'invalid_input',
+      });
+    });
+  });
+
+  it('lists done tasks only from the given day', async () => {
+    await withTestTransaction(async (sql) => {
+      const world = await createFixtureWorld(sql);
+      const founder = taskClaims(world.users.founder);
+      const old = taskDeps(sql, { now: () => new Date('2026-09-30T12:00:00Z') }).deps;
+      const { deps } = taskDeps(sql);
+      const ids: string[] = [];
+      for (const title of ['Antiga', 'Recente', 'Aberta']) {
+        const created = await createTask(founder, { title }, deps);
+        if (!created.ok) throw new Error('Task was not created');
+        ids.push(created.taskId);
+      }
+      await setTaskStage(founder, { taskId: ids[0] ?? '', stage: 'done' }, old);
+      await setTaskStage(founder, { taskId: ids[1] ?? '', stage: 'done' }, deps);
+
+      const tasks = await deps.contexts.withUserContext(founder, (tx) =>
+        listTasks(tx, { doneSince: '2026-10-01' }),
+      );
+      expect(tasks.map((task) => task.title).sort()).toEqual(['Aberta', 'Recente']);
+      expect(tasks.find((task) => task.title === 'Recente')?.completedAt).toBe(
+        '2026-10-12T09:00:00.000Z',
+      );
     });
   });
 

@@ -107,4 +107,33 @@ test.describe('Tasks, home and updates', () => {
     await expect(entry).toHaveAttribute('href', new RegExp(`/pipeline/${payment.dealId}$`));
     await expectAccessible(page);
   });
+
+  test('a task moves to in progress on the board', async ({ page }) => {
+    test.setTimeout(180_000);
+    const title = `Preparar apresentação ${randomUUID().slice(0, 6)}`;
+
+    await signInWithPassword(page, credentials.founder);
+    await page.goto('/tasks?new=1');
+    const form = page.getByRole('form', { name: 'Nova tarefa' });
+    await form.getByLabel('Título').fill(title);
+    await form.getByRole('button', { name: 'Criar tarefa' }).click();
+    await expect(page.getByText('Tarefa criada.')).toBeVisible({ timeout: 30_000 });
+
+    await page.getByRole('link', { name: 'Quadro' }).click();
+    await expect(page).toHaveURL(/view=board/);
+    const todo = page.getByRole('region', { name: /^Por fazer/ });
+    await expect(todo.getByRole('button', { name: title, exact: true })).toBeVisible();
+    await expectAccessible(page);
+
+    await todo.getByRole('button', { name: `Mover ${title}` }).click();
+    await page.getByRole('menuitem', { name: 'Em curso' }).click();
+    const doing = page.getByRole('region', { name: /^Em curso/ });
+    await expect(doing.getByRole('button', { name: title, exact: true })).toBeVisible();
+
+    await page.reload();
+    await expect(doing.getByRole('button', { name: title, exact: true })).toBeVisible();
+    await page.getByRole('link', { name: 'Lista' }).click();
+    const row = page.getByRole('row').filter({ hasText: title });
+    await expect(row.getByText('Em curso')).toBeVisible();
+  });
 });

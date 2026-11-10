@@ -4,15 +4,18 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { TASK_LIST_ID, TaskFilters } from '@/components/tasks/task-filters';
 import { TaskCreate } from '@/components/tasks/task-create';
 import { TaskPanel } from '@/components/tasks/task-panel';
+import { TaskBoard } from '@/components/tasks/task-board';
 import { TaskTable } from '@/components/tasks/task-table';
+import { parseTaskView } from '@/components/tasks/task-view-switch';
 import { requireArea } from '@/components/shell/session-guard';
 import { requireLocale } from '@/i18n/require-locale';
-import { parseTaskFilter, parseTaskSort, sortTasks, taskToday } from '@/modules/tasks';
+import { doneSince, parseTaskFilter, parseTaskSort, sortTasks, taskToday } from '@/modules/tasks';
 import { loadTaskCounts, loadTaskOptions, loadTasks } from '@/modules/tasks/server';
 import {
   addTaskItemAction,
   createTaskAction,
   setTaskItemAction,
+  setTaskStageAction,
   setTaskStatusAction,
 } from './actions';
 import { taskFilePreviewAction } from './collaboration-actions';
@@ -31,6 +34,7 @@ type PageProps = {
     new?: string;
     task?: string;
     sort?: string;
+    view?: string;
   }>;
 };
 
@@ -43,8 +47,12 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
   if (!options) notFound();
   const filter = parseTaskFilter(query);
   const sort = parseTaskSort(query.sort);
+  const view = parseTaskView(query.view);
+  const today = taskToday(new Date());
+  const listed =
+    view === 'board' ? { ...filter, status: 'all' as const, doneSince: doneSince(today) } : filter;
   const [tasks, counts, panel] = await Promise.all([
-    loadTasks(session, filter),
+    loadTasks(session, listed),
     loadTaskCounts(session, { clientId: filter.clientId, assigneeId: filter.assigneeId }),
     loadPanelData(session, query.task, null),
   ]);
@@ -76,18 +84,29 @@ export default async function StudioTasksPage({ params, searchParams }: PageProp
           assigneeId: filter.assigneeId ?? null,
           status: filter.status,
         }}
+        view={view}
       />
       <div id={TASK_LIST_ID}>
-        <TaskTable
-          tasks={sortTasks(tasks, sort)}
-          today={taskToday(new Date())}
-          showClient={true}
-          sort={sort}
-          setStatus={setTaskStatusAction}
-          setItem={setTaskItemAction}
-          addItem={addTaskItemAction}
-          loadPreview={taskFilePreviewAction}
-        />
+        {view === 'board' ? (
+          <TaskBoard
+            tasks={tasks}
+            today={today}
+            showClient={true}
+            currentUserId={session.claims.sub}
+            setStage={setTaskStageAction}
+          />
+        ) : (
+          <TaskTable
+            tasks={sortTasks(tasks, sort)}
+            today={today}
+            showClient={true}
+            sort={sort}
+            setStatus={setTaskStatusAction}
+            setItem={setTaskItemAction}
+            addItem={addTaskItemAction}
+            loadPreview={taskFilePreviewAction}
+          />
+        )}
       </div>
       <TaskPanel
         detail={panel.detail}

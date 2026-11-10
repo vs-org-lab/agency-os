@@ -56,6 +56,8 @@ function task(overrides: Partial<TaskView>): TaskView {
     assigneeName: null,
     dueOn: null,
     status: 'open',
+    startedAt: null,
+    completedAt: null,
     items: [],
     itemsDone: 0,
     itemsTotal: 0,
@@ -94,6 +96,17 @@ function renderTable(
 }
 
 describe('task table', () => {
+  it('labels a task in progress', () => {
+    renderTable([
+      task({ title: 'A decorrer', startedAt: '2026-10-11T09:00:00.000Z' }),
+      task({ title: 'Parada' }),
+    ]);
+
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1] as HTMLElement).getByText('Em curso')).toBeTruthy();
+    expect(within(rows[2] as HTMLElement).queryByText('Em curso')).toBeNull();
+  });
+
   it('sorts by due date by default and toggles aria-sort', () => {
     renderTable([task({ title: 'A' })]);
 

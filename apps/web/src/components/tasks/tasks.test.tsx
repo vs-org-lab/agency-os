@@ -13,6 +13,11 @@ vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams()
 vi.mock('@/i18n/navigation', () => ({
   usePathname: () => '/tasks',
   useRouter: () => ({ replace: vi.fn() }),
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 
 beforeAll(installRadixDomPolyfills);
@@ -93,6 +98,7 @@ describe('tasks', () => {
           current={{ clientId: CLIENT_B, assigneeId: PERSON, status: 'open' }}
           counts={{ open: 4, done: 2, all: 6 }}
           currentUserId={PERSON}
+          view="list"
         />
       </MotionProvider>,
     );
@@ -101,12 +107,31 @@ describe('tasks', () => {
     expect(screen.getByRole('combobox', { name: 'Responsável' }).textContent).toContain(
       'Rita Gestora',
     );
-    expect(screen.getByRole('tab', { name: /Por fazer/ }).textContent).toContain('4');
+    expect(screen.getByRole('tab', { name: /Abertas/ }).textContent).toContain('4');
     expect(screen.getByRole('tab', { name: /Concluídas/ }).textContent).toContain('2');
     expect(screen.queryByRole('button', { name: 'Filtrar' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Minhas' }).getAttribute('aria-pressed')).toBe(
       'true',
     );
+  });
+
+  it('on the board, shows the view switch and hides the status filter', () => {
+    renderWithIntl(
+      <MotionProvider>
+        <TaskFilters
+          clients={null}
+          people={[{ id: PERSON, name: 'Rita Gestora' }]}
+          current={{ clientId: CLIENT_B, assigneeId: null, status: 'open' }}
+          counts={{ open: 4, done: 2, all: 6 }}
+          currentUserId={PERSON}
+          view="board"
+        />
+      </MotionProvider>,
+    );
+
+    expect(screen.queryByRole('tab', { name: /Abertas/ })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Quadro' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('link', { name: 'Lista' }).getAttribute('href')).toBe('/tasks');
   });
 
   it('task form keeps values when refused', async () => {

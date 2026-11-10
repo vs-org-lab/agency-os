@@ -38,6 +38,8 @@ export const tasks = pgTable(
     dueOn: date('due_on'),
     status: taskStatusEnum('status').notNull().default('open'),
     source: taskSourceEnum('source').notNull().default('manual'),
+    /** Set while an open task is being worked on; open without it means not started. */
+    startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
     ...timestamps,

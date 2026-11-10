@@ -5,6 +5,7 @@ import { withActor, type Actor } from '@/modules/access';
 import { recordAudit } from '@/modules/audit';
 import { emit } from '@/modules/events';
 import { isRoomStaff, roomActor } from '@/modules/rooms/server';
+import { nextStageFields, TASK_STAGES, type TaskStage } from './domain/board';
 import type { DbContexts, VerifiedClaims } from '@/platform/db';
 
 const { clientStaffAssignments, organizationMemberships, projects, taskItems, tasks } = schema;
@@ -40,6 +41,9 @@ export type TaskView = {
   assigneeName: string | null;
   dueOn: string | null;
   status: TaskStatus;
+  /** ISO time the task was started, kept after completion; null when never started. */
+  startedAt: string | null;
+  completedAt: string | null;
   items: TaskItemView[];
   itemsDone: number;
   itemsTotal: number;
@@ -315,6 +319,30 @@ export async function setTaskStatus(
   return { ok: true };
 }
 
+/** A move on the board: to do, in progress or done, by whoever may complete the task. */
+export async function setTaskStage(
+  claims: VerifiedClaims,
+  input: { taskId: string; stage: TaskStage },
+  deps: TasksDeps,
+): Promise<{ ok: true } | NotFound | { ok: false; rule: 'invalid_input' }> {
+  if (!TASK_STAGES.includes(input.stage)) return { ok: false, rule: 'invalid_input' };
+  const task = await canWork(deps, claims, input.taskId);
+  if (!task) return NOT_FOUND;
+  const now = (deps.now ?? (() => new Date()))();
+  await deps.contexts.withSystemContext(async (tx) => {
+    const [current] = await tx
+      .select({ startedAt: tasks.startedAt })
+      .from(tasks)
+      .where(eq(tasks.id, task.id))
+      .for('update');
+    await tx
+      .update(tasks)
+      .set(nextStageFields(input.stage, current?.startedAt ?? null, now))
+      .where(eq(tasks.id, task.id));
+  });
+  return { ok: true };
+}
+
 export async function setTaskItem(
   claims: VerifiedClaims,
   input: { itemId: string; done: boolean },
@@ -402,7 +430,14 @@ async function appendTaskItem(
 /** S-03 and C-03: the tasks the caller can read, with their items, client and assignee. */
 export async function listTasks(
   tx: DbTransaction,
-  filter: { taskId?: string; clientId?: string; assigneeId?: string; status?: TaskStatus },
+  filter: {
+    taskId?: string;
+    clientId?: string;
+    assigneeId?: string;
+    status?: TaskStatus;
+    /** Lisbon calendar date from which done tasks are listed; open tasks are always listed. */
+    doneSince?: string;
+  },
 ): Promise<TaskView[]> {
   const rows = await tx.execute<{
     id: string;
@@ -416,6 +451,8 @@ export async function listTasks(
     assignee_name: string | null;
     due_on: string | null;
     status: TaskStatus;
+    started_at: string | null;
+    completed_at: string | null;
     can_edit: boolean;
     items_done: number;
     items_total: number;
@@ -438,6 +475,8 @@ export async function listTasks(
            (select count(*) from public.task_files f
              join public.library_files lf on lf.id = f.library_file_id and lf.status = 'ready'
              where f.task_id = t.id)::int as file_count,
+           to_char(t.started_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as started_at,
+           to_char(t.completed_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as completed_at,
            s.name as phase_name, pr.name as project_name,
            to_char(t.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at
     from public.tasks t
@@ -449,6 +488,8 @@ export async function listTasks(
       and (${filter.clientId ?? null}::uuid is null or t.client_id = ${filter.clientId ?? null}::uuid)
       and (${filter.assigneeId ?? null}::uuid is null or t.assignee_id = ${filter.assigneeId ?? null}::uuid)
       and (${filter.status ?? null}::text is null or t.status::text = ${filter.status ?? null}::text)
+      and (${filter.doneSince ?? null}::date is null or t.status <> 'done'
+           or t.completed_at >= (${filter.doneSince ?? null}::date::timestamp at time zone 'Europe/Lisbon'))
     order by t.due_on nulls last, t.created_at
   `);
   const ids = rows.map((row) => row.id);
@@ -471,6 +512,8 @@ export async function listTasks(
     assigneeName: row.assignee_name,
     dueOn: row.due_on,
     status: row.status,
+    startedAt: row.started_at,
+    completedAt: row.completed_at,
     canEdit: row.can_edit,
     itemsDone: row.items_done,
     itemsTotal: row.items_total,

@@ -8,3 +8,12 @@ export type { TaskCounts, TaskInput, TaskItemView, TaskView } from './service';
 export type { TaskDetail } from './detail';
 export type { CollaborationFailure, TaskFilePreview } from './collaboration';
 export { parseTaskSort, sortTasks, TASK_SORTS, type TaskSort } from './domain/sort';
+export {
+  boardColumns,
+  doneSince,
+  dueUrgency,
+  taskStage,
+  TASK_STAGES,
+  type DueUrgency,
+  type TaskStage,
+} from './domain/board';

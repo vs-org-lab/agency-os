@@ -2414,7 +2414,7 @@
       "assignee": "Responsável",
       "status": "Estado",
       "all": "Todos",
-      "open": "Por fazer",
+      "open": "Abertas",
       "done": "Concluídas",
       "allTasks": "Todas",
       "mine": "Minhas"
@@ -2537,6 +2537,35 @@
       "not_found": "Não tem permissão para esta ação.",
       "invalid_input": "Verifique os campos e tente de novo.",
       "forbidden": "Não tem acesso a esta tarefa."
+    },
+    "inProgress": "Em curso",
+    "views": {
+      "label": "Vista",
+      "list": "Lista",
+      "board": "Quadro"
+    },
+    "board": {
+      "columns": {
+        "todo": "Por fazer",
+        "doing": "Em curso",
+        "done": "Concluídas"
+      },
+      "doneWindow": "Últimos 14 dias",
+      "allDone": "Ver todas as concluídas",
+      "emptyColumn": "Sem tarefas nesta coluna.",
+      "today": "Hoje",
+      "tomorrow": "Amanhã",
+      "move": "Mover {title}",
+      "moveTo": "Mover para",
+      "drag": "Arrastar {title}",
+      "instructions": "Para mover uma tarefa, prima Espaço ou Enter, use as setas para escolher a coluna e prima Espaço ou Enter de novo. Esc cancela.",
+      "announce": {
+        "start": "A mover {title}.",
+        "over": "{title} sobre {column}.",
+        "outside": "{title} fora das colunas.",
+        "end": "{title} largada em {column}.",
+        "cancel": "Movimento de {title} cancelado."
+      }
     }
   },
   "team": {

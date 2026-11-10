@@ -65,3 +65,5 @@ allowBuilds:
   '@parcel/watcher': false
   '@swc/core': false
   protobufjs: false
+overrides:
+  systeminformation: '>=5.33.16'

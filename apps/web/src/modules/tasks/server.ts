@@ -14,6 +14,7 @@ import {
 } from './collaboration';
 import { libraryFileLink } from '@/modules/library/server';
 import { loadTaskDetail } from './detail';
+import type { TaskStage } from './domain/board';
 import { listTaskOptions } from './options';
 import {
   addTaskItem,
@@ -22,6 +23,7 @@ import {
   deleteTask,
   listTasks,
   setTaskItem,
+  setTaskStage,
   setTaskStatus,
   updateTask,
   type TaskInput,
@@ -37,7 +39,12 @@ export function loadTaskOptions(session: TaskSession, clientId: string | null) {
 
 export function loadTasks(
   session: TaskSession,
-  filter: { clientId?: string; assigneeId?: string; status?: TaskStatus | 'all' },
+  filter: {
+    clientId?: string;
+    assigneeId?: string;
+    status?: TaskStatus | 'all';
+    doneSince?: string;
+  },
 ) {
   const { status, ...rest } = filter;
   return withUserContext(session.claims, (tx) =>
@@ -75,6 +82,10 @@ export function deleteStudioTask(session: TaskSession, taskId: string) {
 
 export function setStudioTaskStatus(session: TaskSession, taskId: string, status: TaskStatus) {
   return setTaskStatus(session.claims, { taskId, status }, deps());
+}
+
+export function setStudioTaskStage(session: TaskSession, taskId: string, stage: TaskStage) {
+  return setTaskStage(session.claims, { taskId, stage }, deps());
 }
 
 export function setStudioTaskItem(session: TaskSession, itemId: string, done: boolean) {

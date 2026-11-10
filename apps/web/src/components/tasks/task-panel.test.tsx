@@ -46,6 +46,8 @@ function detail(overrides: Partial<TaskDetail> = {}): TaskDetail {
     assigneeName: null,
     dueOn: null,
     status: 'open',
+    startedAt: null,
+    completedAt: null,
     items: [],
     itemsDone: 0,
     itemsTotal: 0,

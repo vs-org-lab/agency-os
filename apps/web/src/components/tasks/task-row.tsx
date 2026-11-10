@@ -100,6 +100,16 @@ function TitleButton({
   );
 }
 
+function InProgress({ task }: { task: TaskView }) {
+  const t = useTranslations('tasks');
+  if (task.status !== 'open' || !task.startedAt) return null;
+  return (
+    <span className="shrink-0 rounded-sm bg-info-bg px-1.5 py-0.5 text-caption text-info">
+      {t('inProgress')}
+    </span>
+  );
+}
+
 /** One task as a 40 px table row, with its subtasks as an expansion below it. */
 export function TaskRow({
   task,
@@ -145,6 +155,7 @@ export function TaskRow({
               />
             </button>
             <TitleButton task={task} onOpen={actions.onOpen} loadPreview={actions.loadPreview} />
+            <InProgress task={task} />
           </span>
         </TableCell>
         {showClient ? (
@@ -209,6 +220,7 @@ export function TaskCard({ task, today, showClient, ...actions }: RowProps) {
           }
         />
         <TitleButton task={task} onOpen={actions.onOpen} loadPreview={actions.loadPreview} />
+        <InProgress task={task} />
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 text-caption text-text-secondary">
         <Due task={task} today={today} />
